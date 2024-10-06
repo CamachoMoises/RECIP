@@ -29,4 +29,5 @@ export async function axiosGetDefault(ruta: string, params = {}) {
         dataResponse.resp = {}
         dataResponse.status = errorStatus
     }
+    return dataResponse
 }

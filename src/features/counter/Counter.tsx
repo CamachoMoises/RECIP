@@ -16,6 +16,15 @@ export function Counter() {
 		<div>
 			<div>
 				<Button
+					aria-label="Decrement value"
+					onClick={() => dispatch(incrementByAmount(10))}
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					+10
+				</Button>
+				<Button
 					aria-label="Increment value"
 					onClick={() => dispatch(increment())}
 					placeholder={undefined}
@@ -35,12 +44,12 @@ export function Counter() {
 				</Button>
 				<Button
 					aria-label="Decrement value"
-					onClick={() => dispatch(incrementByAmount(10))}
+					onClick={() => dispatch(incrementByAmount(-10))}
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					+10
+					-10
 				</Button>
 
 				<span>{count}</span>
