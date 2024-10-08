@@ -7,6 +7,8 @@ import {
 	IconButton,
 	Avatar,
 } from '@material-tailwind/react';
+// import { Link } from 'react-router-dom';
+
 const NavBar = () => {
 	const [openNav, setOpenNav] = useState(false);
 	useEffect(() => {
@@ -26,54 +28,15 @@ const NavBar = () => {
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				<a href="#" className="flex items-center">
-					Pages
-				</a>
-			</Typography>
-			<Typography
-				as="li"
-				variant="small"
-				color="blue-gray"
-				className="p-1 font-normal"
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				<a href="#" className="flex items-center">
-					Account
-				</a>
-			</Typography>
-			<Typography
-				as="li"
-				variant="small"
-				color="blue-gray"
-				className="p-1 font-normal"
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				<a href="#" className="flex items-center">
-					Blocks
-				</a>
-			</Typography>
-			<Typography
-				as="li"
-				variant="small"
-				color="blue-gray"
-				className="p-1 font-normal"
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				<a href="#" className="flex items-center">
-					Docs
-				</a>
+				{/* <Link to="/contact">Contacto</Link> */}
+				ddd
 			</Typography>
 		</ul>
 	);
+
 	return (
 		<Navbar
-			className="sticky top-0 z-10 h-max max-w-full rounded-none px-4 py-2 lg:px-8 lg:py-4"
+			className="fixed top-0 z-50 left-1/2 transform -translate-x-1/2  bg-blue-gray-50"
 			placeholder={undefined}
 			onPointerEnterCapture={undefined}
 			onPointerLeaveCapture={undefined}
