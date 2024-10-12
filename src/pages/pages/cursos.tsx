@@ -4,7 +4,11 @@ import {
 	Building,
 	Coins,
 	Drama,
+	GraduationCap,
 	Landmark,
+	Newspaper,
+	NotebookText,
+	Presentation,
 	Printer,
 	Replace,
 	UserRound,
@@ -43,10 +47,10 @@ const Cursos = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex justify-center">
-							<Drama size={60} />
+							<Newspaper size={60} />
 						</div>{' '}
 						<br />
-						Grupos
+						Cursos
 					</Button>
 				</div>
 				<div>
@@ -59,10 +63,10 @@ const Cursos = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex justify-center">
-							<Building size={60} />
+							<GraduationCap size={60} />
 						</div>{' '}
 						<br />
-						Empresa
+						Estudiantes
 					</Button>
 				</div>
 				<div>
@@ -75,10 +79,10 @@ const Cursos = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex justify-center">
-							<BadgeDollarSign size={60} />
+							<Presentation size={60} />
 						</div>{' '}
 						<br />
-						Formas de pago
+						Instructores
 					</Button>
 				</div>
 				<div>
@@ -91,60 +95,10 @@ const Cursos = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex justify-center">
-							<Landmark size={60} />
+							<NotebookText size={60} />
 						</div>{' '}
 						<br />
-						Bancos
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Tasas de cambio"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<div className="flex justify-center">
-							<Replace size={60} />
-						</div>{' '}
-						<br />
-						Tasas de Cambio
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Impresoras y cajas"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<div className="flex justify-center">
-							<Printer size={60} />
-						</div>{' '}
-						<br />
-						Impresoras <br />
-						Cajas
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Impuestos"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						disabled={true}
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<div className="flex justify-center">
-							<Coins size={60} />
-						</div>{' '}
-						<br />
-						Impuestos
+						reportes
 					</Button>
 				</div>
 			</div>

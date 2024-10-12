@@ -95,6 +95,71 @@ const NuevoCurso = () => {
 			name: 'Sistema eléctrico, Iluminación y Panel de Advertencia',
 			hours: 3,
 		},
+		{
+			id: 4,
+			name: 'Combustible',
+			hours: 2,
+		},
+		{
+			id: 5,
+			name: 'Motores/ Hélices',
+			hours: 3,
+		},
+		{
+			id: 6,
+			name: 'Protección Contra Incendio',
+			hours: 3,
+		},
+		{
+			id: 7,
+			name: 'Neumático, Protección contra Hielo y Lluvia',
+			hours: 2,
+		},
+		{
+			id: 8,
+			name: 'Aire Acondicionado/Presurización',
+			hours: 2,
+		},
+		{
+			id: 9,
+			name: 'Tren de aterrizaje /controles de vuelo',
+			hours: 2,
+		},
+		{
+			id: 10,
+			name: 'Instrumentos y Aviónica',
+			hours: 2,
+		},
+		{
+			id: 11,
+			name: 'Oxigeno',
+			hours: 2,
+		},
+		{
+			id: 12,
+			name: 'Manual de Vuelo',
+			hours: 1,
+		},
+		{
+			id: 13,
+			name: 'Procedimientos Anormales /Emergencias ',
+			hours: 3,
+		},
+		{
+			id: 14,
+			name: 'CRM /Cortante de Viento Cruzado',
+			hours: 2,
+		},
+		{
+			id: 19,
+			name: 'Repaso',
+			hours: 4,
+		},
+		{
+			id: 20,
+			name: 'Examen/Encuesta',
+			hours: 2,
+		},
 	];
 	const handlePartipante = (value: string | undefined) => {
 		const ps = participantes.find(
@@ -409,10 +474,129 @@ const NuevoCurso = () => {
 							Resultados
 						</AccordionHeader>
 						<AccordionBody>
-							We&apos;re not always in the position that we want to be
-							at. We&apos;re constantly growing. We&apos;re constantly
-							making mistakes. We&apos;re constantly trying to express
-							ourselves and actualize our dreams.
+							<div className="grid grid-cols-3 gap-4 py-2 px-2">
+								<div className="flex flex-row gap-2">
+									<Typography
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Resulatos del Examen %
+									</Typography>
+									<Input
+										type="number"
+										inputMode="numeric"
+										label="Resultado "
+										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										crossOrigin={undefined}
+									/>
+								</div>
+								<div className="flex flex-row gap-2 justify-center">
+									<Checkbox
+										color="red"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										crossOrigin={undefined}
+									/>
+									<Typography
+										variant="small"
+										className="pt-3"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Corregido el 100%
+									</Typography>
+								</div>
+								<div className="flex flex-row gap-2">
+									<Input
+										type="date"
+										label="Fecha de completado"
+										required={true}
+										crossOrigin={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									/>
+								</div>
+							</div>
+							<hr />
+							<div className="grid grid-cols-3 gap-4 py-2 px-2">
+								<div className="flex flex-row gap-2">
+									<Typography
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Resultados para repetir examen %
+									</Typography>
+									<Input
+										type="number"
+										inputMode="numeric"
+										label="Resultado "
+										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										crossOrigin={undefined}
+									/>
+								</div>
+								<div className="flex flex-row gap-2 justify-center">
+									<Checkbox
+										color="red"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										crossOrigin={undefined}
+									/>
+									<Typography
+										variant="small"
+										className="pt-3"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Corregido el 100%
+									</Typography>
+								</div>
+								<div className="flex flex-row gap-2">
+									<Typography
+										variant="small"
+										className="pt-3"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Horas totales:
+									</Typography>
+									<Input
+										type="number"
+										inputMode="numeric"
+										label="Resultado "
+										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										crossOrigin={undefined}
+									/>
+									<Typography
+										variant="small"
+										className="pt-3"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Dias totales:
+									</Typography>
+									<Input
+										type="number"
+										inputMode="numeric"
+										label="Resultado "
+										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										crossOrigin={undefined}
+									/>
+								</div>
+							</div>
 						</AccordionBody>
 					</Accordion>
 				</CardBody>
