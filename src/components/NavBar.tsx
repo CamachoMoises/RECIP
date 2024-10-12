@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
 	Navbar,
 	MobileNav,
@@ -7,10 +7,11 @@ import {
 	IconButton,
 	Avatar,
 } from '@material-tailwind/react';
-// import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const NavBar = () => {
 	const [openNav, setOpenNav] = useState(false);
+	const navigate = useNavigate();
 	useEffect(() => {
 		window.addEventListener(
 			'resize',
@@ -19,18 +20,34 @@ const NavBar = () => {
 	}, []);
 	const navList = (
 		<ul className="mt-2 mb-4 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-			<Typography
-				as="li"
-				variant="small"
-				color="blue-gray"
-				className="p-1 font-normal"
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				{/* <Link to="/contact">Contacto</Link> */}
-				ddd
-			</Typography>
+			<li>
+				<Typography
+					as="li"
+					variant="small"
+					color="blue-gray"
+					className="p-1 font-normal"
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					{/* <Link to="/contact">Contacto</Link> */}
+					Test
+				</Typography>
+			</li>
+			<li>
+				<Typography
+					as="li"
+					variant="small"
+					color="blue-gray"
+					className="p-1 font-normal"
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					{/* <Link to="/contact">Contacto</Link> */}
+					Test
+				</Typography>
+			</li>
 		</ul>
 	);
 
@@ -42,14 +59,21 @@ const NavBar = () => {
 			onPointerLeaveCapture={undefined}
 		>
 			<div className="flex items-center justify-between text-blue-gray-900">
-				<Avatar
-					src="https://docs.material-tailwind.com/img/face-2.jpg"
-					alt="avatar"
-					variant="rounded"
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-				/>
+				<div className="flex flex-col align-bottom justify-center gap-2">
+					<img
+						src="/images/logo.png"
+						alt="Descripción de la imagen"
+						width={80}
+					/>
+					<Typography
+						variant="h5"
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						R.E.C.I.P
+					</Typography>
+				</div>
 
 				<div className="flex items-center gap-4">
 					<div className="mr-4 hidden lg:block">{navList}</div>
@@ -58,21 +82,56 @@ const NavBar = () => {
 							variant="text"
 							size="sm"
 							className="hidden lg:inline-block"
+							onClick={() => navigate('/about')}
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<span>Log In</span>
+							About
 						</Button>
 						<Button
 							variant="gradient"
 							size="sm"
 							className="hidden lg:inline-block"
 							placeholder={undefined}
+							onClick={() => navigate('/contact')}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<span>Sign in</span>
+							Contact
+						</Button>
+						<Button
+							variant="gradient"
+							size="sm"
+							className="hidden lg:inline-block"
+							placeholder={undefined}
+							onClick={() => navigate('/login')}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Login
+						</Button>
+						<Button
+							variant="gradient"
+							size="sm"
+							className="hidden lg:inline-block"
+							placeholder={undefined}
+							onClick={() => navigate('/cursos')}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Cursos
+						</Button>
+						<Button
+							variant="gradient"
+							size="sm"
+							className="hidden lg:inline-block"
+							placeholder={undefined}
+							onClick={() => navigate('/nuevoCurso')}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Nuevo curso
 						</Button>
 					</div>
 					<IconButton
@@ -129,7 +188,7 @@ const NavBar = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<span>Log In</span>
+						<span>ffffff</span>
 					</Button>
 					<Button
 						fullWidth

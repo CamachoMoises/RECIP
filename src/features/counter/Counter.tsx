@@ -14,7 +14,7 @@ export function Counter() {
 
 	return (
 		<div>
-			<div>
+			<div className="flex flex-row gap-2">
 				<Button
 					aria-label="Decrement value"
 					onClick={() => dispatch(incrementByAmount(10))}
