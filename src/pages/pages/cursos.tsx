@@ -1,19 +1,11 @@
 import { Button } from '@material-tailwind/react';
 import {
-	BadgeDollarSign,
-	Building,
-	Coins,
-	Drama,
 	GraduationCap,
-	Landmark,
 	Newspaper,
 	NotebookText,
 	Presentation,
-	Printer,
-	Replace,
 	UserRound,
 } from 'lucide-react';
-import React from 'react';
 
 const Cursos = () => {
 	return (
