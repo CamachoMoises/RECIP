@@ -115,11 +115,11 @@ const NavBar = () => {
 							size="sm"
 							className="hidden lg:inline-block"
 							placeholder={undefined}
-							onClick={() => navigate('/cursos')}
+							onClick={() => navigate('/dashboard')}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Cursos
+							Dashboard
 						</Button>
 						<Button
 							variant="gradient"

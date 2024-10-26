@@ -17,3 +17,25 @@ export type moduloTeoria = {
     name: string;
     hours: number;
 }
+
+export interface breadCrumbsItems {
+    name: string;
+    href: string;
+    parametros?: [];
+}
+
+export interface user {
+    createdAt: string;
+    doc_number: number;
+    email: string;
+    id: number;
+    is_active: boolean;
+    is_staff: boolean;
+    is_superuser: boolean;
+    last_name: string;
+    name: string;
+    password?: string;
+    phone: string;
+    updatedAt: string;
+    uuid: string;
+}

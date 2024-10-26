@@ -1,4 +1,4 @@
-import { Counter } from './features/counter/Counter';
+// import { Counter } from './features/counter/Counter';
 import {
 	BrowserRouter as Router,
 	Route,
@@ -9,9 +9,9 @@ import AboutUs from './pages/AboutUs';
 import ContactPage from './pages/ContactPage';
 import NavBar from './components/NavBar';
 import Login from './pages/login';
-import Cursos from './pages/pages/cursos';
 import NuevoCurso from './pages/pages/nuevoCurso';
 import './app.css';
+import Dashboard from './pages/pages/dashboard';
 
 function App() {
 	return (
@@ -36,7 +36,7 @@ function App() {
 								<Route path="/about" element={<AboutUs />} />
 								<Route path="/contact" element={<ContactPage />} />
 								<Route path="/login" element={<Login />} />
-								<Route path="/cursos/*" element={<Cursos />} />
+								<Route path="/dashboard/*" element={<Dashboard />} />
 								<Route
 									path="/nuevoCurso/*"
 									element={<NuevoCurso />}
@@ -45,7 +45,7 @@ function App() {
 						</div>
 					</div>
 				</Router>
-				<Counter />
+				{/* <Counter /> */}
 			</div>
 		</div>
 	);
