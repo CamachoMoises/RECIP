@@ -13,7 +13,14 @@ import { useRef, useState } from 'react';
 import { EyeIcon, EyeOff } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
-import { axiosPostDefault } from '../../../../services/axios';
+import {
+	axiosPostDefault,
+	axiosPutDefault,
+} from '../../../../services/axios';
+import {
+	createUser,
+	updateUser,
+} from '../../../../features/userSlice';
 type Inputs = {
 	name: string;
 	doc_number: number;
@@ -49,9 +56,7 @@ const ModalNewUser = ({
 		},
 	});
 	const dispatch = useDispatch<AppDispatch>();
-	const user = useSelector(
-		(state: RootState) => state.users.usersList
-	);
+
 	const status = useSelector(
 		(state: RootState) => state.users.status
 	);
@@ -85,8 +90,13 @@ const ModalNewUser = ({
 			is_superuser: isSuperuser,
 			password: data.password,
 		};
-		const response = await axiosPostDefault('api/users', req);
-		console.log(response);
+		handleOpen();
+
+		if (userSelect) {
+			dispatch(updateUser(req));
+		} else {
+			dispatch(createUser(req));
+		}
 	};
 	return (
 		<Dialog
@@ -151,10 +161,15 @@ const ModalNewUser = ({
 									{...register('last_name', {
 										required: {
 											value: true,
-											message: 'El Apellido es requerido',
+											message: 'El apellido es requerido',
 										},
 									})}
 								/>
+								{errors.last_name && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.last_name.message}
+									</span>
+								)}
 							</div>
 							<div className="">
 								<Input
@@ -173,6 +188,11 @@ const ModalNewUser = ({
 										},
 									})}
 								/>
+								{errors.phone && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.phone.message}
+									</span>
+								)}
 							</div>
 							<div className="">
 								<Input
@@ -187,10 +207,15 @@ const ModalNewUser = ({
 									{...register('doc_number', {
 										required: {
 											value: true,
-											message: 'El Cedula es requerido',
+											message: 'La cedula es requerida',
 										},
 									})}
 								/>
+								{errors.doc_number && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.doc_number.message}
+									</span>
+								)}
 							</div>
 							<div className="col-span-2">
 								<Input
@@ -343,7 +368,7 @@ const ModalNewUser = ({
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<span>Cancel</span>
+						<span>Cancelar</span>
 					</Button>
 					<Button
 						variant="gradient"
@@ -353,7 +378,7 @@ const ModalNewUser = ({
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<span>Confirm</span>
+						<span>{userSelect ? 'Actualizar' : 'Crear'}</span>
 					</Button>
 				</DialogFooter>
 			</form>

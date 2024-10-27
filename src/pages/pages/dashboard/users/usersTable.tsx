@@ -12,6 +12,8 @@ import { Pencil, Plus, Settings } from 'lucide-react';
 import ModalNewUser from './modalNewUser';
 import { breadCrumbsItems, user } from '../../../../types/utilidades';
 import PageTitle from '../../../../components/PageTitle';
+import ErrorPage from '../../../../components/ErrorPage';
+import LoadingPage from '../../../../components/LoadingPage';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -50,25 +52,17 @@ const UserTable = () => {
 
 	if (status === 'loading') {
 		return (
-			<Typography
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				Cargando usuarios...
-			</Typography>
+			<>
+				<LoadingPage />
+			</>
 		);
 	}
 
 	if (status === 'failed') {
 		return (
-			<Typography
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				Error: {error}
-			</Typography>
+			<>
+				<ErrorPage error={error ? error : 'Indefinido'} />
+			</>
 		);
 	}
 
@@ -180,17 +174,17 @@ const UserTable = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Configuracion
+								Agregar
 							</Typography>
 							<div className="flex flex-col">
 								<Button
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									className="text-center justify-center"
+									className="flex flex-col text-center justify-center "
 									onClick={handleOpen}
 								>
-									<Plus size={15} />
+									<Plus size={15} className="mx-auto text-lg" />
 								</Button>
 							</div>
 						</CardBody>

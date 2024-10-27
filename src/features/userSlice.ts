@@ -29,8 +29,8 @@ export const createUser = createAsyncThunk<user, user>(
 	'user/createUser',
 	async (userData, { rejectWithValue }) => {
 		try {
-			const response = await axiosPostDefault('api/user', userData);
-			return response.data;
+			const response = await axiosPostDefault('api/users', userData);
+			return response;
 		} catch (error: any) {
 			return rejectWithValue(error.response.data);
 		}
@@ -42,8 +42,8 @@ export const updateUser = createAsyncThunk<user, user>(
 	'user/updateUser',
 	async (userData, { rejectWithValue }) => {
 		try {
-			const response = await axiosPutDefault(`/api/users/${userData.id}`, userData);
-			return response.data;
+			const response = await axiosPutDefault(`api/users`, userData);
+			return response;
 		} catch (error: any) {
 			return rejectWithValue(error.response.data);
 		}

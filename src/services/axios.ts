@@ -14,19 +14,19 @@ export async function axiosGetDefault(ruta: string, params = {}) {
         resp: {},
         status: -1
     }
-    try {
-        const res = await axiosInstance.get(
-            `${apiUrl}/${ruta}`,
-            { params: params }
-        );
-        dataResponse.resp = res.data
-        dataResponse.status = res.status
-    } catch (error: any) {
-        console.log('Error GET Axios OJO!', error?.response?.status);
-        const errorStatus = error?.response?.status
-        dataResponse.resp = {}
-        dataResponse.status = errorStatus
-    }
+    // try {
+    const res = await axiosInstance.get(
+        `${apiUrl}/${ruta}`,
+        { params: params }
+    );
+    dataResponse.resp = res.data
+    dataResponse.status = res.status
+    // } catch (error: any) {
+    //     console.log('Error GET Axios OJO!', error?.response?.status);
+    //     const errorStatus = error?.response?.status
+    //     dataResponse.resp = {}
+    //     dataResponse.status = errorStatus
+    // }
     return dataResponse
 }
 
@@ -39,19 +39,19 @@ export async function axiosPostDefault(ruta: string, data: any = {}) {
             'Accept': 'application/json',
         },
     });
-    try {
-        const res = await axiosInstance.post(
-            `${apiUrl}/${ruta}`,
-            data
-        );
-        return res.data
-    } catch (error: any) {
-        console.log('Error POST Axios', error?.response?.status);
-        const errorStatus = error
-        if (errorStatus === 401 || !errorStatus) {
-            return [{ error: 401 }];
-        }
-    }
+    // try {
+    const res = await axiosInstance.post(
+        `${apiUrl}/${ruta}`,
+        data
+    );
+    return res.data
+    // } catch (error: any) {
+    //     console.log('Error POST Axios', error?.response?.status);
+    //     const errorStatus = error
+    //     if (errorStatus === 401 || !errorStatus) {
+    //         return [{ error: 401 }];
+    //     }
+    // }
 }
 
 export async function axiosPutDefault(ruta: string, data: any = {}) {
@@ -64,13 +64,17 @@ export async function axiosPutDefault(ruta: string, data: any = {}) {
         },
     });
     try {
+        console.log('ojo2', data);
+
         const res = await axiosInstance.put(
-            `${process.env.BACKEND_URL}/${ruta}`,
+            `${apiUrl}/${ruta}`,
             data
         );
+        console.log('jojo');
+
         return res.data
     } catch (error: any) {
-        console.log('Error PUT Axios', error?.response?.status);
+        console.log('Error PUT Axios', error);
         const errorStatus = error?.response?.status
         if (errorStatus === 401 || !errorStatus) {
             return [{ error: 401 }];
