@@ -14,10 +14,6 @@ import { EyeIcon, EyeOff } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import {
-	axiosPostDefault,
-	axiosPutDefault,
-} from '../../../../services/axios';
-import {
 	createUser,
 	updateUser,
 } from '../../../../features/userSlice';

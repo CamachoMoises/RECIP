@@ -63,21 +63,18 @@ export async function axiosPutDefault(ruta: string, data: any = {}) {
             'Accept': 'application/json',
         },
     });
-    try {
-        console.log('ojo2', data);
+    // try {
+    const res = await axiosInstance.put(
+        `${apiUrl}/${ruta}`,
+        data
+    );
 
-        const res = await axiosInstance.put(
-            `${apiUrl}/${ruta}`,
-            data
-        );
-        console.log('jojo');
-
-        return res.data
-    } catch (error: any) {
-        console.log('Error PUT Axios', error);
-        const errorStatus = error?.response?.status
-        if (errorStatus === 401 || !errorStatus) {
-            return [{ error: 401 }];
-        }
-    }
+    return res.data
+    // } catch (error: any) {
+    //     console.log('Error PUT Axios', error);
+    //     const errorStatus = error?.response?.status
+    //     if (errorStatus === 401 || !errorStatus) {
+    //         return [{ error: 401 }];
+    //     }
+    // }
 }

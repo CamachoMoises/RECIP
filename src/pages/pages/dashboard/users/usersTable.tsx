@@ -1,14 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers } from '../../../../features/userSlice';
+import {
+	fetchUsers,
+	updateUser,
+} from '../../../../features/userSlice';
 import { AppDispatch, RootState } from '../../../../store';
 import {
 	Button,
+	ButtonGroup,
 	Card,
 	CardBody,
 	Typography,
 } from '@material-tailwind/react';
-import { Pencil, Plus, Settings } from 'lucide-react';
+import {
+	Pencil,
+	Plus,
+	Power,
+	PowerOff,
+	Settings,
+} from 'lucide-react';
 import ModalNewUser from './modalNewUser';
 import { breadCrumbsItems, user } from '../../../../types/utilidades';
 import PageTitle from '../../../../components/PageTitle';
@@ -25,7 +35,7 @@ const UserTable = () => {
 	const [userSelect, setUserSelect] = useState<user | null>(null);
 	const { usersList, status, error } = useSelector(
 		(state: RootState) => {
-			console.log(state);
+			// console.log(state);
 
 			return (
 				state.users || {
@@ -44,6 +54,10 @@ const UserTable = () => {
 	const handleOpenEdit = (user: user) => {
 		setUserSelect(user);
 		setOpenNewUser(true);
+	};
+	const switchUser = async (user: user) => {
+		const req: user = { ...user, is_active: !user.is_active };
+		dispatch(updateUser(req));
 	};
 
 	useEffect(() => {
@@ -107,11 +121,11 @@ const UserTable = () => {
 											</Typography>
 										</th>
 									))}
-									<th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+									<th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4 justify-center">
 										<Typography
 											variant="small"
 											color="blue-gray"
-											className="font-normal leading-none opacity-70"
+											className="font-normal leading-none opacity-70 text-center justify-center"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
@@ -137,18 +151,45 @@ const UserTable = () => {
 											<td className={classes}>{user.phone}</td>
 											<td className={classes}>{user.email}</td>
 											<td>
-												<Button
-													variant="text"
-													size="sm"
+												<ButtonGroup
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													onClick={() => {
-														handleOpenEdit(user);
-													}}
+													variant="text"
+													size="sm"
 												>
-													<Pencil size={18} />
-												</Button>
+													<Button
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+														className="flex flex-col text-center justify-center "
+														onClick={() => {
+															switchUser(user);
+														}}
+													>
+														{user.is_active ? (
+															<PowerOff
+																size={15}
+																className="mx-auto text-lg"
+															/>
+														) : (
+															<Power
+																size={15}
+																className="mx-auto text-lg"
+															/>
+														)}
+													</Button>
+													<Button
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+														onClick={() => {
+															handleOpenEdit(user);
+														}}
+													>
+														<Pencil size={18} />
+													</Button>
+												</ButtonGroup>
 											</td>
 										</tr>
 									);
