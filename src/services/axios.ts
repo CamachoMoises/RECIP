@@ -61,7 +61,6 @@ export async function axiosPutDefault(ruta: string, data: any = {}) {
         headers: {
             'Content-Type': 'multipart/form-data',
             'Accept': 'application/json',
-            // Authorization: `Bearer ${dataCookie?.value}`,
         },
     });
     try {

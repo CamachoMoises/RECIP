@@ -18,6 +18,8 @@ export type moduloTeoria = {
     hours: number;
 }
 
+
+
 export interface breadCrumbsItems {
     name: string;
     href: string;
@@ -25,10 +27,10 @@ export interface breadCrumbsItems {
 }
 
 export interface user {
-    createdAt: string;
+    createdAt?: string;
     doc_number: number;
     email: string;
-    id: number;
+    id: number | null;
     is_active: boolean;
     is_staff: boolean;
     is_superuser: boolean;
@@ -36,6 +38,12 @@ export interface user {
     name: string;
     password?: string;
     phone: string;
-    updatedAt: string;
-    uuid: string;
+    updatedAt?: string;
+    uuid: string | null;
+}
+
+export interface UserState {
+    usersList: user[];
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null; // Permitir null y string para evitar problemas de tipo
 }

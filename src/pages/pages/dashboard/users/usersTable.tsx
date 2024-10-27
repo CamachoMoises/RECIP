@@ -198,12 +198,14 @@ const UserTable = () => {
 				</div>
 			</div>
 
-			<code>{JSON.stringify(openNewUser, null, 4)}</code>
-			<ModalNewUser
-				userSelect={userSelect}
-				openNewUser={openNewUser}
-				handleOpen={handleOpen}
-			/>
+			{/* <code>{JSON.stringify(openNewUser, null, 4)}</code> */}
+			{openNewUser && (
+				<ModalNewUser
+					userSelect={userSelect}
+					openNewUser={openNewUser}
+					handleOpen={handleOpen}
+				/>
+			)}
 		</div>
 	);
 };

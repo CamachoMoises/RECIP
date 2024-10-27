@@ -1,17 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from '../services/axios';
-import { user } from '../types/utilidades';
+import { UserState, user } from '../types/utilidades';
 
 
-interface UserState {
-	list: user[];
-	usersList: user[];
-	status: 'idle' | 'loading' | 'succeeded' | 'failed';
-	error: string | null; // Permitir null y string para evitar problemas de tipo
-}
 
 const initialState: UserState = {
-	list: [],
 	status: 'idle',
 	usersList: [],
 	error: null, // Inicializar como null
@@ -22,8 +15,7 @@ export const fetchUsers = createAsyncThunk<user[]>(
 	'user/fetchUsers',
 	async (_, { rejectWithValue }) => {
 		try {
-			const response = await axiosGetDefault('api/user');
-			console.log(response);
+			const response = await axiosGetDefault('api/users');
 			return response.resp;
 		} catch (error: any) {
 			return rejectWithValue(error.response.data);
