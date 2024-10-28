@@ -11,8 +11,8 @@ import { user } from '../../../../types/utilidades';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useRef, useState } from 'react';
 import { EyeIcon, EyeOff } from 'lucide-react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../../store';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../../store';
 import {
 	createUser,
 	updateUser,
@@ -53,9 +53,9 @@ const ModalNewUser = ({
 	});
 	const dispatch = useDispatch<AppDispatch>();
 
-	const status = useSelector(
-		(state: RootState) => state.users.status
-	);
+	// const status = useSelector(
+	// 	(state: RootState) => state.users.status
+	// );
 	const password = useRef({});
 	password.current = watch('password', '');
 
@@ -300,7 +300,7 @@ const ModalNewUser = ({
 										<br />
 										<Switch
 											defaultChecked={userSelect ? isActive : true}
-											onChange={(e: any) => {
+											onChange={() => {
 												setIsActive(!isActive);
 											}}
 											crossOrigin={undefined}
@@ -318,7 +318,7 @@ const ModalNewUser = ({
 										<br />
 										<Switch
 											defaultChecked={isStaff}
-											onChange={(e: any) => {
+											onChange={() => {
 												setIsStaff(!isStaff);
 											}}
 											crossOrigin={undefined}
@@ -336,7 +336,7 @@ const ModalNewUser = ({
 										<br />
 										<Switch
 											defaultChecked={isSuperuser}
-											onChange={(e: any) => {
+											onChange={() => {
 												setIsSuperuser(!isSuperuser);
 											}}
 											crossOrigin={undefined}

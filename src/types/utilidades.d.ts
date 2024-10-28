@@ -20,6 +20,19 @@ export type moduloTeoria = {
 
 
 
+export type course = {
+    id: number | null;
+    name: string;
+    hours: number;
+    type: number;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+
+}
+
+
+
 export interface breadCrumbsItems {
     name: string;
     href: string;
@@ -47,3 +60,10 @@ export interface UserState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null; // Permitir null y string para evitar problemas de tipo
 }
+
+export interface CourseState {
+    courseList: course[];
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null; // Permitir null y string para evitar problemas de tipo
+}
+

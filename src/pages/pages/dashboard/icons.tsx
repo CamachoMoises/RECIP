@@ -41,6 +41,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						onClick={() => navigate('courses')}
 					>
 						<div className="flex justify-center">
 							<Newspaper size={60} />
