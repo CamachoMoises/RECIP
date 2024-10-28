@@ -18,8 +18,12 @@ export type moduloTeoria = {
     hours: number;
 }
 
-
-
+export type courseType = {
+    id: number;
+    name: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
 export type course = {
     id: number | null;
     name: string;
@@ -28,6 +32,7 @@ export type course = {
     status: boolean;
     createdAt?: string;
     updatedAt?: string;
+    course_type: courseType;
 
 }
 

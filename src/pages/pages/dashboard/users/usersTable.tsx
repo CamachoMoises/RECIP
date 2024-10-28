@@ -10,6 +10,7 @@ import {
 	ButtonGroup,
 	Card,
 	CardBody,
+	Chip,
 	Typography,
 } from '@material-tailwind/react';
 import {
@@ -80,7 +81,7 @@ const UserTable = () => {
 		);
 	}
 
-	const TABLE_HEAD = ['Id', 'Nombre', 'Telefono', 'Email'];
+	const TABLE_HEAD = ['Id', 'Nombre', 'Telefono', 'Email', 'Estatus'];
 
 	return (
 		<div className="container">
@@ -112,7 +113,7 @@ const UserTable = () => {
 											<Typography
 												variant="small"
 												color="blue-gray"
-												className="font-normal leading-none opacity-70"
+												className="font-normal leading-none opacity-70 text-center"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
@@ -150,6 +151,22 @@ const UserTable = () => {
 											</td>
 											<td className={classes}>{user.phone}</td>
 											<td className={classes}>{user.email}</td>
+											<td className={classes}>
+												{user.is_active ? (
+													<Chip
+														color="green"
+														value="Activo"
+														className="text-center"
+													/>
+												) : (
+													<Chip
+														color="red"
+														value="Inativo"
+														className="text-center"
+													/>
+												)}
+											</td>
+
 											<td>
 												<ButtonGroup
 													placeholder={undefined}
@@ -157,6 +174,7 @@ const UserTable = () => {
 													onPointerLeaveCapture={undefined}
 													variant="text"
 													size="sm"
+													color={user.is_active ? 'green' : 'red'}
 												>
 													<Button
 														placeholder={undefined}
@@ -166,6 +184,11 @@ const UserTable = () => {
 														onClick={() => {
 															switchUser(user);
 														}}
+														title={
+															user.is_active
+																? 'Desactivar'
+																: 'Activar'
+														}
 													>
 														{user.is_active ? (
 															<PowerOff
