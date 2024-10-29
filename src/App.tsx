@@ -19,13 +19,13 @@ function App() {
 			<div className=" flex flex-col pt-24 px-16 gap-3 ">
 				<Router>
 					<div className="video-container">
-						<video className="video-background" autoPlay loop muted>
+						{/* <video className="video-background" autoPlay loop muted>
 							<source
 								src="video/video_background.mp4"
 								type="video/mp4"
 							/>
 							Tu navegador no soporta el video HTML5.
-						</video>
+						</video> */}
 						<div className="content">
 							<NavBar />
 							<div className="flex flex-col p-2"></div>

@@ -52,20 +52,21 @@ const NavBar = () => {
 
 	return (
 		<Navbar
-			className="fixed top-0 z-50 left-1/2 transform -translate-x-1/2  bg-blue-gray-50"
+			className="fixed top-0 z-50 left-1/2 transform -translate-x-1/2  bg-blue-800"
 			placeholder={undefined}
 			onPointerEnterCapture={undefined}
 			onPointerLeaveCapture={undefined}
 		>
 			<div className="flex items-center justify-between text-blue-gray-900">
-				<div className="flex flex-col align-bottom justify-center gap-2">
+				<div className="flex flex-row align-bottom justify-center gap-2">
 					<img
 						src="/images/logo.png"
 						alt="Descripción de la imagen"
-						width={80}
+						width={150}
 					/>
 					<Typography
 						variant="h5"
+						className="pt-10"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}

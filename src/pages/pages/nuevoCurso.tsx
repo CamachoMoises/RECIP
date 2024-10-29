@@ -181,7 +181,7 @@ const NuevoCurso = () => {
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					<div className="">
+					<div className="bg-blue-100 rounded-md">
 						<Typography
 							variant="h5"
 							placeholder={undefined}
@@ -189,16 +189,23 @@ const NuevoCurso = () => {
 							onPointerLeaveCapture={undefined}
 						>
 							King Air B200 Curso de Entrenamiento Inicial
+						</Typography>
+						<Typography
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+							variant="lead"
+						>
 							Verificación de Competencia/Calificación del Piloto
 							Registro de Entrenamiento de Escuela en Tierra
 						</Typography>
 					</div>
 					<hr />
-					<div className="grid grid-cols-2 gap-4 py-2">
-						<div className="flex flex-col gap-2">
-							<div className="w-72">
+					<div className="grid grid-cols-7 gap-4 py-2">
+						<div className="flex flex-col col-span-3 gap-2 max-w-96">
+							<div className="">
 								<Select
-									label="Selecionar estudiante"
+									label="Selecionar Piloto"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -221,23 +228,25 @@ const NuevoCurso = () => {
 								<>
 									<div className="flex flex-row gap-3">
 										<Typography
-											variant="h6"
+											variant="small"
+											className="font-bold"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Número de Identificación <br /> del Piloto
+											Número de Identificación{' '}
 										</Typography>
 										<Typography
-											variant="paragraph"
+											variant="small"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{participanteSelec.nro_doc}
+											122{participanteSelec.nro_doc}
 										</Typography>
 										<Typography
-											variant="h6"
+											variant="small"
+											className="font-bold"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
@@ -245,7 +254,7 @@ const NuevoCurso = () => {
 											Pais
 										</Typography>
 										<Typography
-											variant="paragraph"
+											variant="small"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
@@ -264,39 +273,32 @@ const NuevoCurso = () => {
 								onPointerLeaveCapture={undefined}
 							/>
 						</div>
-						<div className="flex flex-col w-max ">
-							<div className="flex flex-row w-max gap-4 px-20">
-								<Checkbox
+						<div className="flex flex-col w-full  pl-16  col-span-4 border border-gray-400 rounded-md">
+							<div className="flex flex-row w-full gap-8 px-20">
+								<Radio
+									name="tipo"
+									label="PIC"
 									color="red"
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									crossOrigin={undefined}
 								/>
-								<Typography
-									variant="small"
-									className="pt-3"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									PIC
-								</Typography>
-
-								<Checkbox
+								<Radio
+									name="tipo"
+									label="SIC"
 									color="red"
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									crossOrigin={undefined}
 								/>
-								<Typography
-									variant="small"
-									className="pt-3"
-									placeholder={undefined}
+								<Radio
+									name="tipo"
+									label="TRIP"
+									color="red"
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-								>
-									SIC
-								</Typography>
+									crossOrigin={undefined}
+								/>
 							</div>
 							<div className="flex flex-row w-max gap-4">
 								<Typography
@@ -329,7 +331,7 @@ const NuevoCurso = () => {
 
 									<Radio
 										name="licencia"
-										label="Private"
+										label="Privado"
 										defaultChecked
 										color="red"
 										onPointerEnterCapture={undefined}
@@ -385,7 +387,7 @@ const NuevoCurso = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Modulos del curso
+							Modulos del Curso
 						</AccordionHeader>
 						<AccordionBody>
 							<div className="flex flex-col gap-2 ">
@@ -406,10 +408,19 @@ const NuevoCurso = () => {
 													{modulo.name}
 												</Typography>
 											</div>
-											<div className="flex flex-row gap-2">
+											<div className="flex flex-col gap-2">
 												<Input
 													type="date"
 													label="Fecha"
+													required={true}
+													crossOrigin={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												/>
+												<br />
+												<Input
+													type="time"
+													label="Hora de inicio"
 													required={true}
 													crossOrigin={undefined}
 													onPointerEnterCapture={undefined}
@@ -420,7 +431,7 @@ const NuevoCurso = () => {
 												<Input
 													type="number"
 													inputMode="numeric"
-													label="Horas "
+													label="Horas de clase"
 													className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
@@ -433,7 +444,7 @@ const NuevoCurso = () => {
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													Max:{modulo.hours}
+													Max: {modulo.hours}Hrs
 												</Typography>
 											</div>
 											<div className="flex flex-row gap-2">
@@ -566,7 +577,7 @@ const NuevoCurso = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Horas totales:
+										Horas totales en clases:
 									</Typography>
 									<Input
 										type="number"
@@ -584,7 +595,7 @@ const NuevoCurso = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Dias totales:
+										Dias totales clases:
 									</Typography>
 									<Input
 										type="number"
