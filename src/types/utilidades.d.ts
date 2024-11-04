@@ -27,6 +27,7 @@ export type courseType = {
 export type course = {
     id: number | null;
     name: string;
+    description: string;
     hours: number;
     type: number;
     status: boolean;
@@ -35,8 +36,6 @@ export type course = {
     course_type: courseType;
 
 }
-
-
 
 export interface breadCrumbsItems {
     name: string;

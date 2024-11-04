@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { CourseState, course } from "../types/utilidades";
-import { axiosGetDefault } from "../services/axios";
+import { axiosGetDefault, axiosPostDefault } from "../services/axios";
 
 
 const initialState: CourseState = {
@@ -14,6 +14,20 @@ export const fetchCourses = createAsyncThunk<course[]>(
         try {
             const response = await axiosGetDefault('api/courses');
             return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+
+// Acción para crear un curso
+export const createCourse = createAsyncThunk<course, course>(
+    'course/createCourse',
+    async (courseData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostDefault('api/courses', courseData);
+            return response;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
         }
@@ -39,18 +53,18 @@ const userSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-        // // Reducers para la acción createUser
-        // .addCase(createUser.pending, (state) => {
-        //     state.status = 'loading';
-        // })
-        // .addCase(createUser.fulfilled, (state, action: PayloadAction<user>) => {
-        //     state.status = 'succeeded';
-        //     state.usersList.push(action.payload);
-        // })
-        // .addCase(createUser.rejected, (state, action) => {
-        //     state.status = 'failed';
-        //     state.error = action.payload as string;
-        // })
+            // Reducers para la acción createCourse
+            .addCase(createCourse.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createCourse.fulfilled, (state, action: PayloadAction<course>) => {
+                state.status = 'succeeded';
+                state.courseList.push(action.payload);
+            })
+            .addCase(createCourse.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
 
 
         // .addCase(updateUser.pending, (state) => {

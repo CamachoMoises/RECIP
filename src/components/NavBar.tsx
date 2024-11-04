@@ -52,7 +52,7 @@ const NavBar = () => {
 
 	return (
 		<Navbar
-			className="fixed top-0 z-50 left-1/2 transform -translate-x-1/2  bg-blue-800"
+			className="fixed top-0 z-50 left-1/2 transform -translate-x-1/2  bg-blue-gray-400"
 			placeholder={undefined}
 			onPointerEnterCapture={undefined}
 			onPointerLeaveCapture={undefined}

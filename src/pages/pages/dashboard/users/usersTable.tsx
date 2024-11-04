@@ -20,7 +20,7 @@ import {
 	PowerOff,
 	Settings,
 } from 'lucide-react';
-import ModalNewUser from './modalNewUser';
+import ModalFormUser from './modalFormUser';
 import { breadCrumbsItems, user } from '../../../../types/utilidades';
 import PageTitle from '../../../../components/PageTitle';
 import ErrorPage from '../../../../components/ErrorPage';
@@ -258,7 +258,7 @@ const UserTable = () => {
 
 			{/* <code>{JSON.stringify(openNewUser, null, 4)}</code> */}
 			{openNewUser && (
-				<ModalNewUser
+				<ModalFormUser
 					userSelect={userSelect}
 					openNewUser={openNewUser}
 					handleOpen={handleOpen}

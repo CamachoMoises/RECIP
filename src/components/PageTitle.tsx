@@ -25,6 +25,7 @@ export default function PageTitle({
 	const location = useLocation();
 	// console.log(location.pathname);
 	const pathName = location.pathname;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isPending, startTransition] = useTransition();
 	const handleBack = () => {
 		navigate(-1);

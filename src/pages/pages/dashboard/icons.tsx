@@ -1,10 +1,10 @@
 import { Button } from '@material-tailwind/react';
 import {
-	GraduationCap,
 	Newspaper,
 	NotebookPen,
 	NotebookText,
 	Package,
+	Plane,
 	Presentation,
 	UserRound,
 } from 'lucide-react';
@@ -52,7 +52,7 @@ const Icons = () => {
 				</div>
 				<div>
 					<Button
-						title="Empresa"
+						title="Pilotos"
 						className="text-center w-40 h-32"
 						variant="gradient"
 						placeholder={undefined}
@@ -60,10 +60,10 @@ const Icons = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex justify-center">
-							<GraduationCap size={60} />
+							<Plane size={60} />
 						</div>{' '}
 						<br />
-						Estudiantes
+						Pilotos
 					</Button>
 				</div>
 				<div>

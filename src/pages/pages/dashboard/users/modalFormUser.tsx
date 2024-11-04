@@ -26,7 +26,7 @@ type Inputs = {
 	password: string;
 	password2: string;
 };
-const ModalNewUser = ({
+const ModalFormUser = ({
 	userSelect,
 	openNewUser,
 	handleOpen,
@@ -382,4 +382,4 @@ const ModalNewUser = ({
 	);
 };
 
-export default ModalNewUser;
+export default ModalFormUser;
