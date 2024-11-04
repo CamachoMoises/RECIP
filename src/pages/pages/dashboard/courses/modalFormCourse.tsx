@@ -68,12 +68,15 @@ const ModalFormCourse = ({
 				status: isActive,
 				course_type: newCourseType,
 			};
+			handleOpen();
+
 			if (courseSelected) {
 				console.log('update', req);
 			} else {
 				console.log('create');
 				dispatch(createCourse(req));
 			}
+
 			// console.log(data);
 		}
 	};

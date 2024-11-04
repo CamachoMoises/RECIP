@@ -27,6 +27,8 @@ export const createCourse = createAsyncThunk<course, course>(
     async (courseData, { rejectWithValue }) => {
         try {
             const response = await axiosPostDefault('api/courses', courseData);
+            console.log(response);
+
             return response;
         } catch (error: any) {
             return rejectWithValue(error.response.data);

@@ -36,7 +36,7 @@ const GeneralCourses = () => {
 	);
 	const { courseList, status, error } = useSelector(
 		(state: RootState) => {
-			// console.log(state);
+			console.log(state);
 
 			return (
 				state.courses || {
@@ -116,6 +116,7 @@ const GeneralCourses = () => {
 								Cursos actuales
 							</Typography>
 							<div className="grid grid-cols-2 gap-2">
+								{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
 								{courseList.map((course) => {
 									return (
 										<div key={course.id}>
