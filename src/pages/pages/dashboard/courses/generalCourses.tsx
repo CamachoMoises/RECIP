@@ -1,5 +1,6 @@
 import {
 	Button,
+	ButtonGroup,
 	Card,
 	CardBody,
 	Typography,
@@ -13,13 +14,17 @@ import PageTitle from '../../../../components/PageTitle';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { fetchCourses } from '../../../../features/courseSlice';
+import {
+	fetchCourses,
+	setLastCreatedId,
+} from '../../../../features/courseSlice';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import { axiosGetDefault } from '../../../../services/axios';
 import ModalFormCourse from './modalFormCourse';
 import toast from 'react-hot-toast';
-import { Pencil, Plus } from 'lucide-react';
+import { BookCheck, Pencil, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -28,13 +33,14 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 const GeneralCourses = () => {
 	const dispatch = useDispatch<AppDispatch>();
+	const navigate = useNavigate();
 	const [courseSelected, setCourseSelected] = useState<course | null>(
 		null
 	);
 	const [courseTypes, setCourseTypes] = useState<courseType[] | null>(
 		null
 	);
-	const { courseList, status, error } = useSelector(
+	const { courseList, status, error, lastCreatedId } = useSelector(
 		(state: RootState) => {
 			console.log(state);
 
@@ -53,6 +59,7 @@ const GeneralCourses = () => {
 		dispatch(fetchCourses()); // Llamada al thunk para obtener los usuarios
 	}, [dispatch]);
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const handleOpenEdit = async (course: course | null = null) => {
 		const { resp, status } = await axiosGetDefault(
 			'api/courses/courseTypes'
@@ -66,6 +73,21 @@ const GeneralCourses = () => {
 		}
 	};
 
+	useEffect(() => {
+		const editCourse = (id: number) => {
+			const EC = courseList.find((course) => course.id === id);
+			if (EC) {
+				handleOpenEdit(EC);
+			} else {
+				// toast.error('No se pudo encontrar el curso');
+			}
+		};
+
+		if (lastCreatedId) {
+			editCourse(lastCreatedId); // Ejecuta la lógica para editar el curso según `lastCreatedId`
+			dispatch(setLastCreatedId(null));
+		}
+	}, [lastCreatedId, dispatch, courseList, handleOpenEdit]);
 	if (status === 'loading') {
 		return (
 			<>
@@ -73,7 +95,6 @@ const GeneralCourses = () => {
 			</>
 		);
 	}
-
 	if (status === 'failed') {
 		return (
 			<>
@@ -81,20 +102,9 @@ const GeneralCourses = () => {
 			</>
 		);
 	}
-
 	return (
 		<div className="container">
 			<PageTitle title="Cursos" breadCrumbs={breadCrumbs} />
-			{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
-			{/* 
-				<Typography
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-				>
-					OJO
-				</Typography> 
-			*/}
 			<div className="grid lg:grid-cols-4 gap-2">
 				<div className="flex flex-col col-span-3">
 					<Card
@@ -153,14 +163,31 @@ const GeneralCourses = () => {
 													>
 														{course.course_type.name}
 													</Typography>
-													<Button
+													<ButtonGroup
+														size="sm"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
-														onClick={() => handleOpenEdit(course)}
 													>
-														<Pencil />
-													</Button>
+														<Button
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															onClick={() => handleOpenEdit(course)}
+														>
+															<Pencil size={20} />
+														</Button>
+														<Button
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															onClick={() =>
+																navigate(`../course/${course.id}`)
+															}
+														>
+															<BookCheck size={20} />
+														</Button>
+													</ButtonGroup>
 												</CardBody>
 											</Card>
 										</div>

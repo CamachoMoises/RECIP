@@ -1,11 +1,12 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course } from "../types/utilidades";
-import { axiosGetDefault, axiosPostDefault } from "../services/axios";
+import { CourseState, course } from '../types/utilidades';
+import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
 
 
 const initialState: CourseState = {
     status: 'idle',
     courseList: [],
+    lastCreatedId: null, //
     error: null, // Inicializar como null
 };
 export const fetchCourses = createAsyncThunk<course[]>(
@@ -27,8 +28,18 @@ export const createCourse = createAsyncThunk<course, course>(
     async (courseData, { rejectWithValue }) => {
         try {
             const response = await axiosPostDefault('api/courses', courseData);
-            console.log(response);
-
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+//
+export const updateCourse = createAsyncThunk<course, course>(
+    'course/updateCourse',
+    async (courseData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/courses`, courseData);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
@@ -36,10 +47,14 @@ export const createCourse = createAsyncThunk<course, course>(
     }
 );
 
-const userSlice = createSlice({
+const courseSlice = createSlice({
     name: 'courses',
     initialState,
-    reducers: {},
+    reducers: {
+        setLastCreatedId: (state, action: PayloadAction<number | null>) => {
+            state.lastCreatedId = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             // Reducers para la acción fetchCourses
@@ -60,33 +75,36 @@ const userSlice = createSlice({
                 state.status = 'loading';
             })
             .addCase(createCourse.fulfilled, (state, action: PayloadAction<course>) => {
+                const newCourse = action.payload;
+                state.lastCreatedId = newCourse.id;
                 state.status = 'succeeded';
-                state.courseList.push(action.payload);
+                state.courseList.push(newCourse);
             })
             .addCase(createCourse.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
 
-
-        // .addCase(updateUser.pending, (state) => {
-        //     state.status = 'loading';
-        // })
-        // .addCase(updateUser.fulfilled, (state, action: PayloadAction<user>) => {
-        //     state.status = 'succeeded';
-        //     const index = state.usersList.findIndex((user) => user.id === action.payload.id);
-        //     if (index !== -1) {
-        //         state.usersList[index] = action.payload;
-        //     }
-        // })
-        // .addCase(updateUser.rejected, (state, action) => {
-        //     state.status = 'failed';
-        //     state.error = action.payload as string;
-        // });
+            .addCase(updateCourse.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateCourse.fulfilled, (state, action: PayloadAction<course>) => {
+                const editedCourse = action.payload;
+                state.lastCreatedId = editedCourse.id;
+                state.status = 'succeeded';
+                const index = state.courseList.findIndex((course) => course.id === editedCourse.id);
+                if (index !== -1) {
+                    state.courseList[index] = editedCourse;
+                }
+            })
+            .addCase(updateCourse.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            });
 
 
 
     },
 });
-
-export default userSlice.reducer;
+export const { setLastCreatedId } = courseSlice.actions;
+export default courseSlice.reducer;

@@ -24,6 +24,15 @@ export type courseType = {
     createdAt?: string;
     updatedAt?: string;
 }
+export type subject = {
+    id: number | null;
+    name: string;
+    status: boolean;
+    course?: course;
+    course_id: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
 export type course = {
     id: number | null;
     name: string;
@@ -34,7 +43,6 @@ export type course = {
     createdAt?: string;
     updatedAt?: string;
     course_type: courseType;
-
 }
 
 export interface breadCrumbsItems {
@@ -68,6 +76,14 @@ export interface UserState {
 export interface CourseState {
     courseList: course[];
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null; // Permitir null y string para evitar problemas de tipo
+    lastCreatedId: number | null;
+}
+
+export interface subjectState {
+    subjectList: subject[];
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    lastCreatedId: number | null;
     error: string | null; // Permitir null y string para evitar problemas de tipo
 }
 

@@ -13,7 +13,10 @@ import {
 import { course, courseType } from '../../../../types/utilidades';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useState } from 'react';
-import { createCourse } from '../../../../features/courseSlice';
+import {
+	createCourse,
+	updateCourse,
+} from '../../../../features/courseSlice';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../store';
 type Inputs = {
@@ -37,6 +40,7 @@ const ModalFormCourse = ({
 	const [isActive, setIsActive] = useState(
 		courseSelected ? courseSelected?.status : true
 	);
+
 	const dispatch = useDispatch<AppDispatch>();
 
 	const {
@@ -69,15 +73,11 @@ const ModalFormCourse = ({
 				course_type: newCourseType,
 			};
 			handleOpen();
-
 			if (courseSelected) {
-				console.log('update', req);
+				await dispatch(updateCourse(req));
 			} else {
-				console.log('create');
-				dispatch(createCourse(req));
+				await dispatch(createCourse(req));
 			}
-
-			// console.log(data);
 		}
 	};
 
@@ -182,7 +182,7 @@ const ModalFormCourse = ({
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									label="Descripción del curso"
-									maxLength={40}
+									maxLength={500}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 									{...register('description', {
 										required: {
