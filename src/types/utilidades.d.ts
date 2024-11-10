@@ -34,6 +34,18 @@ export type subject = {
     createdAt?: string;
     updatedAt?: string;
 }
+export type subject_days = {
+    id: number | null;
+    course_id: number;
+    subject_id: number;
+    day: number;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+
+
+
+}
 export type course = {
     id: number | null;
     name: string;

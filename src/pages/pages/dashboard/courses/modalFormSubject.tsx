@@ -11,6 +11,12 @@ import { subject } from '../../../../types/utilidades';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+import {
+	createSubject,
+	updateSubject,
+} from '../../../../features/subjectSlice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../../store';
 type Inputs = {
 	name: string;
 };
@@ -25,6 +31,7 @@ const ModalFormSubject = ({
 	handleOpen: () => void;
 	maxOrderNumber: number | null;
 }) => {
+	const dispatch = useDispatch<AppDispatch>();
 	const [isActive, setIsActive] = useState(
 		subjectSelected ? subjectSelected?.status : true
 	);
@@ -45,15 +52,17 @@ const ModalFormSubject = ({
 			order: subjectSelected?.order
 				? subjectSelected.order
 				: maxOrderNumber
-				? maxOrderNumber
+				? maxOrderNumber + 1
 				: 1,
 			course_id: parseInt(id ? id : '-1'),
 			status: isActive,
 		};
 		handleOpen();
 		if (subjectSelected) {
-			// dispatch(updateSubject(newSubject));
+			await dispatch(updateSubject(newSubject));
 			console.log('Asignatura actualizada:', newSubject.id);
+		} else {
+			await dispatch(createSubject(newSubject));
 		}
 	};
 	return (
