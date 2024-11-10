@@ -46,7 +46,7 @@ const GeneralCourses = () => {
 
 			return (
 				state.courses || {
-					list: [],
+					courseList: [],
 					status: 'idle2',
 					error: null,
 				}

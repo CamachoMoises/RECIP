@@ -27,6 +27,7 @@ export type courseType = {
 export type subject = {
     id: number | null;
     name: string;
+    order: number;
     status: boolean;
     course?: course;
     course_id: number;
@@ -38,6 +39,7 @@ export type course = {
     name: string;
     description: string;
     hours: number;
+    days: number;
     type: number;
     status: boolean;
     createdAt?: string;
@@ -85,5 +87,7 @@ export interface subjectState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     lastCreatedId: number | null;
     error: string | null; // Permitir null y string para evitar problemas de tipo
+    maxOrderNumber: number | null;
+
 }
 

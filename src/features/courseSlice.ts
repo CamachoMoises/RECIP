@@ -34,7 +34,7 @@ export const createCourse = createAsyncThunk<course, course>(
         }
     }
 );
-//
+// Acción para actualizar un curso
 export const updateCourse = createAsyncThunk<course, course>(
     'course/updateCourse',
     async (courseData, { rejectWithValue }) => {
@@ -85,6 +85,7 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // Reducers para la acción updateCourse
             .addCase(updateCourse.pending, (state) => {
                 state.status = 'loading';
             })

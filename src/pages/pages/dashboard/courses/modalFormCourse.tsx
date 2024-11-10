@@ -22,6 +22,7 @@ import { AppDispatch } from '../../../../store';
 type Inputs = {
 	name: string;
 	description: string;
+	days: string;
 	hours: number;
 	course_type: string;
 };
@@ -36,6 +37,13 @@ const ModalFormCourse = ({
 	handleOpen: () => void;
 	courseTypes: courseType[];
 }) => {
+	const course_days = [
+		{ value: '1', label: '1 dia' },
+		{ value: '2', label: '2 dias' },
+		{ value: '3', label: '3 dias' },
+		{ value: '4', label: '4 dias' },
+	];
+
 	// Implementación del modal para el formulario de nuevo curso o edición de un curso
 	const [isActive, setIsActive] = useState(
 		courseSelected ? courseSelected?.status : true
@@ -56,6 +64,7 @@ const ModalFormCourse = ({
 			course_type: courseSelected?.course_type.id
 				? `${courseSelected.course_type.id}`
 				: '',
+			days: courseSelected?.days ? `${courseSelected.days}` : '',
 		},
 	});
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -68,6 +77,7 @@ const ModalFormCourse = ({
 				name: data.name,
 				description: data.description,
 				hours: data.hours,
+				days: parseInt(data.days),
 				type: parseInt(data.course_type),
 				status: isActive,
 				course_type: newCourseType,
@@ -106,7 +116,7 @@ const ModalFormCourse = ({
 					onPointerLeaveCapture={undefined}
 				>
 					<div className="container mx-auto p-3">
-						<div className="grid grid-cols-3 gap-4">
+						<div className="grid grid-cols-4 gap-4">
 							<div className="">
 								<Input
 									onPointerEnterCapture={undefined}
@@ -177,7 +187,40 @@ const ModalFormCourse = ({
 									</span>
 								)}
 							</div>
-							<div className="flex flex-col col-span-3">
+
+							<div className="">
+								<Controller
+									name="days"
+									control={control}
+									rules={{
+										required: true,
+									}}
+									render={({ field }) => (
+										<Select
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											{...field}
+											label="Duracion del curso "
+										>
+											{course_days.map((courseDay) => (
+												<Option
+													key={courseDay.value}
+													value={`${courseDay.value}`}
+												>
+													{courseDay.label}
+												</Option>
+											))}
+										</Select>
+									)}
+								/>
+								{errors.days && (
+									<span className="text-red-500">
+										La duracion del curso es requerida
+									</span>
+								)}
+							</div>
+							<div className="flex flex-col col-span-4">
 								<Textarea
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
