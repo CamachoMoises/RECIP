@@ -31,6 +31,7 @@ export type subject = {
     status: boolean;
     course?: course;
     course_id: number;
+    subject_days?: subject_days[];
     createdAt?: string;
     updatedAt?: string;
 }
@@ -42,9 +43,20 @@ export type subject_days = {
     status: boolean;
     createdAt?: string;
     updatedAt?: string;
-
-
-
+}
+export type instructor = {
+    id: number | null;
+    user_id: number;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
+export type student = {
+    id: number | null;
+    user_id: number;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 export type course = {
     id: number | null;
@@ -75,6 +87,8 @@ export interface user {
     is_superuser: boolean;
     last_name: string;
     name: string;
+    student?: student;
+    instructor?: instructor;
     password?: string;
     phone: string;
     updatedAt?: string;

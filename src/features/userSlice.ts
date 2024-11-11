@@ -50,6 +50,30 @@ export const updateUser = createAsyncThunk<user, user>(
 	}
 );
 
+export const userStudent = createAsyncThunk<user, number>(
+	'user/userStudent',
+	async (userData, { rejectWithValue }) => {
+		try {
+			const response = await axiosPostDefault(`api/users/student`, { user_id: userData });
+			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.response.data);
+		}
+	}
+);
+
+export const userInstructor = createAsyncThunk<user, number>(
+	'user/userInstructor',
+	async (userData, { rejectWithValue }) => {
+		try {
+			const response = await axiosPostDefault(`api/users/instructor`, { user_id: userData });
+			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.response.data);
+		}
+	}
+);
+
 const userSlice = createSlice({
 	name: 'users',
 	initialState,
@@ -82,7 +106,7 @@ const userSlice = createSlice({
 				state.error = action.payload as string;
 			})
 
-
+			// Reducers para la acción updateUser
 			.addCase(updateUser.pending, (state) => {
 				state.status = 'loading';
 			})
@@ -96,10 +120,39 @@ const userSlice = createSlice({
 			.addCase(updateUser.rejected, (state, action) => {
 				state.status = 'failed';
 				state.error = action.payload as string;
+			})
+
+			// Reducers para la acción userStudent
+			.addCase(userStudent.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(userStudent.fulfilled, (state, action: PayloadAction<user>) => {
+				state.status = 'succeeded';
+				const index = state.usersList.findIndex((user) => user.id === action.payload.id);
+				if (index !== -1) {
+					state.usersList[index] = action.payload;
+				}
+			})
+			.addCase(userStudent.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+
+			// Reducers para la acción userInstructor
+			.addCase(userInstructor.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(userInstructor.fulfilled, (state, action: PayloadAction<user>) => {
+				state.status = 'succeeded';
+				const index = state.usersList.findIndex((user) => user.id === action.payload.id);
+				if (index !== -1) {
+					state.usersList[index] = action.payload;
+				}
+			})
+			.addCase(userInstructor.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
 			});
-
-
-
 	},
 });
 

@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
 	fetchUsers,
 	updateUser,
+	userInstructor,
+	userStudent,
 } from '../../../../features/userSlice';
 import { AppDispatch, RootState } from '../../../../store';
 import {
@@ -15,9 +17,11 @@ import {
 } from '@material-tailwind/react';
 import {
 	Pencil,
+	Plane,
 	Plus,
 	Power,
 	PowerOff,
+	Presentation,
 	Settings,
 } from 'lucide-react';
 import ModalFormUser from './modalFormUser';
@@ -81,7 +85,14 @@ const UserTable = () => {
 		);
 	}
 
-	const TABLE_HEAD = ['Id', 'Nombre', 'Telefono', 'Email', 'Estatus'];
+	const TABLE_HEAD = [
+		'Id',
+		'Nombre',
+		'Telefono',
+		'Email',
+		'Tipo',
+		'Estatus',
+	];
 
 	return (
 		<div className="container">
@@ -152,6 +163,10 @@ const UserTable = () => {
 											<td className={classes}>{user.phone}</td>
 											<td className={classes}>{user.email}</td>
 											<td className={classes}>
+												{user.student?.id ? 'Piloto' : ''} <br />
+												{user.instructor?.id ? 'Instructor' : ''}
+											</td>
+											<td className={classes}>
 												{user.is_active ? (
 													<Chip
 														color="green"
@@ -176,6 +191,38 @@ const UserTable = () => {
 													size="sm"
 													color={user.is_active ? 'green' : 'red'}
 												>
+													{!user.student?.id && (
+														<Button
+															size="sm"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															onClick={() => {
+																dispatch(
+																	userStudent(user.id ? user.id : -1)
+																);
+															}}
+														>
+															<Plane size={15} />
+														</Button>
+													)}
+													{!user.instructor?.id && (
+														<Button
+															size="sm"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															onClick={() => {
+																dispatch(
+																	userInstructor(
+																		user.id ? user.id : -1
+																	)
+																);
+															}}
+														>
+															<Presentation size={15} />
+														</Button>
+													)}
 													<Button
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
