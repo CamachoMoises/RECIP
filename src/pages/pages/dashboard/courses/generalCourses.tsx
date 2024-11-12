@@ -23,7 +23,7 @@ import ErrorPage from '../../../../components/ErrorPage';
 import { axiosGetDefault } from '../../../../services/axios';
 import ModalFormCourse from './modalFormCourse';
 import toast from 'react-hot-toast';
-import { BookCheck, Pencil, Plus } from 'lucide-react';
+import { BookCheck, CalendarCheck, Pencil, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -170,6 +170,7 @@ const GeneralCourses = () => {
 														onPointerLeaveCapture={undefined}
 													>
 														<Button
+															title="Editar el Curso"
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
@@ -178,6 +179,7 @@ const GeneralCourses = () => {
 															<Pencil size={20} />
 														</Button>
 														<Button
+															title="Asignaciones el Curso"
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
@@ -186,6 +188,17 @@ const GeneralCourses = () => {
 															}
 														>
 															<BookCheck size={20} />
+														</Button>
+														<Button
+															title="Agendar nuevo curso"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															onClick={() =>
+																navigate(`../new_course/${course.id}`)
+															}
+														>
+															<CalendarCheck size={20} />
 														</Button>
 													</ButtonGroup>
 												</CardBody>

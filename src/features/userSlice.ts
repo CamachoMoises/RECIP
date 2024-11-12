@@ -7,6 +7,8 @@ import { UserState, user } from '../types/utilidades';
 const initialState: UserState = {
 	status: 'idle',
 	usersList: [],
+	studentList: [],
+	instructorList: [],
 	error: null, // Inicializar como null
 };
 
@@ -16,6 +18,30 @@ export const fetchUsers = createAsyncThunk<user[]>(
 	async (_, { rejectWithValue }) => {
 		try {
 			const response = await axiosGetDefault('api/users');
+			return response.resp;
+		} catch (error: any) {
+			return rejectWithValue(error.response.data);
+		}
+	}
+);
+
+
+export const fetchStudents = createAsyncThunk<user[]>(
+	'user/fetchStudents',
+	async (_, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetDefault('api/users/student');
+			return response.resp;
+		} catch (error: any) {
+			return rejectWithValue(error.response.data);
+		}
+	}
+);
+export const fetchInstructors = createAsyncThunk<user[]>(
+	'user/fetchInstructors',
+	async (_, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetDefault('api/users/instructor');
 			return response.resp;
 		} catch (error: any) {
 			return rejectWithValue(error.response.data);
@@ -92,7 +118,31 @@ const userSlice = createSlice({
 				state.status = 'failed';
 				state.error = action.payload as string;
 			})
+			// Reducers para la acción fetchStudents
+			.addCase(fetchStudents.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchStudents.fulfilled, (state, action: PayloadAction<user[]>) => {
+				state.status = 'succeeded';
+				state.studentList = action.payload;
+			})
+			.addCase(fetchStudents.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
 
+			// Reducers para la acción fetchInstructors
+			.addCase(fetchInstructors.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchInstructors.fulfilled, (state, action: PayloadAction<user[]>) => {
+				state.status = 'succeeded';
+				state.instructorList = action.payload;
+			})
+			.addCase(fetchInstructors.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
 			// Reducers para la acción createUser
 			.addCase(createUser.pending, (state) => {
 				state.status = 'loading';

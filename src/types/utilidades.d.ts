@@ -97,6 +97,8 @@ export interface user {
 
 export interface UserState {
     usersList: user[];
+    studentList: user[];
+    instructorList: user[];
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null; // Permitir null y string para evitar problemas de tipo
 }
