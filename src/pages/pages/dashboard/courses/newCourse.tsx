@@ -11,169 +11,162 @@ import {
 	Select,
 	Typography,
 } from '@material-tailwind/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { breadCrumbsItems, user } from '../../../../types/utilidades';
+import { AppDispatch, RootState } from '../../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import { fetchSubjects } from '../../../../features/subjectSlice';
+import { fetchCourse } from '../../../../features/courseSlice';
 import {
-	moduloTeoria,
-	participante,
-} from '../../../../types/utilidades';
+	fetchInstructors,
+	fetchStudents,
+} from '../../../../features/userSlice';
+import PageTitle from '../../../../components/PageTitle';
 
+const breadCrumbs: breadCrumbsItems[] = [
+	{
+		name: 'Dashboard',
+		href: '/dashboard',
+	},
+	{
+		name: 'Cursos',
+		href: '/dashboard/courses',
+	},
+];
 const NewCourse = () => {
+	const dispatch = useDispatch<AppDispatch>();
+	const { id } = useParams<{ id: string }>();
+
+	const navigate = useNavigate();
+	const { course, subject, user } = useSelector(
+		(state: RootState) => {
+			return {
+				course: state.courses,
+				subject: state.subjects,
+				user: state.users,
+			};
+		}
+	);
+
+	useEffect(() => {
+		dispatch(fetchSubjects(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener las asignaciones del curso
+		dispatch(fetchCourse(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener los usuarios
+		dispatch(fetchInstructors());
+		dispatch(fetchStudents());
+	}, [dispatch, id]);
+
 	const [open, setOpen] = useState(1);
 
 	const handleOpen = (value: number) =>
 		setOpen(open === value ? 0 : value);
-	const [participanteSelec, setParticipanteSelec] =
-		useState<participante | null>();
-	const personal: participante[] = [
-		{
-			id: 1,
-			name: 'Juan',
-			lastName: 'Perez',
-			nro_doc: 12345678,
-			email: 'juan.perez@gmail.com',
-			country: 'Argentina',
-			tipo: 1,
-		},
-		{
-			id: 2,
-			name: 'Maria',
-			lastName: 'Garcia',
-			nro_doc: 98765432,
-			email: 'maria.garcia@gmail.com',
-			country: 'Chile',
-			tipo: 1,
-		},
-		{
-			id: 3,
-			name: 'Pedro',
-			lastName: 'Lopez',
-			nro_doc: 11111111,
-			email: 'pedro.lopez@gmail.com',
-			country: 'Uruguay',
-			tipo: 1,
-		},
-		{
-			id: 4,
-			name: 'Ana',
-			lastName: 'Rodriguez',
-			nro_doc: 22222222,
-			email: 'pedro.lopez@gmail.com',
-			country: 'Venezuela',
-			tipo: 2,
-		},
-		{
-			id: 5,
-			name: 'Jose',
-			lastName: 'Clark',
-			nro_doc: 33333333,
-			email: 'jose.Clark@gmail.com',
-			country: 'Argentina',
-			tipo: 2,
-		},
-	];
-	const participantes: participante[] = personal.filter(
-		(part) => part.tipo === 1
-	);
-	const instructores: participante[] = personal.filter(
-		(part) => part.tipo === 2
-	);
-	const modulos: moduloTeoria[] = [
-		{
-			id: 0,
-			name: 'Bienvenida/Papeleo',
-			hours: 0.25,
-		},
-		{
-			id: 1,
-			name: 'Generalidades de la Aeronave/ Procedimientos Operacionales / Plan de vuelo/ Maniobras. ',
-			hours: 7.75,
-		},
-		{
-			id: 2,
-			name: 'Peso y Balance, Planificación y  Performance ',
-			hours: 8,
-		},
-		{
-			id: 3,
-			name: 'Sistema eléctrico, Iluminación y Panel de Advertencia',
-			hours: 3,
-		},
-		{
-			id: 4,
-			name: 'Combustible',
-			hours: 2,
-		},
-		{
-			id: 5,
-			name: 'Motores/ Hélices',
-			hours: 3,
-		},
-		{
-			id: 6,
-			name: 'Protección Contra Incendio',
-			hours: 3,
-		},
-		{
-			id: 7,
-			name: 'Neumático, Protección contra Hielo y Lluvia',
-			hours: 2,
-		},
-		{
-			id: 8,
-			name: 'Aire Acondicionado/Presurización',
-			hours: 2,
-		},
-		{
-			id: 9,
-			name: 'Tren de aterrizaje /controles de vuelo',
-			hours: 2,
-		},
-		{
-			id: 10,
-			name: 'Instrumentos y Aviónica',
-			hours: 2,
-		},
-		{
-			id: 11,
-			name: 'Oxigeno',
-			hours: 2,
-		},
-		{
-			id: 12,
-			name: 'Manual de Vuelo',
-			hours: 1,
-		},
-		{
-			id: 13,
-			name: 'Procedimientos Anormales /Emergencias ',
-			hours: 3,
-		},
-		{
-			id: 14,
-			name: 'CRM /Cortante de Viento Cruzado',
-			hours: 2,
-		},
-		{
-			id: 19,
-			name: 'Repaso',
-			hours: 4,
-		},
-		{
-			id: 20,
-			name: 'Examen/Encuesta',
-			hours: 2,
-		},
-	];
+	const [studentSelect, setStudentSelect] = useState<user | null>();
+
+	// const modulos: moduloTeoria[] = [
+	// 	{
+	// 		id: 0,
+	// 		name: 'Bienvenida/Papeleo',
+	// 		hours: 0.25,
+	// 	},
+	// 	{
+	// 		id: 1,
+	// 		name: 'Generalidades de la Aeronave/ Procedimientos Operacionales / Plan de vuelo/ Maniobras. ',
+	// 		hours: 7.75,
+	// 	},
+	// 	{
+	// 		id: 2,
+	// 		name: 'Peso y Balance, Planificación y  Performance ',
+	// 		hours: 8,
+	// 	},
+	// 	{
+	// 		id: 3,
+	// 		name: 'Sistema eléctrico, Iluminación y Panel de Advertencia',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 4,
+	// 		name: 'Combustible',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 5,
+	// 		name: 'Motores/ Hélices',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 6,
+	// 		name: 'Protección Contra Incendio',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 7,
+	// 		name: 'Neumático, Protección contra Hielo y Lluvia',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 8,
+	// 		name: 'Aire Acondicionado/Presurización',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 9,
+	// 		name: 'Tren de aterrizaje /controles de vuelo',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 10,
+	// 		name: 'Instrumentos y Aviónica',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 11,
+	// 		name: 'Oxigeno',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 12,
+	// 		name: 'Manual de Vuelo',
+	// 		hours: 1,
+	// 	},
+	// 	{
+	// 		id: 13,
+	// 		name: 'Procedimientos Anormales /Emergencias ',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 14,
+	// 		name: 'CRM /Cortante de Viento Cruzado',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 19,
+	// 		name: 'Repaso',
+	// 		hours: 4,
+	// 	},
+	// 	{
+	// 		id: 20,
+	// 		name: 'Examen/Encuesta',
+	// 		hours: 2,
+	// 	},
+	// ];
 	const handlePartipante = (value: string | undefined) => {
-		const ps = participantes.find(
+		const studentSelected = user.studentList.find(
 			(part) => part.id == parseInt(value ? value : '-1')
 		);
-		if (ps) {
-			setParticipanteSelec(ps);
+		if (studentSelected) {
+			setStudentSelect(studentSelected);
 		}
 	};
+	if (!id || !course.courseSelected) {
+		navigate('/dashboard/courses');
+	}
+
 	return (
 		<div className="content-center">
+			<PageTitle
+				title={`${course.courseSelected?.name}`}
+				breadCrumbs={breadCrumbs}
+			/>
 			<Card
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
@@ -191,7 +184,7 @@ const NewCourse = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							King Air B200 Curso de Entrenamiento Inicial
+							{course.courseSelected?.name}
 						</Typography>
 						<Typography
 							placeholder={undefined}
@@ -199,8 +192,7 @@ const NewCourse = () => {
 							onPointerLeaveCapture={undefined}
 							variant="lead"
 						>
-							Verificación de Competencia/Calificación del Piloto
-							Registro de Entrenamiento de Escuela en Tierra
+							{course.courseSelected?.description}
 						</Typography>
 					</div>
 					<hr />
@@ -216,18 +208,18 @@ const NewCourse = () => {
 										handlePartipante(e);
 									}}
 								>
-									{participantes.map((participante) => (
+									{user.studentList.map((participante) => (
 										<Option
 											key={participante.id}
 											value={`${participante.id}`}
 										>
-											{participante.name} {participante.lastName}
+											{participante.name} {participante.last_name}
 										</Option>
 									))}
 								</Select>
 							</div>
 
-							{participanteSelec && (
+							{studentSelect && (
 								<>
 									<div className="flex flex-row gap-3">
 										<Typography
@@ -245,7 +237,7 @@ const NewCourse = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											122{participanteSelec.nro_doc}
+											{studentSelect.doc_number}
 										</Typography>
 										<Typography
 											variant="small"
@@ -254,7 +246,7 @@ const NewCourse = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Pais
+											Telefono
 										</Typography>
 										<Typography
 											variant="small"
@@ -262,7 +254,7 @@ const NewCourse = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{participanteSelec.country}
+											{studentSelect.phone}
 										</Typography>
 									</div>
 								</>
@@ -394,7 +386,7 @@ const NewCourse = () => {
 						</AccordionHeader>
 						<AccordionBody>
 							<div className="flex flex-col gap-2 ">
-								{modulos.map((modulo) => (
+								{subject.subjectList.map((modulo) => (
 									<div
 										key={modulo.id}
 										className="flex flex-row gap-4 rounded-md border border-blue-gray-300"
@@ -447,7 +439,7 @@ const NewCourse = () => {
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													Max: {modulo.hours}Hrs
+													Max: {modulo.order}Hrs
 												</Typography>
 											</div>
 											<div className="flex flex-row gap-2">
@@ -457,12 +449,12 @@ const NewCourse = () => {
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													{instructores.map((instr) => (
+													{user.instructorList.map((instr) => (
 														<Option
 															key={instr.id}
 															value={`${instr.id}`}
 														>
-															{instr.name} {instr.lastName}
+															{instr.name} {instr.last_name}
 														</Option>
 													))}
 												</Select>

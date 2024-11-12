@@ -26,6 +26,7 @@ import ModalFormSubject from './modalFormSubject';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import { axiosPostDefault } from '../../../../services/axios';
+import { fetchCourse } from '../../../../features/courseSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -49,14 +50,13 @@ const CourseDetail = () => {
 
 	const { id } = useParams<{ id: string }>();
 	useEffect(() => {
-		dispatch(fetchSubjects(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener los usuarios
+		dispatch(fetchSubjects(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener las asignaciones
+		dispatch(fetchCourse(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener los usuarios
 	}, [dispatch, id]);
-	if (!id || course.courseList.length === 0) {
+	if (!id || !course.courseSelected) {
 		navigate('/dashboard/courses');
 	} else {
-		const selectedCourse = course.courseList.find(
-			(course) => course.id === parseInt(id)
-		);
+		const selectedCourse = course.courseSelected;
 		const subjectList = subject.subjectList;
 		const error = subject.error;
 		const status = subject.status;

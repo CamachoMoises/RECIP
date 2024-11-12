@@ -105,6 +105,7 @@ export interface UserState {
 
 export interface CourseState {
     courseList: course[];
+    courseSelected: course | null;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null; // Permitir null y string para evitar problemas de tipo
     lastCreatedId: number | null;

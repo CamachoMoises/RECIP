@@ -6,6 +6,7 @@ import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/
 const initialState: CourseState = {
     status: 'idle',
     courseList: [],
+    courseSelected: null,
     lastCreatedId: null, //
     error: null, // Inicializar como null
 };
@@ -14,6 +15,18 @@ export const fetchCourses = createAsyncThunk<course[]>(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault('api/courses');
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const fetchCourse = createAsyncThunk<course, number>(
+    'user/fetchCourse',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault(`api/courses/course/${id}`);
             return response.resp;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
@@ -66,6 +79,19 @@ const courseSlice = createSlice({
                 state.courseList = action.payload;
             })
             .addCase(fetchCourses.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción fetchCourse
+            .addCase(fetchCourse.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCourse.fulfilled, (state, action: PayloadAction<course>) => {
+                state.status = 'succeeded';
+                state.courseSelected = action.payload;
+            })
+            .addCase(fetchCourse.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
