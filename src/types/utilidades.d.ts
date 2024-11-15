@@ -98,6 +98,9 @@ export type courseStudent = {
     id: number;
     course_id: number;
     student_id: number;
+    type_trip: number;
+    license: number;
+    regulation: number;
     course?: course
     student?: student
     date: string;

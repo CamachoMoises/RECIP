@@ -1,0 +1,87 @@
+	// const modulos: moduloTeoria[] = [
+	// 	{
+	// 		id: 0,
+	// 		name: 'Bienvenida/Papeleo',
+	// 		hours: 0.25,
+	// 	},
+	// 	{
+	// 		id: 1,
+	// 		name: 'Generalidades de la Aeronave/ Procedimientos Operacionales / Plan de vuelo/ Maniobras. ',
+	// 		hours: 7.75,
+	// 	},
+	// 	{
+	// 		id: 2,
+	// 		name: 'Peso y Balance, Planificación y  Performance ',
+	// 		hours: 8,
+	// 	},
+	// 	{
+	// 		id: 3,
+	// 		name: 'Sistema eléctrico, Iluminación y Panel de Advertencia',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 4,
+	// 		name: 'Combustible',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 5,
+	// 		name: 'Motores/ Hélices',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 6,
+	// 		name: 'Protección Contra Incendio',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 7,
+	// 		name: 'Neumático, Protección contra Hielo y Lluvia',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 8,
+	// 		name: 'Aire Acondicionado/Presurización',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 9,
+	// 		name: 'Tren de aterrizaje /controles de vuelo',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 10,
+	// 		name: 'Instrumentos y Aviónica',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 11,
+	// 		name: 'Oxigeno',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 12,
+	// 		name: 'Manual de Vuelo',
+	// 		hours: 1,
+	// 	},
+	// 	{
+	// 		id: 13,
+	// 		name: 'Procedimientos Anormales /Emergencias ',
+	// 		hours: 3,
+	// 	},
+	// 	{
+	// 		id: 14,
+	// 		name: 'CRM /Cortante de Viento Cruzado',
+	// 		hours: 2,
+	// 	},
+	// 	{
+	// 		id: 19,
+	// 		name: 'Repaso',
+	// 		hours: 4,
+	// 	},
+	// 	{
+	// 		id: 20,
+	// 		name: 'Examen/Encuesta',
+	// 		hours: 2,
+	// 	},
+	// ];

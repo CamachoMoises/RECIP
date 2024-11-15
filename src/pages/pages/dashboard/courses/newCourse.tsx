@@ -16,7 +16,7 @@ import {
 	TabsHeader,
 	Typography,
 } from '@material-tailwind/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { breadCrumbsItems, user } from '../../../../types/utilidades';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,6 +31,9 @@ import {
 	fetchStudents,
 } from '../../../../features/userSlice';
 import PageTitle from '../../../../components/PageTitle';
+import LoadingPage from '../../../../components/LoadingPage';
+import ErrorPage from '../../../../components/ErrorPage';
+import moment from 'moment';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -43,6 +46,7 @@ const breadCrumbs: breadCrumbsItems[] = [
 	},
 ];
 const NewCourse = () => {
+	const dateInputRef = useRef<HTMLInputElement | null>(null);
 	const dispatch = useDispatch<AppDispatch>();
 	const { id, course_id } = useParams<{
 		id: string;
@@ -74,93 +78,6 @@ const NewCourse = () => {
 		setOpen(open === value ? 0 : value);
 	const [studentSelect, setStudentSelect] = useState<user | null>();
 
-	// const modulos: moduloTeoria[] = [
-	// 	{
-	// 		id: 0,
-	// 		name: 'Bienvenida/Papeleo',
-	// 		hours: 0.25,
-	// 	},
-	// 	{
-	// 		id: 1,
-	// 		name: 'Generalidades de la Aeronave/ Procedimientos Operacionales / Plan de vuelo/ Maniobras. ',
-	// 		hours: 7.75,
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		name: 'Peso y Balance, Planificación y  Performance ',
-	// 		hours: 8,
-	// 	},
-	// 	{
-	// 		id: 3,
-	// 		name: 'Sistema eléctrico, Iluminación y Panel de Advertencia',
-	// 		hours: 3,
-	// 	},
-	// 	{
-	// 		id: 4,
-	// 		name: 'Combustible',
-	// 		hours: 2,
-	// 	},
-	// 	{
-	// 		id: 5,
-	// 		name: 'Motores/ Hélices',
-	// 		hours: 3,
-	// 	},
-	// 	{
-	// 		id: 6,
-	// 		name: 'Protección Contra Incendio',
-	// 		hours: 3,
-	// 	},
-	// 	{
-	// 		id: 7,
-	// 		name: 'Neumático, Protección contra Hielo y Lluvia',
-	// 		hours: 2,
-	// 	},
-	// 	{
-	// 		id: 8,
-	// 		name: 'Aire Acondicionado/Presurización',
-	// 		hours: 2,
-	// 	},
-	// 	{
-	// 		id: 9,
-	// 		name: 'Tren de aterrizaje /controles de vuelo',
-	// 		hours: 2,
-	// 	},
-	// 	{
-	// 		id: 10,
-	// 		name: 'Instrumentos y Aviónica',
-	// 		hours: 2,
-	// 	},
-	// 	{
-	// 		id: 11,
-	// 		name: 'Oxigeno',
-	// 		hours: 2,
-	// 	},
-	// 	{
-	// 		id: 12,
-	// 		name: 'Manual de Vuelo',
-	// 		hours: 1,
-	// 	},
-	// 	{
-	// 		id: 13,
-	// 		name: 'Procedimientos Anormales /Emergencias ',
-	// 		hours: 3,
-	// 	},
-	// 	{
-	// 		id: 14,
-	// 		name: 'CRM /Cortante de Viento Cruzado',
-	// 		hours: 2,
-	// 	},
-	// 	{
-	// 		id: 19,
-	// 		name: 'Repaso',
-	// 		hours: 4,
-	// 	},
-	// 	{
-	// 		id: 20,
-	// 		name: 'Examen/Encuesta',
-	// 		hours: 2,
-	// 	},
-	// ];
 	const handlePartipante = (value: string | undefined) => {
 		const studentSelected = user.studentList.find(
 			(part) => part.id == parseInt(value ? value : '-1')
@@ -169,16 +86,32 @@ const NewCourse = () => {
 			setStudentSelect(studentSelected);
 		}
 	};
-	// if (!id || !course.courseSelected) {
-	// 	navigate('/dashboard/courses');
-	// }
+	const handleChange = async () => {
+		const selectedDate = dateInputRef.current?.value;
+		console.log(selectedDate, 'OJITO');
+	};
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
 				name: `Dia ${i + 1}`,
 		  }))
 		: [];
-
+	if (course.status === 'loading') {
+		return (
+			<>
+				<LoadingPage />
+			</>
+		);
+	}
+	if (course.status === 'failed') {
+		return (
+			<>
+				<ErrorPage
+					error={course.error ? course.error : 'Indefinido'}
+				/>
+			</>
+		);
+	}
 	return (
 		<div className="content-center">
 			<PageTitle
@@ -290,6 +223,15 @@ const NewCourse = () => {
 							<Input
 								type="date"
 								label="Fecha de inicio"
+								value={
+									course.courseStudent?.date
+										? moment(course.courseStudent.date).format(
+												'YYYY-MM-DD'
+										  )
+										: undefined
+								}
+								onChange={handleChange}
+								inputRef={dateInputRef}
 								required={true}
 								crossOrigin={undefined}
 								onPointerEnterCapture={undefined}
@@ -299,7 +241,10 @@ const NewCourse = () => {
 						<div className="flex flex-col w-full  pl-16  col-span-4 border border-gray-400 rounded-md">
 							<div className="flex flex-row w-full gap-8 px-20">
 								<Radio
-									name="tipo"
+									name="type_trip"
+									defaultChecked={
+										course.courseStudent?.type_trip === 1
+									}
 									label="PIC"
 									color="red"
 									onPointerEnterCapture={undefined}
@@ -307,7 +252,10 @@ const NewCourse = () => {
 									crossOrigin={undefined}
 								/>
 								<Radio
-									name="tipo"
+									name="type_trip"
+									defaultChecked={
+										course.courseStudent?.type_trip === 2
+									}
 									label="SIC"
 									color="red"
 									onPointerEnterCapture={undefined}
@@ -315,7 +263,10 @@ const NewCourse = () => {
 									crossOrigin={undefined}
 								/>
 								<Radio
-									name="tipo"
+									name="type_trip"
+									defaultChecked={
+										course.courseStudent?.type_trip === 3
+									}
 									label="TRIP"
 									color="red"
 									onPointerEnterCapture={undefined}
@@ -336,7 +287,10 @@ const NewCourse = () => {
 
 								<div className="flex gap-10">
 									<Radio
-										name="licencia"
+										name="license"
+										defaultChecked={
+											course.courseStudent?.license === 1
+										}
 										label="ATP"
 										color="red"
 										onPointerEnterCapture={undefined}
@@ -344,7 +298,10 @@ const NewCourse = () => {
 										crossOrigin={undefined}
 									/>
 									<Radio
-										name="licencia"
+										name="license"
+										defaultChecked={
+											course.courseStudent?.license === 2
+										}
 										label="Commercial"
 										color="red"
 										onPointerEnterCapture={undefined}
@@ -353,9 +310,11 @@ const NewCourse = () => {
 									/>
 
 									<Radio
-										name="licencia"
+										name="license"
+										defaultChecked={
+											course.courseStudent?.license === 3
+										}
 										label="Privado"
-										defaultChecked
 										color="red"
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -376,7 +335,10 @@ const NewCourse = () => {
 
 								<div className="flex gap-10">
 									<Radio
-										name="cump"
+										name="regulation"
+										defaultChecked={
+											course.courseStudent?.regulation === 1
+										}
 										label="INAC"
 										color="red"
 										onPointerEnterCapture={undefined}
@@ -384,9 +346,11 @@ const NewCourse = () => {
 										crossOrigin={undefined}
 									/>
 									<Radio
-										name="cump"
+										name="regulation"
+										defaultChecked={
+											course.courseStudent?.regulation === 2
+										}
 										label="No-INAC"
-										defaultChecked
 										color="red"
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
