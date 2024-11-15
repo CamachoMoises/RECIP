@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course } from '../types/utilidades';
+import { CourseState, course, courseStudent } from '../types/utilidades';
 import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
 
 
@@ -7,6 +7,8 @@ const initialState: CourseState = {
     status: 'idle',
     courseList: [],
     courseSelected: null,
+    courseStudent: null,
+    lastCourseStudentCreatedId: null,
     lastCreatedId: null, //
     error: null, // Inicializar como null
 };
@@ -34,6 +36,18 @@ export const fetchCourse = createAsyncThunk<course, number>(
     }
 );
 
+export const fetchCourseStudent = createAsyncThunk<courseStudent, number>(
+    'user/fetchCourseStudent',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault(`api/courses/courseStudent/${id}`);
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 
 // Acción para crear un curso
 export const createCourse = createAsyncThunk<course, course>(
@@ -47,6 +61,19 @@ export const createCourse = createAsyncThunk<course, course>(
         }
     }
 );
+
+export const createCourseStudent = createAsyncThunk<courseStudent, number>(
+    'course/createCourseStudent',
+    async (course_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostDefault(`api/courses/courseStudent/${course_id}`);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 // Acción para actualizar un curso
 export const updateCourse = createAsyncThunk<course, course>(
     'course/updateCourse',
@@ -66,6 +93,9 @@ const courseSlice = createSlice({
     reducers: {
         setLastCreatedId: (state, action: PayloadAction<number | null>) => {
             state.lastCreatedId = action.payload;
+        },
+        setLastCourseStudentCreatedId: (state, action: PayloadAction<number | null>) => {
+            state.lastCourseStudentCreatedId = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -96,6 +126,19 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // Reducers para la acción fetchCourseStudent
+            .addCase(fetchCourseStudent.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCourseStudent.fulfilled, (state, action: PayloadAction<courseStudent>) => {
+                state.status = 'succeeded';
+                state.courseStudent = action.payload;
+            })
+            .addCase(fetchCourseStudent.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
             // Reducers para la acción createCourse
             .addCase(createCourse.pending, (state) => {
                 state.status = 'loading';
@@ -110,6 +153,22 @@ const courseSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+
+            // Reducers para la acción createCourseStudent
+            .addCase(createCourseStudent.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createCourseStudent.fulfilled, (state, action: PayloadAction<courseStudent>) => {
+                const newCourseStudent = action.payload;
+                state.lastCourseStudentCreatedId = newCourseStudent.id;
+                state.status = 'succeeded';
+                state.courseStudent = newCourseStudent;
+            })
+            .addCase(createCourseStudent.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
 
             // Reducers para la acción updateCourse
             .addCase(updateCourse.pending, (state) => {
@@ -133,5 +192,5 @@ const courseSlice = createSlice({
 
     },
 });
-export const { setLastCreatedId } = courseSlice.actions;
+export const { setLastCreatedId, setLastCourseStudentCreatedId } = courseSlice.actions;
 export default courseSlice.reducer;

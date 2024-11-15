@@ -9,15 +9,23 @@ import {
 	Option,
 	Radio,
 	Select,
+	Tab,
+	TabPanel,
+	Tabs,
+	TabsBody,
+	TabsHeader,
 	Typography,
 } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
 import { breadCrumbsItems, user } from '../../../../types/utilidades';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { fetchSubjects } from '../../../../features/subjectSlice';
-import { fetchCourse } from '../../../../features/courseSlice';
+import {
+	fetchCourse,
+	fetchCourseStudent,
+} from '../../../../features/courseSlice';
 import {
 	fetchInstructors,
 	fetchStudents,
@@ -36,9 +44,12 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 const NewCourse = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const { id } = useParams<{ id: string }>();
+	const { id, course_id } = useParams<{
+		id: string;
+		course_id: string;
+	}>();
 
-	const navigate = useNavigate();
+	// // const navigate = useNavigate();
 	const { course, subject, user } = useSelector(
 		(state: RootState) => {
 			return {
@@ -50,11 +61,12 @@ const NewCourse = () => {
 	);
 
 	useEffect(() => {
-		dispatch(fetchSubjects(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener las asignaciones del curso
-		dispatch(fetchCourse(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener los usuarios
+		dispatch(fetchSubjects(parseInt(course_id ? course_id : '-1')));
+		dispatch(fetchCourse(parseInt(course_id ? course_id : '-1')));
+		dispatch(fetchCourseStudent(parseInt(id ? id : '-1')));
 		dispatch(fetchInstructors());
 		dispatch(fetchStudents());
-	}, [dispatch, id]);
+	}, [dispatch, id, course_id]);
 
 	const [open, setOpen] = useState(1);
 
@@ -157,9 +169,15 @@ const NewCourse = () => {
 			setStudentSelect(studentSelected);
 		}
 	};
-	if (!id || !course.courseSelected) {
-		navigate('/dashboard/courses');
-	}
+	// if (!id || !course.courseSelected) {
+	// 	navigate('/dashboard/courses');
+	// }
+	const days = course.courseSelected
+		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
+				id: i,
+				name: `Dia ${i + 1}`,
+		  }))
+		: [];
 
 	return (
 		<div className="content-center">
@@ -177,6 +195,8 @@ const NewCourse = () => {
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
+					{/* <code>{JSON.stringify(course.courseStudent, null, 4)}</code> */}
+
 					<div className="bg-blue-100 rounded-md">
 						<Typography
 							variant="h5"
@@ -193,6 +213,14 @@ const NewCourse = () => {
 							variant="lead"
 						>
 							{course.courseSelected?.description}
+						</Typography>
+						<Typography
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+							variant="lead"
+						>
+							{course.courseStudent?.code}
 						</Typography>
 					</div>
 					<hr />
@@ -385,84 +413,146 @@ const NewCourse = () => {
 							Modulos del Curso
 						</AccordionHeader>
 						<AccordionBody>
-							<div className="flex flex-col gap-2 ">
-								{subject.subjectList.map((modulo) => (
-									<div
-										key={modulo.id}
-										className="flex flex-row gap-4 rounded-md border border-blue-gray-300"
-									>
-										<div className="grid grid-cols-4 gap-4 py-2 px-2">
-											<div className="flex flex-row gap-2">
-												<Typography
-													variant="h6"
-													className="w-60"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{modulo.name}
-												</Typography>
+							<Tabs value="Dia 1">
+								<TabsHeader
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{days.map((day) => (
+										<Tab
+											key={`${id}-day`}
+											value={day.name}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{day.name}
+										</Tab>
+									))}
+								</TabsHeader>
+								<TabsBody
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{days.map((day) => (
+										<TabPanel
+											key={`${day.id}-day_detail`}
+											value={day.name}
+										>
+											<div className="flex flex-col gap-2 ">
+												{subject.subjectList.map((subjectItem) => (
+													<div
+														key={subjectItem.id}
+														className="flex flex-row gap-4 rounded-md border border-blue-gray-300"
+													>
+														<div className="grid grid-cols-4 gap-4 py-2 px-2">
+															<div className="flex flex-row gap-2">
+																<Typography
+																	variant="h6"
+																	className="w-60"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	{subjectItem.name}
+																</Typography>
+															</div>
+															{subjectItem.subject_days?.some(
+																(sd) =>
+																	sd.day === day.id + 1 && sd.status
+															) && (
+																<>
+																	<div className="flex flex-col gap-2">
+																		<Input
+																			type="date"
+																			label="Fecha"
+																			required={true}
+																			crossOrigin={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		/>
+																		<br />
+																		<Input
+																			type="time"
+																			label="Hora de inicio"
+																			required={true}
+																			crossOrigin={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		/>
+																	</div>
+																	<div className="flex flex-row gap-2">
+																		<Input
+																			type="number"
+																			inputMode="numeric"
+																			label="Horas de clase"
+																			className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																			crossOrigin={undefined}
+																		/>
+																		<Typography
+																			variant="h6"
+																			className="w-60"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			Max: {subjectItem.order}Hrs
+																		</Typography>
+																	</div>
+																	<div className="flex flex-row gap-2">
+																		<Select
+																			label="Selecionar Instructor"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			{user.instructorList.map(
+																				(instr) => (
+																					<Option
+																						key={instr.id}
+																						value={`${instr.id}`}
+																					>
+																						{instr.name}{' '}
+																						{instr.last_name}
+																					</Option>
+																				)
+																			)}
+																		</Select>
+																	</div>
+																</>
+															)}
+														</div>
+													</div>
+												))}
 											</div>
-											<div className="flex flex-col gap-2">
-												<Input
-													type="date"
-													label="Fecha"
-													required={true}
-													crossOrigin={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												/>
-												<br />
-												<Input
-													type="time"
-													label="Hora de inicio"
-													required={true}
-													crossOrigin={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												/>
-											</div>
-											<div className="flex flex-row gap-2">
-												<Input
-													type="number"
-													inputMode="numeric"
-													label="Horas de clase"
-													className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-													crossOrigin={undefined}
-												/>
-												<Typography
-													variant="h6"
-													className="w-60"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													Max: {modulo.order}Hrs
-												</Typography>
-											</div>
-											<div className="flex flex-row gap-2">
-												<Select
-													label="Selecionar Instructor"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{user.instructorList.map((instr) => (
-														<Option
-															key={instr.id}
-															value={`${instr.id}`}
-														>
-															{instr.name} {instr.last_name}
-														</Option>
-													))}
-												</Select>
-											</div>
-										</div>
-									</div>
-								))}
-							</div>
+										</TabPanel>
+									))}
+								</TabsBody>
+							</Tabs>
 						</AccordionBody>
 					</Accordion>
 					<Accordion

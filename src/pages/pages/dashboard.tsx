@@ -14,7 +14,10 @@ const Dashboard = () => {
 				<Route path="users" element={<UsersTable />} />
 				<Route path="courses" element={<GeneralCourses />} />
 				<Route path="course/:id" element={<CourseDetail />} />
-				<Route path="new_course/:id" element={<NewCourse />} />
+				<Route
+					path="new_course/:id/:course_id"
+					element={<NewCourse />}
+				/>
 			</Routes>
 		</>
 	);

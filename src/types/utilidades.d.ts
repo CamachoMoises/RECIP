@@ -78,7 +78,6 @@ export interface breadCrumbsItems {
 }
 
 export interface user {
-    createdAt?: string;
     doc_number: number;
     email: string;
     id: number | null;
@@ -91,8 +90,21 @@ export interface user {
     instructor?: instructor;
     password?: string;
     phone: string;
-    updatedAt?: string;
     uuid: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+}
+export type courseStudent = {
+    id: number;
+    course_id: number;
+    student_id: number;
+    course?: course
+    student?: student
+    date: string;
+    code: string;
+    createdAt: string;
+    updatedAt: string;
+
 }
 
 export interface UserState {
@@ -100,14 +112,17 @@ export interface UserState {
     studentList: user[];
     instructorList: user[];
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null; // Permitir null y string para evitar problemas de tipo
+    error: string | null;
 }
 
 export interface CourseState {
     courseList: course[];
     courseSelected: course | null;
+    courseStudent: courseStudent | null;
+    lastCourseStudentCreatedId: number | null;
+
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null; // Permitir null y string para evitar problemas de tipo
+    error: string | null;
     lastCreatedId: number | null;
 }
 
@@ -115,7 +130,7 @@ export interface subjectState {
     subjectList: subject[];
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     lastCreatedId: number | null;
-    error: string | null; // Permitir null y string para evitar problemas de tipo
+    error: string | null;
     maxOrderNumber: number | null;
 
 }

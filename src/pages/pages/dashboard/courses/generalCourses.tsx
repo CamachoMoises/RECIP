@@ -15,7 +15,9 @@ import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import {
+	createCourseStudent,
 	fetchCourses,
+	setLastCourseStudentCreatedId,
 	setLastCreatedId,
 } from '../../../../features/courseSlice';
 import LoadingPage from '../../../../components/LoadingPage';
@@ -40,19 +42,24 @@ const GeneralCourses = () => {
 	const [courseTypes, setCourseTypes] = useState<courseType[] | null>(
 		null
 	);
-	const { courseList, status, error, lastCreatedId } = useSelector(
-		(state: RootState) => {
-			console.log(state);
+	const {
+		courseList,
+		status,
+		error,
+		lastCreatedId,
+		lastCourseStudentCreatedId,
+		courseStudent,
+	} = useSelector((state: RootState) => {
+		console.log(state);
 
-			return (
-				state.courses || {
-					courseList: [],
-					status: 'idle2',
-					error: null,
-				}
-			);
-		}
-	);
+		return (
+			state.courses || {
+				courseList: [],
+				status: 'idle2',
+				error: null,
+			}
+		);
+	});
 	const [openNewCourse, setOpenNewCourse] = useState(false);
 
 	useEffect(() => {
@@ -88,6 +95,20 @@ const GeneralCourses = () => {
 			dispatch(setLastCreatedId(null));
 		}
 	}, [lastCreatedId, dispatch, courseList, handleOpenEdit]);
+
+	useEffect(() => {
+		console.log('ojo');
+		if (lastCourseStudentCreatedId && courseStudent) {
+			console.log('pelao');
+			dispatch(setLastCourseStudentCreatedId(null));
+			navigate(
+				`../new_course/${courseStudent.id}/${courseStudent.course_id}`
+			);
+		}
+	}, [lastCourseStudentCreatedId, courseStudent, dispatch, navigate]);
+	const handleNewCourseSchedule = async (course_id: number) => {
+		dispatch(createCourseStudent(course_id));
+	};
 	if (status === 'loading') {
 		return (
 			<>
@@ -195,7 +216,9 @@ const GeneralCourses = () => {
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 															onClick={() =>
-																navigate(`../new_course/${course.id}`)
+																handleNewCourseSchedule(
+																	course.id ? course.id : -1
+																)
 															}
 														>
 															<CalendarCheck size={20} />
