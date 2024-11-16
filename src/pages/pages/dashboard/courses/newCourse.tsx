@@ -46,7 +46,6 @@ const breadCrumbs: breadCrumbsItems[] = [
 	},
 ];
 const NewCourse = () => {
-	const dateInputRef = useRef<HTMLInputElement | null>(null);
 	const dispatch = useDispatch<AppDispatch>();
 	const { id, course_id } = useParams<{
 		id: string;
@@ -63,6 +62,21 @@ const NewCourse = () => {
 			};
 		}
 	);
+	const dateInputRef = useRef<HTMLInputElement | null>(null);
+	const typeTripRef = useRef<number>(
+		course.courseStudent?.type_trip
+			? course.courseStudent.type_trip
+			: 1
+	);
+	const licenseRef = useRef<number>(
+		course.courseStudent?.license ? course.courseStudent.license : 1
+	);
+
+	const regulationRef = useRef<number>(
+		course.courseStudent?.regulation
+			? course.courseStudent.regulation
+			: 1
+	);
 
 	useEffect(() => {
 		dispatch(fetchSubjects(parseInt(course_id ? course_id : '-1')));
@@ -77,6 +91,7 @@ const NewCourse = () => {
 	const handleOpen = (value: number) =>
 		setOpen(open === value ? 0 : value);
 	const [studentSelect, setStudentSelect] = useState<user | null>();
+	const studentSelectRef = useRef<user | null>();
 
 	const handlePartipante = (value: string | undefined) => {
 		const studentSelected = user.studentList.find(
@@ -84,11 +99,37 @@ const NewCourse = () => {
 		);
 		if (studentSelected) {
 			setStudentSelect(studentSelected);
+			studentSelectRef.current = studentSelected;
 		}
+		handleChange();
 	};
 	const handleChange = async () => {
-		const selectedDate = dateInputRef.current?.value;
-		console.log(selectedDate, 'OJITO');
+		console.log(
+			dateInputRef.current?.value,
+			typeTripRef.current,
+			studentSelectRef.current?.id,
+			licenseRef.current,
+			regulationRef.current
+		);
+	};
+	const handleChangeRadio = (id: number, type: string) => {
+		switch (type) {
+			case 'type_trip':
+				typeTripRef.current = id;
+				break;
+			case 'license':
+				licenseRef.current = id;
+				break;
+			case 'regulation':
+				regulationRef.current = id;
+				break;
+
+			default:
+				console.log('type error in radio Button');
+
+				break;
+		}
+		handleChange();
 	};
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
@@ -247,6 +288,9 @@ const NewCourse = () => {
 									}
 									label="PIC"
 									color="red"
+									onChange={() => {
+										handleChangeRadio(1, 'type_trip');
+									}}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									crossOrigin={undefined}
@@ -258,6 +302,9 @@ const NewCourse = () => {
 									}
 									label="SIC"
 									color="red"
+									onChange={() => {
+										handleChangeRadio(2, 'type_trip');
+									}}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									crossOrigin={undefined}
@@ -268,6 +315,9 @@ const NewCourse = () => {
 										course.courseStudent?.type_trip === 3
 									}
 									label="TRIP"
+									onChange={() => {
+										handleChangeRadio(3, 'type_trip');
+									}}
 									color="red"
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -292,6 +342,9 @@ const NewCourse = () => {
 											course.courseStudent?.license === 1
 										}
 										label="ATP"
+										onChange={() => {
+											handleChangeRadio(1, 'license');
+										}}
 										color="red"
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -304,6 +357,9 @@ const NewCourse = () => {
 										}
 										label="Commercial"
 										color="red"
+										onChange={() => {
+											handleChangeRadio(2, 'license');
+										}}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										crossOrigin={undefined}
@@ -316,6 +372,9 @@ const NewCourse = () => {
 										}
 										label="Privado"
 										color="red"
+										onChange={() => {
+											handleChangeRadio(3, 'license');
+										}}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										crossOrigin={undefined}
@@ -341,6 +400,9 @@ const NewCourse = () => {
 										}
 										label="INAC"
 										color="red"
+										onChange={() => {
+											handleChangeRadio(1, 'regulation');
+										}}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										crossOrigin={undefined}
@@ -352,6 +414,9 @@ const NewCourse = () => {
 										}
 										label="No-INAC"
 										color="red"
+										onChange={() => {
+											handleChangeRadio(2, 'regulation');
+										}}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										crossOrigin={undefined}
@@ -385,7 +450,7 @@ const NewCourse = () => {
 								>
 									{days.map((day) => (
 										<Tab
-											key={`${id}-day`}
+											key={`${day.id}-day`}
 											value={day.name}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
