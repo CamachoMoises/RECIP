@@ -3,11 +3,15 @@ import {
 	ButtonGroup,
 	Card,
 	CardBody,
+	List,
+	ListItem,
+	ListItemPrefix,
 	Typography,
 } from '@material-tailwind/react';
 import {
 	breadCrumbsItems,
 	course,
+	courseLevel,
 	courseType,
 } from '../../../../types/utilidades';
 import PageTitle from '../../../../components/PageTitle';
@@ -17,6 +21,7 @@ import { useEffect, useState } from 'react';
 import {
 	createCourseStudent,
 	fetchCourses,
+	fetchCoursesStudents,
 	setLastCourseStudentCreatedId,
 	setLastCreatedId,
 } from '../../../../features/courseSlice';
@@ -42,8 +47,12 @@ const GeneralCourses = () => {
 	const [courseTypes, setCourseTypes] = useState<courseType[] | null>(
 		null
 	);
+	const [courseLevel, setCourseLevel] = useState<
+		courseLevel[] | null
+	>(null);
 	const {
 		courseList,
+		courseStudentList,
 		status,
 		error,
 		lastCreatedId,
@@ -63,7 +72,8 @@ const GeneralCourses = () => {
 	const [openNewCourse, setOpenNewCourse] = useState(false);
 
 	useEffect(() => {
-		dispatch(fetchCourses()); // Llamada al thunk para obtener los usuarios
+		dispatch(fetchCourses());
+		dispatch(fetchCoursesStudents());
 	}, [dispatch]);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,8 +81,17 @@ const GeneralCourses = () => {
 		const { resp, status } = await axiosGetDefault(
 			'api/courses/courseTypes'
 		);
-		if (status > 199 && status < 400) {
+		const dataLevel = await axiosGetDefault(
+			'api/courses/courseLevel'
+		);
+		if (
+			status > 199 &&
+			status < 400 &&
+			dataLevel.status > 199 &&
+			dataLevel.status < 400
+		) {
 			setCourseTypes(resp);
+			setCourseLevel(dataLevel.resp);
 			setCourseSelected(course);
 			setOpenNewCourse(!openNewCourse);
 		} else {
@@ -269,12 +288,84 @@ const GeneralCourses = () => {
 					</Card>
 				</div>
 			</div>
-			{openNewCourse && courseTypes && (
+			<div className="flex flex-col pt-4">
+				<Card
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<CardBody
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						<Typography
+							variant="h5"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Cursos de pilotos
+						</Typography>
+						<List
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							{courseStudentList?.map((CL) => (
+								<ListItem
+									key={`${CL.id}.courseList`}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									onClick={() =>
+										navigate(`../new_course/${CL.id}/${CL.course_id}`)
+									}
+								>
+									<ListItemPrefix
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{CL.code}
+									</ListItemPrefix>
+									<div>
+										<Typography
+											variant="h6"
+											color="blue-gray"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{CL.student?.user?.name
+												? `${CL.student.user.name} ${CL.student.user.last_name}`
+												: 'Sin Piloto'}
+										</Typography>
+										<Typography
+											variant="small"
+											color="gray"
+											className="font-normal"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{CL.course?.name} {CL.course?.description} (
+											{CL.course?.course_type.name})
+										</Typography>
+									</div>
+								</ListItem>
+							))}
+						</List>
+					</CardBody>
+				</Card>
+			</div>
+			{openNewCourse && courseTypes && courseLevel && (
 				<ModalFormCourse
 					courseSelected={courseSelected}
 					openNewCourse={openNewCourse}
 					handleOpen={handleOpenEdit}
 					courseTypes={courseTypes}
+					courseLevel={courseLevel}
 				/>
 			)}
 		</div>

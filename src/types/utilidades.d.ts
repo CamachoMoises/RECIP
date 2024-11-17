@@ -24,6 +24,12 @@ export type courseType = {
     createdAt?: string;
     updatedAt?: string;
 }
+export type courseLevel = {
+    id: number;
+    name: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
 export type subject = {
     id: number | null;
     name: string;
@@ -48,6 +54,7 @@ export type instructor = {
     id: number | null;
     user_id: number;
     status: boolean;
+    user?: user;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -55,6 +62,7 @@ export type student = {
     id: number | null;
     user_id: number;
     status: boolean;
+    user?: user;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -64,11 +72,13 @@ export type course = {
     description: string;
     hours: number;
     days: number;
-    type: number;
+    type?: number;
+    level: number;
     status: boolean;
     createdAt?: string;
     updatedAt?: string;
     course_type: courseType;
+    course_level: courseLevel;
 }
 
 export interface breadCrumbsItems {
@@ -97,13 +107,13 @@ export interface user {
 export type courseStudent = {
     id: number;
     course_id: number;
-    student_id: number;
+    student_id: number | null;
     type_trip: number;
     license: number;
     regulation: number;
     course?: course
     student?: student
-    date: string;
+    date: string | null;
     code: string;
     createdAt: string;
     updatedAt: string;
@@ -122,6 +132,7 @@ export interface CourseState {
     courseList: course[];
     courseSelected: course | null;
     courseStudent: courseStudent | null;
+    courseStudentList: courseStudent[] | null;
     lastCourseStudentCreatedId: number | null;
 
     status: 'idle' | 'loading' | 'succeeded' | 'failed';

@@ -10,7 +10,11 @@ import {
 	Switch,
 	Textarea,
 } from '@material-tailwind/react';
-import { course, courseType } from '../../../../types/utilidades';
+import {
+	course,
+	courseLevel,
+	courseType,
+} from '../../../../types/utilidades';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useState } from 'react';
 import {
@@ -25,23 +29,29 @@ type Inputs = {
 	days: string;
 	hours: number;
 	course_type: string;
+	course_level: string;
 };
 const ModalFormCourse = ({
 	courseSelected,
 	openNewCourse,
 	handleOpen,
 	courseTypes,
+	courseLevel,
 }: {
 	courseSelected: course | null;
 	openNewCourse: boolean;
 	handleOpen: () => void;
 	courseTypes: courseType[];
+	courseLevel: courseLevel[];
 }) => {
 	const course_days = [
-		{ value: '1', label: '1 dia' },
+		{ value: '1', label: '1 dias' },
 		{ value: '2', label: '2 dias' },
 		{ value: '3', label: '3 dias' },
+		{ value: '3', label: '3 dias' },
 		{ value: '4', label: '4 dias' },
+		{ value: '5', label: '5 dias' },
+		{ value: '6', label: '6 dias' },
 	];
 
 	// Implementación del modal para el formulario de nuevo curso o edición de un curso
@@ -64,6 +74,9 @@ const ModalFormCourse = ({
 			course_type: courseSelected?.course_type.id
 				? `${courseSelected.course_type.id}`
 				: '',
+			course_level: courseSelected?.course_level.id
+				? `${courseSelected.course_level.id}`
+				: '',
 			days: courseSelected?.days ? `${courseSelected.days}` : '',
 		},
 	});
@@ -71,7 +84,10 @@ const ModalFormCourse = ({
 		const newCourseType: courseType | undefined = courseTypes.find(
 			(course) => course.id === parseInt(data.course_type)
 		);
-		if (newCourseType) {
+		const newCourseLevel: courseLevel | undefined = courseLevel.find(
+			(level) => level.id === parseInt(data.course_level)
+		);
+		if (newCourseType && newCourseLevel) {
 			const req: course = {
 				id: courseSelected?.id ? courseSelected.id : null,
 				name: data.name,
@@ -79,8 +95,10 @@ const ModalFormCourse = ({
 				hours: data.hours,
 				days: parseInt(data.days),
 				type: parseInt(data.course_type),
+				level: parseInt(data.course_level),
 				status: isActive,
 				course_type: newCourseType,
+				course_level: newCourseLevel,
 			};
 			handleOpen();
 			if (courseSelected) {
@@ -155,6 +173,7 @@ const ModalFormCourse = ({
 									aria-invalid={errors.name ? 'true' : 'false'}
 								/>
 							</div>
+
 							<div className="">
 								<Controller
 									name="course_type"
@@ -168,7 +187,7 @@ const ModalFormCourse = ({
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 											{...field}
-											label="Seleccionar Tipo de curso"
+											label="Seleccionar Nivel de curso"
 										>
 											{courseTypes.map((courseType) => (
 												<Option
@@ -184,6 +203,36 @@ const ModalFormCourse = ({
 								{errors.course_type && (
 									<span className="text-red-500">
 										El tipo de curso es requerido
+									</span>
+								)}
+							</div>
+
+							<div className="">
+								<Controller
+									name="course_level"
+									control={control}
+									rules={{
+										required: true,
+									}}
+									render={({ field }) => (
+										<Select
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											{...field}
+											label="Seleccionar Nivel de curso"
+										>
+											{courseLevel.map((CL) => (
+												<Option key={CL.id} value={`${CL.id}`}>
+													{CL.name}
+												</Option>
+											))}
+										</Select>
+									)}
+								/>
+								{errors.course_level && (
+									<span className="text-red-500">
+										El Nivel de curso es requerido
 									</span>
 								)}
 							</div>

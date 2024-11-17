@@ -8,6 +8,7 @@ const initialState: CourseState = {
     courseList: [],
     courseSelected: null,
     courseStudent: null,
+    courseStudentList: null,
     lastCourseStudentCreatedId: null,
     lastCreatedId: null, //
     error: null, // Inicializar como null
@@ -17,6 +18,18 @@ export const fetchCourses = createAsyncThunk<course[]>(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault('api/courses');
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const fetchCoursesStudents = createAsyncThunk<courseStudent[]>(
+    'user/fetchCoursesStudents',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault('api/courses/coursesStudents');
             return response.resp;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
@@ -87,6 +100,18 @@ export const updateCourse = createAsyncThunk<course, course>(
     }
 );
 
+export const updateCourseStudent = createAsyncThunk<courseStudent, { course_id: number, course_student_id: number, date: string | undefined, student_id: number | null | undefined, typeTrip: number, license: number, regulation: number }>(
+    'course/updateCourseStudent',
+    async (courseData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/courses/courseStudent/${courseData.course_id}`, courseData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const courseSlice = createSlice({
     name: 'courses',
     initialState,
@@ -109,6 +134,17 @@ const courseSlice = createSlice({
                 state.courseList = action.payload;
             })
             .addCase(fetchCourses.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+            .addCase(fetchCoursesStudents.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCoursesStudents.fulfilled, (state, action: PayloadAction<courseStudent[]>) => {
+                state.status = 'succeeded';
+                state.courseStudentList = action.payload;
+            })
+            .addCase(fetchCoursesStudents.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
@@ -169,7 +205,6 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-
             // Reducers para la acción updateCourse
             .addCase(updateCourse.pending, (state) => {
                 state.status = 'loading';
@@ -184,6 +219,21 @@ const courseSlice = createSlice({
                 }
             })
             .addCase(updateCourse.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción updateCourse
+            .addCase(updateCourseStudent.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateCourseStudent.fulfilled, (state, action: PayloadAction<courseStudent>) => {
+                const editedCourse = action.payload;
+                state.status = 'succeeded';
+                state.courseStudent = editedCourse
+
+            })
+            .addCase(updateCourseStudent.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });

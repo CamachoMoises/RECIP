@@ -2,6 +2,7 @@ import {
 	Accordion,
 	AccordionBody,
 	AccordionHeader,
+	Button,
 	Card,
 	CardBody,
 	Checkbox,
@@ -25,6 +26,7 @@ import { fetchSubjects } from '../../../../features/subjectSlice';
 import {
 	fetchCourse,
 	fetchCourseStudent,
+	updateCourseStudent,
 } from '../../../../features/courseSlice';
 import {
 	fetchInstructors,
@@ -34,6 +36,8 @@ import PageTitle from '../../../../components/PageTitle';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import moment from 'moment';
+import { useReactToPrint } from 'react-to-print';
+import { Printer } from 'lucide-react';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -46,6 +50,8 @@ const breadCrumbs: breadCrumbsItems[] = [
 	},
 ];
 const NewCourse = () => {
+	const componentRef = useRef<HTMLDivElement>(null);
+
 	const dispatch = useDispatch<AppDispatch>();
 	const { id, course_id } = useParams<{
 		id: string;
@@ -62,6 +68,7 @@ const NewCourse = () => {
 			};
 		}
 	);
+
 	const dateInputRef = useRef<HTMLInputElement | null>(null);
 	const typeTripRef = useRef<number>(
 		course.courseStudent?.type_trip
@@ -85,7 +92,10 @@ const NewCourse = () => {
 		dispatch(fetchInstructors());
 		dispatch(fetchStudents());
 	}, [dispatch, id, course_id]);
-
+	const handlePrint = useReactToPrint({
+		contentRef: componentRef,
+		documentTitle: `Curso-${course.courseStudent?.code}`,
+	});
 	const [open, setOpen] = useState(1);
 
 	const handleOpen = (value: number) =>
@@ -95,22 +105,29 @@ const NewCourse = () => {
 
 	const handlePartipante = (value: string | undefined) => {
 		const studentSelected = user.studentList.find(
-			(part) => part.id == parseInt(value ? value : '-1')
+			(part) => part.student?.id === parseInt(value ? value : '-1')
 		);
 		if (studentSelected) {
 			setStudentSelect(studentSelected);
 			studentSelectRef.current = studentSelected;
+			console.log(studentSelectRef.current?.student?.id);
 		}
 		handleChange();
 	};
 	const handleChange = async () => {
-		console.log(
-			dateInputRef.current?.value,
-			typeTripRef.current,
-			studentSelectRef.current?.id,
-			licenseRef.current,
-			regulationRef.current
-		);
+		if (course.courseSelected?.id && course.courseStudent?.id) {
+			dispatch(
+				updateCourseStudent({
+					course_id: course.courseSelected.id,
+					course_student_id: course.courseStudent.id,
+					date: dateInputRef.current?.value,
+					student_id: studentSelectRef.current?.student?.id,
+					typeTrip: typeTripRef.current,
+					license: licenseRef.current,
+					regulation: regulationRef.current,
+				})
+			);
+		}
 	};
 	const handleChangeRadio = (id: number, type: string) => {
 		switch (type) {
@@ -131,6 +148,27 @@ const NewCourse = () => {
 		}
 		handleChange();
 	};
+	useEffect(() => {
+		const setStudentFunc = (value: number) => {
+			const studentSelected = user.studentList.find(
+				(part) => part.student?.id == value
+			);
+			if (studentSelected) {
+				setStudentSelect(studentSelected);
+				studentSelectRef.current = studentSelected;
+			}
+		};
+		if (course.courseStudent?.student?.id) {
+			console.log('student');
+			setStudentFunc(course.courseStudent.student.id);
+		}
+		if (course.courseStudent) {
+			typeTripRef.current = course.courseStudent.type_trip;
+			licenseRef.current = course.courseStudent.license;
+			regulationRef.current = course.courseStudent.regulation;
+		}
+	}, [course.courseStudent, user.studentList]);
+
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
@@ -153,8 +191,9 @@ const NewCourse = () => {
 			</>
 		);
 	}
+
 	return (
-		<div className="content-center">
+		<div className="content-center" ref={componentRef}>
 			<PageTitle
 				title={`${course.courseSelected?.name}`}
 				breadCrumbs={breadCrumbs}
@@ -205,6 +244,7 @@ const NewCourse = () => {
 									label="Selecionar Piloto"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
+									value={`${studentSelect?.student?.id}`}
 									onPointerLeaveCapture={undefined}
 									onChange={(e) => {
 										handlePartipante(e);
@@ -212,8 +252,8 @@ const NewCourse = () => {
 								>
 									{user.studentList.map((participante) => (
 										<Option
-											key={participante.id}
-											value={`${participante.id}`}
+											key={participante.student?.id}
+											value={`${participante.student?.id}`}
 										>
 											{participante.name} {participante.last_name}
 										</Option>
@@ -424,6 +464,19 @@ const NewCourse = () => {
 								</div>
 							</div>
 						</div>
+						<div>
+							<Button
+								fullWidth
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+								onClick={() => {
+									handlePrint();
+								}}
+							>
+								<Printer />
+							</Button>
+						</div>
 					</div>
 
 					<hr />
@@ -488,9 +541,22 @@ const NewCourse = () => {
 																	{subjectItem.name}
 																</Typography>
 															</div>
+															{!subjectItem.status && (
+																<Typography
+																	variant="h5"
+																	className="w-full text-center"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	La asignacion esta inactiva
+																</Typography>
+															)}
 															{subjectItem.subject_days?.some(
 																(sd) =>
-																	sd.day === day.id + 1 && sd.status
+																	sd.day === day.id + 1 &&
+																	sd.status &&
+																	subjectItem.status
 															) && (
 																<>
 																	<div className="flex flex-col gap-2">

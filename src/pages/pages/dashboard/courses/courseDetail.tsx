@@ -107,7 +107,7 @@ const CourseDetail = () => {
 				const req = {
 					status: event.target.checked,
 					subject_id: subject_id,
-					day: day.id + 1,
+					day: day.id + 3,
 					course_id: selectedCourse.id,
 				};
 
@@ -135,7 +135,7 @@ const CourseDetail = () => {
 		if (selectedCourse) {
 			const days = Array.from(
 				{ length: selectedCourse.days },
-				(_, i) => ({ id: i, name: `Dia ${i + 1}` })
+				(_, i) => ({ id: i, name: `Dia ${i + 3}` })
 			);
 			return (
 				<>
@@ -156,20 +156,24 @@ const CourseDetail = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									<Typography
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Nombre: {selectedCourse.name}
-									</Typography>
-									<Typography
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Descripcion: {selectedCourse.description}
-									</Typography>
+									<div className="flex flex-row w-full text-center">
+										<Typography
+											variant="h5"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{selectedCourse.name}
+										</Typography>
+										<Typography
+											variant="lead"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Descripcion: {selectedCourse.description}
+										</Typography>
+									</div>
 								</CardBody>
 							</Card>
 						</div>

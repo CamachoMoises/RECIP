@@ -58,6 +58,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						onClick={() => navigate('students')}
 					>
 						<div className="flex justify-center">
 							<Plane size={60} />
@@ -74,6 +75,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						onClick={() => navigate('instructors')}
 					>
 						<div className="flex justify-center">
 							<Presentation size={60} />
@@ -127,7 +129,7 @@ const Icons = () => {
 							<NotebookPen size={60} />
 						</div>{' '}
 						<br />
-						Examenes
+						Evaluaciones
 					</Button>
 				</div>
 			</div>
