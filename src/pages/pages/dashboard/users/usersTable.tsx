@@ -25,10 +25,16 @@ import {
 	Settings,
 } from 'lucide-react';
 import ModalFormUser from './modalFormUser';
-import { breadCrumbsItems, user } from '../../../../types/utilidades';
+import {
+	breadCrumbsItems,
+	user,
+	userDocType,
+} from '../../../../types/utilidades';
 import PageTitle from '../../../../components/PageTitle';
 import ErrorPage from '../../../../components/ErrorPage';
 import LoadingPage from '../../../../components/LoadingPage';
+import { axiosGetDefault } from '../../../../services/axios';
+import toast from 'react-hot-toast';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -38,6 +44,9 @@ const breadCrumbs: breadCrumbsItems[] = [
 const UserTable = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [userSelect, setUserSelect] = useState<user | null>(null);
+	const [userDocTypes, setUserDocTypes] = useState<
+		userDocType[] | null
+	>(null);
 	const { usersList, status, error } = useSelector(
 		(state: RootState) => {
 			// console.log(state);
@@ -52,9 +61,17 @@ const UserTable = () => {
 		}
 	);
 	const [openNewUser, setOpenNewUser] = useState(false);
-	const handleOpen = () => {
-		setUserSelect(null);
-		setOpenNewUser(!openNewUser);
+	const handleOpen = async () => {
+		const { resp, status } = await axiosGetDefault(
+			'api/users/userDocType'
+		);
+		if (status > 199 && status < 400) {
+			setUserDocTypes(resp);
+			setUserSelect(null);
+			setOpenNewUser(!openNewUser);
+		} else {
+			toast.error('Ocurrio un error al consultar el servidor');
+		}
 	};
 	const handleOpenEdit = (user: user) => {
 		setUserSelect(user);
@@ -97,8 +114,9 @@ const UserTable = () => {
 	return (
 		<div className="container">
 			<PageTitle title="Usuarios" breadCrumbs={breadCrumbs} />
-			<div className="grid lg:grid-cols-4 gap-2">
-				<div className="flex flex-col col-span-3">
+			{/* <code>{JSON.stringify(usersList)}</code> */}
+			<div className="lg:grid lg:grid-cols-6 gap-2">
+				<div className="flex flex-col col-span-5">
 					<Card
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
@@ -113,7 +131,7 @@ const UserTable = () => {
 						>
 							Usuarios
 						</Typography>
-						<table className="w-full min-w-max table-auto text-left">
+						<table className="w-full min-w-max table-auto text-left overflow-auto">
 							<thead>
 								<tr>
 									{TABLE_HEAD.map((head) => (
@@ -156,13 +174,18 @@ const UserTable = () => {
 
 									return (
 										<tr key={user.id}>
-											<td className={classes}>{user.id}</td>
+											<td className={classes}>
+												{user.user_doc_type?.symbol}-{user.doc_number}
+											</td>
 											<td className={classes}>
 												{user.name} {user.last_name}
 											</td>
 											<td className={classes}>{user.phone}</td>
 											<td className={classes}>{user.email}</td>
 											<td className={classes}>
+												{!user.student?.id && !user.instructor?.id
+													? 'Sin Roles'
+													: ''}
 												{user.student?.id ? 'Piloto' : ''} <br />
 												{user.instructor?.id ? 'Instructor' : ''}
 											</td>
@@ -182,7 +205,7 @@ const UserTable = () => {
 												)}
 											</td>
 
-											<td>
+											<td className={classes}>
 												<ButtonGroup
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
@@ -304,11 +327,12 @@ const UserTable = () => {
 			</div>
 
 			{/* <code>{JSON.stringify(openNewUser, null, 4)}</code> */}
-			{openNewUser && (
+			{openNewUser && userDocTypes && (
 				<ModalFormUser
 					userSelect={userSelect}
 					openNewUser={openNewUser}
 					handleOpen={handleOpen}
+					userDocTypes={userDocTypes}
 				/>
 			)}
 		</div>

@@ -5,10 +5,12 @@ import {
 	DialogFooter,
 	DialogHeader,
 	Input,
+	Option,
+	Select,
 	Switch,
 } from '@material-tailwind/react';
-import { user } from '../../../../types/utilidades';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { user, userDocType } from '../../../../types/utilidades';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useRef, useState } from 'react';
 import { EyeIcon, EyeOff } from 'lucide-react';
 import { useDispatch } from 'react-redux';
@@ -20,6 +22,7 @@ import {
 type Inputs = {
 	name: string;
 	doc_number: number;
+	user_doc_type: string;
 	last_name: string;
 	phone: string;
 	email: string;
@@ -30,15 +33,18 @@ const ModalFormUser = ({
 	userSelect,
 	openNewUser,
 	handleOpen,
+	userDocTypes,
 }: {
 	userSelect: user | null;
 	openNewUser: boolean;
 	handleOpen: () => void;
+	userDocTypes: userDocType[];
 }) => {
 	const {
 		register,
 		handleSubmit,
 		watch,
+		control,
 		formState: { errors },
 	} = useForm<Inputs>({
 		defaultValues: {
@@ -49,6 +55,9 @@ const ModalFormUser = ({
 			email: userSelect?.email,
 			password: '',
 			password2: '',
+			user_doc_type: userSelect?.user_doc_type?.id
+				? `${userSelect.user_doc_type.id}`
+				: '',
 		},
 	});
 	const dispatch = useDispatch<AppDispatch>();
@@ -73,25 +82,27 @@ const ModalFormUser = ({
 		setPasswordShown((cur) => !cur);
 	};
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
-		const req: user = {
-			uuid: userSelect?.uuid ? userSelect.uuid : null,
-			id: userSelect?.id ? userSelect.id : null,
-			name: data.name,
-			doc_number: data.doc_number,
-			last_name: data.last_name,
-			phone: data.phone,
-			email: data.email,
-			is_active: isActive,
-			is_staff: isStaff,
-			is_superuser: isSuperuser,
-			password: data.password,
-		};
-		handleOpen();
-
-		if (userSelect) {
-			dispatch(updateUser(req));
-		} else {
-			dispatch(createUser(req));
+		if (data.user_doc_type) {
+			const req: user = {
+				uuid: userSelect?.uuid ? userSelect.uuid : null,
+				id: userSelect?.id ? userSelect.id : null,
+				user_doc_type_id: parseInt(data.user_doc_type),
+				name: data.name,
+				doc_number: data.doc_number,
+				last_name: data.last_name,
+				phone: data.phone,
+				email: data.email,
+				is_active: isActive,
+				is_staff: isStaff,
+				is_superuser: isSuperuser,
+				password: data.password,
+			};
+			handleOpen();
+			if (userSelect) {
+				dispatch(updateUser(req));
+			} else {
+				dispatch(createUser(req));
+			}
 		}
 	};
 	return (
@@ -187,6 +198,38 @@ const ModalFormUser = ({
 								{errors.phone && (
 									<span className="text-red-500 text-sm/[8px] py-2">
 										{errors.phone.message}
+									</span>
+								)}
+							</div>
+							<div className="">
+								<Controller
+									name="user_doc_type"
+									control={control}
+									rules={{
+										required: true,
+									}}
+									render={({ field }) => (
+										<Select
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											{...field}
+											label="Seleccionar tipo de documento"
+										>
+											{userDocTypes.map((userDocType) => (
+												<Option
+													key={userDocType.id}
+													value={`${userDocType.id}`}
+												>
+													{userDocType.name}
+												</Option>
+											))}
+										</Select>
+									)}
+								/>
+								{errors.user_doc_type && (
+									<span className="text-red-500">
+										El tipo de documento es requerido
 									</span>
 								)}
 							</div>

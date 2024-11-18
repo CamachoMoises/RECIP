@@ -2,6 +2,13 @@ export type dataResponseTypeAxios = {
     resp: any;
     status: number;
 };
+export type userDocType = {
+    id: number;
+    name: string;
+    symbol: string;
+    createdAt: string;
+    updatedAt: string;
+}
 export type participante = {
     id: number;
     name: string;
@@ -73,7 +80,7 @@ export type course = {
     hours: number;
     days: number;
     type?: number;
-    level: number;
+    level?: number;
     status: boolean;
     createdAt?: string;
     updatedAt?: string;
@@ -101,6 +108,8 @@ export interface user {
     password?: string;
     phone: string;
     uuid: string | null;
+    user_doc_type_id?: number;
+    user_doc_type?: userDocType
     createdAt?: string;
     updatedAt?: string;
 }

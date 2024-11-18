@@ -135,7 +135,7 @@ const CourseDetail = () => {
 		if (selectedCourse) {
 			const days = Array.from(
 				{ length: selectedCourse.days },
-				(_, i) => ({ id: i, name: `Dia ${i + 3}` })
+				(_, i) => ({ id: i, name: `Dia ${i + 1}` })
 			);
 			return (
 				<>
