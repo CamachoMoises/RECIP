@@ -19,6 +19,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../store';
 type Inputs = {
 	name: string;
+	hours: number;
 };
 const ModalFormSubject = ({
 	subjectSelected,
@@ -43,12 +44,14 @@ const ModalFormSubject = ({
 	} = useForm<Inputs>({
 		defaultValues: {
 			name: subjectSelected?.name,
+			hours: subjectSelected?.hours,
 		},
 	});
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		const newSubject: subject = {
 			id: subjectSelected?.id ? subjectSelected.id : null,
 			name: data.name,
+			hours: data.hours,
 			order: subjectSelected?.order
 				? subjectSelected.order
 				: maxOrderNumber
@@ -90,29 +93,45 @@ const ModalFormSubject = ({
 					onPointerLeaveCapture={undefined}
 				>
 					<div className="container mx-auto p-3">
-						<div className="">
-							<Input
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-								type="text"
-								label="Nombre"
-								placeholder="Nombre"
-								maxLength={500}
-								className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-								crossOrigin={undefined}
-								{...register('name', {
-									required: {
-										value: true,
-										message: 'El nombre es requerido',
-									},
-								})}
-								aria-invalid={errors.name ? 'true' : 'false'}
-							/>
-							{errors.name && (
-								<span className="text-red-500 text-sm/[8px] py-2">
-									{errors.name.message}
-								</span>
-							)}
+						<div className="flex flex-row gap-2 w-full">
+							<div className="flex flex-col w-full">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									label="Nombre"
+									placeholder="Nombre"
+									maxLength={500}
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('name', {
+										required: {
+											value: true,
+											message: 'El nombre es requerido',
+										},
+									})}
+									aria-invalid={errors.name ? 'true' : 'false'}
+								/>
+								{errors.name && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.name.message}
+									</span>
+								)}
+							</div>
+							<div className="flex flex-col w-full">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="number"
+									label="Horas"
+									placeholder="Horas"
+									maxLength={500}
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('hours', {})}
+									aria-invalid={errors.name ? 'true' : 'false'}
+								/>
+							</div>
 						</div>
 						<div className="flex flex-row gap-3 py-3">
 							<div className="basis-1/2">

@@ -42,6 +42,7 @@ export type subject = {
     name: string;
     order: number;
     status: boolean;
+    hours: number;
     course?: course;
     course_id: number;
     subject_days?: subject_days[];
