@@ -66,7 +66,7 @@ const CourseDetail = () => {
 			setSubjectSelected(subject);
 			setOpenNewSubject(!openNewSubject);
 		};
-		const handleSwicthSubject = async (
+		const handleSwitchSubject = async (
 			subjectEdit: subject,
 			index: number,
 			tpye: string
@@ -98,7 +98,7 @@ const CourseDetail = () => {
 
 			dispatch(fetchSubjects(parseInt(id)));
 		};
-		const handeChangeStatusDay = async (
+		const handleChangeStatusDay = async (
 			event: React.ChangeEvent<HTMLInputElement>,
 			day: { id: number; name: string },
 			subject_id: number | null
@@ -107,7 +107,7 @@ const CourseDetail = () => {
 				const req = {
 					status: event.target.checked,
 					subject_id: subject_id,
-					day: day.id + 3,
+					day: day.id + 1,
 					course_id: selectedCourse.id,
 				};
 
@@ -246,6 +246,14 @@ const CourseDetail = () => {
 																>
 																	{subject.name}
 																</Typography>
+																<Typography
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	horas: ({subject.hours})
+																</Typography>
+
 																{!subject.status && (
 																	<Typography
 																		placeholder={undefined}
@@ -273,12 +281,12 @@ const CourseDetail = () => {
 																			className="flex flex-col gap-1"
 																			key={`day-${day.id}`}
 																		>
-																			<label>{day.name} </label>
+																			<label>{day.name}</label>
 
 																			<Switch
 																				defaultChecked={check}
 																				onChange={(event) => {
-																					handeChangeStatusDay(
+																					handleChangeStatusDay(
 																						event,
 																						day,
 																						subject.id
@@ -308,7 +316,7 @@ const CourseDetail = () => {
 																	onPointerLeaveCapture={undefined}
 																	disabled={subject.order <= 1}
 																	onClick={() =>
-																		handleSwicthSubject(
+																		handleSwitchSubject(
 																			subject,
 																			index,
 																			'up'
@@ -339,7 +347,7 @@ const CourseDetail = () => {
 																			: true
 																	}
 																	onClick={() =>
-																		handleSwicthSubject(
+																		handleSwitchSubject(
 																			subject,
 																			index,
 																			'down'

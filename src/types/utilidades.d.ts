@@ -83,10 +83,24 @@ export type course = {
     type?: number;
     level?: number;
     status: boolean;
-    createdAt?: string;
-    updatedAt?: string;
     course_type: courseType;
     course_level: courseLevel;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type schedule = {
+    id: number | null;
+    course_id: number;
+    instructor_id: number | null;
+    student_id: number;
+    subject_days_subject_id: number;
+    course_student_id: number;
+    date: string;
+    hour: string;
+    class_time: number;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface breadCrumbsItems {

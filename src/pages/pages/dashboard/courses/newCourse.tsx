@@ -38,6 +38,7 @@ import ErrorPage from '../../../../components/ErrorPage';
 import moment from 'moment';
 import { useReactToPrint } from 'react-to-print';
 import { Printer } from 'lucide-react';
+import NewCourseSubject from './newCourseSubject';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -103,7 +104,7 @@ const NewCourse = () => {
 	const [studentSelect, setStudentSelect] = useState<user | null>();
 	const studentSelectRef = useRef<user | null>();
 
-	const handlePartipante = (value: string | undefined) => {
+	const handlePilot = (value: string | undefined) => {
 		const studentSelected = user.studentList.find(
 			(part) => part.student?.id === parseInt(value ? value : '-1')
 		);
@@ -247,15 +248,15 @@ const NewCourse = () => {
 									value={`${studentSelect?.student?.id}`}
 									onPointerLeaveCapture={undefined}
 									onChange={(e) => {
-										handlePartipante(e);
+										handlePilot(e);
 									}}
 								>
-									{user.studentList.map((participante) => (
+									{user.studentList.map((pilot) => (
 										<Option
-											key={participante.student?.id}
-											value={`${participante.student?.id}`}
+											key={pilot.student?.id}
+											value={`${pilot.student?.id}`}
 										>
-											{participante.name} {participante.last_name}
+											{pilot.name} {pilot.last_name}
 										</Option>
 									))}
 								</Select>
@@ -529,118 +530,14 @@ const NewCourse = () => {
 														key={subjectItem.id}
 														className="flex flex-row gap-4 rounded-md border border-blue-gray-300"
 													>
-														<div className="grid grid-cols-4 gap-4 py-2 px-2">
-															<div className="flex flex-row gap-2">
-																<Typography
-																	variant="h6"
-																	className="w-60"
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																>
-																	{subjectItem.name}
-																</Typography>
-															</div>
-															{!subjectItem.status && (
-																<Typography
-																	variant="h5"
-																	className="w-full text-center"
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																>
-																	La asignacion esta inactiva
-																</Typography>
-															)}
-															{subjectItem.subject_days?.some(
-																(sd) =>
-																	sd.day === day.id + 1 &&
-																	sd.status &&
-																	subjectItem.status
-															) && (
-																<>
-																	<div className="flex flex-col gap-2">
-																		<Input
-																			type="date"
-																			label="Fecha"
-																			required={true}
-																			crossOrigin={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		/>
-																		<br />
-																		<Input
-																			type="time"
-																			label="Hora de inicio"
-																			required={true}
-																			crossOrigin={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		/>
-																	</div>
-																	<div className="flex flex-row gap-2">
-																		<Input
-																			type="number"
-																			inputMode="numeric"
-																			label="Horas de clase"
-																			className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																			crossOrigin={undefined}
-																		/>
-																		<Typography
-																			variant="h6"
-																			className="w-60"
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			Max: {subjectItem.order}Hrs
-																		</Typography>
-																	</div>
-																	<div className="flex flex-row gap-2">
-																		<Select
-																			label="Selecionar Instructor"
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			{user.instructorList.map(
-																				(instr) => (
-																					<Option
-																						key={instr.id}
-																						value={`${instr.id}`}
-																					>
-																						{instr.name}{' '}
-																						{instr.last_name}
-																					</Option>
-																				)
-																			)}
-																		</Select>
-																	</div>
-																</>
-															)}
-														</div>
+														<NewCourseSubject
+															subjectItem={subjectItem}
+															day={day}
+															user={user}
+															course_student_id={
+																course.courseStudent?.id
+															}
+														/>
 													</div>
 												))}
 											</div>
@@ -780,7 +677,7 @@ const NewCourse = () => {
 									<Input
 										type="number"
 										inputMode="numeric"
-										label="Resultado "
+										label="Resultado"
 										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}

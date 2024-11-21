@@ -48,7 +48,6 @@ const ModalFormCourse = ({
 		{ value: '1', label: '1 dias' },
 		{ value: '2', label: '2 dias' },
 		{ value: '3', label: '3 dias' },
-		{ value: '3', label: '3 dias' },
 		{ value: '4', label: '4 dias' },
 		{ value: '5', label: '5 dias' },
 		{ value: '6', label: '6 dias' },
@@ -169,6 +168,7 @@ const ModalFormCourse = ({
 									maxLength={500}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 									crossOrigin={undefined}
+									disabled={true}
 									{...register('hours', {})}
 									aria-invalid={errors.name ? 'true' : 'false'}
 								/>
