@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course, courseStudent } from '../types/utilidades';
+import { CourseState, course, courseStudent, schedule } from '../types/utilidades';
 import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
 
 
@@ -9,6 +9,7 @@ const initialState: CourseState = {
     courseSelected: null,
     courseStudent: null,
     courseStudentList: null,
+    scheduleList: [],
     lastCourseStudentCreatedId: null,
     lastCreatedId: null, //
     error: null, // Inicializar como null
@@ -62,6 +63,19 @@ export const fetchCourseStudent = createAsyncThunk<courseStudent, number>(
 );
 
 
+export const fetchSchedule = createAsyncThunk<schedule[], number>(
+    'user/fetchSchedule',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault(`api/courses/schedule/${id}`);
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+
 // Acción para crear un curso
 export const createCourse = createAsyncThunk<course, course>(
     'course/createCourse',
@@ -74,7 +88,7 @@ export const createCourse = createAsyncThunk<course, course>(
         }
     }
 );
-
+// Acción para crear un curso por piloto
 export const createCourseStudent = createAsyncThunk<courseStudent, number>(
     'course/createCourseStudent',
     async (course_id, { rejectWithValue }) => {
@@ -86,6 +100,20 @@ export const createCourseStudent = createAsyncThunk<courseStudent, number>(
         }
     }
 );
+// Acción para crear una actividad
+export const createSchedule = createAsyncThunk<schedule, schedule>(
+    'course/createSchedule',
+    async (scheduleData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostDefault('api/courses/schedule', scheduleData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+
 
 // Acción para actualizar un curso
 export const updateCourse = createAsyncThunk<course, course>(
@@ -99,12 +127,24 @@ export const updateCourse = createAsyncThunk<course, course>(
         }
     }
 );
-
+// Acción para actualizar un curso por estudiante
 export const updateCourseStudent = createAsyncThunk<courseStudent, { course_id: number, course_student_id: number, date: string | undefined, student_id: number | null | undefined, typeTrip: number, license: number, regulation: number }>(
     'course/updateCourseStudent',
     async (courseData, { rejectWithValue }) => {
         try {
             const response = await axiosPutDefault(`api/courses/courseStudent/${courseData.course_id}`, courseData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+// Acción para actualizar una actividad
+export const updateSchedule = createAsyncThunk<schedule, schedule>(
+    'course/updateSchedule',
+    async (scheduleData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/courses/schedule`, scheduleData);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
@@ -137,6 +177,7 @@ const courseSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+            //Reducers para la acción fetchCoursesStudents
             .addCase(fetchCoursesStudents.pending, (state) => {
                 state.status = 'loading';
             })
@@ -174,6 +215,19 @@ const courseSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+            // Reducers para la acción fetchSchedule
+            .addCase(fetchSchedule.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchSchedule.fulfilled, (state, action: PayloadAction<schedule[]>) => {
+                state.status = 'succeeded';
+                state.scheduleList = action.payload;
+            })
+            .addCase(fetchSchedule.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
 
             // Reducers para la acción createCourse
             .addCase(createCourse.pending, (state) => {
@@ -201,6 +255,20 @@ const courseSlice = createSlice({
                 state.courseStudent = newCourseStudent;
             })
             .addCase(createCourseStudent.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción createSchedule
+            .addCase(createSchedule.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createSchedule.fulfilled, (state, action: PayloadAction<schedule>) => {
+                const newSchedule = action.payload;
+                state.status = 'succeeded';
+                state.scheduleList.push(newSchedule);
+            })
+            .addCase(createSchedule.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
@@ -236,8 +304,24 @@ const courseSlice = createSlice({
             .addCase(updateCourseStudent.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
-            });
+            })
 
+            // Reducers para la acción updateSchedule
+            .addCase(updateSchedule.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateSchedule.fulfilled, (state, action: PayloadAction<schedule>) => {
+                const editedCourse = action.payload;
+                state.status = 'succeeded';
+                const index = state.scheduleList.findIndex((schedule) => schedule.id === editedCourse.id);
+                if (index !== -1) {
+                    state.scheduleList[index] = editedCourse;
+                }
+            })
+            .addCase(updateSchedule.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
 
 
     },

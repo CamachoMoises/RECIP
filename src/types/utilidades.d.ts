@@ -90,15 +90,16 @@ export type course = {
 }
 
 export type schedule = {
-    id: number | null;
+    id?: number;
     course_id: number;
     instructor_id: number | null;
     student_id: number;
+    subject_days_id: number;
     subject_days_subject_id: number;
     course_student_id: number;
     date: string;
     hour: string;
-    class_time: number;
+    classTime: number;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -157,6 +158,7 @@ export interface CourseState {
     courseSelected: course | null;
     courseStudent: courseStudent | null;
     courseStudentList: courseStudent[] | null;
+    scheduleList: schedule[];
     lastCourseStudentCreatedId: number | null;
 
     status: 'idle' | 'loading' | 'succeeded' | 'failed';

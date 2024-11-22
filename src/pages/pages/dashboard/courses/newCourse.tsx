@@ -26,6 +26,7 @@ import { fetchSubjects } from '../../../../features/subjectSlice';
 import {
 	fetchCourse,
 	fetchCourseStudent,
+	fetchSchedule,
 	updateCourseStudent,
 } from '../../../../features/courseSlice';
 import {
@@ -92,6 +93,7 @@ const NewCourse = () => {
 		dispatch(fetchCourseStudent(parseInt(id ? id : '-1')));
 		dispatch(fetchInstructors());
 		dispatch(fetchStudents());
+		dispatch(fetchSchedule(parseInt(id ? id : '-1')));
 	}, [dispatch, id, course_id]);
 	const handlePrint = useReactToPrint({
 		contentRef: componentRef,
@@ -209,7 +211,7 @@ const NewCourse = () => {
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					{/* <code>{JSON.stringify(course.courseStudent, null, 4)}</code> */}
+					{/* <code>{JSON.stringify(course.scheduleList, null, 4)}</code> */}
 
 					<div className="bg-blue-100 rounded-md">
 						<Typography
@@ -525,21 +527,41 @@ const NewCourse = () => {
 											value={day.name}
 										>
 											<div className="flex flex-col gap-2 ">
-												{subject.subjectList.map((subjectItem) => (
-													<div
-														key={subjectItem.id}
-														className="flex flex-row gap-4 rounded-md border border-blue-gray-300"
-													>
-														<NewCourseSubject
-															subjectItem={subjectItem}
-															day={day}
-															user={user}
-															course_student_id={
-																course.courseStudent?.id
-															}
-														/>
-													</div>
-												))}
+												{subject.subjectList.map((subjectItem) => {
+													const SD = subjectItem.subject_days?.find(
+														(sd) =>
+															sd.day === day.id + 1 &&
+															sd.status &&
+															subjectItem.status
+													);
+													const schedule = course.scheduleList?.find(
+														(schedule) =>
+															schedule.subject_days_subject_id ===
+																subjectItem.id &&
+															schedule.subject_days_id === SD?.id
+													);
+
+													return (
+														<div key={subjectItem.id}>
+															<NewCourseSubject
+																subjectItem={subjectItem}
+																user={user}
+																course_student_id={
+																	course.courseStudent?.id
+																}
+																schedule={schedule}
+																SD={SD}
+																student_id={
+																	studentSelectRef.current?.student
+																		?.id
+																		? studentSelectRef.current.student
+																				.id
+																		: -1
+																}
+															/>
+														</div>
+													);
+												})}
 											</div>
 										</TabPanel>
 									))}
