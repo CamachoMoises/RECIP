@@ -12,6 +12,7 @@ import {
 	breadCrumbsItems,
 	course,
 	courseLevel,
+	courseStudent,
 	courseType,
 } from '../../../../types/utilidades';
 import PageTitle from '../../../../components/PageTitle';
@@ -20,8 +21,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import {
 	createCourseStudent,
+	fetchCourse,
+	fetchCourseStudent,
 	fetchCourses,
 	fetchCoursesStudents,
+	fetchSchedule,
 	setLastCourseStudentCreatedId,
 	setLastCreatedId,
 } from '../../../../features/courseSlice';
@@ -32,6 +36,11 @@ import ModalFormCourse from './modalFormCourse';
 import toast from 'react-hot-toast';
 import { BookCheck, CalendarCheck, Pencil, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { fetchSubjects } from '../../../../features/subjectSlice';
+import {
+	fetchInstructors,
+	fetchStudents,
+} from '../../../../features/userSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -116,17 +125,22 @@ const GeneralCourses = () => {
 	}, [lastCreatedId, dispatch, courseList, handleOpenEdit]);
 
 	useEffect(() => {
-		console.log('ojo');
 		if (lastCourseStudentCreatedId && courseStudent) {
-			console.log('pelao');
 			dispatch(setLastCourseStudentCreatedId(null));
-			navigate(
-				`../new_course/${courseStudent.id}/${courseStudent.course_id}`
-			);
+			navigateCourseStudent(courseStudent);
 		}
-	}, [lastCourseStudentCreatedId, courseStudent, dispatch, navigate]);
+	}, [lastCourseStudentCreatedId, courseStudent, dispatch]);
 	const handleNewCourseSchedule = async (course_id: number) => {
 		dispatch(createCourseStudent(course_id));
+	};
+	const navigateCourseStudent = async (CL: courseStudent) => {
+		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
+		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
+		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
+		await dispatch(fetchInstructors());
+		await dispatch(fetchStudents());
+		await dispatch(fetchSchedule(CL.id ? CL.id : -1));
+		navigate(`../new_course/${CL.id}/${CL.course_id}`);
 	};
 	if (status === 'loading') {
 		return (
@@ -318,9 +332,9 @@ const GeneralCourses = () => {
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									onClick={() =>
-										navigate(`../new_course/${CL.id}/${CL.course_id}`)
-									}
+									onClick={() => {
+										navigateCourseStudent(CL);
+									}}
 								>
 									<ListItemPrefix
 										placeholder={undefined}

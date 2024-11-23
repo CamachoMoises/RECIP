@@ -77,7 +77,7 @@ const TableStudents = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Instructor
+										Piloto
 									</Typography>
 									<Typography
 										variant="small"

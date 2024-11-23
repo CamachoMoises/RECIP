@@ -21,18 +21,8 @@ import { useEffect, useRef, useState } from 'react';
 import { breadCrumbsItems, user } from '../../../../types/utilidades';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { fetchSubjects } from '../../../../features/subjectSlice';
-import {
-	fetchCourse,
-	fetchCourseStudent,
-	fetchSchedule,
-	updateCourseStudent,
-} from '../../../../features/courseSlice';
-import {
-	fetchInstructors,
-	fetchStudents,
-} from '../../../../features/userSlice';
+import { updateCourseStudent } from '../../../../features/courseSlice';
+
 import PageTitle from '../../../../components/PageTitle';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
@@ -40,6 +30,7 @@ import moment from 'moment';
 import { useReactToPrint } from 'react-to-print';
 import { Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseSubject';
+import PDFCourseSchedule from './pdfCourseSchedule';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -53,14 +44,8 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 const NewCourse = () => {
 	const componentRef = useRef<HTMLDivElement>(null);
-
 	const dispatch = useDispatch<AppDispatch>();
-	const { id, course_id } = useParams<{
-		id: string;
-		course_id: string;
-	}>();
 
-	// // const navigate = useNavigate();
 	const { course, subject, user } = useSelector(
 		(state: RootState) => {
 			return {
@@ -87,14 +72,6 @@ const NewCourse = () => {
 			: 1
 	);
 
-	useEffect(() => {
-		dispatch(fetchSubjects(parseInt(course_id ? course_id : '-1')));
-		dispatch(fetchCourse(parseInt(course_id ? course_id : '-1')));
-		dispatch(fetchCourseStudent(parseInt(id ? id : '-1')));
-		dispatch(fetchInstructors());
-		dispatch(fetchStudents());
-		dispatch(fetchSchedule(parseInt(id ? id : '-1')));
-	}, [dispatch, id, course_id]);
 	const handlePrint = useReactToPrint({
 		contentRef: componentRef,
 		documentTitle: `Curso-${course.courseStudent?.code}`,
@@ -196,7 +173,7 @@ const NewCourse = () => {
 	}
 
 	return (
-		<div className="content-center" ref={componentRef}>
+		<div className="content-center">
 			<PageTitle
 				title={`${course.courseSelected?.name}`}
 				breadCrumbs={breadCrumbs}
@@ -495,18 +472,21 @@ const NewCourse = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Modulos del Curso
+							Asignaciones del Curso
 						</AccordionHeader>
 						<AccordionBody>
-							<Tabs value="Dia 1">
+							<Tabs
+								value={`Dia ${course.day}`}
+								orientation="vertical"
+							>
 								<TabsHeader
-									placeholder={undefined}
+									placeholder={course.day}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
 									{days.map((day) => (
 										<Tab
-											key={`${day.id}-day`}
+											key={day.id}
 											value={day.name}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
@@ -546,9 +526,7 @@ const NewCourse = () => {
 															<NewCourseSubject
 																subjectItem={subjectItem}
 																user={user}
-																course_student_id={
-																	course.courseStudent?.id
-																}
+																course_student={course.courseStudent}
 																schedule={schedule}
 																SD={SD}
 																student_id={
@@ -711,6 +689,16 @@ const NewCourse = () => {
 					</Accordion>
 				</CardBody>
 			</Card>
+			<div style={{ display: 'none' }}>
+				<div ref={componentRef} className="flex flex-col w-full">
+					<PDFCourseSchedule
+						course={course}
+						subjectList={subject.subjectList}
+						studentSelect={studentSelect}
+						days={days}
+					/>
+				</div>
+			</div>
 		</div>
 	);
 };

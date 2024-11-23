@@ -5,6 +5,7 @@ import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/
 
 const initialState: CourseState = {
     status: 'idle',
+    day: 1,
     courseList: [],
     courseSelected: null,
     courseStudent: null,
@@ -162,6 +163,9 @@ const courseSlice = createSlice({
         setLastCourseStudentCreatedId: (state, action: PayloadAction<number | null>) => {
             state.lastCourseStudentCreatedId = action.payload;
         },
+        setDay: (state, action: PayloadAction<number>) => {
+            state.day = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -326,5 +330,5 @@ const courseSlice = createSlice({
 
     },
 });
-export const { setLastCreatedId, setLastCourseStudentCreatedId } = courseSlice.actions;
+export const { setLastCreatedId, setLastCourseStudentCreatedId, setDay } = courseSlice.actions;
 export default courseSlice.reducer;

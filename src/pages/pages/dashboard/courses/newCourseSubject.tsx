@@ -6,6 +6,7 @@ import {
 } from '@material-tailwind/react';
 import {
 	UserState,
+	courseStudent,
 	schedule,
 	subject,
 	subject_days,
@@ -17,6 +18,8 @@ import {
 	createSchedule,
 	updateSchedule,
 } from '../../../../features/courseSlice';
+import { useState } from 'react';
+import moment from 'moment';
 type Inputs = {
 	date: string;
 	hour: string;
@@ -26,20 +29,31 @@ type Inputs = {
 const NewCourseSubject = ({
 	subjectItem,
 	user,
-	course_student_id,
+	course_student,
 	student_id,
 	SD,
 	schedule,
 }: {
 	subjectItem: subject;
 	user: UserState;
-	course_student_id: number | undefined;
+	course_student: courseStudent | null;
 	student_id: number;
 	SD: subject_days | undefined;
 	schedule: schedule | undefined;
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
-
+	let dateS = schedule?.date
+		? schedule.date
+		: course_student?.date
+		? course_student.date
+		: undefined;
+	if (dateS) {
+		const newDate = moment(dateS, 'YYYY-MM-DD').add(
+			SD?.day ? SD.day - 1 : 0,
+			'days'
+		);
+		dateS = newDate.format('YYYY-MM-DD');
+	}
 	const {
 		register,
 		handleSubmit,
@@ -47,7 +61,7 @@ const NewCourseSubject = ({
 		formState: { errors },
 	} = useForm<Inputs>({
 		defaultValues: {
-			date: schedule?.date,
+			date: dateS,
 			hour: schedule?.hour,
 			classTime: schedule?.classTime,
 			instructor_id: schedule?.instructor_id
@@ -64,7 +78,7 @@ const NewCourseSubject = ({
 			subject_days_id: SD?.id ? SD.id : -1,
 			student_id: student_id,
 			subject_days_subject_id: subjectItem.id ? subjectItem.id : -1,
-			course_student_id: course_student_id ? course_student_id : -1,
+			course_student_id: course_student ? course_student.id : -1,
 			date: data.date,
 			hour: data.hour,
 			classTime: data.classTime,
@@ -80,8 +94,10 @@ const NewCourseSubject = ({
 		<>
 			<div
 				className={`grid grid-cols-4 gap-4 py-2 px-2 ${
-					schedule ? 'bg-green-100 200 rounded' : ''
-				}`}
+					schedule && SD && student_id > 0
+						? 'bg-green-100 rounded'
+						: ''
+				} ${!SD || student_id < 0 ? 'bg-gray-300 rounded ' : ''}`}
 			>
 				<div className="flex flex-row gap-2">
 					<Typography

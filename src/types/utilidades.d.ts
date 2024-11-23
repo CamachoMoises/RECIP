@@ -155,6 +155,7 @@ export interface UserState {
 
 export interface CourseState {
     courseList: course[];
+    day: number;
     courseSelected: course | null;
     courseStudent: courseStudent | null;
     courseStudentList: courseStudent[] | null;

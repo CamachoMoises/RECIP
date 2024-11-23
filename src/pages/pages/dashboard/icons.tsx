@@ -1,5 +1,6 @@
 import { Button } from '@material-tailwind/react';
 import {
+	BookOpenCheck,
 	Newspaper,
 	NotebookPen,
 	NotebookText,
@@ -110,10 +111,10 @@ const Icons = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex justify-center">
-							<Package size={60} />
+							<BookOpenCheck size={60} />
 						</div>{' '}
 						<br />
-						modulos
+						Examenes
 					</Button>
 				</div>
 				<div>
@@ -124,6 +125,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						onClick={() => navigate('assessment')}
 					>
 						<div className="flex justify-center">
 							<NotebookPen size={60} />

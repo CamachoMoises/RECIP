@@ -1,0 +1,12 @@
+/* print-styles.css */
+@media print {
+	body {
+		margin: 0; /* Elimina márgenes globales */
+	}
+
+	.printable {
+		margin: 9mm; /* Márgenes personalizados */
+		padding: 5mm;
+		page-break-after: always; /* Controla saltos de página */
+	}
+}
