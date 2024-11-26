@@ -54,6 +54,7 @@ export type subject_days = {
     course_id: number;
     subject_id: number;
     day: number;
+    subject?: subject;
     status: boolean;
     createdAt?: string;
     updatedAt?: string;
@@ -92,11 +93,14 @@ export type course = {
 export type schedule = {
     id?: number;
     course_id: number;
+    ourse_student?: courseStudent;
+    course_student_id: number;
+    instructor?: instructor;
     instructor_id: number | null;
     student_id: number;
     subject_days_id: number;
+    subject_day?: subject_days;
     subject_days_subject_id: number;
-    course_student_id: number;
     date: string;
     hour: string;
     classTime: number;
