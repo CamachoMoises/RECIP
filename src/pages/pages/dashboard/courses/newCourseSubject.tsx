@@ -47,7 +47,7 @@ const NewCourseSubject = ({
 		: course_student?.date
 		? course_student.date
 		: undefined;
-	if (dateS) {
+	if (dateS && !schedule?.date) {
 		const newDate = moment(dateS, 'YYYY-MM-DD').add(
 			SD?.day ? SD.day - 1 : 0,
 			'days'
