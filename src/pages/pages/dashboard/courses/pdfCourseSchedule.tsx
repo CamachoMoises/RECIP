@@ -24,11 +24,9 @@ const PDFCourseSchedule = ({
 }) => {
 	moment.locale('es');
 	const data = course.scheduleList;
-	const isSplit = data.length > 12;
-	const table1Data = isSplit ? data.slice(0, 12) : data;
-	const table2Data = isSplit ? data.slice(12) : [];
-
-	// const fechaFormateada = moment().format('dddd, D MMMM YYYY');
+	const isSplit = data.length > 10;
+	const table1Data = isSplit ? data.slice(0, 10) : data;
+	const table2Data = isSplit ? data.slice(10) : [];
 	return (
 		<div className="printable">
 			<div className="flex flex-row justify-between">
@@ -119,182 +117,32 @@ const PDFCourseSchedule = ({
 								{course.courseSelected?.course_type.name}
 							</Typography>
 						</div>
+
 						<div
-							className={`flex flex-wrap ${
+							className={`flex flex-col ${
 								isSplit ? 'justify-between' : 'justify-center'
 							}`}
 						>
 							{/* Tabla 1 */}
-							<div className="w-full overflow-hidden">
+
+							<Table
+								columns={['Módulo', 'Fecha', 'Horas', 'Instructor']}
+								data={table1Data}
+							/>
+
+							{/* Tabla 2*/}
+							{table2Data.length > 0 && (
 								<Table
 									columns={['Módulo', 'Fecha', 'Horas', 'Instructor']}
-									data={table1Data}
+									data={table2Data}
 								/>
-							</div>
-
-							{/* Tabla 2 (solo si hay datos adicionales) */}
-							{table2Data.length > 0 && (
-								<div className="w-full overflow-hidden">
-									<Table
-										columns={[
-											'Módulo',
-											'Fecha',
-											'Horas',
-											'Instructor',
-										]}
-										data={table2Data}
-									/>
-								</div>
 							)}
 						</div>
-						{/* <table className="table-auto border-blue-gray-800">
-							<thead className="bg-gray-400 border border-blue-gray-800">
-								<tr>
-									<th>Song</th>
-									<th>Artist</th>
-									<th>Year</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td className="border border-blue-gray-800 px-2">
-										Nombre
-									</td>
-									<td className="border border-blue-gray-800 px-2">
-										{studentSelect?.name} {studentSelect?.last_name}
-									</td>
-									<td className="border border-blue-gray-800 px-2">
-										Nombre
-									</td>
-								</tr>
-								<tr>
-									<td className="border border-green-800 px-2">
-										Identificacion
-									</td>
-									<td className="border border-green-800 px-2">
-										{studentSelect?.user_doc_type?.symbol}-
-										{studentSelect?.doc_number}
-									</td>
-									<td className="border border-green-800 px-2">
-										Nombre
-									</td>
-								</tr>
-								<tr>
-									<td className="border border-green-800 px-2">
-										Fecha de inicio
-									</td>
-									<td className="border border-green-800 px-2">
-										{moment(course.courseStudent?.date).format(
-											'DD-MM-YYYY'
-										)}
-									</td>
-									<td className="border border-green-800 px-2">
-										Nombre
-									</td>
-								</tr>
-							</tbody>
-						</table> */}
 					</div>
 				</div>
 				{/* 
 				<p className="pt-6">{fechaFormateada}</p> */}
 			</div>
-			{/* <div className="pt-2">
-				<Typography
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-				>
-					Buen día {studentSelect?.name} {studentSelect?.last_name} se
-					encuentra agendado el curso {course.courseSelected?.name}{' '}
-					{course.courseSelected?.course_type.name}{' '}
-					{course.courseSelected?.course_level.name} Iniciado en la
-					fecha {course.courseStudent?.date} teniendo el siguiente
-					cronograma:
-				</Typography>
-			</div>
-			{days.map((day) => (
-				<div key={`${day.id}-day`} className="pt-2 flex flex-col">
-					<div className="flex flex-row gap-3">
-						<Typography
-							variant="h5"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							{day.name}
-						</Typography>
-						<Typography
-							variant="h6"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Asignaciones
-						</Typography>
-					</div>
-					{subjectList.map((subjectItem) => {
-						const SD = subjectItem.subject_days?.find(
-							(sd) =>
-								sd.day === day.id + 1 &&
-								sd.status &&
-								subjectItem.status
-						);
-						const schedule = course.scheduleList?.find(
-							(schedule) =>
-								schedule.subject_days_subject_id === subjectItem.id &&
-								schedule.subject_days_id === SD?.id
-						);
-						return (
-							<div key={`${subjectItem.id}-subject`} className="pt-2">
-								<Typography
-									variant="lead"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									{subjectItem.name}
-								</Typography>
-								{SD ? (
-									<div className="flex flex-row gap-3">
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Fecha:
-											{moment(schedule?.date).format(
-												'dddd, D MMMM YYYY'
-											)}{' '}
-											({schedule?.hour})
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											duracion: {subjectItem.hours}horas
-										</Typography>
-									</div>
-								) : (
-									<>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Nop aplica
-										</Typography>
-									</>
-								)}
-							</div>
-						);
-					})}
-				</div>
-			))} */}
 		</div>
 	);
 };
@@ -303,14 +151,21 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 	columns,
 	data,
 }) => {
+	const add_files =
+		data.length < 10
+			? Array.from({ length: 10 - data.length }, (_, i) => ({
+					id: i,
+					name: `item ${i + 1}`,
+			  }))
+			: [];
 	return (
-		<table className="table-auto border-collapse border border-gray-300 w-full">
+		<table className="table-auto border-collapse border border-gray-300">
 			<thead className="bg-gray-100">
 				<tr>
 					{columns.map((col, index) => (
 						<th
 							key={index}
-							className="border border-gray-800 px-4 py-2 text-center"
+							className="border border-gray-800 px-4 py-2 text-center text-xs"
 						>
 							{col}
 						</th>
@@ -320,10 +175,9 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 			<tbody>
 				{data.map((row, index) => (
 					<tr key={index} className="hover:bg-gray-50">
-						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center font-bold">
+						<td className="border border-gray-800 px-4 py-2 h-11 w-40 overflow-hidden bg-white text-xs text-center font-bold">
 							{index ? (
 								<>
-									{' '}
 									{index} <br />
 								</>
 							) : (
@@ -340,6 +194,22 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
 							{row.instructor.user.name}{' '}
 							{row.instructor.user.last_name}
+						</td>
+					</tr>
+				))}
+				{add_files.map((row, index) => (
+					<tr key={index} className="hover:bg-gray-50">
+						<td className="border border-gray-800 px-4 py-2 w-40 h-11 bg-gray-600 text-xs text-center font-bold">
+							{' '}
+						</td>
+						<td className="border border-gray-800 px-4 py-2  h-11 bg-gray-600 text-xs text-center font-bold">
+							{' '}
+						</td>
+						<td className="border border-gray-800 px-4 py-2  h-11 bg-gray-600 text-xs text-center font-bold">
+							{' '}
+						</td>
+						<td className="border border-gray-800 px-4 py-2  h-11 bg-gray-600 text-xs text-center font-bold">
+							{' '}
 						</td>
 					</tr>
 				))}
