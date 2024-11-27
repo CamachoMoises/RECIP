@@ -31,6 +31,7 @@ import { useReactToPrint } from 'react-to-print';
 import { Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseSubject';
 import PDFCourseSchedule from './pdfCourseSchedule';
+import { useNavigate } from 'react-router-dom';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -44,6 +45,8 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 const NewCourse = () => {
 	const componentRef = useRef<HTMLDivElement>(null);
+	const navigate = useNavigate();
+
 	const dispatch = useDispatch<AppDispatch>();
 
 	const { course, subject, user } = useSelector(
@@ -155,6 +158,12 @@ const NewCourse = () => {
 				name: `Dia ${i + 1}`,
 		  }))
 		: [];
+	useEffect(() => {
+		if (!course.courseSelected) {
+			navigate('../');
+		}
+	}, [course, navigate]);
+
 	if (course.status === 'loading') {
 		return (
 			<>

@@ -93,7 +93,7 @@ export type course = {
 export type schedule = {
     id?: number;
     course_id: number;
-    ourse_student?: courseStudent;
+    course_student?: courseStudent;
     course_student_id: number;
     instructor?: instructor;
     instructor_id: number | null;

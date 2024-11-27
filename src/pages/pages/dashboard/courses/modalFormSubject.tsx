@@ -19,7 +19,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../store';
 type Inputs = {
 	name: string;
-	hours: number;
+	hours: string;
 };
 const ModalFormSubject = ({
 	subjectSelected,
@@ -44,14 +44,14 @@ const ModalFormSubject = ({
 	} = useForm<Inputs>({
 		defaultValues: {
 			name: subjectSelected?.name,
-			hours: subjectSelected?.hours,
+			hours: `${subjectSelected?.hours}`,
 		},
 	});
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		const newSubject: subject = {
 			id: subjectSelected?.id ? subjectSelected.id : null,
 			name: data.name,
-			hours: data.hours,
+			hours: parseFloat(data.hours ? data.hours : '0'),
 			order: subjectSelected?.order
 				? subjectSelected.order
 				: maxOrderNumber
@@ -84,7 +84,7 @@ const ModalFormSubject = ({
 					onPointerLeaveCapture={undefined}
 				>
 					{subjectSelected
-						? `Editar a ${subjectSelected.name}`
+						? `Editar  ${subjectSelected.name}`
 						: 'Nueva Asignación'}
 				</DialogHeader>
 				<DialogBody
@@ -122,15 +122,35 @@ const ModalFormSubject = ({
 								<Input
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									type="number"
+									type="text"
 									label="Horas"
 									placeholder="Horas"
 									maxLength={500}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 									crossOrigin={undefined}
-									{...register('hours', {})}
+									{...register(
+										'hours',
+
+										{
+											required: {
+												value: true,
+												message: 'la Hora es requerida',
+											},
+											validate: async (value: string) => {
+												const regex = /^\d+(\.\d+)?$/;
+												if (!regex.test(value))
+													return 'Debe ser nuemrico con decimales separados por puntos';
+												return true;
+											},
+										}
+									)}
 									aria-invalid={errors.name ? 'true' : 'false'}
 								/>
+								{errors.hours && (
+									<span className="text-red-500">
+										{errors.hours.message}
+									</span>
+								)}
 							</div>
 						</div>
 						<div className="flex flex-row gap-3 py-3">

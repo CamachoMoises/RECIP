@@ -2,17 +2,15 @@ import { Typography } from '@material-tailwind/react';
 import {
 	CourseState,
 	subject,
-	subjectState,
 	user,
 } from '../../../../types/utilidades';
 import './pdfStyle.css';
 import moment from 'moment';
+import { Check } from 'lucide-react';
 
 const PDFCourseSchedule = ({
 	studentSelect,
 	course,
-	subjectList,
-	days,
 }: {
 	course: CourseState;
 	subjectList: subject[];
@@ -24,18 +22,18 @@ const PDFCourseSchedule = ({
 }) => {
 	moment.locale('es');
 	const data = course.scheduleList;
-	const isSplit = data.length > 10;
-	const table1Data = isSplit ? data.slice(0, 10) : data;
-	const table2Data = isSplit ? data.slice(10) : [];
+	const type_trip = ['', 'PIC', 'SIC', 'TRIP'];
+	const license = ['', 'ATP', 'Commercial', 'Privado'];
+	const regulation = ['', 'INAC', 'No-INAC'];
 	return (
 		<div className="printable">
 			<div className="flex flex-row justify-between">
 				<div className="flex flex-col bg-gray-400 w-full border-4  border-blue-gray-800 p-2 gap-2">
-					<div className="flex flex-row justify-between">
+					<div className="flex flex-row justify-around">
 						<img
 							src="/images/logo.png"
 							alt="Descripción de la imagen"
-							width={120}
+							width={125}
 						/>
 
 						<div className="flex-col justify-center text-center">
@@ -46,7 +44,8 @@ const PDFCourseSchedule = ({
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								{course.courseSelected?.name}
+								{course.courseSelected?.name}{' '}
+								{course.courseSelected?.course_level.name}
 							</Typography>
 							<Typography
 								variant="h6"
@@ -64,39 +63,67 @@ const PDFCourseSchedule = ({
 						<table className="table-auto ">
 							<tbody>
 								<tr>
-									<td className="border border-green-800 px-2">
-										Nombre
+									<td className="border border-green-800 px-2 text-xs">
+										Nombre del Piloto
 									</td>
-									<td className="border border-green-800 px-2">
+									<td className="border border-green-800 px-2  text-xs">
 										{studentSelect?.name} {studentSelect?.last_name}
 									</td>
-									<td className="border border-green-800 px-2">
-										Nombre
+									<td className="border border-green-800 px-2  text-xs">
+										<div className="flex flex-row gap-3">
+											Tipo: <Check size={15} color="green" />
+											{
+												type_trip[
+													course.courseStudent?.type_trip
+														? course.courseStudent.type_trip
+														: 0
+												]
+											}{' '}
+										</div>
 									</td>
 								</tr>
 								<tr>
-									<td className="border border-green-800 px-2">
+									<td className="border border-green-800 px-2  text-xs">
 										Identificacion
 									</td>
-									<td className="border border-green-800 px-2">
+									<td className="border border-green-800 px-2  text-xs">
 										{studentSelect?.user_doc_type?.symbol}-
 										{studentSelect?.doc_number}
 									</td>
-									<td className="border border-green-800 px-2">
-										Nombre
+									<td className="border border-green-800 px-2  text-xs">
+										<div className="flex flex-row gap-3">
+											Licencia:
+											<Check size={15} color="green" />
+											{
+												license[
+													course.courseStudent?.license
+														? course.courseStudent.license
+														: 0
+												]
+											}
+										</div>
 									</td>
 								</tr>
 								<tr>
-									<td className="border border-green-800 px-2">
+									<td className="border border-green-800 px-2  text-xs">
 										Fecha de inicio
 									</td>
-									<td className="border border-green-800 px-2">
+									<td className="border border-green-800 px-2  text-xs">
 										{moment(course.courseStudent?.date).format(
 											'DD-MM-YYYY'
 										)}
 									</td>
-									<td className="border border-green-800 px-2">
-										Nombre
+									<td className="border border-green-800 px-2 text-xs">
+										<div className="flex flex-row gap-3">
+											Normativa: <Check size={15} color="green" />
+											{
+												regulation[
+													course.courseStudent?.regulation
+														? course.courseStudent.regulation
+														: 0
+												]
+											}
+										</div>
 									</td>
 								</tr>
 							</tbody>
@@ -118,25 +145,13 @@ const PDFCourseSchedule = ({
 							</Typography>
 						</div>
 
-						<div
-							className={`flex flex-col ${
-								isSplit ? 'justify-between' : 'justify-center'
-							}`}
-						>
+						<div className={`flex flex-col`}>
 							{/* Tabla 1 */}
 
 							<Table
 								columns={['Módulo', 'Fecha', 'Horas', 'Instructor']}
-								data={table1Data}
+								data={data}
 							/>
-
-							{/* Tabla 2*/}
-							{table2Data.length > 0 && (
-								<Table
-									columns={['Módulo', 'Fecha', 'Horas', 'Instructor']}
-									data={table2Data}
-								/>
-							)}
 						</div>
 					</div>
 				</div>
@@ -151,9 +166,11 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 	columns,
 	data,
 }) => {
+	// console.log(data);
+
 	const add_files =
-		data.length < 10
-			? Array.from({ length: 10 - data.length }, (_, i) => ({
+		data.length < 8
+			? Array.from({ length: 8 - data.length }, (_, i) => ({
 					id: i,
 					name: `item ${i + 1}`,
 			  }))
@@ -186,10 +203,10 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 							{row.subject_day.subject.name}
 						</td>
 						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
-							{row.date}
+							{moment(row.date).format('DD-MM-YYYY')}
 						</td>
 						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
-							{row.hour}
+							{row.classTime}
 						</td>
 						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
 							{row.instructor.user.name}{' '}

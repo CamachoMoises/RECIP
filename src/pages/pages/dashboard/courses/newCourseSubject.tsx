@@ -16,14 +16,14 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../store';
 import {
 	createSchedule,
+	setDay,
 	updateSchedule,
 } from '../../../../features/courseSlice';
-import { useState } from 'react';
 import moment from 'moment';
 type Inputs = {
 	date: string;
 	hour: string;
-	classTime: number;
+	classTime: string;
 	instructor_id: string;
 };
 const NewCourseSubject = ({
@@ -63,7 +63,9 @@ const NewCourseSubject = ({
 		defaultValues: {
 			date: dateS,
 			hour: schedule?.hour,
-			classTime: schedule?.classTime,
+			classTime: schedule?.classTime
+				? `${schedule.classTime}`
+				: `${subjectItem.hours}`,
 			instructor_id: schedule?.instructor_id
 				? `${schedule.instructor_id}`
 				: undefined,
@@ -71,6 +73,7 @@ const NewCourseSubject = ({
 	});
 
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
+		dispatch(setDay(SD?.day ? SD.day : 1));
 		const req: schedule = {
 			id: schedule?.id,
 			instructor_id: parseInt(data.instructor_id),
@@ -81,7 +84,7 @@ const NewCourseSubject = ({
 			course_student_id: course_student ? course_student.id : -1,
 			date: data.date,
 			hour: data.hour,
-			classTime: data.classTime,
+			classTime: parseFloat(data.classTime ? data.classTime : '0'),
 		};
 		if (schedule) {
 			await dispatch(updateSchedule(req));
@@ -99,7 +102,7 @@ const NewCourseSubject = ({
 						: ''
 				} ${!SD || student_id < 0 ? 'bg-gray-300 rounded ' : ''}`}
 			>
-				<div className="flex flex-row gap-2">
+				<div className="flex flex-col gap-2">
 					<Typography
 						variant="h6"
 						className="w-60"
@@ -166,16 +169,36 @@ const NewCourseSubject = ({
 									)}
 								</div>
 								<div className="flex flex-row gap-2">
-									<Input
-										type="number"
-										inputMode="numeric"
-										{...register('classTime')}
-										label="Horas de clase"
-										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
+									<div className="flex flex-col gap-2">
+										<Input
+											type="text"
+											{...register('classTime', {
+												required: {
+													value: true,
+													message: 'la Hora es requerida',
+												},
+												validate: async (value: string) => {
+													const regex = /^\d+(\.\d+)?$/;
+													if (!regex.test(value))
+														return 'Debe ser nuemrico con decimales separados por puntos';
+													if (parseFloat(value) > subjectItem.hours) {
+														return `no debe superar las horas maximas de la asignacion ${subjectItem.hours}`;
+													}
+													return true;
+												},
+											})}
+											label="Horas de clase"
+											className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											crossOrigin={undefined}
+										/>
+										{errors.classTime && (
+											<span className="text-red-500">
+												{errors.classTime.message}
+											</span>
+										)}
+									</div>
 									<Typography
 										variant="h6"
 										placeholder={undefined}

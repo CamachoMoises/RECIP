@@ -76,7 +76,7 @@ const ModalFormCourse = ({
 			course_level: courseSelected?.course_level.id
 				? `${courseSelected.course_level.id}`
 				: '',
-			days: courseSelected?.days ? `${courseSelected.days}` : '',
+			days: courseSelected?.course_level.id === 1 ? `6` : '3',
 		},
 	});
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -124,7 +124,7 @@ const ModalFormCourse = ({
 					onPointerLeaveCapture={undefined}
 				>
 					{courseSelected
-						? `Editar a ${courseSelected.name}`
+						? `Editar ${courseSelected.name} ${courseSelected.course_level.name}`
 						: 'Nuevo Curso'}
 				</DialogHeader>
 				<DialogBody

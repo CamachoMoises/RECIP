@@ -26,6 +26,7 @@ import {
 	fetchCourses,
 	fetchCoursesStudents,
 	fetchSchedule,
+	setDay,
 	setLastCourseStudentCreatedId,
 	setLastCreatedId,
 } from '../../../../features/courseSlice';
@@ -79,7 +80,7 @@ const GeneralCourses = () => {
 		);
 	});
 	const [openNewCourse, setOpenNewCourse] = useState(false);
-
+	dispatch(setDay(1));
 	useEffect(() => {
 		dispatch(fetchCourses());
 		dispatch(fetchCoursesStudents());

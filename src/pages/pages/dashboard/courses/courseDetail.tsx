@@ -238,7 +238,7 @@ const CourseDetail = () => {
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 														>
-															<div className="flex flex-row gap-2 w-36">
+															<div className="flex flex-row justify-between w-80">
 																<Typography
 																	placeholder={undefined}
 																	onPointerEnterCapture={undefined}
