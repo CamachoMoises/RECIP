@@ -60,6 +60,10 @@ export type subject_days = {
     createdAt?: string;
     updatedAt?: string;
 }
+export type test = {
+    id: number;
+
+}
 export type instructor = {
     id: number | null;
     user_id: number;

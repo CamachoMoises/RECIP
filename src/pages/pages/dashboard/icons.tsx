@@ -109,6 +109,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						onClick={() => navigate('test')}
 					>
 						<div className="flex justify-center">
 							<BookOpenCheck size={60} />

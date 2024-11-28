@@ -52,7 +52,7 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 const GeneralCourses = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const [testActive, setTestActive] = useState<boolean>(false);
+
 	const navigate = useNavigate();
 	const [courseSelected, setCourseSelected] = useState<course | null>(
 		null
@@ -163,12 +163,6 @@ const GeneralCourses = () => {
 	return (
 		<div className="container">
 			<PageTitle title="Cursos" breadCrumbs={breadCrumbs} />
-			<Countdown
-				startTime="13:00"
-				totalMinutes={120}
-				setActive={setTestActive}
-			/>
-			<code>{JSON.stringify(testActive)}</code>
 			<div className="grid lg:grid-cols-4 gap-2">
 				<div className="flex flex-col col-span-3">
 					<Card

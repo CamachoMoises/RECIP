@@ -1,13 +1,20 @@
-import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import PageTitle from '../../../../components/PageTitle';
+
+import { fetchSubjects } from '../../../../features/subjectSlice';
+import {
+	fetchCourse,
+	fetchCourseStudent,
+	fetchSchedule,
+} from '../../../../features/courseSlice';
 import {
 	breadCrumbsItems,
 	courseStudent,
 } from '../../../../types/utilidades';
-import { useNavigate } from 'react-router-dom';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
-import PageTitle from '../../../../components/PageTitle';
 import {
 	Card,
 	CardBody,
@@ -16,25 +23,16 @@ import {
 	ListItemPrefix,
 	Typography,
 } from '@material-tailwind/react';
-import { fetchSubjects } from '../../../../features/subjectSlice';
-import {
-	fetchCourse,
-	fetchCourseStudent,
-	fetchSchedule,
-} from '../../../../features/courseSlice';
-import {
-	fetchInstructors,
-	fetchStudents,
-} from '../../../../features/userSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
 		href: '/dashboard',
 	},
 ];
-const GeneralAssessment = () => {
+const GeneralTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
+	console.log('GENERAL TEST');
 	const {
 		courseList,
 		courseStudentList,
@@ -42,8 +40,6 @@ const GeneralAssessment = () => {
 		error,
 		courseStudent,
 	} = useSelector((state: RootState) => {
-		console.log(state);
-
 		return (
 			state.courses || {
 				courseList: [],
@@ -52,16 +48,12 @@ const GeneralAssessment = () => {
 			}
 		);
 	});
-	const navigateCourseStudentAssessment = async (
-		CL: courseStudent
-	) => {
+	const navigateCourseStudentTest = async (CL: courseStudent) => {
 		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
-		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
+		// await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
-		await dispatch(fetchInstructors());
-		await dispatch(fetchStudents());
-		await dispatch(fetchSchedule(CL.id ? CL.id : -1));
-		navigate(`../course_assessment/${CL.id}/${CL.course_id}`);
+		// await dispatch(fetchSchedule(CL.id ? CL.id : -1));
+		navigate(`../new_test/${CL.id}/${CL.course_id}`);
 	};
 	if (status === 'loading') {
 		return (
@@ -79,7 +71,7 @@ const GeneralAssessment = () => {
 	}
 	return (
 		<div className=" container">
-			<PageTitle title="Evaluaciones" breadCrumbs={breadCrumbs} />
+			<PageTitle title="Examenes" breadCrumbs={breadCrumbs} />
 			<div className="flex flex-col pt-4">
 				<Card
 					placeholder={undefined}
@@ -103,7 +95,7 @@ const GeneralAssessment = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									onClick={() => {
-										navigateCourseStudentAssessment(CL);
+										navigateCourseStudentTest(CL);
 									}}
 								>
 									<ListItemPrefix
@@ -147,4 +139,4 @@ const GeneralAssessment = () => {
 	);
 };
 
-export default GeneralAssessment;
+export default GeneralTest;
