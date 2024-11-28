@@ -525,7 +525,7 @@ const NewCourse = () => {
 													);
 													const schedule = course.scheduleList?.find(
 														(schedule) =>
-															schedule.subject_days_subject_id ===
+															schedule.subject_id ===
 																subjectItem.id &&
 															schedule.subject_days_id === SD?.id
 													);

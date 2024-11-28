@@ -166,7 +166,7 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 	columns,
 	data,
 }) => {
-	// console.log(data);
+	console.log(data);
 
 	const add_files =
 		data.length < 8
@@ -200,7 +200,7 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 							) : (
 								''
 							)}
-							{row.subject_day.subject.name}
+							{row.subject.name}
 						</td>
 						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
 							{moment(row.date).format('DD-MM-YYYY')}

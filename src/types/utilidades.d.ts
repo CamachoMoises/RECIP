@@ -1,3 +1,4 @@
+import { subject } from './utilidades.d';
 export type dataResponseTypeAxios = {
     resp: any;
     status: number;
@@ -100,7 +101,8 @@ export type schedule = {
     student_id: number;
     subject_days_id: number;
     subject_day?: subject_days;
-    subject_days_subject_id: number;
+    subject_id: number;
+    subject?: subject;
     date: string;
     hour: string;
     classTime: number;

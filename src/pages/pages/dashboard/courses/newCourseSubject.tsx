@@ -80,7 +80,7 @@ const NewCourseSubject = ({
 			course_id: subjectItem.course_id,
 			subject_days_id: SD?.id ? SD.id : -1,
 			student_id: student_id,
-			subject_days_subject_id: subjectItem.id ? subjectItem.id : -1,
+			subject_id: subjectItem.id ? subjectItem.id : -1,
 			course_student_id: course_student ? course_student.id : -1,
 			date: data.date,
 			hour: data.hour,
