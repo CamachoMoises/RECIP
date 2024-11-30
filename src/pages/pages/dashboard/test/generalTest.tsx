@@ -4,11 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PageTitle from '../../../../components/PageTitle';
 
 import { fetchSubjects } from '../../../../features/subjectSlice';
-import {
-	fetchCourse,
-	fetchCourseStudent,
-	fetchSchedule,
-} from '../../../../features/courseSlice';
+import { fetchCourseStudent } from '../../../../features/courseSlice';
 import {
 	breadCrumbsItems,
 	courseStudent,
@@ -23,31 +19,28 @@ import {
 	ListItemPrefix,
 	Typography,
 } from '@material-tailwind/react';
+import moment from 'moment';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
 		href: '/dashboard',
 	},
 ];
+
 const GeneralTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	console.log('GENERAL TEST');
-	const {
-		courseList,
-		courseStudentList,
-		status,
-		error,
-		courseStudent,
-	} = useSelector((state: RootState) => {
-		return (
-			state.courses || {
-				courseList: [],
-				status: 'idle2',
-				error: null,
-			}
-		);
-	});
+	const { courseStudentList, status, error, courseStudent } =
+		useSelector((state: RootState) => {
+			return (
+				state.courses || {
+					courseList: [],
+					status: 'idle2',
+					error: null,
+				}
+			);
+		});
 	const navigateCourseStudentTest = async (CL: courseStudent) => {
 		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
 		// await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
@@ -94,6 +87,11 @@ const GeneralTest = () => {
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
+									disabled={moment()
+										.startOf('day')
+										.isAfter(
+											moment(`${courseStudent?.date}`).startOf('day')
+										)}
 									onClick={() => {
 										navigateCourseStudentTest(CL);
 									}}
@@ -115,7 +113,12 @@ const GeneralTest = () => {
 										>
 											{CL.student?.user?.name
 												? `${CL.student.user.name} ${CL.student.user.last_name}`
-												: 'Sin Piloto'}
+												: 'Sin Piloto'}{' '}
+											Fecha:
+											{moment(`${courseStudent?.date}`).format(
+												'DD-MM-YYYY'
+											)}{' '}
+											Hora: 15:00pm
 										</Typography>
 										<Typography
 											variant="small"

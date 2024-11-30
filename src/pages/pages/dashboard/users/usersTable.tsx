@@ -109,13 +109,47 @@ const UserTable = () => {
 		'Email',
 		'Tipo',
 		'Estatus',
+		'Edit',
 	];
 
 	return (
 		<div className="container">
 			<PageTitle title="Usuarios" breadCrumbs={breadCrumbs} />
 			{/* <code>{JSON.stringify(usersList)}</code> */}
-			<div className="lg:grid lg:grid-cols-6 gap-2">
+			<div className="flex flex-col gap-3">
+				<div className="flex flex-col">
+					<Card
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						<CardBody
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<Typography
+								variant="h5"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Agregar
+							</Typography>
+							<div className="flex flex-col">
+								<Button
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									className="flex flex-col text-center justify-center "
+									onClick={handleOpen}
+								>
+									<Plus size={15} className="mx-auto text-lg" />
+								</Button>
+							</div>
+						</CardBody>
+					</Card>
+				</div>
 				<div className="flex flex-col col-span-5">
 					<Card
 						placeholder={undefined}
@@ -131,7 +165,7 @@ const UserTable = () => {
 						>
 							Usuarios
 						</Typography>
-						<table className="w-full min-w-max table-auto text-left overflow-auto">
+						<table>
 							<thead>
 								<tr>
 									{TABLE_HEAD.map((head) => (
@@ -151,18 +185,6 @@ const UserTable = () => {
 											</Typography>
 										</th>
 									))}
-									<th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4 justify-center">
-										<Typography
-											variant="small"
-											color="blue-gray"
-											className="font-normal leading-none opacity-70 text-center justify-center"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											<Settings />
-										</Typography>
-									</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -289,39 +311,6 @@ const UserTable = () => {
 								})}
 							</tbody>
 						</table>
-					</Card>
-				</div>
-				<div className="flex flex-col">
-					<Card
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<CardBody
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<Typography
-								variant="h5"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Agregar
-							</Typography>
-							<div className="flex flex-col">
-								<Button
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									className="flex flex-col text-center justify-center "
-									onClick={handleOpen}
-								>
-									<Plus size={15} className="mx-auto text-lg" />
-								</Button>
-							</div>
-						</CardBody>
 					</Card>
 				</div>
 			</div>

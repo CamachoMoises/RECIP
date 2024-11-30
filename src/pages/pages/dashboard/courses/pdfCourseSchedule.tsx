@@ -64,14 +64,13 @@ const PDFCourseSchedule = ({
 							<tbody>
 								<tr>
 									<td className="border border-green-800 px-2 text-xs">
-										Nombre del Piloto
-									</td>
-									<td className="border border-green-800 px-2  text-xs">
+										<strong> Nombre del Piloto:</strong>{' '}
 										{studentSelect?.name} {studentSelect?.last_name}
 									</td>
-									<td className="border border-green-800 px-2  text-xs">
+									<td className="border border-green-800 px-2 col-span-2 text-xs">
 										<div className="flex flex-row gap-3">
-											Tipo: <Check size={15} color="green" />
+											<strong>Tipo:</strong>{' '}
+											<Check size={15} color="green" />
 											{
 												type_trip[
 													course.courseStudent?.type_trip
@@ -84,15 +83,13 @@ const PDFCourseSchedule = ({
 								</tr>
 								<tr>
 									<td className="border border-green-800 px-2  text-xs">
-										Identificacion
-									</td>
-									<td className="border border-green-800 px-2  text-xs">
+										<strong>Identificacion:</strong>{' '}
 										{studentSelect?.user_doc_type?.symbol}-
 										{studentSelect?.doc_number}
 									</td>
 									<td className="border border-green-800 px-2  text-xs">
 										<div className="flex flex-row gap-3">
-											Licencia:
+											<strong>Licencia:</strong>
 											<Check size={15} color="green" />
 											{
 												license[
@@ -106,16 +103,16 @@ const PDFCourseSchedule = ({
 								</tr>
 								<tr>
 									<td className="border border-green-800 px-2  text-xs">
-										Fecha de inicio
-									</td>
-									<td className="border border-green-800 px-2  text-xs">
+										<strong>Fecha de inicio:</strong>{' '}
 										{moment(course.courseStudent?.date).format(
 											'DD-MM-YYYY'
 										)}
 									</td>
+
 									<td className="border border-green-800 px-2 text-xs">
 										<div className="flex flex-row gap-3">
-											Normativa: <Check size={15} color="green" />
+											<strong>Normativa:</strong>{' '}
+											<Check size={15} color="green" />
 											{
 												regulation[
 													course.courseStudent?.regulation
@@ -123,6 +120,17 @@ const PDFCourseSchedule = ({
 														: 0
 												]
 											}
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td className="border border-green-800 px-2  text-xs">
+										<strong>Correo:</strong> {studentSelect?.email}
+									</td>
+									<td className="border border-green-800 px-2  text-xs">
+										<strong>Telefono:</strong> {studentSelect?.phone}
+										<div className="fle flex-row">
+											<strong>Pais</strong>
 										</div>
 									</td>
 								</tr>
@@ -140,7 +148,7 @@ const PDFCourseSchedule = ({
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Modulos de la{' '}
+								Cronograma de la{' '}
 								{course.courseSelected?.course_type.name}
 							</Typography>
 						</div>
@@ -149,7 +157,12 @@ const PDFCourseSchedule = ({
 							{/* Tabla 1 */}
 
 							<Table
-								columns={['Módulo', 'Fecha', 'Horas', 'Instructor']}
+								columns={[
+									'Módulo',
+									'Fecha / Hora Inicio',
+									'Horas Totales',
+									'Instructor',
+								]}
 								data={data}
 							/>
 						</div>
@@ -161,7 +174,13 @@ const PDFCourseSchedule = ({
 		</div>
 	);
 };
+{
+	/*  
+				Una sola hoja 
+				mosttrar las ojas 
 
+			*/
+}
 const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 	columns,
 	data,
@@ -203,7 +222,8 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 							{row.subject.name}
 						</td>
 						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
-							{moment(row.date).format('DD-MM-YYYY')}
+							{moment(row.date).format('DD-MM-YYYY')} <br />
+							{moment(row.hour, 'HH:mm:ss').format('HH:mm')}
 						</td>
 						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
 							{row.classTime}
