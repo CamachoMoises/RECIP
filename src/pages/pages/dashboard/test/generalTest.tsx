@@ -7,6 +7,8 @@ import { fetchSubjects } from '../../../../features/subjectSlice';
 import {
 	fetchCourse,
 	fetchCourseStudent,
+	fetchCourses,
+	fetchCoursesStudents,
 } from '../../../../features/courseSlice';
 import {
 	breadCrumbsItems,
@@ -23,6 +25,7 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import moment from 'moment';
+import { useEffect } from 'react';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -44,6 +47,10 @@ const GeneralTest = () => {
 				}
 			);
 		});
+	useEffect(() => {
+		dispatch(fetchCourses());
+		dispatch(fetchCoursesStudents());
+	}, [dispatch]);
 	const navigateCourseStudentTest = async (CL: courseStudent) => {
 		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
@@ -65,6 +72,8 @@ const GeneralTest = () => {
 			</>
 		);
 	}
+	console.log(courseStudentList);
+
 	return (
 		<div className=" container">
 			<PageTitle title="Examenes" breadCrumbs={breadCrumbs} />

@@ -100,6 +100,7 @@ export type answer = {
     test?: test;
     course_id: number;
     course?: course;
+    is_correct: boolean;
     status: boolean;
     createdAt?: string;
     updatedAt?: string;
@@ -185,7 +186,8 @@ export type courseStudent = {
     course_id: number;
     course?: course
     student_id: number | null;
-    student?: student
+    course_student_tests?: courseStudentTest[];
+    student?: student;
     type_trip: number;
     license: number;
     regulation: number;
