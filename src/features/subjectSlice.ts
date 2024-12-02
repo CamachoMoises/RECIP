@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { subject, subjectState } from '../types/utilidades';
+import { subject, subjectState } from '../types/utilities';
 import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
 
 const initialState: subjectState = {
@@ -58,7 +58,7 @@ const subjectSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Reducers para la acción fetchCourses
+            // Reducers para la acción fetchSubjects
             .addCase(fetchSubjects.pending, (state) => {
                 state.status = 'loading';
             })

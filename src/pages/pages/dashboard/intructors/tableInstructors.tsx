@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { breadCrumbsItems } from '../../../../types/utilidades';
+import { breadCrumbsItems } from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
 import {
 	Card,

@@ -1,4 +1,4 @@
-import { subject } from './utilidades.d';
+import { subject, courseStudent } from './utilities';
 export type dataResponseTypeAxios = {
     resp: any;
     status: number;
@@ -46,11 +46,11 @@ export type subject = {
     hours: number;
     course?: course;
     course_id: number;
-    subject_days?: subject_days[];
+    subject_days?: subjectDays[];
     createdAt?: string;
     updatedAt?: string;
 }
-export type subject_days = {
+export type subjectDays = {
     id: number | null;
     course_id: number;
     subject_id: number;
@@ -62,8 +62,49 @@ export type subject_days = {
 }
 export type test = {
     id: number;
-
+    course_id: number;
+    course?: course;
+    code: string;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
+
+export type questionType = {
+    id: number;
+    name: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type question = {
+    id: number;
+    header: string;
+    course_id: number;
+    course?: course;
+    question_type_id: number;
+    question_type?: question_type;
+    test_id: number;
+    test?: test;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type answer = {
+    id: number;
+    value: string;
+    question_id: number;
+    question?: question;
+    test_id: number;
+    test?: test;
+    course_id: number;
+    course?: course;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export type instructor = {
     id: number | null;
     user_id: number;
@@ -104,7 +145,7 @@ export type schedule = {
     instructor_id: number | null;
     student_id: number;
     subject_days_id: number;
-    subject_day?: subject_days;
+    subject_day?: subjectDays;
     subject_id: number;
     subject?: subject;
     date: string;
@@ -142,17 +183,51 @@ export interface user {
 export type courseStudent = {
     id: number;
     course_id: number;
+    course?: course
     student_id: number | null;
+    student?: student
     type_trip: number;
     license: number;
     regulation: number;
-    course?: course
-    student?: student
     date: string | null;
     code: string;
     createdAt: string;
     updatedAt: string;
+}
 
+export type courseStudentTest = {
+    id: number;
+    course_id: number;
+    course?: course;
+    score: number;
+    test_id: number;
+    test?: test;
+    attempts: number;
+    course_student_id: number;
+    course_student?: courseStudent;
+    date: string;
+    student_id: number;
+    student?: student;
+    code: string;
+    status: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type courseStudentTestQuestion = {
+    id: number;
+    course_student_test_id: number;
+    course_student_test?: courseStudentTest;
+    course_student_id: number;
+    course_student?: courseStudent;
+    question_id: number;
+    question?: question;
+    test_id: number;
+    test?: test;
+    course_id: number;
+    course?: course;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface UserState {
@@ -171,7 +246,6 @@ export interface CourseState {
     courseStudentList: courseStudent[] | null;
     scheduleList: schedule[];
     lastCourseStudentCreatedId: number | null;
-
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
     lastCreatedId: number | null;
@@ -183,6 +257,20 @@ export interface subjectState {
     lastCreatedId: number | null;
     error: string | null;
     maxOrderNumber: number | null;
+}
 
+export interface testState {
+    testList: test[];
+    testSelected: test | null;
+    questionList: question[];
+    questionSelected: question | null;
+    answerList: answer[];
+    courseStudentTestList: courseStudentTest[];
+    courseStudentTestSelected: courseStudentTest | null;
+    courseStudentTestQuestionList: courseStudentTestQuestion[];
+    courseStudentTestQuestionSelected: courseStudentTestQuestion | null;
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    lastCreatedId: number | null;
+    error: string | null;
 }
 

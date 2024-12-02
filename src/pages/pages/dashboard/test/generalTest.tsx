@@ -4,11 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import PageTitle from '../../../../components/PageTitle';
 
 import { fetchSubjects } from '../../../../features/subjectSlice';
-import { fetchCourseStudent } from '../../../../features/courseSlice';
+import {
+	fetchCourse,
+	fetchCourseStudent,
+} from '../../../../features/courseSlice';
 import {
 	breadCrumbsItems,
 	courseStudent,
-} from '../../../../types/utilidades';
+} from '../../../../types/utilities';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import {
@@ -43,7 +46,7 @@ const GeneralTest = () => {
 		});
 	const navigateCourseStudentTest = async (CL: courseStudent) => {
 		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
-		// await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
+		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
 		// await dispatch(fetchSchedule(CL.id ? CL.id : -1));
 		navigate(`../new_test/${CL.id}/${CL.course_id}`);
@@ -87,11 +90,11 @@ const GeneralTest = () => {
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									disabled={moment()
-										.startOf('day')
-										.isAfter(
-											moment(`${courseStudent?.date}`).startOf('day')
-										)}
+									// disabled={moment()
+									// 	.startOf('day')
+									// 	.isAfter(
+									// 		moment(`${courseStudent?.date}`).startOf('day')
+									// 	)}
 									onClick={() => {
 										navigateCourseStudentTest(CL);
 									}}

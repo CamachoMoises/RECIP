@@ -3,7 +3,7 @@ import {
 	CourseState,
 	subject,
 	user,
-} from '../../../../types/utilidades';
+} from '../../../../types/utilities';
 import './pdfStyle.css';
 import moment from 'moment';
 import { Check } from 'lucide-react';
@@ -28,7 +28,7 @@ const PDFCourseSchedule = ({
 	return (
 		<div className="printable">
 			<div className="flex flex-row justify-between">
-				<div className="flex flex-col bg-gray-400 w-full border-4  border-blue-gray-800 p-2 gap-2">
+				<div className="flex flex-col bg-gray-400 w-full border-4  border-blue-gray-800 p-1 gap-2">
 					<div className="flex flex-row justify-around">
 						<img
 							src="/images/logo.png"
@@ -137,9 +137,9 @@ const PDFCourseSchedule = ({
 							</tbody>
 						</table>
 					</div>
-					<div></div>
+
 					<div className="flex flex-col">
-						<div className="flex w-full bg-white border border-blue-gray-800  pb-3">
+						<div className="flex w-full bg-white border border-blue-gray-800">
 							<Typography
 								variant="h6"
 								color="black"
@@ -211,24 +211,18 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 			<tbody>
 				{data.map((row, index) => (
 					<tr key={index} className="hover:bg-gray-50">
-						<td className="border border-gray-800 px-4 py-2 h-11 w-40 overflow-hidden bg-white text-xs text-center font-bold">
-							{index ? (
-								<>
-									{index} <br />
-								</>
-							) : (
-								''
-							)}
+						<td className="border border-gray-800 h-9 w-40 overflow-hidden bg-white text-xs text-center font-bold">
+							{index ? <>{index} </> : ' '}
 							{row.subject.name}
 						</td>
-						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
-							{moment(row.date).format('DD-MM-YYYY')} <br />
+						<td className="border border-gray-800 bg-white text-xs text-center">
+							{moment(row.date).format('DD-MM-YYYY')}{' '}
 							{moment(row.hour, 'HH:mm:ss').format('HH:mm')}
 						</td>
-						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
+						<td className="border border-gray-800 bg-white text-xs text-center">
 							{row.classTime}
 						</td>
-						<td className="border border-gray-800 px-4 py-2 bg-white text-xs text-center">
+						<td className="border border-gray-800 bg-white text-xs text-center">
 							{row.instructor.user.name}{' '}
 							{row.instructor.user.last_name}
 						</td>
@@ -236,16 +230,16 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 				))}
 				{add_files.map((row, index) => (
 					<tr key={index} className="hover:bg-gray-50">
-						<td className="border border-gray-800 px-4 py-2 w-40 h-11 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800 w-40 h-9 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
-						<td className="border border-gray-800 px-4 py-2  h-11 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800  h-9 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
-						<td className="border border-gray-800 px-4 py-2  h-11 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800  h-9 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
-						<td className="border border-gray-800 px-4 py-2  h-11 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800  h-9 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
 					</tr>

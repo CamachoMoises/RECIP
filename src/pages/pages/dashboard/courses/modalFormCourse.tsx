@@ -14,7 +14,7 @@ import {
 	course,
 	courseLevel,
 	courseType,
-} from '../../../../types/utilidades';
+} from '../../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useState } from 'react';
 import {

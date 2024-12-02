@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
-import { breadCrumbsItems } from '../../../../types/utilidades';
+import { breadCrumbsItems } from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
 const breadCrumbs: breadCrumbsItems[] = [
@@ -112,15 +112,17 @@ const hardQuestion: question[] = [
 	},
 ];
 const NewTest = () => {
-	const { course, subject, user } = useSelector(
-		(state: RootState) => {
-			return {
-				course: state.courses,
-				subject: state.subjects,
-				user: state.users,
-			};
-		}
-	);
+	const {
+		course,
+		// subject,
+		// user
+	} = useSelector((state: RootState) => {
+		return {
+			course: state.courses,
+			subject: state.subjects,
+			user: state.users,
+		};
+	});
 	const [testActive, setTestActive] = useState<boolean>(false);
 
 	if (course.status === 'loading') {

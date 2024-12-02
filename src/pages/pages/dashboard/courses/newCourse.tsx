@@ -18,7 +18,7 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import { useEffect, useRef, useState } from 'react';
-import { breadCrumbsItems, user } from '../../../../types/utilidades';
+import { breadCrumbsItems, user } from '../../../../types/utilities';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateCourseStudent } from '../../../../features/courseSlice';

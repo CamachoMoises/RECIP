@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { breadCrumbsItems, user } from '../../../../types/utilidades';
+import { breadCrumbsItems, user } from '../../../../types/utilities';
 import { AppDispatch, RootState } from '../../../../store';
 import { useEffect, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';

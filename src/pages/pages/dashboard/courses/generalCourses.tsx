@@ -14,7 +14,7 @@ import {
 	courseLevel,
 	courseStudent,
 	courseType,
-} from '../../../../types/utilidades';
+} from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';

@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import PageTitle from '../../../../components/PageTitle';
-import { breadCrumbsItems } from '../../../../types/utilidades';
+import { breadCrumbsItems } from '../../../../types/utilities';
 import { AppDispatch, RootState } from '../../../../store';
 import {
 	Card,

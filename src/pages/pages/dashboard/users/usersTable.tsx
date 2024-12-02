@@ -22,14 +22,13 @@ import {
 	Power,
 	PowerOff,
 	Presentation,
-	Settings,
 } from 'lucide-react';
 import ModalFormUser from './modalFormUser';
 import {
 	breadCrumbsItems,
 	user,
 	userDocType,
-} from '../../../../types/utilidades';
+} from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
 import ErrorPage from '../../../../components/ErrorPage';
 import LoadingPage from '../../../../components/LoadingPage';

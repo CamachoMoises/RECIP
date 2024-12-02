@@ -9,8 +9,8 @@ import {
 	courseStudent,
 	schedule,
 	subject,
-	subject_days,
-} from '../../../../types/utilidades';
+	subjectDays,
+} from '../../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../store';
@@ -38,7 +38,7 @@ const NewCourseSubject = ({
 	user: UserState;
 	course_student: courseStudent | null;
 	student_id: number;
-	SD: subject_days | undefined;
+	SD: subjectDays | undefined;
 	schedule: schedule | undefined;
 }) => {
 	const dispatch = useDispatch<AppDispatch>();

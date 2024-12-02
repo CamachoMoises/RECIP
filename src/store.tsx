@@ -3,6 +3,7 @@ import counterReducer from './features/counter/counterSlice';
 import userReducer from './features/userSlice';
 import courseSlice from './features/courseSlice';
 import subjectSlice from './features/subjectSlice';
+import testSlice from './features/testSlice';
 
 const store = configureStore({
 	reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
 		users: userReducer,
 		courses: courseSlice,
 		subjects: subjectSlice,
+		tests: testSlice,
 	},
 });
 export default store;

@@ -5,8 +5,8 @@
 	}
 
 	.printable {
-		margin: 9mm; /* Márgenes personalizados */
-		padding: 5mm;
+		margin: 1mm; /* Márgenes personalizados */
+		padding: 3mm;
 		page-break-after: always; /* Controla saltos de página */
 	}
 }

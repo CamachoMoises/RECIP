@@ -9,7 +9,7 @@ import {
 	Select,
 	Switch,
 } from '@material-tailwind/react';
-import { user, userDocType } from '../../../../types/utilidades';
+import { user, userDocType } from '../../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useRef, useState } from 'react';
 import { EyeIcon, EyeOff } from 'lucide-react';

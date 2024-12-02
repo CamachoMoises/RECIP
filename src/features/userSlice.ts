@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from '../services/axios';
-import { UserState, user } from '../types/utilidades';
+import { UserState, user } from '../types/utilities';
 
 
 

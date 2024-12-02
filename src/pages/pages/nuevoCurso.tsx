@@ -12,7 +12,7 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import { useState } from 'react';
-import { moduloTeoria, participante } from '../../types/utilidades';
+import { moduloTeoria, participante } from '../../types/utilities';
 
 const NuevoCurso = () => {
 	const [open, setOpen] = useState(1);

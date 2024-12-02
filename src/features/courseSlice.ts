@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course, courseStudent, schedule } from '../types/utilidades';
+import { CourseState, course, courseStudent, schedule } from '../types/utilities';
 import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
 
 
@@ -62,7 +62,6 @@ export const fetchCourseStudent = createAsyncThunk<courseStudent, number>(
         }
     }
 );
-
 
 export const fetchSchedule = createAsyncThunk<schedule[], number>(
     'user/fetchSchedule',

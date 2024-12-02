@@ -7,7 +7,7 @@ import {
 	Input,
 	Switch,
 } from '@material-tailwind/react';
-import { subject } from '../../../../types/utilidades';
+import { subject } from '../../../../types/utilities';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';

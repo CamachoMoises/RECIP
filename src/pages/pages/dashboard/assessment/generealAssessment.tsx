@@ -3,7 +3,7 @@ import { AppDispatch, RootState } from '../../../../store';
 import {
 	breadCrumbsItems,
 	courseStudent,
-} from '../../../../types/utilidades';
+} from '../../../../types/utilities';
 import { useNavigate } from 'react-router-dom';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';

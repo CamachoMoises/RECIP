@@ -11,7 +11,7 @@ import {
 import {
 	breadCrumbsItems,
 	subject,
-} from '../../../../types/utilidades';
+} from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { dataResponseTypeAxios } from '../types/utilidades';
+import { dataResponseTypeAxios } from '../types/utilities';
 const apiUrl = import.meta.env.VITE_REACT_APP_API_URL;
 
 
