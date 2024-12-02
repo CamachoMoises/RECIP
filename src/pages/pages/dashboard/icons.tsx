@@ -4,7 +4,6 @@ import {
 	Newspaper,
 	NotebookPen,
 	NotebookText,
-	Package,
 	Plane,
 	Presentation,
 	UserRound,

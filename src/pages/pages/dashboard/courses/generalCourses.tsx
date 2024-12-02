@@ -42,8 +42,6 @@ import {
 	fetchInstructors,
 	fetchStudents,
 } from '../../../../features/userSlice';
-import moment from 'moment';
-import Countdown from '../../../../components/countDown';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -323,7 +321,7 @@ const GeneralCourses = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Cursos de pilotos
+							Agenda de Cursos a pilotos
 						</Typography>
 						<List
 							placeholder={undefined}

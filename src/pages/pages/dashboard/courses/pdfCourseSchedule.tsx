@@ -174,19 +174,11 @@ const PDFCourseSchedule = ({
 		</div>
 	);
 };
-{
-	/*  
-				Una sola hoja 
-				mosttrar las ojas 
 
-			*/
-}
 const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 	columns,
 	data,
 }) => {
-	console.log(data);
-
 	const add_files =
 		data.length < 8
 			? Array.from({ length: 8 - data.length }, (_, i) => ({
