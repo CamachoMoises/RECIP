@@ -182,6 +182,7 @@ export interface user {
     createdAt?: string;
     updatedAt?: string;
 }
+
 export type courseStudent = {
     id: number;
     course_id: number;
