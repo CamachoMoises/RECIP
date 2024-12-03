@@ -584,6 +584,7 @@ const NewCourse = () => {
 										type="number"
 										inputMode="numeric"
 										label="Resultado "
+										value={12.4}
 										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}

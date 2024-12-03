@@ -74,17 +74,19 @@ export type test = {
 export type questionType = {
     id: number;
     name: string;
+    value: number;
     createdAt?: string;
     updatedAt?: string;
 }
 
 export type question = {
+    answers?: answer[]
     id: number;
     header: string;
     course_id: number;
     course?: course;
     question_type_id: number;
-    question_type?: question_type;
+    question_type?: questionType;
     test_id: number;
     test?: test;
     status: boolean;

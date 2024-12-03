@@ -1,3 +1,4 @@
+import { Typography } from '@material-tailwind/react';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 
@@ -47,10 +48,15 @@ const Countdown = ({
 	const progress = (timeLeft / (totalMinutes * 60)) * 100;
 
 	return (
-		<div className="w-full max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
-			<h1 className="text-2xl font-semibold text-center mb-4">
+		<div className=" mx-auto p-6 bg-white shadow-lg rounded-lg">
+			<Typography
+				variant="h5"
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
 				Tiempo disponible
-			</h1>
+			</Typography>
 			<div className="flex items-center justify-center mb-4">
 				<div className="text-4xl font-bold text-blue-600">
 					{calculateTime(timeLeft)}

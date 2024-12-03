@@ -31,9 +31,9 @@ export const fetchTest = createAsyncThunk<test[], number>(
 
 export const fetchQuestions = createAsyncThunk<question[], number>(
     'user/fetchQuestions',
-    async (id, { rejectWithValue }) => {
+    async (test_id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/questions/${id}`);
+            const response = await axiosGetDefault(`api/test/questions/${test_id}`);
             return response.resp;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
@@ -100,6 +100,21 @@ const testSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+            // Reducers para la acción fetchQuestions
+            .addCase(fetchQuestions.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchQuestions.fulfilled, (state, action: PayloadAction<question[]>) => {
+                const newQuestions = action.payload;
+
+                state.status = 'succeeded';
+                state.questionList = newQuestions;
+            })
+            .addCase(fetchQuestions.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
 
     }
 })
