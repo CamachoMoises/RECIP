@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { answer, question, test, testState } from '../types/utilities';
-import { axiosGetDefault } from "../services/axios";
+import { answer, courseStudentTest, question, test, testState } from '../types/utilities';
+import { axiosGetDefault, axiosPostDefault } from "../services/axios";
 
 
 const initialState: testState = {
@@ -10,7 +10,6 @@ const initialState: testState = {
     questionList: [],
     questionSelected: null,
     answerList: [],
-    courseStudentTestList: [],
     courseStudentTestSelected: null,
     courseStudentTestQuestionList: [],
     courseStudentTestQuestionSelected: null,
@@ -53,6 +52,19 @@ export const fetchAnswers = createAsyncThunk<answer[], number>(
     }
 );
 
+// Acción para mostrar la evaluacion de un piloto
+export const createCourseStudentTest = createAsyncThunk<courseStudentTest, number>(
+    'course/createCourseStudentTest',
+    async (course_student_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostDefault(`api/test/courseStudentTest/${course_student_id}`);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const testSlice = createSlice({
     name: 'subject',
     initialState,
@@ -71,6 +83,20 @@ const testSlice = createSlice({
                 state.testList = action.payload;
             })
             .addCase(fetchTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+            // Reducers para la acción createCourseStudent
+            .addCase(createCourseStudentTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createCourseStudentTest.fulfilled, (state, action: PayloadAction<courseStudentTest>) => {
+                const newCourseStudentTest = action.payload;
+
+                state.status = 'succeeded';
+                state.courseStudentTestSelected = newCourseStudentTest;
+            })
+            .addCase(createCourseStudentTest.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

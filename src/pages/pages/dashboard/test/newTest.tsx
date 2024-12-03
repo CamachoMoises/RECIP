@@ -7,6 +7,8 @@ import ErrorPage from '../../../../components/ErrorPage';
 import { breadCrumbsItems } from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
+import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -112,106 +114,146 @@ const hardQuestion: question[] = [
 	},
 ];
 const NewTest = () => {
+	const navigate = useNavigate();
+	let dateTest: moment.Moment | null = null;
+	let horas = null;
 	const {
 		course,
 		// subject,
 		// user
+		test,
 	} = useSelector((state: RootState) => {
 		return {
 			course: state.courses,
 			subject: state.subjects,
 			user: state.users,
+			test: state.tests,
 		};
 	});
 	const [testActive, setTestActive] = useState<boolean>(false);
 
-	if (course.status === 'loading') {
+	console.log(course.courseStudent);
+
+	if (test.status === 'loading') {
 		return (
 			<>
 				<LoadingPage />
 			</>
 		);
 	}
-	if (course.status === 'failed') {
+	if (test.status === 'failed') {
 		return (
 			<>
-				<ErrorPage
-					error={course.error ? course.error : 'Indefinido'}
-				/>
+				<ErrorPage error={test.error ? test.error : 'Indefinido'} />
 			</>
 		);
 	}
+	if (!course.courseStudent) {
+		navigate('test');
+	} else {
+		if (course.courseStudent.course_student_tests?.length === 0) {
+			// setTestActive(
+			// 	course.courseStudent.course_student_tests.length < 2
+			// );
+			navigate('test');
+		}
+		if (course.courseStudent.schedules?.length === 0) {
+			// setTestActive(false);
+			navigate('test');
+		} else {
+			dateTest = course.courseStudent.schedules
+				? moment(
+						`${course.courseStudent.schedules[0].date}  ${course.courseStudent.schedules[0].hour}`
+				  )
+				: null;
+		}
+
+		if (dateTest) {
+			const currentDate = moment();
+			horas = currentDate.diff(dateTest, 'hours', true);
+		}
+		if (!horas || horas < 0 || horas > 2) {
+			// setTestActive(false);
+			navigate('test');
+		}
+	}
+
 	return (
 		<div className="container">
 			<PageTitle
 				title={`Examen de ${course.courseSelected?.name}`}
 				breadCrumbs={breadCrumbs}
 			/>
-			<Countdown
-				startTime="15:00"
-				totalMinutes={120}
-				setActive={setTestActive}
-			/>
-			<br />
-
-			{testActive && (
+			{dateTest && (
 				<>
-					<Card
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<CardBody
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<Typography
-								variant="h5"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Preguntas
-							</Typography>
-
-							<div className="grid grid-cols-2 gap-4">
-								{hardQuestion.map((question) => (
-									<div key={`Quetion-${question.question_id}`}>
+					<Countdown
+						startTime={dateTest.format('HH:mm')}
+						totalMinutes={120}
+						setActive={setTestActive}
+					/>
+					<br />
+					<div>
+						{testActive && (
+							<>
+								<Card
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<CardBody
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
 										<Typography
+											variant="h5"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{question.question_text}
+											Preguntas
 										</Typography>
 
-										{question.question_options.map((answer) => (
-											<div
-												key={answer.answer_id}
-												className="flex flex-row justify-evenly"
-											>
-												<input
-													type="radio"
-													name="radio"
-													id={`radio-${answer.answer_id}`}
-													value={answer.answer_id}
-												/>
-												<Typography
-													variant="small"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{answer.answer_text}
-												</Typography>
-											</div>
-										))}
-									</div>
-								))}
-							</div>
-						</CardBody>
-					</Card>
+										<div className="grid grid-cols-2 gap-4">
+											{hardQuestion.map((question) => (
+												<div key={`Quetion-${question.question_id}`}>
+													<Typography
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+													>
+														{question.question_text}
+													</Typography>
+
+													{question.question_options.map((answer) => (
+														<div
+															key={answer.answer_id}
+															className="flex flex-row justify-evenly"
+														>
+															<input
+																type="radio"
+																name="radio"
+																id={`radio-${answer.answer_id}`}
+																value={answer.answer_id}
+															/>
+															<Typography
+																variant="small"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+															>
+																{answer.answer_text}
+															</Typography>
+														</div>
+													))}
+												</div>
+											))}
+										</div>
+									</CardBody>
+								</Card>
+							</>
+						)}
+					</div>
 				</>
 			)}
 		</div>

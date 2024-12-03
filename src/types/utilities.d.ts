@@ -1,3 +1,4 @@
+import { schedule } from './utilidades.d';
 import { subject, courseStudent } from './utilities';
 export type dataResponseTypeAxios = {
     resp: any;
@@ -190,6 +191,7 @@ export type courseStudent = {
     student?: student;
     type_trip: number;
     license: number;
+    schedules?: schedule[];
     regulation: number;
     date: string | null;
     code: string;
@@ -212,6 +214,7 @@ export type courseStudentTest = {
     student?: student;
     code: string;
     status: boolean;
+    finished: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -267,7 +270,7 @@ export interface testState {
     questionList: question[];
     questionSelected: question | null;
     answerList: answer[];
-    courseStudentTestList: courseStudentTest[];
+
     courseStudentTestSelected: courseStudentTest | null;
     courseStudentTestQuestionList: courseStudentTestQuestion[];
     courseStudentTestQuestionSelected: courseStudentTestQuestion | null;
