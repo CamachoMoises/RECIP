@@ -107,7 +107,7 @@ const GeneralTest = () => {
 								let dateTest = null;
 								let horas = null;
 								if (CL.course_student_tests?.length) {
-									active = CL.course_student_tests.length < 2;
+									active = CL.course_student_tests.length < 4;
 								}
 								if (CL.schedules?.length === 0) {
 									active = false;

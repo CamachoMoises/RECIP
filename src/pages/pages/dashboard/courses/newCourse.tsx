@@ -184,7 +184,7 @@ const NewCourse = () => {
 	return (
 		<div className="content-center">
 			<PageTitle
-				title={`${course.courseSelected?.name}`}
+				title={`${course.courseSelected?.name} ${course.courseSelected?.course_level.name}`}
 				breadCrumbs={breadCrumbs}
 			/>
 			<Card
@@ -206,7 +206,8 @@ const NewCourse = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							{course.courseSelected?.name}
+							{course.courseSelected?.name}{' '}
+							{course.courseSelected?.course_level.name}
 						</Typography>
 						<Typography
 							placeholder={undefined}
@@ -584,7 +585,6 @@ const NewCourse = () => {
 										type="number"
 										inputMode="numeric"
 										label="Resultado "
-										value={12.4}
 										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -632,6 +632,7 @@ const NewCourse = () => {
 									<Input
 										type="number"
 										inputMode="numeric"
+										value={4}
 										label="Resultado "
 										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 										onPointerEnterCapture={undefined}

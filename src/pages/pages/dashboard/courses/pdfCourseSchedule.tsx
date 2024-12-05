@@ -44,8 +44,8 @@ const PDFCourseSchedule = ({
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								{course.courseSelected?.name}{' '}
-								{course.courseSelected?.course_level.name}
+								Curso {course.courseSelected?.course_level.name}{' '}
+								{course.courseSelected?.name}
 							</Typography>
 							<Typography
 								variant="h6"
@@ -130,7 +130,7 @@ const PDFCourseSchedule = ({
 									<td className="border border-green-800 px-2  text-xs">
 										<strong>Telefono:</strong> {studentSelect?.phone}
 										<div className="fle flex-row">
-											<strong>Pais</strong>
+											<strong>Pais:</strong>
 										</div>
 									</td>
 								</tr>
@@ -180,8 +180,8 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 	data,
 }) => {
 	const add_files =
-		data.length < 8
-			? Array.from({ length: 8 - data.length }, (_, i) => ({
+		data.length < 18
+			? Array.from({ length: 18 - data.length }, (_, i) => ({
 					id: i,
 					name: `item ${i + 1}`,
 			  }))
@@ -208,7 +208,7 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 							{row.subject.name}
 						</td>
 						<td className="border border-gray-800 bg-white text-xs text-center">
-							{moment(row.date).format('DD-MM-YYYY')}{' '}
+							{moment(row.date).format('DD-MM-YYYY')} /{' '}
 							{moment(row.hour, 'HH:mm:ss').format('HH:mm')}
 						</td>
 						<td className="border border-gray-800 bg-white text-xs text-center">
