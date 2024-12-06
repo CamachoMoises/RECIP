@@ -249,35 +249,7 @@ const NewTest = () => {
 										30 Puntos.
 									</Typography>
 								</div>
-								<div className="flex flex-row justify-between gap-3">
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										15 Preguntas de seleccion simple
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										01 Punto c/u
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										30 Puntos.
-									</Typography>
-								</div>
+
 								<div className="flex flex-row justify-between gap-3">
 									<Typography
 										variant="lead"
@@ -344,7 +316,7 @@ const NewTest = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										01 Pregunta de completación
+										1 Pregunta de completación
 									</Typography>
 									<Typography
 										variant="lead"
@@ -353,7 +325,7 @@ const NewTest = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										09 Puntos
+										9 Puntos
 									</Typography>
 									<Typography
 										variant="lead"
@@ -362,7 +334,7 @@ const NewTest = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										09 Puntos.
+										9 Puntos.
 									</Typography>
 								</div>
 								<div className="flex flex-row justify-between gap-3">
@@ -373,7 +345,7 @@ const NewTest = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										04 Preguntas de desarrollo
+										4 Preguntas de desarrollo
 									</Typography>
 									<Typography
 										variant="lead"
@@ -382,7 +354,7 @@ const NewTest = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										04 Puntos c/u
+										4 Puntos c/u
 									</Typography>
 									<Typography
 										variant="lead"

@@ -53,11 +53,15 @@ export const fetchAnswers = createAsyncThunk<answer[], number>(
 );
 
 // Acción para mostrar la evaluacion de un piloto
-export const createCourseStudentTest = createAsyncThunk<courseStudentTest, { test_id: number, course_student_id: number }>(
+export const createCourseStudentTest = createAsyncThunk<courseStudentTest, { test_id: number, course_student_id: number, date: string }>(
     'course/createCourseStudentTest',
-    async ({ course_student_id, test_id }, { rejectWithValue }) => {
+    async ({ course_student_id, test_id, date }, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault(`api/test/courseStudentTest/${course_student_id}/${test_id}`);
+            const response = await axiosPostDefault(`api/test/courseStudentTest/${course_student_id}/${test_id}`,
+                {
+                    date: date
+                }
+            );
             return response;
         } catch (error: any) {
             return rejectWithValue(error.response.data);

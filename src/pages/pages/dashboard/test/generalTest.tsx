@@ -55,7 +55,10 @@ const GeneralTest = () => {
 		dispatch(fetchCourses());
 		dispatch(fetchCoursesStudents());
 	}, [dispatch]);
-	const navigateCourseStudentTest = async (CL: courseStudent) => {
+	const navigateCourseStudentTest = async (
+		CL: courseStudent,
+		date: string
+	) => {
 		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
@@ -64,6 +67,7 @@ const GeneralTest = () => {
 			createCourseStudentTest({
 				course_student_id: CL.id ? CL.id : -1,
 				test_id: 1,
+				date: date,
 			})
 		);
 		navigate(`../new_test/${CL.id}/${CL.course_id}`);
@@ -107,7 +111,7 @@ const GeneralTest = () => {
 								let dateTest = null;
 								let horas = null;
 								if (CL.course_student_tests?.length) {
-									active = CL.course_student_tests.length < 4;
+									active = CL.course_student_tests.length < 5;
 								}
 								if (CL.schedules?.length === 0) {
 									active = false;
@@ -139,7 +143,12 @@ const GeneralTest = () => {
 										// 	)}
 										disabled={!active}
 										onClick={() => {
-											navigateCourseStudentTest(CL);
+											navigateCourseStudentTest(
+												CL,
+												dateTest
+													? dateTest.format('YYYY-MM-DD')
+													: '-1'
+											);
 										}}
 									>
 										<ListItemPrefix
