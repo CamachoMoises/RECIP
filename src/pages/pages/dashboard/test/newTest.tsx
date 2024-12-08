@@ -18,6 +18,7 @@ import QuestionTypeRadio from './questionTypeRadio';
 import QuestionTypeCheck from './questionTypeCheck';
 import { SaveAll } from 'lucide-react';
 import QuestionTypeInput from './questionTypeInput';
+import { axiosPostDefault } from '../../../../services/axios';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -38,111 +39,27 @@ export type answer = {
 	answer_text: string;
 	answer_is_correct: boolean;
 };
-// const hardQuestion: question[] = [
-// 	{
-// 		question_id: 1,
-// 		question_text: '¿Cuál es la clasificación de la batería?',
-// 		question_options: [
-// 			{
-// 				answer_id: 1,
-// 				answer_text: '28 voltios, 24 amperios-hora',
-// 				answer_is_correct: true,
-// 			},
-// 			{
-// 				answer_id: 2,
-// 				answer_text: '24 voltios, 34/36 amperios-hora',
-// 				answer_is_correct: false,
-// 			},
-// 			{
-// 				answer_id: 3,
-// 				answer_text: '28 voltios, 34/36 amperios-hora',
-// 				answer_is_correct: false,
-// 			},
-// 			{
-// 				answer_id: 4,
-// 				answer_text: '24 voltios, 42 amperios-hora',
-// 				answer_is_correct: false,
-// 			},
-// 		],
-// 	},
-// 	{
-// 		question_id: 2,
-// 		question_text:
-// 			'En aviones con números de serie BB-88 y posteriores, ¿cómo se enciende un generador?',
-// 		question_options: [
-// 			{
-// 				answer_id: 1,
-// 				answer_text:
-// 					'Mueva el interruptor a APAGADO y luego a ENCENDIDO.',
-// 				answer_is_correct: true,
-// 			},
-// 			{
-// 				answer_id: 2,
-// 				answer_text:
-// 					'Mantenga presionado el interruptor en RESET durante un segundo y suéltelo en ON',
-// 				answer_is_correct: false,
-// 			},
-// 			{
-// 				answer_id: 3,
-// 				answer_text: 'Mueva el interruptor a ON',
-// 				answer_is_correct: false,
-// 			},
-// 			{
-// 				answer_id: 4,
-// 				answer_text:
-// 					'Mantenga el interruptor en ON durante un segundo.',
-// 				answer_is_correct: false,
-// 			},
-// 		],
-// 	},
-// 	{
-// 		question_id: 3,
-// 		question_text: '¿Dónde está ubicada la batería?',
-// 		question_options: [
-// 			{
-// 				answer_id: 1,
-// 				answer_text: 'En la sección central del ala izquierda',
-// 				answer_is_correct: true,
-// 			},
-// 			{
-// 				answer_id: 2,
-// 				answer_text: 'En el compartimento de popa',
-// 				answer_is_correct: false,
-// 			},
-// 			{
-// 				answer_id: 3,
-// 				answer_text: 'En la sección central del ala derecha',
-// 				answer_is_correct: false,
-// 			},
-// 			{
-// 				answer_id: 4,
-// 				answer_text: 'En el compartimento de la nariz',
-// 				answer_is_correct: false,
-// 			},
-// 		],
-// 	},
-// ];
+
 const NewTest = () => {
 	const navigate = useNavigate();
 	let dateTest: moment.Moment | null = null;
 	let horas = null;
-	const {
-		course,
-		// subject,
-		// user
-		test,
-	} = useSelector((state: RootState) => {
+	const { course, test } = useSelector((state: RootState) => {
 		return {
 			course: state.courses,
-			subject: state.subjects,
-			user: state.users,
 			test: state.tests,
 		};
 	});
-	const [testActive, setTestActive] = useState<boolean>(false);
-
-	console.log(course.courseStudent);
-
+	const handleEndTest = async (course_student_test_id: number) => {
+		const resp = await axiosPostDefault(
+			`api/test/courseStudentTestEnd`,
+			{
+				course_student_test_id: course_student_test_id,
+			}
+		);
+		console.log(resp);
+	};
+	const [testActive, setTestActive] = useState<boolean>(true);
 	if (test.status === 'loading') {
 		return (
 			<>
@@ -161,13 +78,9 @@ const NewTest = () => {
 		navigate('test');
 	} else {
 		if (course.courseStudent.course_student_tests?.length === 0) {
-			// setTestActive(
-			// 	course.courseStudent.course_student_tests.length < 2
-			// );
 			navigate('test');
 		}
 		if (course.courseStudent.schedules?.length === 0) {
-			// setTestActive(false);
 			navigate('test');
 		} else {
 			dateTest = course.courseStudent.schedules
@@ -182,10 +95,10 @@ const NewTest = () => {
 			horas = currentDate.diff(dateTest, 'hours', true);
 		}
 		if (!horas || horas < 0 || horas > 2) {
-			// setTestActive(false);
 			navigate('test');
 		}
 	}
+	// console.log('horas', test.courseStudentTestSelected);
 
 	return (
 		<div className="container">
@@ -403,49 +316,67 @@ const NewTest = () => {
 										</Typography>
 
 										<div className="flex flex-col gap-4">
-											{test.questionList.map((question, key) => (
-												<div
-													key={`Question-${question.id}`}
-													className="border-2 border-blue-gray-800 rounded-md"
-												>
-													{question.question_type?.id === 1 && (
-														<>
-															<QuestionTypeRadio
-																question={question}
-																countKey={key}
-																type={question.question_type.id}
-															/>
-														</>
-													)}
-													{question.question_type?.id === 2 && (
-														<>
-															<QuestionTypeCheck
-																question={question}
-																countKey={key}
-																type={question.question_type.id}
-															/>
-														</>
-													)}
-													{question.question_type?.id === 3 && (
-														<>
-															<QuestionTypeRadio
-																question={question}
-																countKey={key}
-																type={question.question_type.id}
-															/>
-														</>
-													)}
-													{question.question_type?.id === 5 && (
-														<>
-															<QuestionTypeInput
-																question={question}
-																countKey={key}
-																type={question.question_type.id}
-															/>
-														</>
-													)}
-												</div>
-											))}
+											{test.courseStudentTestSelected?.course_student_test_questions?.map(
+												(questionTest, index) => {
+													return (
+														<div key={`Question-${questionTest.id}`}>
+															{questionTest.question?.question_type
+																?.id === 1 && (
+																<>
+																	<QuestionTypeRadio
+																		questionTest={questionTest}
+																		countKey={index}
+																		type={
+																			questionTest.question
+																				?.question_type?.id
+																		}
+																	/>
+																</>
+															)}
+															{questionTest.question?.question_type
+																?.id === 2 && (
+																<>
+																	<QuestionTypeCheck
+																		questionTest={questionTest}
+																		countKey={index}
+																		type={
+																			questionTest.question
+																				.question_type.id
+																		}
+																	/>
+																</>
+															)}
+															{questionTest.question?.question_type
+																?.id === 3 && (
+																<>
+																	<QuestionTypeRadio
+																		questionTest={questionTest}
+																		countKey={index}
+																		type={
+																			questionTest.question
+																				.question_type.id
+																		}
+																	/>
+																</>
+															)}
+															{questionTest.question?.question_type
+																?.id === 5 && (
+																<>
+																	<QuestionTypeInput
+																		questionTest={questionTest}
+																		countKey={index}
+																		type={
+																			questionTest.question
+																				.question_type.id
+																		}
+																	/>
+																</>
+															)}
+														</div>
+													);
+												}
+											)}
+
 											<Typography
 												variant="h5"
 												placeholder={undefined}
@@ -457,7 +388,11 @@ const NewTest = () => {
 											<div className="flex flex-col">
 												<Button
 													onClick={() => {
-														navigate('../../dashboard');
+														handleEndTest(
+															test.courseStudentTestSelected?.id
+																? test.courseStudentTestSelected.id
+																: -1
+														);
 													}}
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}

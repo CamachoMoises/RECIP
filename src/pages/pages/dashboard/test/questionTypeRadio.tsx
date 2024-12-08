@@ -1,24 +1,53 @@
 import { Radio, Typography } from '@material-tailwind/react';
-import { question } from '../../../../types/utilities';
+import {
+	courseStudentTestAnswer,
+	courseStudentTestQuestion,
+} from '../../../../types/utilities';
+import { axiosPostDefault } from '../../../../services/axios';
+// import { useRef } from 'react';
 
 const QuestionTypeRadio = ({
-	question,
+	questionTest,
 	countKey,
 	type,
 }: {
-	question: question;
+	questionTest: courseStudentTestQuestion;
 	countKey: number;
 	type: number;
 }) => {
+	// const typeTripRef = useRef<number>(0);
+	const handleChangeRadio = async (answer_id: number) => {
+		const CSTA: courseStudentTestAnswer = {
+			course_student_test_id: questionTest.course_student_test_id,
+			course_student_test_question_id: questionTest.id,
+			course_student_id: questionTest.course_student_id,
+			student_id: questionTest.student_id,
+			question_id: questionTest.question_id,
+			resp: `${answer_id}`,
+			test_id: questionTest.test_id,
+			course_id: questionTest.course_id,
+		};
+
+		await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
+			courseStudentTestAnswer: CSTA,
+		});
+		console.log('Se guardaron las respuestas ');
+	};
 	return (
-		<>
+		<div
+			className={`${
+				questionTest.Answered
+					? 'bg-light-green-200'
+					: 'bg-blue-gray-100'
+			}`}
+		>
 			<Typography
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 				variant="lead"
 			>
-				{question.header}
+				{questionTest.question?.header}
 			</Typography>
 			<Typography
 				placeholder={undefined}
@@ -28,13 +57,23 @@ const QuestionTypeRadio = ({
 				{type === 1 && <>Seleccion Simple</>}
 				{type === 3 && <>Verdadero o falso</>} {countKey + 1}
 			</Typography>
-			{question.answers?.map((answer) => (
+			{questionTest.question?.answers?.map((answer) => (
 				<div key={answer.id} className="flex flex-row justify-start">
 					<Radio
-						name={`radio-${question.id}`}
+						name={`radio-${questionTest.question?.id}`}
 						id={`radio-${answer.id}`}
 						label={answer.value}
+						defaultChecked={
+							parseInt(
+								questionTest.course_student_test_answer?.resp
+									? questionTest.course_student_test_answer.resp
+									: '-1'
+							) === answer.id
+						}
 						color="red"
+						onChange={() => {
+							handleChangeRadio(answer.id);
+						}}
 						value={answer.id}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
@@ -42,7 +81,7 @@ const QuestionTypeRadio = ({
 					/>
 				</div>
 			))}
-		</>
+		</div>
 	);
 };
 

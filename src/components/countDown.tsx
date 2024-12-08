@@ -35,7 +35,7 @@ const Countdown = ({
 		}, 1000);
 
 		return () => clearInterval(interval);
-	}, [startTime, totalMinutes]);
+	}, [setActive, startTime, totalMinutes]);
 
 	const calculateTime = (seconds: number) => {
 		const minutes = Math.floor(seconds / 60);

@@ -26,10 +26,7 @@ import {
 } from '@material-tailwind/react';
 import moment from 'moment';
 import { useEffect } from 'react';
-import {
-	createCourseStudentTest,
-	fetchQuestions,
-} from '../../../../features/testSlice';
+import { createCourseStudentTest } from '../../../../features/testSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -62,7 +59,6 @@ const GeneralTest = () => {
 		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
-		await dispatch(fetchQuestions(1));
 		await dispatch(
 			createCourseStudentTest({
 				course_student_id: CL.id ? CL.id : -1,
@@ -107,11 +103,12 @@ const GeneralTest = () => {
 							onPointerLeaveCapture={undefined}
 						>
 							{courseStudentList?.map((CL) => {
+								const maxTries = 4;
 								let active = true;
 								let dateTest = null;
 								let horas = null;
 								if (CL.course_student_tests?.length) {
-									active = CL.course_student_tests.length < 5;
+									active = CL.course_student_tests.length <= maxTries;
 								}
 								if (CL.schedules?.length === 0) {
 									active = false;
@@ -136,11 +133,6 @@ const GeneralTest = () => {
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										// disabled={moment()
-										// 	.startOf('day')
-										// 	.isAfter(
-										// 		moment(`${courseStudent?.date}`).startOf('day')
-										// 	)}
 										disabled={!active}
 										onClick={() => {
 											navigateCourseStudentTest(
@@ -159,7 +151,8 @@ const GeneralTest = () => {
 											{CL.code}
 											{CL.course_student_tests && (
 												<small className="text-red-800">
-													Intentos {CL.course_student_tests.length}
+													Intentos {CL.course_student_tests.length} /{' '}
+													{maxTries}
 												</small>
 											)}
 										</ListItemPrefix>

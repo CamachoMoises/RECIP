@@ -1,4 +1,4 @@
-import { schedule } from './utilidades.d';
+import { schedule, answer } from './utilidades.d';
 import { subject, courseStudent } from './utilities';
 export type dataResponseTypeAxios = {
     resp: any;
@@ -211,6 +211,7 @@ export type courseStudentTest = {
     test?: test;
     attempts: number;
     course_student_id: number;
+    course_student_test_questions?: courseStudentTestQuestion[];
     course_student?: courseStudent;
     date: string;
     student_id: number;
@@ -226,16 +227,41 @@ export type courseStudentTestQuestion = {
     id: number;
     course_student_test_id: number;
     course_student_test?: courseStudentTest;
+    course_student_test_answer?: courseStudentTestAnswer;
     course_student_id: number;
+    student_id: number;
+    student?: student;
     course_student?: courseStudent;
     question_id: number;
     question?: question;
+    Answered: boolean;
     test_id: number;
     test?: test;
     course_id: number;
     course?: course;
     createdAt: string;
     updatedAt: string;
+}
+
+export type courseStudentTestAnswer = {
+    id?: number;
+    course_student_test_id: number;
+    course_student_test?: courseStudentTest;
+    course_student_test_question_id: number;
+    course_student_test_question?: courseStudentTestQuestion;
+    course_student_id: number;
+    course_student?: courseStudent;
+    question_id: number;
+    question?: question;
+    resp: string;
+    test_id: number;
+    test?: test;
+    student_id: number;
+    student?: student;
+    course_id: number;
+    course?: course;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface UserState {
