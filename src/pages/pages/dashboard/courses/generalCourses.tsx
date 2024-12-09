@@ -195,6 +195,7 @@ const GeneralCourses = () => {
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
+													className="flex flex-col justify-center"
 												>
 													<Typography
 														placeholder={undefined}
@@ -210,7 +211,7 @@ const GeneralCourses = () => {
 														onPointerLeaveCapture
 														variant="small"
 													>
-														{course.description}
+														{course.course_level.name}
 													</Typography>
 													<Typography
 														placeholder={undefined}
@@ -219,46 +220,48 @@ const GeneralCourses = () => {
 													>
 														{course.course_type.name}
 													</Typography>
-													<ButtonGroup
-														size="sm"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														<Button
-															title="Editar el Curso"
+													<div className="flex flex-row justify-center">
+														<ButtonGroup
+															size="sm"
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
-															onClick={() => handleOpenEdit(course)}
 														>
-															<Pencil size={20} />
-														</Button>
-														<Button
-															title="Asignaciones el Curso"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-															onClick={() =>
-																navigate(`../course/${course.id}`)
-															}
-														>
-															<BookCheck size={20} />
-														</Button>
-														<Button
-															title="Agendar nuevo curso"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-															onClick={() =>
-																handleNewCourseSchedule(
-																	course.id ? course.id : -1
-																)
-															}
-														>
-															<CalendarCheck size={20} />
-														</Button>
-													</ButtonGroup>
+															<Button
+																title="Editar el Curso"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+																onClick={() => handleOpenEdit(course)}
+															>
+																<Pencil size={20} />
+															</Button>
+															<Button
+																title="Asignaciones el Curso"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+																onClick={() =>
+																	navigate(`../course/${course.id}`)
+																}
+															>
+																<BookCheck size={20} />
+															</Button>
+															<Button
+																title="Agendar nuevo curso"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+																onClick={() =>
+																	handleNewCourseSchedule(
+																		course.id ? course.id : -1
+																	)
+																}
+															>
+																<CalendarCheck size={20} />
+															</Button>
+														</ButtonGroup>
+													</div>
 												</CardBody>
 											</Card>
 										</div>
@@ -366,6 +369,7 @@ const GeneralCourses = () => {
 											onPointerLeaveCapture={undefined}
 										>
 											{CL.course?.name} {CL.course?.description} (
+											{CL.course?.course_level.name}-
 											{CL.course?.course_type.name})
 										</Typography>
 									</div>
