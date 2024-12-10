@@ -5,7 +5,6 @@ import {
 } from '../../../../types/utilities';
 import { axiosPostDefault } from '../../../../services/axios';
 import { useEffect, useState } from 'react';
-import { cleanString } from '../../../../services/utilities';
 
 const QuestionTypeInput = ({
 	questionTest,
@@ -26,7 +25,7 @@ const QuestionTypeInput = ({
 	const [hasChange, setHasChange] = useState(false);
 	const handleChange = (index: number, value: string) => {
 		const newInputs = [...answers];
-		newInputs[index] = cleanString(value);
+		newInputs[index] = value;
 		setAnswers(newInputs);
 		setHasChange(true);
 	};
@@ -60,7 +59,7 @@ const QuestionTypeInput = ({
 					setHasChange(false);
 				}
 			}
-		}, 10000);
+		}, 5000);
 
 		return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
 	}, [answers, hasChange, saveAnswers]);

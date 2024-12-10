@@ -368,7 +368,7 @@ const GeneralCourses = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CL.course?.name} {CL.course?.description} (
+											{CL.course?.name} (
 											{CL.course?.course_level.name}-
 											{CL.course?.course_type.name})
 										</Typography>
