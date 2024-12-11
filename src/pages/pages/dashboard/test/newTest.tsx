@@ -11,6 +11,10 @@ import {
 	Card,
 	CardBody,
 	Typography,
+	Dialog,
+	DialogHeader,
+	DialogBody,
+	DialogFooter,
 } from '@material-tailwind/react';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +23,7 @@ import QuestionTypeCheck from './questionTypeCheck';
 import { SaveAll } from 'lucide-react';
 import QuestionTypeInput from './questionTypeInput';
 import { axiosPostDefault } from '../../../../services/axios';
+
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -42,6 +47,11 @@ export type answer = {
 
 const NewTest = () => {
 	const navigate = useNavigate();
+	const [open, setOpen] = useState(false);
+	const [score, setScore] = useState(0);
+
+	const handleOpen = () => setOpen(!open);
+	const [ended, setEnded] = useState(false);
 	let dateTest: moment.Moment | null = null;
 	let horas = null;
 	const { course, test } = useSelector((state: RootState) => {
@@ -58,6 +68,9 @@ const NewTest = () => {
 			}
 		);
 		console.log(resp);
+		setScore(resp.score);
+		setOpen(true);
+		setEnded(true);
 	};
 	const [testActive, setTestActive] = useState<boolean>(true);
 	if (test.status === 'loading') {
@@ -71,6 +84,75 @@ const NewTest = () => {
 		return (
 			<>
 				<ErrorPage error={test.error ? test.error : 'Indefinido'} />
+			</>
+		);
+	}
+	if (ended) {
+		return (
+			<>
+				<PageTitle
+					title={`Examen de ${course.courseSelected?.name} ${test.courseStudentTestSelected?.code}`}
+					breadCrumbs={breadCrumbs}
+				/>
+				<LoadingPage />
+				<Dialog
+					open={open}
+					handler={handleOpen}
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<DialogHeader
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						Examen finalizado
+					</DialogHeader>
+					<DialogBody
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						El examen a finalizado si calificacion total es {score}
+						/100
+					</DialogBody>
+					<DialogFooter
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						{score > 4 ? (
+							<Button
+								variant="gradient"
+								color="green"
+								onClick={() => {
+									navigate('../../dashboard');
+								}}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<span>Ver detalles</span>
+							</Button>
+						) : (
+							<>
+								<Button
+									variant="gradient"
+									color="red"
+									onClick={() => {
+										navigate('../test');
+									}}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<span>Repetir examen</span>
+								</Button>
+							</>
+						)}
+					</DialogFooter>
+				</Dialog>
 			</>
 		);
 	}
