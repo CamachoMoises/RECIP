@@ -23,6 +23,7 @@ import QuestionTypeCheck from './questionTypeCheck';
 import { SaveAll } from 'lucide-react';
 import QuestionTypeInput from './questionTypeInput';
 import { axiosPostDefault } from '../../../../services/axios';
+import QuestionTypeCompletion from './questionTypeCompletion';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -432,6 +433,19 @@ const NewTest = () => {
 																?.id === 3 && (
 																<>
 																	<QuestionTypeRadio
+																		questionTest={questionTest}
+																		countKey={index}
+																		type={
+																			questionTest.question
+																				.question_type.id
+																		}
+																	/>
+																</>
+															)}
+															{questionTest.question?.question_type
+																?.id === 4 && (
+																<>
+																	<QuestionTypeCompletion
 																		questionTest={questionTest}
 																		countKey={index}
 																		type={

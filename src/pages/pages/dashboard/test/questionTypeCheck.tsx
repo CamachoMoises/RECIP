@@ -82,17 +82,19 @@ const QuestionTypeCheck = ({
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
-				variant="lead"
+				variant="h5"
 			>
-				{questionTest.question?.header}
+				Pregunta de Seleccion Multiple Nº{countKey + 1}
 			</Typography>
 			<Typography
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
+				variant="h6"
 			>
-				Seleccion Multiple {countKey + 1}
+				{questionTest.question?.header}
 			</Typography>
+
 			{/* <code>{JSON.stringify(checkboxes, null, 4)}</code> */}
 			{questionTest.question?.answers?.map((answer, index) => (
 				<div key={answer.id} className="flex flex-row justify-start">

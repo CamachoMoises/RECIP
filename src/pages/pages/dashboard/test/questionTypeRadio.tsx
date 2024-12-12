@@ -41,21 +41,23 @@ const QuestionTypeRadio = ({
 					: 'bg-blue-gray-100'
 			}`}
 		>
+			{' '}
 			<Typography
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
-				variant="lead"
+				variant="h5"
 			>
-				{questionTest.question?.header}
+				Pregunta de {type === 1 && <>Seleccion Simple</>}
+				{type === 3 && <>Verdadero o falso</>} Nº{countKey + 1}
 			</Typography>
 			<Typography
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
+				variant="h6"
 			>
-				{type === 1 && <>Seleccion Simple</>}
-				{type === 3 && <>Verdadero o falso</>} {countKey + 1}
+				{questionTest.question?.header}
 			</Typography>
 			{questionTest.question?.answers?.map((answer) => (
 				<div key={answer.id} className="flex flex-row justify-start">

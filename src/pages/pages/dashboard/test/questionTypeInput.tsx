@@ -75,17 +75,19 @@ const QuestionTypeInput = ({
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
-				variant="lead"
+				variant="h5"
 			>
-				{questionTest.question?.header}
+				Pregunta de desarrollo Nº{countKey + 1}
 			</Typography>
 			<Typography
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
+				variant="h6"
 			>
-				Pregunta de desarrollo {countKey + 1}
+				{questionTest.question?.header}
 			</Typography>
+
 			{/* <code>{JSON.stringify(answers, null, 4)}</code> */}
 			{questionTest.question?.answers?.map((answer, index) => (
 				<div
