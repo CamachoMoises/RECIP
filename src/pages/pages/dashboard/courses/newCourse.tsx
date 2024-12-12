@@ -5,7 +5,6 @@ import {
 	Button,
 	Card,
 	CardBody,
-	Checkbox,
 	Input,
 	Option,
 	Radio,
@@ -572,130 +571,152 @@ const NewCourse = () => {
 							Resultados
 						</AccordionHeader>
 						<AccordionBody>
-							<div className="grid grid-cols-3 gap-4 py-2 px-2">
-								<div className="flex flex-row gap-2">
-									<Typography
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Resulatos del Examen %
-									</Typography>
-									<Input
-										type="number"
-										inputMode="numeric"
-										label="Resultado "
-										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-								</div>
-								<div className="flex flex-row gap-2 justify-center">
-									<Checkbox
-										color="red"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-									<Typography
-										variant="small"
-										className="pt-3"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Corregido el 100%
-									</Typography>
-								</div>
-								<div className="flex flex-row gap-2">
-									<Input
-										type="date"
-										label="Fecha de completado"
-										required={true}
-										crossOrigin={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									/>
-								</div>
-							</div>
-							<hr />
-							<div className="grid grid-cols-3 gap-4 py-2 px-2">
-								<div className="flex flex-row gap-2">
-									<Typography
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Resultados para repetir examen %
-									</Typography>
-									<Input
-										type="number"
-										inputMode="numeric"
-										value={4}
-										label="Resultado "
-										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-								</div>
-								<div className="flex flex-row gap-2 justify-center">
-									<Checkbox
-										color="red"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-									<Typography
-										variant="small"
-										className="pt-3"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Corregido el 100%
-									</Typography>
-								</div>
-								<div className="flex flex-row gap-2">
-									<Typography
-										variant="small"
-										className="pt-3"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Horas totales en clases:
-									</Typography>
-									<Input
-										type="number"
-										inputMode="numeric"
-										label="Resultado "
-										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-									<Typography
-										variant="small"
-										className="pt-3"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Dias totales clases:
-									</Typography>
-									<Input
-										type="number"
-										inputMode="numeric"
-										label="Resultado"
-										className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-								</div>
-							</div>
+							{course.courseStudent?.score && (
+								<>
+									<div className="grid grid-cols-3 gap-4 py-2 px-2">
+										<div className="flex flex-row gap-2">
+											<Typography
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Resulatos del Examen %
+											</Typography>
+
+											<Input
+												type="number"
+												inputMode="numeric"
+												value={
+													course.courseStudent.score > 1
+														? course.courseStudent.score
+														: 0
+												}
+												label="Resultado "
+												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+												crossOrigin={undefined}
+											/>
+										</div>
+										<div className="flex flex-row gap-2 justify-center">
+											{}
+											{course.courseStudent?.score >= 0 && (
+												<Typography
+													variant="small"
+													className="pt-3"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													Corregido el 100%
+												</Typography>
+											)}
+										</div>
+										<div className="flex flex-row gap-2">
+											<Input
+												type="date"
+												label="Fecha de completado"
+												required={true}
+												value={moment(course.courseStudent.date)
+													.add(
+														course.courseSelected?.days
+															? course.courseSelected.days
+															: -1,
+														'days'
+													)
+													.format('YYYY-MM-DD')}
+												crossOrigin={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											/>
+										</div>
+									</div>
+									<hr />
+									<div className="grid grid-cols-3 gap-4 py-2 px-2">
+										<div className="flex flex-row gap-2">
+											<Typography
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Resultados para repetir examen %
+											</Typography>
+
+											<Input
+												type="number"
+												inputMode="numeric"
+												value={course.courseStudent.score}
+												label="Resultado "
+												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+												crossOrigin={undefined}
+											/>
+										</div>
+										<div className="flex flex-row gap-2 justify-center">
+											{course.courseStudent?.score >= 0 && (
+												<Typography
+													variant="small"
+													className="pt-3"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													Corregido el 100%
+												</Typography>
+											)}
+										</div>
+										<div className="flex flex-col gap-2">
+											<Typography
+												variant="small"
+												className="pt-3"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Horas totales en clases:
+											</Typography>
+											<Input
+												type="number"
+												inputMode="numeric"
+												label="Horas"
+												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+												crossOrigin={undefined}
+												value={
+													course.courseSelected?.hours
+														? course.courseSelected.hours
+														: -1
+												}
+											/>
+											<Typography
+												variant="small"
+												className="pt-3"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Dias totales clases:
+											</Typography>
+											<Input
+												type="number"
+												inputMode="numeric"
+												label="Dias"
+												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+												crossOrigin={undefined}
+												value={
+													course.courseSelected?.days
+														? course.courseSelected.days
+														: -1
+												}
+											/>
+										</div>
+									</div>
+								</>
+							)}
 						</AccordionBody>
 					</Accordion>
 				</CardBody>

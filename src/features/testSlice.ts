@@ -69,6 +69,18 @@ export const createCourseStudentTest = createAsyncThunk<courseStudentTest, { tes
     }
 );
 
+export const fetchCourseStudentTest = createAsyncThunk<courseStudentTest, number>(
+    'user/fetchCourseStudentTest',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault(`api/test/courseStudentTest/${id}`);
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const testSlice = createSlice({
     name: 'subject',
     initialState,
@@ -118,7 +130,20 @@ const testSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+            // Reducers para la acción createCourseStudent
+            .addCase(fetchCourseStudentTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCourseStudentTest.fulfilled, (state, action: PayloadAction<courseStudentTest>) => {
+                const newCourseStudentTest = action.payload;
 
+                state.status = 'succeeded';
+                state.courseStudentTestSelected = newCourseStudentTest;
+            })
+            .addCase(fetchCourseStudentTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
 
     }
 })

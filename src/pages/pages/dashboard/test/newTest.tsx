@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Countdown from '../../../../components/countDown';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../../store';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import { breadCrumbsItems } from '../../../../types/utilities';
@@ -24,6 +24,7 @@ import { SaveAll } from 'lucide-react';
 import QuestionTypeInput from './questionTypeInput';
 import { axiosPostDefault } from '../../../../services/axios';
 import QuestionTypeCompletion from './questionTypeCompletion';
+import { fetchCourseStudentTest } from '../../../../features/testSlice';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -47,10 +48,10 @@ export type answer = {
 };
 
 const NewTest = () => {
+	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
 	const [score, setScore] = useState(0);
-
 	const handleOpen = () => setOpen(!open);
 	const [ended, setEnded] = useState(false);
 	let dateTest: moment.Moment | null = null;
@@ -61,6 +62,7 @@ const NewTest = () => {
 			test: state.tests,
 		};
 	});
+	console.log(test, course);
 	const handleEndTest = async (course_student_test_id: number) => {
 		const resp = await axiosPostDefault(
 			`api/test/courseStudentTestEnd`,
@@ -72,6 +74,17 @@ const NewTest = () => {
 		setScore(resp.score);
 		setOpen(true);
 		setEnded(true);
+	};
+	const seeResults = async () => {
+		await dispatch(
+			fetchCourseStudentTest(
+				test.courseStudentTestSelected?.id
+					? test.courseStudentTestSelected.id
+					: -1
+			)
+		);
+
+		// navigate('../../dashboard');
 	};
 	const [testActive, setTestActive] = useState<boolean>(true);
 	if (test.status === 'loading') {
@@ -123,10 +136,10 @@ const NewTest = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						{score > 4 ? (
+						<div className="flex flex-row gap-3">
 							<Button
-								variant="gradient"
-								color="green"
+								variant="filled"
+								color="cyan"
 								onClick={() => {
 									navigate('../../dashboard');
 								}}
@@ -134,24 +147,38 @@ const NewTest = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<span>Ver detalles</span>
+								Volver
 							</Button>
-						) : (
-							<>
+							{score > 1 ? (
 								<Button
-									variant="gradient"
-									color="red"
+									variant="filled"
+									color="green"
 									onClick={() => {
-										navigate('../test');
+										seeResults();
 									}}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									<span>Repetir examen</span>
+									<span>Ver detalles</span>
 								</Button>
-							</>
-						)}
+							) : (
+								<>
+									<Button
+										variant="filled"
+										color="red"
+										onClick={() => {
+											navigate('../test');
+										}}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										<span>Repetir examen</span>
+									</Button>
+								</>
+							)}
+						</div>
 					</DialogFooter>
 				</Dialog>
 			</>

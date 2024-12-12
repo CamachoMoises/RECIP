@@ -7,7 +7,6 @@ import {
 import './pdfStyle.css';
 import moment from 'moment';
 import { Check } from 'lucide-react';
-import { instructor } from '../../../../types/utilities';
 
 const PDFCourseSchedule = ({
 	studentSelect,
@@ -66,72 +65,72 @@ const PDFCourseSchedule = ({
 								<tr>
 									<td className="border border-green-800 px-2 text-xs">
 										<strong> Nombre del Piloto:</strong>{' '}
-										{/* {studentSelect?.name} {studentSelect?.last_name} */}
+										{studentSelect?.name} {studentSelect?.last_name}
 									</td>
 									<td className="border border-green-800 px-2 col-span-2 text-xs">
 										<div className="flex flex-row gap-3">
 											<strong>Tipo:</strong>{' '}
 											<Check size={15} color="green" />
-											{/* {
+											{
 												type_trip[
 													course.courseStudent?.type_trip
 														? course.courseStudent.type_trip
 														: 0
 												]
-											}{' '} */}
+											}{' '}
 										</div>
 									</td>
 								</tr>
 								<tr>
 									<td className="border border-green-800 px-2  text-xs">
 										<strong>Identificacion:</strong>{' '}
-										{/* {studentSelect?.user_doc_type?.symbol}-
-										{studentSelect?.doc_number} */}
+										{studentSelect?.user_doc_type?.symbol}-
+										{studentSelect?.doc_number}
 									</td>
 									<td className="border border-green-800 px-2  text-xs">
 										<div className="flex flex-row gap-3">
 											<strong>Licencia:</strong>
 											<Check size={15} color="green" />
-											{/* {
+											{
 												license[
 													course.courseStudent?.license
 														? course.courseStudent.license
 														: 0
 												]
-											} */}
+											}
 										</div>
 									</td>
 								</tr>
 								<tr>
 									<td className="border border-green-800 px-2  text-xs">
 										<strong>Fecha de inicio:</strong>{' '}
-										{/* {moment(course.courseStudent?.date).format(
+										{moment(course.courseStudent?.date).format(
 											'DD-MM-YYYY'
-										)} */}
+										)}
 									</td>
 
 									<td className="border border-green-800 px-2 text-xs">
 										<div className="flex flex-row gap-3">
 											<strong>Normativa:</strong>{' '}
 											<Check size={15} color="green" />
-											{/* {
+											{
 												regulation[
 													course.courseStudent?.regulation
 														? course.courseStudent.regulation
 														: 0
 												]
-											} */}
+											}
 										</div>
 									</td>
 								</tr>
 								<tr>
 									<td className="border border-green-800 px-2  text-xs">
 										<strong>Correo:</strong>
-										{/* {studentSelect?.email} */}
+										{studentSelect?.email}
 									</td>
 									<td className="border border-green-800 px-2  text-xs">
 										<strong>Telefono:</strong>
-										{/* {studentSelect?.phone} */}
+										{studentSelect?.phone}
 										<div className="fle flex-row">
 											<strong>Pais:</strong>
 										</div>
@@ -255,15 +254,15 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 							{row.subject.name}
 						</td>
 						<td className="border border-gray-800 bg-white text-xs text-center">
-							{/* {moment(row.date).format('DD-MM-YYYY')} /{' '}
-							{moment(row.hour, 'HH:mm:ss').format('HH:mm')} */}
+							{moment(row.date).format('DD-MM-YYYY')} /{' '}
+							{moment(row.hour, 'HH:mm:ss').format('HH:mm')}
 						</td>
 						<td className="border border-gray-800 bg-white text-xs text-center">
 							{row.classTime}
 						</td>
 						<td className="border border-gray-800 bg-white text-xs text-center">
-							{/* {row.instructor.user.name}{' '}
-							{row.instructor.user.last_name} */}
+							{row.instructor.user.name}{' '}
+							{row.instructor.user.last_name}
 						</td>
 					</tr>
 				))}

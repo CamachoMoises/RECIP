@@ -1,5 +1,3 @@
-import { schedule, answer } from './utilidades.d';
-import { subject, courseStudent } from './utilities';
 export type dataResponseTypeAxios = {
     resp: any;
     status: number;
@@ -197,6 +195,7 @@ export type courseStudent = {
     schedules?: schedule[];
     regulation: number;
     date: string | null;
+    score?: number;
     code: string;
     createdAt: string;
     updatedAt: string;
