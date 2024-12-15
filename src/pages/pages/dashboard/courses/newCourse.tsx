@@ -141,7 +141,6 @@ const NewCourse = () => {
 			}
 		};
 		if (course.courseStudent?.student?.id) {
-			console.log('student');
 			setStudentFunc(course.courseStudent.student.id);
 		}
 		if (course.courseStudent) {

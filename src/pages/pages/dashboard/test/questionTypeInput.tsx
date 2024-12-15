@@ -66,9 +66,7 @@ const QuestionTypeInput = ({
 	return (
 		<div
 			className={`${
-				questionTest.Answered
-					? 'bg-light-green-200'
-					: 'bg-blue-gray-100'
+				questionTest.Answered ? 'bg-light-green-200' : ''
 			}`}
 		>
 			<Typography
@@ -92,10 +90,9 @@ const QuestionTypeInput = ({
 			{questionTest.question?.answers?.map((answer, index) => (
 				<div
 					key={answer.id}
-					className="flex flex-row justify-start p-5"
+					className="flex flex-row justify-start p-2"
 				>
 					<Input
-						variant="static"
 						label={`${index + 1}`}
 						onChange={(e) => handleChange(index, e.target.value)}
 						placeholder={`Respuesta`}

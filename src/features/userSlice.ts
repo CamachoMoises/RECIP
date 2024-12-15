@@ -6,6 +6,7 @@ import { UserState, user } from '../types/utilities';
 
 const initialState: UserState = {
 	status: 'idle',
+	userSelected: null,
 	usersList: [],
 	studentList: [],
 	instructorList: [],
@@ -25,6 +26,17 @@ export const fetchUsers = createAsyncThunk<user[]>(
 	}
 );
 
+export const fetchUser = createAsyncThunk<user, number>(
+	'user/fetchUser',
+	async (user_id, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetDefault(`api/users/user/${user_id}`);
+			return response.resp;
+		} catch (error: any) {
+			return rejectWithValue(error.response.data);
+		}
+	}
+);
 
 export const fetchStudents = createAsyncThunk<user[]>(
 	'user/fetchStudents',
@@ -115,6 +127,20 @@ const userSlice = createSlice({
 				state.usersList = action.payload;
 			})
 			.addCase(fetchUsers.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+			// Reducers para la acción fetchUsers
+			.addCase(fetchUser.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchUser.fulfilled, (state, action: PayloadAction<user>) => {
+				state.status = 'succeeded';
+				console.log('Consulta de user', action.payload);
+
+				state.userSelected = action.payload;
+			})
+			.addCase(fetchUser.rejected, (state, action) => {
 				state.status = 'failed';
 				state.error = action.payload as string;
 			})

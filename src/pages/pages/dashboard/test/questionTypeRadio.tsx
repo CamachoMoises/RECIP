@@ -36,9 +36,7 @@ const QuestionTypeRadio = ({
 	return (
 		<div
 			className={`${
-				questionTest.Answered
-					? 'bg-light-green-200'
-					: 'bg-blue-gray-100'
+				questionTest.Answered ? 'bg-light-green-200' : ''
 			}`}
 		>
 			{' '}
@@ -48,8 +46,16 @@ const QuestionTypeRadio = ({
 				onPointerLeaveCapture={undefined}
 				variant="h5"
 			>
-				Pregunta de {type === 1 && <>Seleccion Simple</>}
-				{type === 3 && <>Verdadero o falso</>} Nº{countKey + 1}
+				Pregunta Nº{countKey + 1}{' '}
+			</Typography>
+			<Typography
+				variant="small"
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				{type === 1 && <>Seleccion Simple</>}
+				{type === 3 && <>Verdadero o Falso</>}
 			</Typography>
 			<Typography
 				placeholder={undefined}
@@ -59,30 +65,44 @@ const QuestionTypeRadio = ({
 			>
 				{questionTest.question?.header}
 			</Typography>
-			{questionTest.question?.answers?.map((answer) => (
-				<div key={answer.id} className="flex flex-row justify-start">
-					<Radio
-						name={`radio-${questionTest.question?.id}`}
-						id={`radio-${answer.id}`}
-						label={answer.value}
-						defaultChecked={
-							parseInt(
-								questionTest.course_student_test_answer?.resp
-									? questionTest.course_student_test_answer.resp
-									: '-1'
-							) === answer.id
-						}
-						color="red"
-						onChange={() => {
-							handleChangeRadio(answer.id);
-						}}
-						value={answer.id}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-						crossOrigin={undefined}
-					/>
-				</div>
-			))}
+			<div className="flex flex-row justify-center">
+				{questionTest.question?.answers?.map((answer) => (
+					<div key={answer.id} className="basis-1/4 justify-center">
+						<Radio
+							name={`radio-${questionTest.question?.id}`}
+							id={`radio-${answer.id}`}
+							defaultChecked={
+								parseInt(
+									questionTest.course_student_test_answer?.resp
+										? questionTest.course_student_test_answer.resp
+										: '-1'
+								) === answer.id
+							}
+							color="red"
+							onChange={() => {
+								handleChangeRadio(answer.id);
+							}}
+							value={answer.id}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+							crossOrigin={undefined}
+						/>
+						<br />
+						<div className="flex flex-row justify-center">
+							<Typography
+								variant="small"
+								className="max-w-48 text-center"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								{answer.value}
+							</Typography>
+						</div>
+					</div>
+				))}
+			</div>
+			<hr />
 		</div>
 	);
 };

@@ -73,9 +73,7 @@ const QuestionTypeCheck = ({
 	return (
 		<div
 			className={`${
-				questionTest.Answered
-					? 'bg-light-green-200'
-					: 'bg-blue-gray-100'
+				questionTest.Answered ? 'bg-light-green-200' : ''
 			}`}
 		>
 			<Typography
@@ -84,7 +82,7 @@ const QuestionTypeCheck = ({
 				onPointerLeaveCapture={undefined}
 				variant="h5"
 			>
-				Pregunta de Seleccion Multiple Nº{countKey + 1}
+				Pregunta Nº{countKey + 1} Seleccion Multiple
 			</Typography>
 			<Typography
 				placeholder={undefined}
@@ -96,24 +94,42 @@ const QuestionTypeCheck = ({
 			</Typography>
 
 			{/* <code>{JSON.stringify(checkboxes, null, 4)}</code> */}
-			{questionTest.question?.answers?.map((answer, index) => (
-				<div key={answer.id} className="flex flex-row justify-start">
-					<Checkbox
-						color="red"
-						id={`check-${answer.id}`}
-						value={answer.id}
-						defaultChecked={checkboxes[index].check}
-						label={answer.value}
-						name={`check-${questionTest.question?.id}`}
-						onPointerEnterCapture={undefined}
-						onChange={(e) =>
-							handleCheckboxChange(answer.id, e.target.checked, index)
-						}
-						onPointerLeaveCapture={undefined}
-						crossOrigin={undefined}
-					/>
-				</div>
-			))}
+			<div className="flex flex-row justify-center">
+				{questionTest.question?.answers?.map((answer, index) => (
+					<div key={answer.id} className="basis-1/4 justify-center">
+						<Checkbox
+							color="red"
+							id={`check-${answer.id}`}
+							value={answer.id}
+							defaultChecked={checkboxes[index].check}
+							name={`check-${questionTest.question?.id}`}
+							onPointerEnterCapture={undefined}
+							onChange={(e) =>
+								handleCheckboxChange(
+									answer.id,
+									e.target.checked,
+									index
+								)
+							}
+							onPointerLeaveCapture={undefined}
+							crossOrigin={undefined}
+						/>
+						<br />
+						<div className="flex flex-row justify-center">
+							<Typography
+								variant="small"
+								className="max-w-40 text-center"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								{answer.value}
+							</Typography>
+						</div>
+					</div>
+				))}
+			</div>
+			<hr />
 		</div>
 	);
 };

@@ -254,6 +254,7 @@ export type courseStudentTestAnswer = {
     question?: question;
     resp: string;
     test_id: number;
+    score?: number;
     test?: test;
     student_id: number;
     student?: student;
@@ -264,6 +265,7 @@ export type courseStudentTestAnswer = {
 }
 
 export interface UserState {
+    userSelected: user | null;
     usersList: user[];
     studentList: user[];
     instructorList: user[];

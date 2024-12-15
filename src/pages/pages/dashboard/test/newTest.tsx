@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Countdown from '../../../../components/countDown';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
@@ -25,6 +25,9 @@ import QuestionTypeInput from './questionTypeInput';
 import { axiosPostDefault } from '../../../../services/axios';
 import QuestionTypeCompletion from './questionTypeCompletion';
 import { fetchCourseStudentTest } from '../../../../features/testSlice';
+import ResultsTestPdf from './resultsTestPdf';
+import { useReactToPrint } from 'react-to-print';
+import { fetchUser } from '../../../../features/userSlice';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -48,6 +51,8 @@ export type answer = {
 };
 
 const NewTest = () => {
+	const componentRef = useRef<HTMLDivElement>(null);
+
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
@@ -56,13 +61,13 @@ const NewTest = () => {
 	const [ended, setEnded] = useState(false);
 	let dateTest: moment.Moment | null = null;
 	let horas = null;
-	const { course, test } = useSelector((state: RootState) => {
+	const { course, test, user } = useSelector((state: RootState) => {
 		return {
 			course: state.courses,
 			test: state.tests,
+			user: state.users,
 		};
 	});
-	console.log(test, course);
 	const handleEndTest = async (course_student_test_id: number) => {
 		const resp = await axiosPostDefault(
 			`api/test/courseStudentTestEnd`,
@@ -70,22 +75,37 @@ const NewTest = () => {
 				course_student_test_id: course_student_test_id,
 			}
 		);
-		console.log(resp);
+		console.log('dip');
+
 		setScore(resp.score);
 		setOpen(true);
 		setEnded(true);
 	};
 	const seeResults = async () => {
-		await dispatch(
+		const userdata = await dispatch(
+			fetchUser(
+				course.courseStudent?.student?.user_id
+					? course.courseStudent.student.user_id
+					: -1
+			)
+		).unwrap();
+		const testData = await dispatch(
 			fetchCourseStudentTest(
 				test.courseStudentTestSelected?.id
 					? test.courseStudentTestSelected.id
 					: -1
 			)
-		);
+		).unwrap();
+		console.log(testData);
+		console.log(userdata);
+		handlePrint();
 
 		// navigate('../../dashboard');
 	};
+	const handlePrint = useReactToPrint({
+		contentRef: componentRef,
+		documentTitle: `Curso-${course.courseStudent?.code}`,
+	});
 	const [testActive, setTestActive] = useState<boolean>(true);
 	if (test.status === 'loading') {
 		return (
@@ -181,6 +201,11 @@ const NewTest = () => {
 						</div>
 					</DialogFooter>
 				</Dialog>
+				<div style={{ display: 'none' }}>
+					<div ref={componentRef} className="flex flex-col w-full">
+						<ResultsTestPdf course={course} test={test} user={user} />
+					</div>
+				</div>
 			</>
 		);
 	}
@@ -416,15 +441,6 @@ const NewTest = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										<Typography
-											variant="h5"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Preguntas
-										</Typography>
-
 										<div className="flex flex-col gap-4">
 											{test.courseStudentTestSelected?.course_student_test_questions?.map(
 												(questionTest, index) => {

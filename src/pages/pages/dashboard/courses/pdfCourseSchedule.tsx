@@ -268,16 +268,16 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 				))}
 				{add_files.map((row, index) => (
 					<tr key={index} className="hover:bg-gray-50">
-						<td className="border border-gray-800 w-40 h-9 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800 w-40 h-6 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
-						<td className="border border-gray-800  h-9 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800  h-6 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
-						<td className="border border-gray-800  h-9 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800  h-6 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
-						<td className="border border-gray-800  h-9 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800  h-6 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
 					</tr>
