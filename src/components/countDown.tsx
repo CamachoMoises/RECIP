@@ -22,16 +22,16 @@ const Countdown = ({
 
 		// Actualiza cada segundo
 		const interval = setInterval(() => {
-			setTimeLeft((prev) => {
-				if (prev > 0) {
-					setActive(true);
-				} else {
-					setActive(false);
-					clearInterval(interval);
-				}
+			const now_2 = moment();
+			const timeLeft = Math.max(end.diff(now_2, 'seconds'), 0);
+			if (timeLeft) {
+				setActive(true);
+			} else {
+				setActive(false);
+				clearInterval(interval);
+			}
 
-				return prev > 0 ? prev - 1 : 0;
-			});
+			setTimeLeft(timeLeft > 0 ? timeLeft : 0);
 		}, 1000);
 
 		return () => clearInterval(interval);

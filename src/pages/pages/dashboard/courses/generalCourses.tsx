@@ -70,8 +70,6 @@ const GeneralCourses = () => {
 		lastCourseStudentCreatedId,
 		courseStudent,
 	} = useSelector((state: RootState) => {
-		console.log(state);
-
 		return (
 			state.courses || {
 				courseList: [],

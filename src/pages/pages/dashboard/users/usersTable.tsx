@@ -60,21 +60,17 @@ const UserTable = () => {
 		}
 	);
 	const [openNewUser, setOpenNewUser] = useState(false);
-	const handleOpen = async () => {
+	const handleOpen = async (user: user | null = null) => {
 		const { resp, status } = await axiosGetDefault(
 			'api/users/userDocType'
 		);
 		if (status > 199 && status < 400) {
 			setUserDocTypes(resp);
-			setUserSelect(null);
+			setUserSelect(user);
 			setOpenNewUser(!openNewUser);
 		} else {
 			toast.error('Ocurrio un error al consultar el servidor');
 		}
-	};
-	const handleOpenEdit = (user: user) => {
-		setUserSelect(user);
-		setOpenNewUser(true);
 	};
 	const switchUser = async (user: user) => {
 		const req: user = { ...user, is_active: !user.is_active };
@@ -141,7 +137,9 @@ const UserTable = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									className="flex flex-col text-center justify-center "
-									onClick={handleOpen}
+									onClick={() => {
+										handleOpen(null);
+									}}
 								>
 									<Plus size={15} className="mx-auto text-lg" />
 								</Button>
@@ -298,7 +296,7 @@ const UserTable = () => {
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 														onClick={() => {
-															handleOpenEdit(user);
+															handleOpen(user);
 														}}
 													>
 														<Pencil size={18} />

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Countdown from '../../../../components/countDown';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
@@ -56,6 +56,7 @@ const NewTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
+	const [seePDF, setSeePDF] = useState(false);
 	const [score, setScore] = useState(0);
 	const handleOpen = () => setOpen(!open);
 	const [ended, setEnded] = useState(false);
@@ -76,12 +77,6 @@ const NewTest = () => {
 			}
 		);
 		console.log('dip');
-
-		setScore(resp.score);
-		setOpen(true);
-		setEnded(true);
-	};
-	const seeResults = async () => {
 		const userdata = await dispatch(
 			fetchUser(
 				course.courseStudent?.student?.user_id
@@ -98,6 +93,12 @@ const NewTest = () => {
 		).unwrap();
 		console.log(testData);
 		console.log(userdata);
+		setScore(resp.score);
+		setOpen(true);
+		setEnded(true);
+		setSeePDF(true);
+	};
+	const seeResults = async () => {
 		handlePrint();
 
 		// navigate('../../dashboard');
@@ -107,6 +108,21 @@ const NewTest = () => {
 		documentTitle: `Curso-${course.courseStudent?.code}`,
 	});
 	const [testActive, setTestActive] = useState<boolean>(true);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const endTimeTest = async () => {
+		handleEndTest(
+			test.courseStudentTestSelected?.id
+				? test.courseStudentTestSelected.id
+				: -1
+		);
+	};
+
+	useEffect(() => {
+		if (!testActive && !ended) {
+			endTimeTest();
+		}
+	}, [testActive, endTimeTest, ended]);
+
 	if (test.status === 'loading') {
 		return (
 			<>
@@ -203,20 +219,25 @@ const NewTest = () => {
 				</Dialog>
 				<div style={{ display: 'none' }}>
 					<div ref={componentRef} className="flex flex-col w-full">
-						<ResultsTestPdf course={course} test={test} user={user} />
+						{seePDF && (
+							<>
+								<ResultsTestPdf
+									course={course}
+									test={test}
+									user={user}
+								/>
+							</>
+						)}
 					</div>
 				</div>
 			</>
 		);
 	}
 	if (!course.courseStudent) {
-		navigate('test');
+		navigate('../test');
 	} else {
-		if (course.courseStudent.course_student_tests?.length === 0) {
-			navigate('test');
-		}
 		if (course.courseStudent.schedules?.length === 0) {
-			navigate('test');
+			navigate('../test');
 		} else {
 			dateTest = course.courseStudent.schedules
 				? moment(
@@ -230,7 +251,7 @@ const NewTest = () => {
 			horas = currentDate.diff(dateTest, 'hours', true);
 		}
 		if (!horas || horas < 0 || horas > 2) {
-			navigate('test');
+			navigate('../test');
 		}
 	}
 	// console.log('horas', test.courseStudentTestSelected);

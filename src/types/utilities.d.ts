@@ -176,6 +176,8 @@ export interface user {
     instructor?: instructor;
     password?: string;
     phone: string;
+    country_name?: string;
+    flag: string | null;
     uuid: string | null;
     user_doc_type_id?: number;
     user_doc_type?: userDocType

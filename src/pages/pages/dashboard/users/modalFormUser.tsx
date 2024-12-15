@@ -9,6 +9,7 @@ import {
 	Select,
 	Switch,
 } from '@material-tailwind/react';
+import 'react-phone-input-2/lib/style.css';
 import { user, userDocType } from '../../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useRef, useState } from 'react';
@@ -19,6 +20,9 @@ import {
 	createUser,
 	updateUser,
 } from '../../../../features/userSlice';
+import PhoneInput, { CountryData } from 'react-phone-input-2';
+import countries from 'world-countries';
+import { getFlagEmoji } from '../../../../services/utilities';
 type Inputs = {
 	name: string;
 	doc_number: number;
@@ -28,6 +32,7 @@ type Inputs = {
 	email: string;
 	password: string;
 	password2: string;
+	country_name: string;
 };
 const ModalFormUser = ({
 	userSelect,
@@ -37,14 +42,29 @@ const ModalFormUser = ({
 }: {
 	userSelect: user | null;
 	openNewUser: boolean;
-	handleOpen: () => void;
+	handleOpen: (user?: user | null) => void;
 	userDocTypes: userDocType[];
 }) => {
+	const [countryInfo, setCountryInfo] = useState<{
+		name: string;
+		flag: string;
+	}>({
+		name: userSelect?.country_name ? userSelect.country_name : '',
+		flag: userSelect?.flag ? userSelect.flag : '',
+	});
+	const countryOptions = countries.map((country) => ({
+		value: country.cca2.toLowerCase(),
+		label: `${getFlagEmoji(country.cca2.toLowerCase())} ${
+			country.name.common
+		}`,
+		name: country.name.common,
+	}));
 	const {
 		register,
 		handleSubmit,
 		watch,
 		control,
+		setValue,
 		formState: { errors },
 	} = useForm<Inputs>({
 		defaultValues: {
@@ -53,6 +73,7 @@ const ModalFormUser = ({
 			last_name: userSelect?.last_name,
 			phone: userSelect?.phone,
 			email: userSelect?.email,
+			country_name: userSelect?.country_name,
 			password: '',
 			password2: '',
 			user_doc_type: userSelect?.user_doc_type?.id
@@ -81,6 +102,7 @@ const ModalFormUser = ({
 	const togglePasswordVisiblity = () => {
 		setPasswordShown((cur) => !cur);
 	};
+
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		if (data.user_doc_type) {
 			const req: user = {
@@ -91,12 +113,16 @@ const ModalFormUser = ({
 				doc_number: data.doc_number,
 				last_name: data.last_name,
 				phone: data.phone,
+				country_name: data.country_name,
+				flag: countryInfo.flag,
 				email: data.email,
 				is_active: isActive,
 				is_staff: isStaff,
 				is_superuser: isSuperuser,
 				password: data.password,
 			};
+			console.log(req);
+
 			handleOpen();
 			if (userSelect) {
 				dispatch(updateUser(req));
@@ -129,6 +155,9 @@ const ModalFormUser = ({
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
+					{String.fromCodePoint(
+						...'US'.split('').map((c) => 127397 + c.charCodeAt(0))
+					)}
 					<div className="container mx-auto p-3">
 						<div className="grid grid-cols-3 gap-4">
 							<div className="">
@@ -178,7 +207,7 @@ const ModalFormUser = ({
 									</span>
 								)}
 							</div>
-							<div className="">
+							{/* <div className="">
 								<Input
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -200,7 +229,86 @@ const ModalFormUser = ({
 										{errors.phone.message}
 									</span>
 								)}
+							</div> */}
+							{/* Teléfono */}
+							{/* Mostrar bandera seleccionada */}
+
+							<div>
+								<Controller
+									name="country_name"
+									control={control}
+									rules={{
+										required:
+											'Seleccionar la nacionalidad es obligatorio',
+									}}
+									render={({ field }) => (
+										<Select
+											label="Seleccionar Nacionalidad"
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											{...field}
+											placeholder="Selecciona tu nacionalidad"
+										>
+											{countryOptions.map((country) => (
+												<Option
+													key={country.value}
+													value={country.name}
+												>
+													{country.label}
+												</Option>
+											))}
+										</Select>
+									)}
+								/>
+								{errors.country_name && (
+									<p className="text-red-500 text-sm mt-1">
+										{errors.country_name.message}
+									</p>
+								)}
 							</div>
+							<div>
+								<Controller
+									name="phone"
+									control={control}
+									rules={{
+										required: 'El número de teléfono es obligatorio',
+									}}
+									render={({ field }) => (
+										<PhoneInput
+											{...field}
+											country={'ve'}
+											inputStyle={{
+												width: '100%',
+												paddingLeft: '3rem',
+												height: '2.5rem',
+												borderRadius: '0.5rem',
+												borderColor: errors.phone ? 'red' : '#b0bec5',
+											}}
+											dropdownStyle={{
+												borderRadius: '0.5rem',
+											}}
+											onChange={(value, countryData: CountryData) => {
+												console.log(countryData.countryCode);
+
+												field.onChange(value);
+
+												setValue('phone', value);
+												setCountryInfo({
+													name: countryData.name,
+													flag: getFlagEmoji(countryData.countryCode),
+												});
+											}}
+										/>
+									)}
+								/>
+								{errors.phone && (
+									<p className="text-red-500 text-sm mt-1">
+										{errors.phone.message}
+									</p>
+								)}
+							</div>
+							{/* Información del país */}
+
 							<div className="">
 								<Controller
 									name="user_doc_type"
@@ -323,13 +431,14 @@ const ModalFormUser = ({
 										},
 									})}
 								/>
-								{errors.password2 && (
+								{errors.password && (
 									<span className="text-red-500 text-sm/[8px] py-2">
-										{errors.password2.message}
+										{errors.password.message}
 									</span>
 								)}
 							</div>
 						</div>
+						{/* <code>{JSON.stringify(errors)}</code> */}
 						<div className="flex flex-row gap-3 py-3">
 							<div className="basis-1/2">
 								<div className="flex flex-row gap-5">
@@ -401,7 +510,9 @@ const ModalFormUser = ({
 					<Button
 						variant="text"
 						color="red"
-						onClick={handleOpen}
+						onClick={() => {
+							handleOpen(null);
+						}}
 						className="mr-1"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}

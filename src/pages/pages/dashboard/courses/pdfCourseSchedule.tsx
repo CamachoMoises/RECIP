@@ -133,6 +133,7 @@ const PDFCourseSchedule = ({
 										{studentSelect?.phone}
 										<div className="fle flex-row">
 											<strong>Pais:</strong>
+											{studentSelect?.country_name}
 										</div>
 									</td>
 								</tr>
@@ -177,7 +178,19 @@ const PDFCourseSchedule = ({
 											Corregido el: %
 										</td>
 										<td className="border border-gray-800 px-4 text-left text-xs">
-											Fecha de completado:
+											Fecha de completado:{' '}
+											{course.courseStudent && (
+												<>
+													{moment(course.courseStudent.date)
+														.add(
+															course.courseSelected?.days
+																? course.courseSelected.days
+																: -1,
+															'days'
+														)
+														.format('DD-MM-YYYY')}
+												</>
+											)}
 										</td>
 									</tr>
 									<tr>

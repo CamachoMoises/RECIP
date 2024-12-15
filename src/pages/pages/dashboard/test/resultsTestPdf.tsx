@@ -134,6 +134,7 @@ const ResultsTestPdf = ({
 										{user.userSelected?.phone}
 										<div className="fle flex-row">
 											<strong>Pais:</strong>
+											{user.userSelected?.country_name}
 										</div>
 									</td>
 								</tr>
@@ -187,7 +188,7 @@ const ResultsTestPdf = ({
 							findAnswer = JSON.parse(
 								question.course_student_test_answer?.resp
 									? question.course_student_test_answer.resp
-									: ''
+									: '[]'
 							);
 							for (const answer of findAnswer) {
 								if (answer.check) {
@@ -228,7 +229,7 @@ const ResultsTestPdf = ({
 							findAnswer = JSON.parse(
 								question.course_student_test_answer?.resp
 									? question.course_student_test_answer.resp
-									: ''
+									: '[]'
 							);
 
 							if (findAnswer.length > 0) {
@@ -241,7 +242,7 @@ const ResultsTestPdf = ({
 							findAnswer = JSON.parse(
 								question.course_student_test_answer?.resp
 									? question.course_student_test_answer.resp
-									: ''
+									: '[]'
 							);
 
 							if (findAnswer.length > 0) {
@@ -298,8 +299,10 @@ const ResultsTestPdf = ({
 										onPointerLeaveCapture={undefined}
 									>
 										Puntaje :
-										{question.course_student_test_answer?.score}/
-										{question.question?.question_type?.value}
+										{question.course_student_test_answer?.score
+											? question.course_student_test_answer.score
+											: 0}
+										/{question.question?.question_type?.value}
 									</Typography>
 								</div>
 							</div>
