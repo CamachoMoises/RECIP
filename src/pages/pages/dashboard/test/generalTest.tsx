@@ -62,7 +62,7 @@ const GeneralTest = () => {
 		await dispatch(
 			createCourseStudentTest({
 				course_student_id: CL.id ? CL.id : -1,
-				test_id: 1,
+				test_id: CL.course_id,
 				date: date,
 			})
 		);

@@ -158,7 +158,6 @@ const PDFCourseSchedule = ({
 
 						<div className="flex flex-col gap-3">
 							{/* Tabla 1 */}
-
 							<Table
 								columns={[
 									'Módulo',
@@ -167,65 +166,76 @@ const PDFCourseSchedule = ({
 									'Instructor',
 								]}
 								data={data}
-							/>
-							<table className="table-auto border-collapse border border-gray-300">
-								<tbody className="bg-gray-100">
-									<tr>
-										<td className="border border-gray-800 px-4 text-left text-xs">
-											Resultados del examen: %
-										</td>
-										<td className="border border-gray-800 px-4 text-left text-xs">
-											Corregido el: %
-										</td>
-										<td className="border border-gray-800 px-4 text-left text-xs">
-											Fecha de completado:{' '}
-											{course.courseStudent && (
-												<>
-													{moment(course.courseStudent.date)
-														.add(
-															course.courseSelected?.days
-																? course.courseSelected.days
-																: -1,
-															'days'
-														)
-														.format('DD-MM-YYYY')}
-												</>
-											)}
-										</td>
-									</tr>
-									<tr>
-										<td className="border border-gray-800 px-4  text-left text-xs">
-											Resultados para repetir: %
-										</td>
-										<td className="border border-gray-800 px-4  text-left text-xs">
-											Corregido el: %
-										</td>
-										<td className="border border-gray-800 px-4  text-left text-xs">
-											Total de horas: {course.courseSelected?.hours}{' '}
-											<br />
-											Total de dias: {course.courseSelected?.days}
-										</td>
-									</tr>
-									<tr>
-										<td
-											colSpan={3}
-											className="border border-gray-800 px-4 py-2 text-left text-tahiti-600 text-xs"
-										>
-											Nombre del instructor:
-										</td>
-									</tr>
-									<tr>
-										<td
-											colSpan={3}
-											className="border border-gray-800 px-4 py-2 text-left text-xs"
-										>
-											El resultado de las pruebas inferiores al 85%:
-											Reentrenamiento en módulos donde el conocimiento
-											y compresión del estudiante es deficiente.
-										</td>
-									</tr>
-								</tbody>
-							</table>
+							/>{' '}
+							{course.courseStudent?.score && (
+								<table className="table-auto border-collapse border border-gray-300">
+									<tbody className="bg-gray-100">
+										<tr>
+											<td className="border border-gray-800 px-4 text-left text-xs">
+												Resultados del examen:{' '}
+												{course.courseStudent.score >= 85
+													? course.courseStudent.score
+													: ''}{' '}
+												%
+											</td>
+											<td className="border border-gray-800 px-4 text-left text-xs">
+												Corregido el: 100%
+											</td>
+											<td className="border border-gray-800 px-4 text-left text-xs">
+												Fecha de completado:{' '}
+												{course.courseStudent && (
+													<>
+														{moment(course.courseStudent.date)
+															.add(
+																course.courseSelected?.days
+																	? course.courseSelected.days
+																	: -1,
+																'days'
+															)
+															.format('DD-MM-YYYY')}
+													</>
+												)}
+											</td>
+										</tr>
+										<tr>
+											<td className="border border-gray-800 px-4  text-left text-xs">
+												Resultados para repetir:{' '}
+												{course.courseStudent.score < 85
+													? course.courseStudent.score
+													: ''}{' '}
+												%
+											</td>
+											<td className="border border-gray-800 px-4  text-left text-xs">
+												Corregido el: 100%
+											</td>
+											<td className="border border-gray-800 px-4  text-left text-xs">
+												Total de horas: {course.courseSelected?.hours}{' '}
+												<br />
+												Total de dias: {course.courseSelected?.days}
+											</td>
+										</tr>
+										<tr>
+											<td
+												colSpan={3}
+												className="border border-gray-800 px-4 py-2 text-left text-tahiti-600 text-xs"
+											>
+												Nombre del instructor:
+											</td>
+										</tr>
+										<tr>
+											<td
+												colSpan={3}
+												className="border border-gray-800 px-4 py-2 text-left text-xs"
+											>
+												El resultado de las pruebas inferiores al 85%:
+												Reentrenamiento en módulos donde el
+												conocimiento y compresión del estudiante es
+												deficiente.
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							)}
 						</div>
 					</div>
 				</div>

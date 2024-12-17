@@ -79,28 +79,6 @@ const NavBar = () => {
 					{/* <div className="mr-4 hidden lg:block">{navList}</div> */}
 					<div className="flex items-center gap-x-1">
 						<Button
-							variant="text"
-							size="sm"
-							className="hidden lg:inline-block"
-							onClick={() => navigate('/about')}
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							About
-						</Button>
-						<Button
-							variant="gradient"
-							size="sm"
-							className="hidden lg:inline-block"
-							placeholder={undefined}
-							onClick={() => navigate('/contact')}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Contact
-						</Button>
-						<Button
 							variant="gradient"
 							size="sm"
 							className="hidden lg:inline-block"
@@ -120,18 +98,7 @@ const NavBar = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Dashboard
-						</Button>
-						<Button
-							variant="gradient"
-							size="sm"
-							className="hidden lg:inline-block"
-							placeholder={undefined}
-							onClick={() => navigate('/nuevoCurso')}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Nuevo curso
+							Pricipal
 						</Button>
 					</div>
 					<IconButton
