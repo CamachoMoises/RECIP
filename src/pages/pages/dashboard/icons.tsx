@@ -1,6 +1,7 @@
 import { Button } from '@material-tailwind/react';
 import {
 	BookOpenCheck,
+	Cog,
 	Newspaper,
 	NotebookPen,
 	NotebookText,
@@ -15,7 +16,7 @@ const Icons = () => {
 
 	return (
 		<div>
-			<div className="grid grid-cols-1 d:grid-cols-2 lg:grid-cols-4 gap-y-6 text-center px-3 py-6">
+			<div className="grid grid-cols-1 d:grid-cols-2 lg:grid-cols-4 gap-y-6 text-center px-3">
 				<div>
 					<Button
 						title="Usuarios"
@@ -86,7 +87,7 @@ const Icons = () => {
 				</div>
 				<div>
 					<Button
-						title="Bancos"
+						title="Reportes"
 						className="text-center w-40 h-32"
 						variant="gradient"
 						placeholder={undefined}
@@ -97,12 +98,12 @@ const Icons = () => {
 							<NotebookText size={60} />
 						</div>{' '}
 						<br />
-						reportes
+						Reportes
 					</Button>
 				</div>
 				<div>
 					<Button
-						title="Bancos"
+						title="Examenes"
 						className="text-center w-40 h-32"
 						variant="gradient"
 						placeholder={undefined}
@@ -119,7 +120,7 @@ const Icons = () => {
 				</div>
 				<div>
 					<Button
-						title="Bancos"
+						title="Evaluacion"
 						className="text-center w-40 h-32"
 						variant="gradient"
 						placeholder={undefined}
@@ -132,6 +133,23 @@ const Icons = () => {
 						</div>{' '}
 						<br />
 						Evaluaciones
+					</Button>
+				</div>
+				<div>
+					<Button
+						title="Configuracion"
+						className="text-center w-40 h-32"
+						variant="gradient"
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						onClick={() => navigate('config')}
+					>
+						<div className="flex justify-center">
+							<Cog size={60} />
+						</div>{' '}
+						<br />
+						Configuracion
 					</Button>
 				</div>
 			</div>

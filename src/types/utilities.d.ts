@@ -184,7 +184,10 @@ export interface user {
     createdAt?: string;
     updatedAt?: string;
 }
-
+export type daySubjectType = {
+    day: number;
+    hours: number;
+}
 export type courseStudent = {
     id: number;
     course_id: number;

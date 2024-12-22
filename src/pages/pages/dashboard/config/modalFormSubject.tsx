@@ -63,6 +63,7 @@ const ModalFormSubject = ({
 		handleOpen();
 		if (subjectSelected) {
 			await dispatch(updateSubject(newSubject));
+			console.log('Asignatura actualizada:', newSubject.id);
 		} else {
 			await dispatch(createSubject(newSubject));
 		}

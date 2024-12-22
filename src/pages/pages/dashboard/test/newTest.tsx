@@ -15,6 +15,8 @@ import {
 	DialogHeader,
 	DialogBody,
 	DialogFooter,
+	List,
+	ListItem,
 } from '@material-tailwind/react';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
@@ -185,7 +187,7 @@ const NewTest = () => {
 							>
 								Volver
 							</Button>
-							{score > 1 ? (
+							{score > 20 ? (
 								<Button
 									variant="filled"
 									color="green"
@@ -259,7 +261,7 @@ const NewTest = () => {
 	return (
 		<div className="container">
 			<PageTitle
-				title={`Examen de ${course.courseSelected?.name} ${test.courseStudentTestSelected?.code}`}
+				title={`Examen de ${course.courseSelected?.name} ${course.courseSelected?.course_type.name} ${course.courseSelected?.course_level.name} ${test.courseStudentTestSelected?.code}`}
 				breadCrumbs={breadCrumbs}
 			/>
 			{dateTest && (
@@ -277,8 +279,16 @@ const NewTest = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Fecha y hora de inicio:{' '}
-								{dateTest.format('DD/MM/YYYY HH:mm')}
+								hora de inicio: {dateTest.format('HH:mm a')}
+							</Typography>
+							<Typography
+								variant="h5"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Hora de cierre:{' '}
+								{dateTest.add(2, 'hours').format('HH:mm a')}
 							</Typography>
 							<div className="flex flex-col justify-between">
 								<Typography
@@ -446,6 +456,79 @@ const NewTest = () => {
 									100 puntos.
 								</Typography>
 							</div>
+						</div>
+					</div>
+					<br />
+					<div className="flex flex-row gap-4 justify-start">
+						<div className="mx-auto p-6 bg-white shadow-lg rounded w-full">
+							<Typography
+								variant="h5"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								INSTRUCCIONES:
+							</Typography>
+							<List
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<ListItem
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Lea cuidadosamente cada pregunta.
+								</ListItem>
+								<ListItem
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Consulte con el supervisor cualquier duda que se le
+									presente.
+								</ListItem>
+								<ListItem
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									El examen se realizará a libro cerrado.
+								</ListItem>
+								<ListItem
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Una vez que finalice el examen, verifíquelo y
+									precione finalizar.
+								</ListItem>
+								<ListItem
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									El examen tendrá una duración de una hora y media
+									(02:00 HRS) o (120 Mins) .
+								</ListItem>
+								<ListItem
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Debe tomar en consideración que la honestidad debe
+									ser siempre nuestra virtud.
+								</ListItem>
+								<ListItem
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									La mínima aprobatoria en el puntaje total será 85
+									puntos.
+								</ListItem>
+							</List>
 						</div>
 					</div>
 					<br />

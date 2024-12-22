@@ -10,6 +10,7 @@ import {
 } from '@material-tailwind/react';
 import {
 	breadCrumbsItems,
+	daySubjectType,
 	subject,
 } from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
@@ -33,8 +34,8 @@ const breadCrumbs: breadCrumbsItems[] = [
 		href: '/dashboard',
 	},
 	{
-		name: 'Cursos',
-		href: '/dashboard/courses',
+		name: 'Configuracion',
+		href: '/dashboard/config',
 	},
 ];
 const CourseDetail = () => {
@@ -54,7 +55,7 @@ const CourseDetail = () => {
 		dispatch(fetchCourse(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener los usuarios
 	}, [dispatch, id]);
 	if (!id || !course.courseSelected) {
-		navigate('/dashboard/courses');
+		navigate('/dashboard/config');
 	} else {
 		const selectedCourse = course.courseSelected;
 		const subjectList = subject.subjectList;
@@ -127,6 +128,27 @@ const CourseDetail = () => {
 				</>
 			);
 		}
+		let hoursToDays: daySubjectType[] = [];
+
+		if (subject.subjectList) {
+			const subjectDays = subject.subjectList.map((sub) => {
+				const dayT = sub.subject_days;
+				const dayS = dayT?.map((DT) => {
+					if (DT.status) {
+						return DT.day;
+					}
+				});
+				let day: number = -1;
+				if (dayS) {
+					if (dayS.length > 0) {
+						day = dayS[0] ? dayS[0] : -1;
+					}
+				}
+				return { day: day, hours: sub.hours };
+			});
+			hoursToDays = subjectDays;
+		}
+
 		if (selectedCourse) {
 			const days = Array.from(
 				{ length: selectedCourse.days },
@@ -135,7 +157,7 @@ const CourseDetail = () => {
 			return (
 				<>
 					<PageTitle
-						title={`${selectedCourse.name}`}
+						title={`Editar Asiganciones del curso ${selectedCourse.name}`}
 						breadCrumbs={breadCrumbs}
 					/>
 					<div className="flex lg:flex-col  gap-2">
@@ -153,21 +175,66 @@ const CourseDetail = () => {
 									onPointerLeaveCapture={undefined}
 								>
 									<div className="flex flex-col w-full">
+										<div className="flex flex-row justify-between">
+											<Typography
+												variant="lead"
+												className="text-left"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Nombre: {selectedCourse.name}
+											</Typography>
+											<Typography
+												variant="lead"
+												className="text-left"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Curso {selectedCourse.course_level.name}
+											</Typography>
+										</div>
+										<div className="flex flex-row justify-between">
+											<Typography
+												variant="lead"
+												className="text-left"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Descripcion: {selectedCourse.description}
+											</Typography>
+											<Typography
+												variant="lead"
+												className="text-left"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Tipo: {selectedCourse.course_type.name}
+											</Typography>
+										</div>
 										<Typography
-											variant="h5"
+											variant="small"
+											className="text-left"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{selectedCourse.name}
-										</Typography>
-										<Typography
-											variant="lead"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Descripcion: {selectedCourse.description}
+											{days.map((day, index) => {
+												let hoursD = 0;
+												hoursToDays.forEach((HTD) => {
+													if (HTD.day === day.id + 1) {
+														hoursD = hoursD + HTD.hours;
+													}
+												});
+												return (
+													<span key={`dayDetails-${index}`}>
+														{day.name}: {hoursD} horas \{'     '}
+													</span>
+												);
+											})}
 										</Typography>
 									</div>
 								</CardBody>

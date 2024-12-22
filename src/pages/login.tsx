@@ -8,11 +8,30 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import { KeyRound } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+	const navigate = useNavigate();
+
 	return (
 		<>
-			<div className="flex flex-row w-full justify-center my-5">
+			<div className="fixed left-8 z-20 mt-10">
+				<video
+					className="rounded-lg shadow-lg"
+					width="550"
+					height="550"
+					loop
+					autoPlay
+					muted
+				>
+					<source
+						src="/video/video_background.mp4"
+						type="video/mp4"
+					/>
+					Tu navegador no soporta el elemento de video.
+				</video>
+			</div>
+			<div className="flex flex-row w-full fixed justify-center my-16 ms-32">
 				<Card
 					className="w-96"
 					shadow={true}
@@ -21,8 +40,8 @@ const Login = () => {
 					onPointerLeaveCapture={undefined}
 				>
 					<CardHeader
-						variant="gradient"
-						color="gray"
+						variant="filled"
+						color="blue-gray"
 						className="mb-4 grid h-28 place-items-center"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
@@ -80,6 +99,7 @@ const Login = () => {
 								<Input
 									name="password"
 									size="lg"
+									type="password"
 									crossOrigin={undefined}
 									maxLength={20}
 									placeholder="********"
@@ -94,13 +114,17 @@ const Login = () => {
 							</div>
 							<Button
 								type="submit"
+								color="blue-gray"
 								className="mt-6 flex justify-center"
 								fullWidth
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
+								onClick={() => {
+									navigate('../dashboard');
+								}}
 							>
-								<KeyRound />
+								Ingresar
 							</Button>
 						</form>
 					</CardBody>
@@ -114,9 +138,9 @@ const Login = () => {
 								Acceso no autorizado
 							</span>
 						)} */}
-						<span className="text-red-500 text-center w-full">
+						{/* <span className="text-red-500 text-center w-full">
 							Acceso no autorizado
-						</span>
+						</span> */}{' '}
 					</CardFooter>
 				</Card>
 			</div>

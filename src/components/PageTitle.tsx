@@ -1,7 +1,13 @@
 'use client';
 import cn from '../lib/utils';
 import React, { useTransition } from 'react';
-import { Breadcrumbs, Button } from '@material-tailwind/react';
+import {
+	Breadcrumbs,
+	Button,
+	Card,
+	CardBody,
+	Typography,
+} from '@material-tailwind/react';
 import { ChevronLeft, Home } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -32,13 +38,31 @@ export default function PageTitle({
 	};
 	return (
 		<>
-			<div className="flex flex-col py-3">
+			<div className="flex flex-col py-3 gap-3">
 				<div className="flex-auto px-1">
-					<h1 className={cn('text-2xl font-semibold', classname)}>
-						{title}
-					</h1>
+					<Card
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						<CardBody
+							className="pb-12 pt-4"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<Typography
+								className={cn('text-2xl font-semibold', classname)}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								{title}
+							</Typography>
+						</CardBody>
+					</Card>
 				</div>
-				<div className="flex flex-row gap-1">
+				<div className="fixed flex flex-row gap-2 px-3 py-12 z-20">
 					<Button
 						onClick={handleBack}
 						variant="text"

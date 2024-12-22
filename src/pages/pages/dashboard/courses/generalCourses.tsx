@@ -35,7 +35,12 @@ import ErrorPage from '../../../../components/ErrorPage';
 import { axiosGetDefault } from '../../../../services/axios';
 import ModalFormCourse from './modalFormCourse';
 import toast from 'react-hot-toast';
-import { BookCheck, CalendarCheck, Pencil, Plus } from 'lucide-react';
+import {
+	// BookCheck,
+	CalendarCheck,
+	// Pencil,
+	// Plus
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchSubjects } from '../../../../features/subjectSlice';
 import {
@@ -133,14 +138,14 @@ const GeneralCourses = () => {
 	const handleNewCourseSchedule = async (course_id: number) => {
 		dispatch(createCourseStudent(course_id));
 	};
-	const navigateCourseStudent = async (CL: courseStudent) => {
-		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
-		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
-		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
+	const navigateCourseStudent = async (CS: courseStudent) => {
+		await dispatch(fetchSubjects(CS.course_id ? CS.course_id : -1));
+		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
+		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
 		await dispatch(fetchInstructors());
 		await dispatch(fetchStudents());
-		await dispatch(fetchSchedule(CL.id ? CL.id : -1));
-		navigate(`../new_course/${CL.id}/${CL.course_id}`);
+		await dispatch(fetchSchedule(CS.id ? CS.id : -1));
+		navigate(`../new_course/${CS.id}/${CS.course_id}`);
 	};
 	if (status === 'loading') {
 		return (
@@ -159,73 +164,72 @@ const GeneralCourses = () => {
 	return (
 		<div className="container">
 			<PageTitle title="Cursos" breadCrumbs={breadCrumbs} />
-			<div className="grid lg:grid-cols-4 gap-2">
-				<div className="flex flex-col col-span-3">
-					<Card
+			<div className="flex flex-col">
+				<Card
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<CardBody
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<CardBody
+						<Typography
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
+							variant="h5"
 						>
-							<Typography
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-								variant="h5"
-							>
-								Cursos actuales
-							</Typography>
-							<div className="grid grid-cols-2 gap-2">
-								{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
-								{courseList.map((course) => {
-									return (
-										<div key={course.id}>
-											<Card
+							Cursos actuales
+						</Typography>
+						<div className="grid grid-cols-2 gap-2">
+							{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
+							{courseList.map((course) => {
+								return (
+									<div key={course.id}>
+										<Card
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<CardBody
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
+												className="flex flex-col justify-center"
 											>
-												<CardBody
+												<Typography
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture
+													variant="lead"
+												>
+													{course.name}
+												</Typography>
+												<Typography
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture
+													variant="small"
+												>
+													{course.course_level.name}
+												</Typography>
+												<Typography
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													className="flex flex-col justify-center"
 												>
-													<Typography
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture
-														variant="lead"
-													>
-														{course.name}
-													</Typography>
-													<Typography
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture
-														variant="small"
-													>
-														{course.course_level.name}
-													</Typography>
-													<Typography
+													{course.course_type.name}
+												</Typography>
+												<div className="flex flex-row justify-center">
+													<ButtonGroup
+														size="sm"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														{course.course_type.name}
-													</Typography>
-													<div className="flex flex-row justify-center">
-														<ButtonGroup
-															size="sm"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															<Button
+														{/* <Button
 																title="Editar el Curso"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
@@ -235,7 +239,7 @@ const GeneralCourses = () => {
 																<Pencil size={20} />
 															</Button>
 															<Button
-																title="Asignaciones el Curso"
+																title="Asignaciones del Curso"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
@@ -244,67 +248,36 @@ const GeneralCourses = () => {
 																}
 															>
 																<BookCheck size={20} />
-															</Button>
-															<Button
-																title="Agendar nuevo curso"
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
-																onClick={() =>
-																	handleNewCourseSchedule(
-																		course.id ? course.id : -1
-																	)
-																}
-															>
+															</Button> */}
+														<Button
+															title="Agendar nuevo curso"
+															className="flex flex-col justify-center text-center align-middle"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															onClick={() =>
+																handleNewCourseSchedule(
+																	course.id ? course.id : -1
+																)
+															}
+														>
+															Agendar nuevo curso
+															<div className="flex flex-row w-full justify-center">
 																<CalendarCheck size={20} />
-															</Button>
-														</ButtonGroup>
-													</div>
-												</CardBody>
-											</Card>
-										</div>
-									);
-								})}
-							</div>
-						</CardBody>
-					</Card>
-				</div>
-				<div className="flex flex-col">
-					<Card
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<CardBody
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<Typography
-								variant="h5"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Agregar
-							</Typography>
-							<div className="flex flex-col">
-								<Button
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									className="flex flex-col text-center justify-center "
-									onClick={() => {
-										handleOpenEdit();
-									}}
-								>
-									<Plus size={15} className="mx-auto text-lg" />
-								</Button>
-							</div>
-						</CardBody>
-					</Card>
-				</div>
+															</div>
+														</Button>
+													</ButtonGroup>
+												</div>
+											</CardBody>
+										</Card>
+									</div>
+								);
+							})}
+						</div>
+					</CardBody>
+				</Card>
 			</div>
+
 			<div className="flex flex-col pt-4">
 				<Card
 					placeholder={undefined}

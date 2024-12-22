@@ -28,7 +28,7 @@ import ErrorPage from '../../../../components/ErrorPage';
 import moment from 'moment';
 import { useReactToPrint } from 'react-to-print';
 import { Printer } from 'lucide-react';
-import NewCourseSubject from './newCourseSubject';
+import NewCourseSubject from './newCourseStudentScheduleSubject';
 import PDFCourseSchedule from './pdfCourseSchedule';
 import { useNavigate } from 'react-router-dom';
 
@@ -92,7 +92,6 @@ const NewCourse = () => {
 		if (studentSelected) {
 			setStudentSelect(studentSelected);
 			studentSelectRef.current = studentSelected;
-			console.log(studentSelectRef.current?.student?.id);
 		}
 		handleChange();
 	};

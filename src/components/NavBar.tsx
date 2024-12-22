@@ -58,20 +58,41 @@ const NavBar = () => {
 			onPointerLeaveCapture={undefined}
 		>
 			<div className="flex items-center justify-between text-blue-gray-900">
-				<div className="flex flex-row align-bottom justify-center gap-2">
+				<div className="flex flex-col fixed z-[-1] justify-center w-full mt-[-3rem]">
+					<Typography
+						variant="h1"
+						className="pt-10 font-sans"
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						RECIP
+					</Typography>{' '}
+					<div className="">
+						<Typography
+							variant="small"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Registro de Evaluacion, Capacitación e Instrución del
+							Piloto
+						</Typography>
+					</div>
+				</div>
+				<div className="flex flex-col">
 					<img
 						src="/images/logo.png"
 						alt="Descripción de la imagen"
 						width={150}
 					/>
 					<Typography
-						variant="h5"
-						className="pt-10"
+						variant="small"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						R.E.C.I.P
+						J-500255586
 					</Typography>
 				</div>
 
