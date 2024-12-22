@@ -29,6 +29,11 @@ import { BookCheck, Pencil, Plus } from 'lucide-react';
 import ModalFormCourse from './modalFormCourse';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
+import {
+	fetchQuestionTypes,
+	updateQuestionTypes,
+} from '../../../../features/testSlice';
+import QuestionType from './questionType';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -52,19 +57,12 @@ const GeneralConfig = () => {
 	>(null);
 	const [open, setOpen] = useState(1);
 
-	const { courseList, status, error, lastCreatedId } = useSelector(
-		(state: RootState) => {
-			return (
-				state.courses || {
-					courseList: [],
-					status: 'idle2',
-					error: null,
-				}
-			);
-		}
-	);
+	const { course, test } = useSelector((state: RootState) => {
+		return { course: state.courses, test: state.tests };
+	});
 	useEffect(() => {
 		dispatch(fetchCourses());
+		dispatch(fetchQuestionTypes());
 	}, [dispatch]);
 
 	const handleOpen = (value: number) =>
@@ -91,10 +89,23 @@ const GeneralConfig = () => {
 			toast.error('Ocurrio un error al consultar el servidor');
 		}
 	};
-
+	const updateQuestionTypeFunc = async (
+		questionTypeId: number,
+		value: number
+	) => {
+		const questionType = test.questionTypes.find(
+			(QT) => QT.id === questionTypeId
+		);
+		if (questionType) {
+			const newQuestionType = { ...questionType, value: value };
+			dispatch(updateQuestionTypes(newQuestionType));
+		} else {
+			toast.error('No se encontro el tipo de pregunta');
+		}
+	};
 	useEffect(() => {
 		const editCourse = (id: number) => {
-			const EC = courseList.find((course) => course.id === id);
+			const EC = course.courseList.find((course) => course.id === id);
 			if (EC) {
 				handleOpenEdit(EC);
 			} else {
@@ -102,11 +113,16 @@ const GeneralConfig = () => {
 			}
 		};
 
-		if (lastCreatedId) {
-			editCourse(lastCreatedId); // Ejecuta la lógica para editar el curso según `lastCreatedId`
+		if (course.lastCreatedId) {
+			editCourse(course.lastCreatedId); // Ejecuta la lógica para editar el curso según `lastCreatedId`
 			dispatch(setLastCreatedId(null));
 		}
-	}, [lastCreatedId, dispatch, courseList, handleOpenEdit]);
+	}, [
+		course.lastCreatedId,
+		dispatch,
+		course.courseList,
+		handleOpenEdit,
+	]);
 
 	if (status === 'loading') {
 		return (
@@ -118,7 +134,9 @@ const GeneralConfig = () => {
 	if (status === 'failed') {
 		return (
 			<>
-				<ErrorPage error={error ? error : 'Indefinido'} />
+				<ErrorPage
+					error={course.error ? course.error : 'Indefinido'}
+				/>
 			</>
 		);
 	}
@@ -187,7 +205,7 @@ const GeneralConfig = () => {
 							</Typography>
 							<div className="grid grid-cols-2 gap-2">
 								{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
-								{courseList.map((course) => {
+								{course.courseList.map((course) => {
 									return (
 										<div key={course.id}>
 											<Card
@@ -275,9 +293,24 @@ const GeneralConfig = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Permisos
+							Tipos de preguntas
 						</AccordionHeader>
-						<AccordionBody>OJO 2</AccordionBody>
+						<AccordionBody>
+							<div className="grid grid-cols-2 gap-2">
+								{test.questionTypes.map((QT) => {
+									return (
+										<div key={`QT-${QT.id}`}>
+											<QuestionType
+												QT={QT}
+												updateQuestionTypeFunc={
+													updateQuestionTypeFunc
+												}
+											/>
+										</div>
+									);
+								})}
+							</div>
+						</AccordionBody>
 					</Accordion>
 				</CardBody>
 			</Card>

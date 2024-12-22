@@ -1,11 +1,12 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { answer, courseStudentTest, question, test, testState } from '../types/utilities';
-import { axiosGetDefault, axiosPostDefault } from "../services/axios";
+import { answer, courseStudentTest, question, questionType, test, testState } from '../types/utilities';
+import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
 
 
 const initialState: testState = {
     status: 'idle',
     testList: [],
+    questionTypes: [],
     testSelected: null,
     questionList: [],
     questionSelected: null,
@@ -16,6 +17,19 @@ const initialState: testState = {
     lastCreatedId: null,
     error: null,
 };
+
+// Acción asíncrona para obtener los tipos de preguntas
+export const fetchQuestionTypes = createAsyncThunk<questionType[]>(
+    'user/fetchQuestionTypes',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault('api/test/questionTypes');
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
 
 export const fetchTest = createAsyncThunk<test[], number>(
     'user/fetchTest',
@@ -51,7 +65,18 @@ export const fetchAnswers = createAsyncThunk<answer[], number>(
         }
     }
 );
-
+// Acción para actualizar una asignacion
+export const updateQuestionTypes = createAsyncThunk<questionType, questionType>(
+    'questionTypes/updateQuestionTypes',
+    async (questionTypeData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/test/questionTypes`, questionTypeData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
 // Acción para mostrar la evaluacion de un piloto
 export const createCourseStudentTest = createAsyncThunk<courseStudentTest, { test_id: number, course_student_id: number, date: string }>(
     'course/createCourseStudentTest',
@@ -91,6 +116,17 @@ const testSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // Reducers para la acción fetchQuestionTypes
+            .addCase(fetchQuestionTypes.pending, (state) => {
+                state.status = 'loading';
+            }).addCase(fetchQuestionTypes.fulfilled, (state, action: PayloadAction<questionType[]>) => {
+                state.status = 'succeeded';
+                state.questionTypes = action.payload;
+            })
+            .addCase(fetchQuestionTypes.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
             // Reducers para la acción fetchTest
             .addCase(fetchTest.pending, (state) => {
                 state.status = 'loading';
@@ -119,6 +155,18 @@ const testSlice = createSlice({
             // Reducers para la acción fetchQuestions
             .addCase(fetchQuestions.pending, (state) => {
                 state.status = 'loading';
+            })
+            // Reducers para la acción updateQuestionTypes
+            .addCase(updateQuestionTypes.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateQuestionTypes.fulfilled, (state, action: PayloadAction<questionType>) => {
+                const editedQuestionType = action.payload;
+                state.status = 'succeeded';
+                const index = state.questionTypes.findIndex((QT) => QT.id === editedQuestionType.id);
+                if (index !== -1) {
+                    state.questionTypes[index] = editedQuestionType;
+                }
             })
             .addCase(fetchQuestions.fulfilled, (state, action: PayloadAction<question[]>) => {
                 const newQuestions = action.payload;

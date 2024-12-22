@@ -62,6 +62,7 @@ export type subjectDays = {
 export type test = {
     id: number;
     course_id: number;
+    min_score: number;
     course?: course;
     code: string;
     status: boolean;
@@ -301,6 +302,7 @@ export interface subjectState {
 
 export interface testState {
     testList: test[];
+    questionTypes: questionType[];
     testSelected: test | null;
     questionList: question[];
     questionSelected: question | null;
