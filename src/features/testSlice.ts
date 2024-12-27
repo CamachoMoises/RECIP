@@ -1,7 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { answer, courseStudentTest, question, questionType, test, testState } from '../types/utilities';
+import { answer, courseStudentTest, question, questionType, test, testQuestionType, testState } from '../types/utilities';
 import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
-
 
 const initialState: testState = {
     status: 'idle',
@@ -31,11 +30,11 @@ export const fetchQuestionTypes = createAsyncThunk<questionType[]>(
     }
 );
 
-export const fetchTest = createAsyncThunk<test[], number>(
+export const fetchTest = createAsyncThunk<test, number>(
     'user/fetchTest',
-    async (id, { rejectWithValue }) => {
+    async (test_id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/tests/${id}`);
+            const response = await axiosGetDefault(`api/test/test/${test_id}`);
             return response.resp;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
@@ -43,17 +42,33 @@ export const fetchTest = createAsyncThunk<test[], number>(
     }
 );
 
-export const fetchQuestions = createAsyncThunk<question[], number>(
-    'user/fetchQuestions',
-    async (test_id, { rejectWithValue }) => {
+
+export const fetchTests = createAsyncThunk<test[], number>(
+    'user/fetchTests',
+    async (course_id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/questions/${test_id}`);
+            const response = await axiosGetDefault(`api/test/tests/${course_id}`);
             return response.resp;
         } catch (error: any) {
             return rejectWithValue(error.response.data);
         }
     }
 );
+
+export const fetchQuestions = createAsyncThunk<question[], { test_id: number, question_type_id: number }>(
+    'user/fetchQuestions',
+    async ({ test_id, question_type_id }, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault(`api/test/questions/${test_id}`, {
+                question_type_id: question_type_id
+            });
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const fetchAnswers = createAsyncThunk<answer[], number>(
     'user/fetchAnswers',
     async (id, { rejectWithValue }) => {
@@ -65,6 +80,7 @@ export const fetchAnswers = createAsyncThunk<answer[], number>(
         }
     }
 );
+
 // Acción para actualizar una asignacion
 export const updateQuestionTypes = createAsyncThunk<questionType, questionType>(
     'questionTypes/updateQuestionTypes',
@@ -77,6 +93,19 @@ export const updateQuestionTypes = createAsyncThunk<questionType, questionType>(
         }
     }
 );
+
+export const updateTestQuestionTypes = createAsyncThunk<test, testQuestionType>(
+    'questionTypes/updateTestQuestionTypes',
+    async (testQuestionTypeData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/test/testQuestionTypes`, testQuestionTypeData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 // Acción para mostrar la evaluacion de un piloto
 export const createCourseStudentTest = createAsyncThunk<courseStudentTest, { test_id: number, course_student_id: number, date: string }>(
     'course/createCourseStudentTest',
@@ -127,17 +156,31 @@ const testSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+
+            // Reducers para la acción fetchTests
+            .addCase(fetchTests.pending, (state) => {
+                state.status = 'loading';
+            }).addCase(fetchTests.fulfilled, (state, action: PayloadAction<test[]>) => {
+                state.status = 'succeeded';
+                state.testList = action.payload;
+            })
+            .addCase(fetchTests.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
             // Reducers para la acción fetchTest
             .addCase(fetchTest.pending, (state) => {
                 state.status = 'loading';
-            }).addCase(fetchTest.fulfilled, (state, action: PayloadAction<test[]>) => {
+            }).addCase(fetchTest.fulfilled, (state, action: PayloadAction<test>) => {
                 state.status = 'succeeded';
-                state.testList = action.payload;
+                state.testSelected = action.payload;
             })
             .addCase(fetchTest.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+
             // Reducers para la acción createCourseStudent
             .addCase(createCourseStudentTest.pending, (state) => {
                 state.status = 'loading';
@@ -152,10 +195,22 @@ const testSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+
             // Reducers para la acción fetchQuestions
             .addCase(fetchQuestions.pending, (state) => {
                 state.status = 'loading';
             })
+            .addCase(fetchQuestions.fulfilled, (state, action: PayloadAction<question[]>) => {
+                const newQuestions = action.payload;
+
+                state.status = 'succeeded';
+                state.questionList = newQuestions;
+            })
+            .addCase(fetchQuestions.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
             // Reducers para la acción updateQuestionTypes
             .addCase(updateQuestionTypes.pending, (state) => {
                 state.status = 'loading';
@@ -168,16 +223,28 @@ const testSlice = createSlice({
                     state.questionTypes[index] = editedQuestionType;
                 }
             })
-            .addCase(fetchQuestions.fulfilled, (state, action: PayloadAction<question[]>) => {
-                const newQuestions = action.payload;
-
-                state.status = 'succeeded';
-                state.questionList = newQuestions;
-            })
-            .addCase(fetchQuestions.rejected, (state, action) => {
+            .addCase(updateQuestionTypes.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+
+            // Reducers para la acción updateTestQuestionTypes
+            .addCase(updateTestQuestionTypes.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateTestQuestionTypes.fulfilled, (state, action: PayloadAction<test>) => {
+                const editedTest = action.payload;
+                state.status = 'succeeded';
+                const index = state.testList.findIndex((QT) => QT.id === editedTest.id);
+                if (index !== -1) {
+                    state.testList[index] = editedTest;
+                }
+            })
+            .addCase(updateTestQuestionTypes.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
             // Reducers para la acción createCourseStudent
             .addCase(fetchCourseStudentTest.pending, (state) => {
                 state.status = 'loading';

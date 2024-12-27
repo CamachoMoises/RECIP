@@ -1,26 +1,22 @@
 import { useEffect, useState } from 'react';
-import {
-	courseStudentTestAnswer,
-	courseStudentTestQuestion,
-} from '../../../../types/utilities';
+import { question } from '../../../../../types/utilities';
 import { Typography } from '@material-tailwind/react';
-import { axiosPostDefault } from '../../../../services/axios';
+// import { axiosPostDefault } from '../../../../services/axios';
 import { Minus } from 'lucide-react';
 
-const QuestionTypeCompletion = ({
-	questionTest,
-	countKey,
+const TestCompletion = ({
+	question,
 }: {
-	questionTest: courseStudentTestQuestion;
-	countKey: number;
+	question: question;
 	type: number;
 }) => {
-	const answerLength = questionTest.question?.answers
-		? questionTest.question.answers.length
+	const answerLength = question?.answers
+		? question.answers.length
 		: 0;
-	const loadAnswers: string[] = questionTest
-		.course_student_test_answer?.resp
-		? JSON.parse(questionTest.course_student_test_answer.resp)
+	const loadAnswers: string[] = question.answers
+		? question.answers.map((answer) => {
+				return answer.value;
+		  })
 		: Array(answerLength).fill('');
 	const [answers, setAnswers] = useState<string[]>(loadAnswers);
 	const [hasChange, setHasChange] = useState(false);
@@ -32,20 +28,20 @@ const QuestionTypeCompletion = ({
 	};
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const saveAnswers = async (resp: string[]) => {
-		const CSTA: courseStudentTestAnswer = {
-			course_student_test_id: questionTest.course_student_test_id,
-			course_student_test_question_id: questionTest.id,
-			course_student_id: questionTest.course_student_id,
-			student_id: questionTest.student_id,
-			question_id: questionTest.question_id,
-			resp: JSON.stringify(resp),
-			test_id: questionTest.test_id,
-			course_id: questionTest.course_id,
-		};
-		await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
-			courseStudentTestAnswer: CSTA,
-		});
-		console.log('Se guardaron las respuestas ');
+		// const CSTA: courseStudentTestAnswer = {
+		// 	course_student_test_id: questionTest.course_student_test_id,
+		// 	course_student_test_question_id: questionTest.id,
+		// 	course_student_id: questionTest.course_student_id,
+		// 	student_id: questionTest.student_id,
+		// 	question_id: questionTest.question_id,
+		// 	resp: JSON.stringify(resp),
+		// 	test_id: questionTest.test_id,
+		// 	course_id: questionTest.course_id,
+		// };
+		// await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
+		// 	courseStudentTestAnswer: CSTA,
+		// });
+		console.log('Se guardaron las respuestas ', resp);
 	};
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -65,26 +61,14 @@ const QuestionTypeCompletion = ({
 	}, [answers, hasChange, saveAnswers]);
 
 	return (
-		<div
-			className={`${
-				questionTest.Answered ? 'bg-light-green-200' : ''
-			} px-5`}
-		>
-			<Typography
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-				variant="h5"
-			>
-				Pregunta de dompletacion Nº{countKey + 1}
-			</Typography>
+		<div>
 			<Typography
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 				variant="h6"
 			>
-				{questionTest.question?.header}
+				{question?.header}
 			</Typography>
 
 			{answerLength === 44 && (
@@ -857,4 +841,4 @@ const QuestionTypeCompletion = ({
 	);
 };
 
-export default QuestionTypeCompletion;
+export default TestCompletion;

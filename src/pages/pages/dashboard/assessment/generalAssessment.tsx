@@ -35,23 +35,19 @@ const breadCrumbs: breadCrumbsItems[] = [
 const GeneralAssessment = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
-	const {
-		courseList,
-		courseStudentList,
-		status,
-		error,
-		courseStudent,
-	} = useSelector((state: RootState) => {
-		console.log(state);
+	const { courseStudentList, status, error } = useSelector(
+		(state: RootState) => {
+			console.log(state);
 
-		return (
-			state.courses || {
-				courseList: [],
-				status: 'idle2',
-				error: null,
-			}
-		);
-	});
+			return (
+				state.courses || {
+					courseList: [],
+					status: 'idle2',
+					error: null,
+				}
+			);
+		}
+	);
 	const navigateCourseStudentAssessment = async (
 		CL: courseStudent
 	) => {

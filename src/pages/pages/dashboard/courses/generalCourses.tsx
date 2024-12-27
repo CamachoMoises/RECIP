@@ -175,14 +175,6 @@ const GeneralCourses = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<Typography
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-							variant="h5"
-						>
-							Cursos actuales
-						</Typography>
 						<div className="grid grid-cols-2 gap-2">
 							{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
 							{courseList.map((course) => {

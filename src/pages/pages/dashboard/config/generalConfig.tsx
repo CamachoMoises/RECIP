@@ -25,7 +25,7 @@ import {
 	CardBody,
 	Typography,
 } from '@material-tailwind/react';
-import { BookCheck, Pencil, Plus } from 'lucide-react';
+import { BookCheck, PaperclipIcon, Pencil, Plus } from 'lucide-react';
 import ModalFormCourse from './modalFormCourse';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
@@ -124,14 +124,14 @@ const GeneralConfig = () => {
 		handleOpenEdit,
 	]);
 
-	if (status === 'loading') {
+	if (test.status === 'loading') {
 		return (
 			<>
 				<LoadingPage />
 			</>
 		);
 	}
-	if (status === 'failed') {
+	if (test.status === 'failed') {
 		return (
 			<>
 				<ErrorPage
@@ -204,7 +204,6 @@ const GeneralConfig = () => {
 								Lista de Cursos
 							</Typography>
 							<div className="grid grid-cols-2 gap-2">
-								{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
 								{course.courseList.map((course) => {
 									return (
 										<div key={course.id}>
@@ -270,6 +269,21 @@ const GeneralConfig = () => {
 																}
 															>
 																<BookCheck size={20} />
+															</Button>
+
+															<Button
+																title="Editar examen"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+																disabled={course.course_type.id !== 1}
+																onClick={() =>
+																	navigate(
+																		`../config/test/${course.id}`
+																	)
+																}
+															>
+																<PaperclipIcon size={20} />
 															</Button>
 														</ButtonGroup>
 													</div>

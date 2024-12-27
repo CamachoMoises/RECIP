@@ -5,12 +5,14 @@ import GeneralCourses from './dashboard/courses/generalCourses';
 import CourseDetail from './dashboard/config/courseDetail';
 import NewCourse from './dashboard/courses/newCourseStudentSchedule';
 import TableStudents from './dashboard/students/tableStudents';
-import TableInstructors from './dashboard/intructors/tableInstructors';
-import GeneralAssessment from './dashboard/assessment/generealAssessment';
+import TableInstructors from './dashboard/instructors/tableInstructors';
+import GeneralAssessment from './dashboard/assessment/generalAssessment';
 import NewAssessment from './dashboard/assessment/newAssessment';
 import NewTest from './dashboard/test/newTest';
 import GeneralTest from './dashboard/test/generalTest';
 import GeneralConfig from './dashboard/config/generalConfig';
+import Test from './dashboard/config/test';
+import QuestionTestList from './dashboard/config/questionTestList';
 
 const Dashboard = () => {
 	return (
@@ -53,6 +55,11 @@ const Dashboard = () => {
 							<Route
 								path="config/course/:id"
 								element={<CourseDetail />}
+							/>
+							<Route path="config/test/:id" element={<Test />} />
+							<Route
+								path="config/testQuestion/:id/:question_type_id"
+								element={<QuestionTestList />}
 							/>
 							<Route
 								path="new_course/:id/:course_id"

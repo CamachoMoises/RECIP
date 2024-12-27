@@ -230,7 +230,12 @@ const CourseDetail = () => {
 													}
 												});
 												return (
-													<span key={`dayDetails-${index}`}>
+													<span
+														key={`dayDetails-${index}`}
+														className={
+															hoursD > 8 ? 'text-red-700' : ''
+														}
+													>
 														{day.name}: {hoursD} horas \{'     '}
 													</span>
 												);

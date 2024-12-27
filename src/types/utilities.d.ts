@@ -66,10 +66,21 @@ export type test = {
     course?: course;
     code: string;
     status: boolean;
+    test_question_types: testQuestionType[];
     createdAt?: string;
     updatedAt?: string;
 }
 
+export type testQuestionType = {
+    id: number;
+    amount: number;
+    course_id: number;
+    question_type_id: number;
+    test_id: number;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
 export type questionType = {
     id: number;
     name: string;
@@ -79,7 +90,7 @@ export type questionType = {
 }
 
 export type question = {
-    answers?: answer[]
+    answers?: answer[];
     id: number;
     header: string;
     course_id: number;

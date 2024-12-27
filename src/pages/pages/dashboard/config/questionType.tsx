@@ -55,7 +55,7 @@ const QuestionType = ({
 									type="number"
 									label="Valor"
 									placeholder="Valor"
-									maxLength={500}
+									maxLength={2}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 									crossOrigin={undefined}
 								/>

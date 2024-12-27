@@ -46,7 +46,7 @@ export default function PageTitle({
 						onPointerLeaveCapture={undefined}
 					>
 						<CardBody
-							className="pb-12 pt-4"
+							className="pt-4"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -59,53 +59,58 @@ export default function PageTitle({
 							>
 								{title}
 							</Typography>
+							<div className="flex flex-row gap-2">
+								<Button
+									onClick={handleBack}
+									variant="text"
+									title="Volver"
+									className="text-xs bg-blue-gray-50"
+									size="sm"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<ChevronLeft size={13} />
+								</Button>
+								{pathName !== '/' && (
+									<Breadcrumbs
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										<a
+											onClick={() => navigate('/')}
+											className="opacity-60"
+										>
+											<Home size={13} />
+										</a>
+										{breadCrumbs.map((item: breadCrumbsItems) => (
+											<a
+												onClick={() =>
+													item.parametros
+														? startTransition(() =>
+																navigate(
+																	`${item.href}?${new URLSearchParams(
+																		item.parametros
+																	).toString()}`
+																)
+														  )
+														: startTransition(() =>
+																navigate(item.href)
+														  )
+												}
+												className="opacity-60"
+												key={item.name}
+											>
+												{item.name}
+											</a>
+										))}
+										<span>{title ? title : 'Desconocido'}</span>
+									</Breadcrumbs>
+								)}
+							</div>
 						</CardBody>
 					</Card>
-				</div>
-				<div className="fixed flex flex-row gap-2 px-3 py-12 z-20">
-					<Button
-						onClick={handleBack}
-						variant="text"
-						title="Volver"
-						className="text-xs bg-blue-gray-50"
-						size="sm"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<ChevronLeft size={13} />
-					</Button>
-					{pathName !== '/' && (
-						<Breadcrumbs
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<a onClick={() => navigate('/')} className="opacity-60">
-								<Home size={13} />
-							</a>
-							{breadCrumbs.map((item: breadCrumbsItems) => (
-								<a
-									onClick={() =>
-										item.parametros
-											? startTransition(() =>
-													navigate(
-														`${item.href}?${new URLSearchParams(
-															item.parametros
-														).toString()}`
-													)
-											  )
-											: startTransition(() => navigate(item.href))
-									}
-									className="opacity-60"
-									key={item.name}
-								>
-									{item.name}
-								</a>
-							))}
-							<span>{title ? title : 'Desconocido'}</span>
-						</Breadcrumbs>
-					)}
 				</div>
 			</div>
 		</>
