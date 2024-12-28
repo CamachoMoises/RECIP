@@ -1,7 +1,11 @@
-import { Radio, Typography } from '@material-tailwind/react';
-import { question } from '../../../../../types/utilities';
+import { Radio } from '@material-tailwind/react';
+import { answer, question } from '../../../../../types/utilities';
 import QuestionHeader from './components/questionHeader';
 import { useState } from 'react';
+import AnswerValue from './components/answerValue';
+import { AppDispatch } from '../../../../../store';
+import { useDispatch } from 'react-redux';
+import { updateAnswerQuestionTest } from '../../../../../features/testSlice';
 // import { axiosPostDefault } from '../../../../services/axios';
 
 const TestRadio = ({
@@ -11,23 +15,34 @@ const TestRadio = ({
 	type: number;
 }) => {
 	const [editHeader, setEditHeader] = useState(false);
-	const handleChangeRadio = async (answer_id: number) => {
-		console.log(answer_id);
+	const [editAnswer, setEditAnswer] = useState(false);
+	const dispatch = useDispatch<AppDispatch>();
 
-		// const CSTA: courseStudentTestAnswer = {
-		// 	course_student_test_id: questionTest.course_student_test_id,
-		// 	course_student_test_question_id: questionTest.id,
-		// 	course_student_id: questionTest.course_student_id,
-		// 	student_id: questionTest.student_id,
-		// 	question_id: questionTest.question_id,
-		// 	resp: `${answer_id}`,
-		// 	test_id: questionTest.test_id,
-		// 	course_id: questionTest.course_id,
-		// };
+	const correctAnswer: answer | undefined = question.answers?.find(
+		(answer) => answer.is_correct
+	);
 
-		// await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
-		// 	courseStudentTestAnswer: CSTA,
-		// });
+	const handleChangeRadio = async (newAnswer: answer) => {
+		if (correctAnswer) {
+			const removePrevAnswer: answer = {
+				...correctAnswer,
+				is_correct: false,
+			};
+			await dispatch(
+				updateAnswerQuestionTest({
+					answerData: removePrevAnswer,
+					question_id: question.id,
+				})
+			);
+		}
+		const newAnswerData: answer = { ...newAnswer, is_correct: true };
+		await dispatch(
+			updateAnswerQuestionTest({
+				answerData: newAnswerData,
+				question_id: question.id,
+			})
+		);
+
 		console.log('Se guardaron las respuestas');
 	};
 	return (
@@ -35,19 +50,21 @@ const TestRadio = ({
 			<QuestionHeader
 				question={question}
 				editHeader={editHeader}
+				editAnswer={editAnswer}
 				setEditHeader={setEditHeader}
 			/>
-			<div className="flex flex-row justify-center">
+			{/* <code>{JSON.stringify(correctAnswer, null, 4)}</code> */}
+			<div className="flex flex-row justify-center gap-3">
 				{question?.answers?.map((answer) => (
 					<div key={answer.id} className="basis-1/4 justify-center">
 						<Radio
-							disabled={editHeader}
+							disabled={editHeader || editAnswer}
 							name={`radio-${question?.id}`}
 							id={`radio-${answer.id}`}
 							defaultChecked={answer.is_correct}
 							color="red"
 							onChange={() => {
-								handleChangeRadio(answer.id);
+								handleChangeRadio(answer);
 							}}
 							value={answer.id}
 							onPointerEnterCapture={undefined}
@@ -56,20 +73,17 @@ const TestRadio = ({
 						/>
 						<br />
 						<div className="flex flex-row justify-center">
-							<Typography
-								variant="small"
-								className="max-w-48 text-center"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								{answer.value}
-							</Typography>
+							<AnswerValue
+								answer={answer}
+								questionId={question.id}
+								editHeader={editHeader}
+								editAnswer={editAnswer}
+								setEditAnswer={setEditAnswer}
+							/>
 						</div>
 					</div>
 				))}
-			</div>
-			<hr />
+			</div>{' '}
 		</div>
 	);
 };

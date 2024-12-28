@@ -63,6 +63,7 @@ export type test = {
     id: number;
     course_id: number;
     min_score: number;
+    duration: number;
     course?: course;
     code: string;
     status: boolean;
@@ -85,6 +86,7 @@ export type questionType = {
     id: number;
     name: string;
     value: number;
+    max_answer: number;
     createdAt?: string;
     updatedAt?: string;
 }

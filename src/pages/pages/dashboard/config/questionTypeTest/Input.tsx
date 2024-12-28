@@ -1,8 +1,12 @@
-import { Input } from '@material-tailwind/react';
-import { question } from '../../../../../types/utilities';
+import { Button, Input } from '@material-tailwind/react';
+import { answer, question } from '../../../../../types/utilities';
 // import { axiosPostDefault } from '../../../../services/axios';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import QuestionHeader from './components/questionHeader';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../../../store';
+import { updateAnswerQuestionTest } from '../../../../../features/testSlice';
+import { Save } from 'lucide-react';
 
 const TestInput = ({
 	question,
@@ -11,7 +15,7 @@ const TestInput = ({
 	type: number;
 }) => {
 	const [editHeader, setEditHeader] = useState(false);
-
+	const dispatch = useDispatch<AppDispatch>();
 	const answerLength = question?.answers
 		? question.answers.length
 		: 0;
@@ -28,45 +32,47 @@ const TestInput = ({
 		setAnswers(newInputs);
 		setHasChange(true);
 	};
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const saveAnswers = async (resp: string[]) => {
-		// const CSTA: courseStudentTestAnswer = {
-		// 	course_student_test_id: questionTest.course_student_test_id,
-		// 	course_student_test_question_id: questionTest.id,
-		// 	course_student_id: questionTest.course_student_id,
-		// 	student_id: questionTest.student_id,
-		// 	question_id: questionTest.question_id,
-		// 	resp: JSON.stringify(resp),
-		// 	test_id: questionTest.test_id,
-		// 	course_id: questionTest.course_id,
-		// };
-		// await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
-		// 	courseStudentTestAnswer: CSTA,
-		// });
-		console.log('Se guardaron las respuestas', resp);
-	};
-	useEffect(() => {
-		const interval = setInterval(() => {
-			if (hasChange) {
-				const nonNullValues = answers.filter(
-					(value) => value !== null && value !== ''
-				);
-
-				if (nonNullValues.length > 0) {
-					saveAnswers(answers);
-					setHasChange(false);
+		if (question.answers) {
+			for (let index = 0; index < question.answers.length; index++) {
+				const oldAnswer = question.answers[index];
+				const newAnswer = resp[index];
+				if (oldAnswer.value != newAnswer) {
+					const newAnswerData: answer = {
+						...oldAnswer,
+						value: newAnswer,
+					};
+					await dispatch(
+						updateAnswerQuestionTest({
+							answerData: newAnswerData,
+							question_id: question.id,
+						})
+					);
 				}
 			}
-		}, 5000);
+		}
 
-		return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
-	}, [answers, hasChange, saveAnswers]);
+		console.log('Se guardaron las respuestas');
+	};
+	const handleSaveAnswer = async () => {
+		if (hasChange) {
+			const nonNullValues = answers.filter(
+				(value) => value !== null && value !== ''
+			);
+
+			if (nonNullValues.length > 0) {
+				saveAnswers(answers);
+				setHasChange(false);
+			}
+		}
+	};
+
 	return (
-		<div>
+		<div className="flex flex-col gap-2">
 			<QuestionHeader
 				question={question}
 				editHeader={editHeader}
+				editAnswer={false}
 				setEditHeader={setEditHeader}
 			/>
 
@@ -87,6 +93,20 @@ const TestInput = ({
 					/>
 				</div>
 			))}
+
+			<div>
+				<Button
+					title="Guardar"
+					size="sm"
+					disabled={!hasChange}
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+					onClick={async () => handleSaveAnswer()}
+				>
+					<Save size={15} />
+				</Button>
+			</div>
 		</div>
 	);
 };

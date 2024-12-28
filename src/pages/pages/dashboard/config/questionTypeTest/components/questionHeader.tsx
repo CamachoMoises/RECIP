@@ -2,28 +2,29 @@ import { Button, Input, Typography } from '@material-tailwind/react';
 import { Pencil, Save, X } from 'lucide-react';
 import { useState } from 'react';
 import { question } from '../../../../../../types/utilities';
-// import { useDispatch } from 'react-redux';
-// import { AppDispatch } from '../../../../../../store';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../../../../store';
+import { updateQuestionTest } from '../../../../../../features/testSlice';
 
 const QuestionHeader = ({
 	question,
 	editHeader,
+	editAnswer,
 	setEditHeader,
 }: {
 	question: question;
 	editHeader: boolean;
+	editAnswer: boolean;
 	setEditHeader: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
 	const [headerState, setHeaderState] = useState(question.header);
-	// const dispatch = useDispatch<AppDispatch>();
+	const dispatch = useDispatch<AppDispatch>();
 	const updateTestQuestion = async () => {
 		const newQuestion = { ...question, header: headerState };
-		console.log(newQuestion);
-
-		// dispatch()
+		dispatch(updateQuestionTest(newQuestion));
 	};
 	return (
-		<div className="flex flex-col justify-center gap-3 pt-3">
+		<div className="flex flex-row justify-start gap-3 pt-3">
 			{editHeader ? (
 				<>
 					<Input
@@ -36,20 +37,32 @@ const QuestionHeader = ({
 						type="text"
 						label="Encabezado"
 						placeholder="Encabezado"
-						maxLength={2}
 						className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 						crossOrigin={undefined}
 					/>
 				</>
 			) : (
-				<Typography
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-					variant="h6"
-				>
-					{question.header}
-				</Typography>
+				<div className="flex flex-row gap-4">
+					<Typography
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						variant="h5"
+						className="text-left"
+					>
+						Encabezado:
+					</Typography>
+
+					<Typography
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						variant="h6"
+						className="text-left"
+					>
+						{question.header}
+					</Typography>
+				</div>
 			)}
 
 			<div className="flex flex-row justify-center gap-4">
@@ -58,6 +71,7 @@ const QuestionHeader = ({
 					title={editHeader ? 'Cancelar' : 'Cambiar Encabezado'}
 					variant={editHeader ? 'outlined' : 'filled'}
 					placeholder={undefined}
+					disabled={editAnswer}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 					onClick={() => {
@@ -73,8 +87,8 @@ const QuestionHeader = ({
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
-						onClick={() => {
-							updateTestQuestion();
+						onClick={async () => {
+							await updateTestQuestion();
 							setEditHeader(false);
 						}}
 					>

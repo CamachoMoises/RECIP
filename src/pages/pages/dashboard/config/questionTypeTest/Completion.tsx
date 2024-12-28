@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
-import { question } from '../../../../../types/utilities';
-import { Typography } from '@material-tailwind/react';
+import { useState } from 'react';
+import { answer, question } from '../../../../../types/utilities';
+import { Button } from '@material-tailwind/react';
 // import { axiosPostDefault } from '../../../../services/axios';
-import { Minus } from 'lucide-react';
+import { Minus, Save } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../../../store';
+import { updateAnswerQuestionTest } from '../../../../../features/testSlice';
+import QuestionHeader from './components/questionHeader';
 
 const TestCompletion = ({
 	question,
@@ -10,6 +14,9 @@ const TestCompletion = ({
 	question: question;
 	type: number;
 }) => {
+	const dispatch = useDispatch<AppDispatch>();
+	const [editHeader, setEditHeader] = useState(false);
+
 	const answerLength = question?.answers
 		? question.answers.length
 		: 0;
@@ -26,51 +33,58 @@ const TestCompletion = ({
 		setAnswers(newInputs);
 		setHasChange(true);
 	};
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const saveAnswers = async (resp: string[]) => {
-		// const CSTA: courseStudentTestAnswer = {
-		// 	course_student_test_id: questionTest.course_student_test_id,
-		// 	course_student_test_question_id: questionTest.id,
-		// 	course_student_id: questionTest.course_student_id,
-		// 	student_id: questionTest.student_id,
-		// 	question_id: questionTest.question_id,
-		// 	resp: JSON.stringify(resp),
-		// 	test_id: questionTest.test_id,
-		// 	course_id: questionTest.course_id,
-		// };
-		// await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
-		// 	courseStudentTestAnswer: CSTA,
-		// });
-		console.log('Se guardaron las respuestas ', resp);
-	};
-	useEffect(() => {
-		const interval = setInterval(() => {
-			if (hasChange) {
-				const nonNullValues = answers.filter(
-					(value) => value !== null && value !== ''
-				);
-
-				if (nonNullValues.length > 0) {
-					saveAnswers(answers);
-					setHasChange(false);
+		if (question.answers) {
+			for (let index = 0; index < question.answers.length; index++) {
+				const oldAnswer = question.answers[index];
+				const newAnswer = resp[index];
+				if (oldAnswer.value != newAnswer) {
+					const newAnswerData: answer = {
+						...oldAnswer,
+						value: newAnswer,
+					};
+					await dispatch(
+						updateAnswerQuestionTest({
+							answerData: newAnswerData,
+							question_id: question.id,
+						})
+					);
 				}
 			}
-		}, 5000);
+		}
+		console.log('Se guardaron las respuestas ');
+	};
 
-		return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
-	}, [answers, hasChange, saveAnswers]);
+	const handleSaveAnswer = async () => {
+		if (hasChange) {
+			const nonNullValues = answers.filter(
+				(value) => value !== null && value !== ''
+			);
+
+			if (nonNullValues.length > 0) {
+				saveAnswers(answers);
+				setHasChange(false);
+			}
+		}
+	};
+
+	// useEffect(() => {
+	// 	const interval = setInterval(() => {
+
+	// 	}, 5000);
+
+	// 	return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
+	// }, [answers, hasChange, saveAnswers]);
 
 	return (
 		<div>
-			<Typography
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-				variant="h6"
-			>
-				{question?.header}
-			</Typography>
-
+			<QuestionHeader
+				question={question}
+				editHeader={editHeader}
+				editAnswer={false}
+				setEditHeader={setEditHeader}
+			/>
+			<br />
 			{answerLength === 44 && (
 				<table className="table-auto text-left px-5 overflow-scroll">
 					<thead>
@@ -835,6 +849,19 @@ const TestCompletion = ({
 					</tbody>
 				</table>
 			)}
+			<div>
+				<Button
+					title="Guardar"
+					size="sm"
+					disabled={!hasChange}
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+					onClick={async () => handleSaveAnswer()}
+				>
+					<Save size={15} />
+				</Button>
+			</div>
 			{/* {questionTest.question?.answers?.length}
 			{JSON.stringify(questionTest.question?.answers, null, 4)} */}
 		</div>

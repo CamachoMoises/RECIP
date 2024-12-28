@@ -1,7 +1,9 @@
-import { Checkbox, Typography } from '@material-tailwind/react';
-import { question } from '../../../../../types/utilities';
+import { Checkbox } from '@material-tailwind/react';
+import { answer, question } from '../../../../../types/utilities';
 import { useEffect, useState } from 'react';
 import QuestionHeader from './components/questionHeader';
+import AnswerValue from './components/answerValue';
+import { axiosPutDefault } from '../../../../../services/axios';
 // import { axiosPostDefault } from '../../../../services/axios';
 type checkData = {
 	id: number;
@@ -14,6 +16,7 @@ const TestCheck = ({
 	type: number;
 }) => {
 	const [editHeader, setEditHeader] = useState(false);
+	const [editAnswer, setEditAnswer] = useState(false);
 
 	const enptyCheck: checkData = {
 		id: -1,
@@ -54,19 +57,23 @@ const TestCheck = ({
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const saveAnswers = async (resp: checkData[]) => {
-		// const CSTA: courseStudentTestAnswer = {
-		// 	course_student_test_id: questionTest.course_student_test_id,
-		// 	course_student_test_question_id: questionTest.id,
-		// 	course_student_id: questionTest.course_student_id,
-		// 	student_id: questionTest.student_id,
-		// 	question_id: questionTest.question_id,
-		// 	resp: JSON.stringify(resp),
-		// 	test_id: questionTest.test_id,
-		// 	course_id: questionTest.course_id,
-		// };
-		// await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
-		// 	courseStudentTestAnswer: CSTA,
-		// });
+		if (question.answers) {
+			for (let index = 0; index < question.answers.length; index++) {
+				const oldAnswer = question.answers[index];
+				const newAnswer = resp[index];
+				if (oldAnswer.is_correct != newAnswer.check) {
+					const newAnswerData: answer = {
+						...oldAnswer,
+						is_correct: newAnswer.check,
+					};
+
+					await axiosPutDefault(
+						`api/test/answerQuestionTest/${question.id}`,
+						newAnswerData
+					);
+				}
+			}
+		}
 		console.log('Se guardaron las respuestas', resp);
 	};
 
@@ -80,11 +87,11 @@ const TestCheck = ({
 			<QuestionHeader
 				question={question}
 				editHeader={editHeader}
+				editAnswer={editAnswer}
 				setEditHeader={setEditHeader}
 			/>
 
-			{/* <code>{JSON.stringify(checkboxes, null, 4)}</code> */}
-			<div className="flex flex-row justify-center">
+			<div className="flex flex-row justify-center gap-3">
 				{question?.answers?.map((answer, index) => {
 					const checked = checkboxes[index].check;
 					return (
@@ -93,6 +100,7 @@ const TestCheck = ({
 								color="red"
 								id={`check-${answer.id}`}
 								value={answer.id}
+								disabled={editHeader || editAnswer}
 								defaultChecked={checked}
 								name={`check-${question?.id}`}
 								onPointerEnterCapture={undefined}
@@ -108,21 +116,18 @@ const TestCheck = ({
 							/>
 							<br />
 							<div className="flex flex-row justify-center">
-								<Typography
-									variant="small"
-									className="max-w-40 text-center"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									{answer.value}
-								</Typography>
+								<AnswerValue
+									answer={answer}
+									questionId={question.id}
+									editHeader={editHeader}
+									editAnswer={editAnswer}
+									setEditAnswer={setEditAnswer}
+								/>
 							</div>
 						</div>
 					);
 				})}
 			</div>
-			<hr />
 		</div>
 	);
 };

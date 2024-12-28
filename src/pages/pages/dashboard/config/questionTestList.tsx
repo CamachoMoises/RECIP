@@ -14,7 +14,7 @@ import { AppDispatch, RootState } from '../../../../store';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import { useEffect } from 'react';
-import { Card, CardBody } from '@material-tailwind/react';
+import { Card, CardBody, Typography } from '@material-tailwind/react';
 import TestRadio from './questionTypeTest/Radio';
 import TestInput from './questionTypeTest/Input';
 import TestCheck from './questionTypeTest/Check';
@@ -79,7 +79,7 @@ const QuestionTestList = () => {
 	return (
 		<div className="container">
 			<PageTitle
-				title={`Lista de preguntas de ${questionType.name}`}
+				title={`Lista de ${questionType.name} del ${test.testSelected?.code}`}
 				breadCrumbs={breadCrumbs}
 			/>
 			<Card
@@ -92,9 +92,32 @@ const QuestionTestList = () => {
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					{test.questionList.map((QL, index) => {
-						return (
-							<div key={`QL-${index}`}>
+					<Typography
+						variant="h4"
+						className="text-left"
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						Cantidad de preguntas {test.questionList.length}
+					</Typography>
+				</CardBody>
+			</Card>
+			<br />
+			<div className="flex flex-col gap-4">
+				{test.questionList.map((QL, index) => {
+					return (
+						<Card
+							key={`QL-${index}`}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<CardBody
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
 								{QL.question_type?.id === 1 && (
 									<TestRadio
 										question={QL}
@@ -126,11 +149,11 @@ const QuestionTestList = () => {
 										type={QL?.question_type?.id}
 									/>
 								)}
-							</div>
-						);
-					})}
-				</CardBody>
-			</Card>
+							</CardBody>
+						</Card>
+					);
+				})}
+			</div>
 		</div>
 	);
 };

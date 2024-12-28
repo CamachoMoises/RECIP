@@ -94,6 +94,31 @@ export const updateQuestionTypes = createAsyncThunk<questionType, questionType>(
     }
 );
 
+// Acción para actualizar una pregunta
+export const updateQuestionTest = createAsyncThunk<question, question>(
+    'questionTypes/updateQuestion',
+    async (questionData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/test/questionTest`, questionData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+// Acción para actualizar una Respuesta
+export const updateAnswerQuestionTest = createAsyncThunk<question, { answerData: answer, question_id: number }>(
+    'questionTypes/updateAnswerQuestionTest',
+    async ({ answerData, question_id }, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/test/answerQuestionTest/${question_id}`, answerData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const updateTestQuestionTypes = createAsyncThunk<test, testQuestionType>(
     'questionTypes/updateTestQuestionTypes',
     async (testQuestionTypeData, { rejectWithValue }) => {
@@ -224,6 +249,41 @@ const testSlice = createSlice({
                 }
             })
             .addCase(updateQuestionTypes.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción updateQuestionTest
+            .addCase(updateQuestionTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateQuestionTest.fulfilled, (state, action: PayloadAction<question>) => {
+                const editedQuestion = action.payload;
+                state.status = 'succeeded';
+                const index = state.questionList.findIndex((QL) => QL.id === editedQuestion.id);
+                if (index !== -1) {
+                    state.questionList[index] = editedQuestion;
+                }
+            })
+            .addCase(updateQuestionTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+
+            // Reducers para la acción updateAnswerQuestionTest
+            .addCase(updateAnswerQuestionTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateAnswerQuestionTest.fulfilled, (state, action: PayloadAction<question>) => {
+                const editedQuestion = action.payload;
+                state.status = 'succeeded';
+                const index = state.questionList.findIndex((QL) => QL.id === editedQuestion.id);
+                if (index !== -1) {
+                    state.questionList[index] = editedQuestion;
+                }
+            })
+            .addCase(updateAnswerQuestionTest.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
