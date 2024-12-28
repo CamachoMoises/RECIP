@@ -32,7 +32,6 @@ const NewTestModal = ({
 	} = useForm<Inputs>();
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		if (courseId) {
-			console.log(data, courseId);
 			const dataTest = { ...data, course_id: courseId };
 			await dispatch(createTest(dataTest));
 			setOpen(false);

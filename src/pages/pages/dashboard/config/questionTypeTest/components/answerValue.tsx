@@ -38,12 +38,13 @@ const AnswerValue = ({
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 						value={answerState}
+						required
 						onChange={(e) => {
 							setAnswerState(e.target.value);
 						}}
 						type="text"
-						label="Valor"
-						placeholder="Valor"
+						label="Respuesta"
+						placeholder="Respuesta"
 						className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 						crossOrigin={undefined}
 					/>
@@ -68,7 +69,7 @@ const AnswerValue = ({
 						title={
 							editAnswer && editAnswerLocal
 								? 'Cancelar'
-								: 'Cambiar Encabezado'
+								: 'Cambiar Respuesta'
 						}
 						disabled={editAnswer != editAnswerLocal || editHeader}
 						variant={

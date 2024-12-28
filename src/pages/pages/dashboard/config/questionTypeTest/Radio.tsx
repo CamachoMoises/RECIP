@@ -1,4 +1,4 @@
-import { Radio } from '@material-tailwind/react';
+import { Button, Radio } from '@material-tailwind/react';
 import { answer, question } from '../../../../../types/utilities';
 import QuestionHeader from './components/questionHeader';
 import { useState } from 'react';
@@ -6,6 +6,8 @@ import AnswerValue from './components/answerValue';
 import { AppDispatch } from '../../../../../store';
 import { useDispatch } from 'react-redux';
 import { updateAnswerQuestionTest } from '../../../../../features/testSlice';
+import { Plus } from 'lucide-react';
+import NewAnswerQuestionTest from '../newAnswerQuestionTest';
 // import { axiosPostDefault } from '../../../../services/axios';
 
 const TestRadio = ({
@@ -14,6 +16,8 @@ const TestRadio = ({
 	question: question;
 	type: number;
 }) => {
+	const [open, setOpen] = useState(false);
+
 	const [editHeader, setEditHeader] = useState(false);
 	const [editAnswer, setEditAnswer] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
@@ -21,7 +25,11 @@ const TestRadio = ({
 	const correctAnswer: answer | undefined = question.answers?.find(
 		(answer) => answer.is_correct
 	);
-
+	const answersData = question.answers ? question.answers : [];
+	const questionTypeData = question.question_type?.max_answer
+		? question.question_type.max_answer
+		: 0;
+	const add = answersData.length < questionTypeData;
 	const handleChangeRadio = async (newAnswer: answer) => {
 		if (correctAnswer) {
 			const removePrevAnswer: answer = {
@@ -53,7 +61,6 @@ const TestRadio = ({
 				editAnswer={editAnswer}
 				setEditHeader={setEditHeader}
 			/>
-			{/* <code>{JSON.stringify(correctAnswer, null, 4)}</code> */}
 			<div className="flex flex-row justify-center gap-3">
 				{question?.answers?.map((answer) => (
 					<div key={answer.id} className="basis-1/4 justify-center">
@@ -83,7 +90,35 @@ const TestRadio = ({
 						</div>
 					</div>
 				))}
-			</div>{' '}
+				{add && (
+					<div className="flex flex-col justify-center align-middle">
+						<Button
+							size="lg"
+							title="Agregar respuesta"
+							variant="filled"
+							disabled={editHeader || editAnswer}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+							placeholder={undefined}
+							onClick={() => {
+								setOpen(!open);
+							}}
+						>
+							<Plus size={15} className="mx-auto text-lg" />
+						</Button>
+					</div>
+				)}
+			</div>
+			{open && (
+				<NewAnswerQuestionTest
+					open={open}
+					courseId={question.course_id}
+					testId={question.test_id}
+					questionTypeId={question.question_type_id}
+					questionId={question.id}
+					setOpen={setOpen}
+				/>
+			)}
 		</div>
 	);
 };

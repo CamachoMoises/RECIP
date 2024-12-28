@@ -13,12 +13,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
-import { useEffect } from 'react';
-import { Card, CardBody, Typography } from '@material-tailwind/react';
+import { useEffect, useState } from 'react';
+import {
+	Button,
+	Card,
+	CardBody,
+	Typography,
+} from '@material-tailwind/react';
 import TestRadio from './questionTypeTest/Radio';
 import TestInput from './questionTypeTest/Input';
 import TestCheck from './questionTypeTest/Check';
 import TestCompletion from './questionTypeTest/Completion';
+import { Plus } from 'lucide-react';
+import NewQuestionTest from './newQuestionTest';
 
 const QuestionTestList = () => {
 	// const navigate = useNavigate();
@@ -31,6 +38,7 @@ const QuestionTestList = () => {
 		question_type_id: string;
 	}>();
 	const dispatch = useDispatch<AppDispatch>();
+	const [open, setOpen] = useState(false);
 	useEffect(() => {
 		dispatch(fetchTest(test_id ? parseInt(test_id) : -1));
 		dispatch(
@@ -102,13 +110,13 @@ const QuestionTestList = () => {
 				>
 					<Typography
 						variant="h4"
-						className="text-left"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
 						Cantidad de preguntas {test.questionList.length}
 					</Typography>
+
 					{questionForTest > test.questionList.length && (
 						<Typography
 							variant="h4"
@@ -121,6 +129,23 @@ const QuestionTestList = () => {
 							La cantidad de preguntas no corresponde con la necesaria
 							para el examen ({questionForTest})
 						</Typography>
+					)}
+					{questionType.id != 4 && (
+						<div className="flex flex-col">
+							<Button
+								size="sm"
+								title="Agregar examen"
+								variant="filled"
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+								placeholder={undefined}
+								onClick={() => {
+									setOpen(!open);
+								}}
+							>
+								<Plus size={15} className="mx-auto text-lg" />
+							</Button>
+						</div>
 					)}
 				</CardBody>
 			</Card>
@@ -175,6 +200,15 @@ const QuestionTestList = () => {
 					);
 				})}
 			</div>
+			{open && course_id && test_id && question_type_id && (
+				<NewQuestionTest
+					open={open}
+					testId={parseInt(test_id)}
+					courseId={parseInt(course_id)}
+					questionTypeId={parseInt(question_type_id)}
+					setOpen={setOpen}
+				/>
+			)}
 		</div>
 	);
 };

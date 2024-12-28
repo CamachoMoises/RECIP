@@ -1,9 +1,11 @@
-import { Checkbox } from '@material-tailwind/react';
+import { Button, Checkbox } from '@material-tailwind/react';
 import { answer, question } from '../../../../../types/utilities';
 import { useEffect, useState } from 'react';
 import QuestionHeader from './components/questionHeader';
 import AnswerValue from './components/answerValue';
 import { axiosPutDefault } from '../../../../../services/axios';
+import { Plus } from 'lucide-react';
+import NewAnswerQuestionTest from '../newAnswerQuestionTest';
 // import { axiosPostDefault } from '../../../../services/axios';
 type checkData = {
 	id: number;
@@ -15,9 +17,15 @@ const TestCheck = ({
 	question: question;
 	type: number;
 }) => {
+	const [open, setOpen] = useState(false);
+
 	const [editHeader, setEditHeader] = useState(false);
 	const [editAnswer, setEditAnswer] = useState(false);
-
+	const answersData = question.answers ? question.answers : [];
+	const questionTypeData = question.question_type?.max_answer
+		? question.question_type.max_answer
+		: 0;
+	const add = answersData.length < questionTypeData;
 	const enptyCheck: checkData = {
 		id: -1,
 		check: false,
@@ -127,7 +135,35 @@ const TestCheck = ({
 						</div>
 					);
 				})}
+				{add && (
+					<div className="flex flex-col justify-center align-middle">
+						<Button
+							size="lg"
+							title="Agregar respuesta"
+							variant="filled"
+							disabled={editHeader || editAnswer}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+							placeholder={undefined}
+							onClick={() => {
+								setOpen(!open);
+							}}
+						>
+							<Plus size={15} className="mx-auto text-lg" />
+						</Button>
+					</div>
+				)}
 			</div>
+			{open && (
+				<NewAnswerQuestionTest
+					open={open}
+					courseId={question.course_id}
+					testId={question.test_id}
+					questionTypeId={question.question_type_id}
+					questionId={question.id}
+					setOpen={setOpen}
+				/>
+			)}
 		</div>
 	);
 };

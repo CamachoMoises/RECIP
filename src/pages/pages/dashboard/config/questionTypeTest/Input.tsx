@@ -6,7 +6,8 @@ import QuestionHeader from './components/questionHeader';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../../store';
 import { updateAnswerQuestionTest } from '../../../../../features/testSlice';
-import { Save } from 'lucide-react';
+import { Plus, Save } from 'lucide-react';
+import NewAnswerQuestionTest from '../newAnswerQuestionTest';
 
 const TestInput = ({
 	question,
@@ -15,6 +16,7 @@ const TestInput = ({
 	type: number;
 }) => {
 	const [editHeader, setEditHeader] = useState(false);
+	const [open, setOpen] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const answerLength = question?.answers
 		? question.answers.length
@@ -32,6 +34,11 @@ const TestInput = ({
 		setAnswers(newInputs);
 		setHasChange(true);
 	};
+	const answersData = question.answers ? question.answers : [];
+	const questionTypeData = question.question_type?.max_answer
+		? question.question_type.max_answer
+		: 0;
+	const add = answersData.length < questionTypeData;
 	const saveAnswers = async (resp: string[]) => {
 		if (question.answers) {
 			for (let index = 0; index < question.answers.length; index++) {
@@ -94,19 +101,51 @@ const TestInput = ({
 				</div>
 			))}
 
-			<div>
-				<Button
-					title="Guardar"
-					size="sm"
-					disabled={!hasChange}
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-					onClick={async () => handleSaveAnswer()}
-				>
-					<Save size={15} />
-				</Button>
+			<div className="flex flex-row justify-center gap-2">
+				<div>
+					<Button
+						title="Guardar"
+						size="lg"
+						disabled={!hasChange}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						onClick={async () => handleSaveAnswer()}
+					>
+						<Save size={15} />
+					</Button>
+				</div>
+				<div>
+					{add && (
+						<div className="flex flex-col justify-center align-middle">
+							<Button
+								size="lg"
+								title="Agregar respuesta"
+								variant="filled"
+								disabled={editHeader}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+								placeholder={undefined}
+								onClick={() => {
+									setOpen(!open);
+								}}
+							>
+								<Plus size={15} className="mx-auto text-lg" />
+							</Button>
+						</div>
+					)}
+				</div>
 			</div>
+			{open && (
+				<NewAnswerQuestionTest
+					open={open}
+					courseId={question.course_id}
+					testId={question.test_id}
+					questionTypeId={question.question_type_id}
+					questionId={question.id}
+					setOpen={setOpen}
+				/>
+			)}
 		</div>
 	);
 };

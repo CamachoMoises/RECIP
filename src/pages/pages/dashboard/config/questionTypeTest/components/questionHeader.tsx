@@ -31,6 +31,7 @@ const QuestionHeader = ({
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 						value={headerState}
+						required
 						onChange={(e) => {
 							setHeaderState(e.target.value);
 						}}
@@ -66,20 +67,22 @@ const QuestionHeader = ({
 			)}
 
 			<div className="flex flex-row justify-center gap-4">
-				<Button
-					size="sm"
-					title={editHeader ? 'Cancelar' : 'Cambiar Encabezado'}
-					variant={editHeader ? 'outlined' : 'filled'}
-					placeholder={undefined}
-					disabled={editAnswer}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-					onClick={() => {
-						setEditHeader(!editHeader);
-					}}
-				>
-					{editHeader ? <X size={15} /> : <Pencil size={10} />}
-				</Button>
+				<div>
+					<Button
+						size="sm"
+						title={editHeader ? 'Cancelar' : 'Cambiar Encabezado'}
+						variant={editHeader ? 'outlined' : 'filled'}
+						placeholder={undefined}
+						disabled={editAnswer}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						onClick={() => {
+							setEditHeader(!editHeader);
+						}}
+					>
+						{editHeader ? <X size={15} /> : <Pencil size={10} />}
+					</Button>
+				</div>
 				{editHeader && (
 					<Button
 						title="Guardar"
