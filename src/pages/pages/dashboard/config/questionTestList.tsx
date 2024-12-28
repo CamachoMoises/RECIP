@@ -25,28 +25,36 @@ const QuestionTestList = () => {
 	const { test } = useSelector((state: RootState) => {
 		return { test: state.tests };
 	});
-	const { id, question_type_id } = useParams<{
-		id: string;
+	const { course_id, test_id, question_type_id } = useParams<{
+		course_id: string;
+		test_id: string;
 		question_type_id: string;
 	}>();
 	const dispatch = useDispatch<AppDispatch>();
 	useEffect(() => {
-		dispatch(fetchTest(id ? parseInt(id) : -1));
+		dispatch(fetchTest(test_id ? parseInt(test_id) : -1));
 		dispatch(
 			fetchQuestions({
-				test_id: id ? parseInt(id) : -1,
+				test_id: test_id ? parseInt(test_id) : -1,
 				question_type_id: question_type_id
 					? parseInt(question_type_id)
 					: -1,
 			})
 		);
 		dispatch(fetchQuestionTypes());
-	}, [dispatch, id, question_type_id]);
+	}, [dispatch, test_id, question_type_id]);
 	const questionType = test.questionTypes.find(
 		(QT) =>
 			QT.id === parseInt(question_type_id ? question_type_id : '-1')
 	);
-
+	const questionTypeTest =
+		test.testSelected?.test_question_types.find(
+			(TQT) =>
+				TQT.question_type_id === (questionType ? questionType.id : -1)
+		);
+	const questionForTest = questionTypeTest?.amount
+		? questionTypeTest.amount
+		: 0;
 	const breadCrumbs: breadCrumbsItems[] = [
 		{
 			name: 'Dashboard',
@@ -58,7 +66,7 @@ const QuestionTestList = () => {
 		},
 		{
 			name: 'Lista de Examenes',
-			href: `/dashboard/config/test/${id}`,
+			href: `/dashboard/config/test/${course_id}`,
 		},
 	];
 	if (test.status === 'loading') {
@@ -101,6 +109,19 @@ const QuestionTestList = () => {
 					>
 						Cantidad de preguntas {test.questionList.length}
 					</Typography>
+					{questionForTest > test.questionList.length && (
+						<Typography
+							variant="h4"
+							color="red"
+							className="text-center"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							La cantidad de preguntas no corresponde con la necesaria
+							para el examen ({questionForTest})
+						</Typography>
+					)}
 				</CardBody>
 			</Card>
 			<br />

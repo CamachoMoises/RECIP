@@ -27,6 +27,7 @@ type Inputs = {
 	instructor_id: string;
 };
 const NewCourseSubject = ({
+	hours,
 	subjectItem,
 	user,
 	course_student,
@@ -34,6 +35,7 @@ const NewCourseSubject = ({
 	SD,
 	schedule,
 }: {
+	hours: number;
 	subjectItem: subject;
 	user: UserState;
 	course_student: courseStudent | null;
@@ -54,6 +56,11 @@ const NewCourseSubject = ({
 		);
 		dateS = newDate.format('YYYY-MM-DD');
 	}
+	const hoursPassed = hours - subjectItem.hours;
+	const startTime = moment('08:00', 'HH:mm').add(
+		hoursPassed,
+		'hours'
+	);
 	const {
 		register,
 		handleSubmit,
@@ -62,7 +69,9 @@ const NewCourseSubject = ({
 	} = useForm<Inputs>({
 		defaultValues: {
 			date: dateS,
-			hour: schedule?.hour,
+			hour: schedule?.hour
+				? schedule.hour
+				: startTime.format('HH:mm'),
 			classTime: schedule?.classTime
 				? `${schedule.classTime}`
 				: `${subjectItem.hours}`,

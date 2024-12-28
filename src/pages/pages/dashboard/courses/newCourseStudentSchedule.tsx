@@ -508,48 +508,58 @@ const NewCourse = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									{days.map((day) => (
-										<TabPanel
-											key={`${day.id}-day_detail`}
-											value={day.name}
-										>
-											<div className="flex flex-col gap-2 ">
-												{subject.subjectList.map((subjectItem) => {
-													const SD = subjectItem.subject_days?.find(
-														(sd) =>
-															sd.day === day.id + 1 &&
-															sd.status &&
-															subjectItem.status
-													);
-													const schedule = course.scheduleList?.find(
-														(schedule) =>
-															schedule.subject_id ===
-																subjectItem.id &&
-															schedule.subject_days_id === SD?.id
-													);
+									{days.map((day) => {
+										let hours = 0;
+										return (
+											<TabPanel
+												key={`${day.id}-day_detail`}
+												value={day.name}
+											>
+												<div className="flex flex-col gap-2 ">
+													{subject.subjectList.map((subjectItem) => {
+														const SD = subjectItem.subject_days?.find(
+															(sd) =>
+																sd.day === day.id + 1 &&
+																sd.status &&
+																subjectItem.status
+														);
+														if (SD) {
+															hours = hours + subjectItem.hours;
+														}
+														const schedule =
+															course.scheduleList?.find(
+																(schedule) =>
+																	schedule.subject_id ===
+																		subjectItem.id &&
+																	schedule.subject_days_id === SD?.id
+															);
 
-													return (
-														<div key={subjectItem.id}>
-															<NewCourseSubject
-																subjectItem={subjectItem}
-																user={user}
-																course_student={course.courseStudent}
-																schedule={schedule}
-																SD={SD}
-																student_id={
-																	studentSelectRef.current?.student
-																		?.id
-																		? studentSelectRef.current.student
-																				.id
-																		: -1
-																}
-															/>
-														</div>
-													);
-												})}
-											</div>
-										</TabPanel>
-									))}
+														return (
+															<div key={subjectItem.id}>
+																<NewCourseSubject
+																	hours={hours}
+																	subjectItem={subjectItem}
+																	user={user}
+																	course_student={
+																		course.courseStudent
+																	}
+																	schedule={schedule}
+																	SD={SD}
+																	student_id={
+																		studentSelectRef.current?.student
+																			?.id
+																			? studentSelectRef.current
+																					.student.id
+																			: -1
+																	}
+																/>
+															</div>
+														);
+													})}
+												</div>
+											</TabPanel>
+										);
+									})}
 								</TabsBody>
 							</Tabs>
 						</AccordionBody>

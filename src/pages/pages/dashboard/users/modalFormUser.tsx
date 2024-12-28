@@ -155,9 +155,6 @@ const ModalFormUser = ({
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					{String.fromCodePoint(
-						...'US'.split('').map((c) => 127397 + c.charCodeAt(0))
-					)}
 					<div className="container mx-auto p-3">
 						<div className="grid grid-cols-3 gap-4">
 							<div className="">

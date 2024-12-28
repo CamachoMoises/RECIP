@@ -272,7 +272,7 @@ const GeneralConfig = () => {
 															</Button>
 
 															<Button
-																title="Editar examen"
+																title="Editar examenes del curso"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}

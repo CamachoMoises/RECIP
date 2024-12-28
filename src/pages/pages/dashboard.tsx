@@ -11,7 +11,7 @@ import NewAssessment from './dashboard/assessment/newAssessment';
 import NewTest from './dashboard/test/newTest';
 import GeneralTest from './dashboard/test/generalTest';
 import GeneralConfig from './dashboard/config/generalConfig';
-import Test from './dashboard/config/test';
+import TestList from './dashboard/config/testList';
 import QuestionTestList from './dashboard/config/questionTestList';
 
 const Dashboard = () => {
@@ -56,9 +56,9 @@ const Dashboard = () => {
 								path="config/course/:id"
 								element={<CourseDetail />}
 							/>
-							<Route path="config/test/:id" element={<Test />} />
+							<Route path="config/test/:id" element={<TestList />} />
 							<Route
-								path="config/testQuestion/:id/:question_type_id"
+								path="config/testQuestion/:course_id/:test_id/:question_type_id"
 								element={<QuestionTestList />}
 							/>
 							<Route

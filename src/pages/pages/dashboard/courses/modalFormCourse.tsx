@@ -170,7 +170,7 @@ const ModalFormCourse = ({
 									crossOrigin={undefined}
 									disabled={true}
 									{...register('hours', {})}
-									aria-invalid={errors.name ? 'true' : 'false'}
+									aria-invalid={errors.hours ? 'true' : 'false'}
 								/>
 							</div>
 

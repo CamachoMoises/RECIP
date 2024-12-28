@@ -93,7 +93,30 @@ export const updateQuestionTypes = createAsyncThunk<questionType, questionType>(
         }
     }
 );
-
+// Acción para Crear una Examen
+export const createTest = createAsyncThunk<test, { course_id: number, duration: number, min_score: number }>(
+    'questionTypes/createTest',
+    async (testData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostDefault(`api/test/test`, testData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+// Acción para actualizar una Examen
+export const updateTest = createAsyncThunk<test, test>(
+    'questionTypes/updateTest',
+    async (testData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutDefault(`api/test/test`, testData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
 // Acción para actualizar una pregunta
 export const updateQuestionTest = createAsyncThunk<question, question>(
     'questionTypes/updateQuestion',
@@ -253,16 +276,48 @@ const testSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // Reducers para la acción createTest
+            .addCase(createTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createTest.fulfilled, (state, action: PayloadAction<test>) => {
+                const newTest = action.payload;
+                state.status = 'succeeded';
+                state.testList.push(newTest);
+            })
+            .addCase(createTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción updateTest
+            .addCase(updateTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateTest.fulfilled, (state, action: PayloadAction<test>) => {
+                const testEdited = action.payload;
+                state.status = 'succeeded';
+                const index = state.testList.findIndex((TE) => TE.id === testEdited.id);
+                if (index !== -1) {
+                    state.testList[index] = testEdited;
+                }
+            })
+            .addCase(updateTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+
             // Reducers para la acción updateQuestionTest
             .addCase(updateQuestionTest.pending, (state) => {
                 state.status = 'loading';
             })
             .addCase(updateQuestionTest.fulfilled, (state, action: PayloadAction<question>) => {
-                const editedQuestion = action.payload;
+                const questionEdited = action.payload;
                 state.status = 'succeeded';
-                const index = state.questionList.findIndex((QL) => QL.id === editedQuestion.id);
+                const index = state.questionList.findIndex((QE) => QE.id === questionEdited.id);
                 if (index !== -1) {
-                    state.questionList[index] = editedQuestion;
+                    state.questionList[index] = questionEdited;
                 }
             })
             .addCase(updateQuestionTest.rejected, (state, action) => {
@@ -276,11 +331,11 @@ const testSlice = createSlice({
                 state.status = 'loading';
             })
             .addCase(updateAnswerQuestionTest.fulfilled, (state, action: PayloadAction<question>) => {
-                const editedQuestion = action.payload;
+                const questionEdited = action.payload;
                 state.status = 'succeeded';
-                const index = state.questionList.findIndex((QL) => QL.id === editedQuestion.id);
+                const index = state.questionList.findIndex((QE) => QE.id === questionEdited.id);
                 if (index !== -1) {
-                    state.questionList[index] = editedQuestion;
+                    state.questionList[index] = questionEdited;
                 }
             })
             .addCase(updateAnswerQuestionTest.rejected, (state, action) => {
