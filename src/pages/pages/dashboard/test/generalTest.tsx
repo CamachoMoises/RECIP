@@ -26,7 +26,10 @@ import {
 } from '@material-tailwind/react';
 import moment from 'moment';
 import { useEffect } from 'react';
-import { createCourseStudentTest } from '../../../../features/testSlice';
+import {
+	createCourseStudentTest,
+	fetchTest,
+} from '../../../../features/testSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -37,48 +40,44 @@ const breadCrumbs: breadCrumbsItems[] = [
 const GeneralTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
-	const { courseStudentList, status, error } = useSelector(
-		(state: RootState) => {
-			return (
-				state.courses || {
-					courseList: [],
-					status: 'idle2',
-					error: null,
-				}
-			);
-		}
-	);
+	const { course, test } = useSelector((state: RootState) => {
+		return { course: state.courses, test: state.tests };
+	});
 	useEffect(() => {
 		dispatch(fetchCourses());
 		dispatch(fetchCoursesStudents());
 	}, [dispatch]);
 	const navigateCourseStudentTest = async (
-		CL: courseStudent,
+		CS: courseStudent,
 		date: string
 	) => {
-		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
-		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
-		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
-		await dispatch(
+		await dispatch(fetchSubjects(CS.course_id ? CS.course_id : -1));
+		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
+		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
+		const CST = await dispatch(
 			createCourseStudentTest({
-				course_student_id: CL.id ? CL.id : -1,
-				test_id: CL.course_id,
+				course_student_id: CS.id ? CS.id : -1,
 				date: date,
 			})
-		);
-		navigate(`../new_test/${CL.id}/${CL.course_id}`);
+		).unwrap();
+		await dispatch(fetchTest(CST.test_id));
+		navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
 	};
-	if (status === 'loading') {
+	console.log(test.testSelected);
+
+	if (course.status === 'loading') {
 		return (
 			<>
 				<LoadingPage />
 			</>
 		);
 	}
-	if (status === 'failed') {
+	if (course.status === 'failed') {
 		return (
 			<>
-				<ErrorPage error={error ? error : 'Indefinido'} />
+				<ErrorPage
+					error={course.error ? course.error : 'Indefinido'}
+				/>
 			</>
 		);
 	}
@@ -102,7 +101,7 @@ const GeneralTest = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							{courseStudentList?.map((CL) => {
+							{course.courseStudentList?.map((CL) => {
 								const maxTries = 4;
 								let active = true;
 								let dateTest = null;

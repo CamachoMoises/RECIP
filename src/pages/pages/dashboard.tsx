@@ -70,7 +70,7 @@ const Dashboard = () => {
 								element={<NewAssessment />}
 							/>
 							<Route
-								path="new_test/:id/:course_id"
+								path="new_test/:id/:course_id/:test_id"
 								element={<NewTest />}
 							/>
 						</Routes>

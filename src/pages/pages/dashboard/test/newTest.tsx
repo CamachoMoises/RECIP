@@ -102,9 +102,17 @@ const NewTest = () => {
 	};
 	const seeResults = async () => {
 		handlePrint();
-
-		// navigate('../../dashboard');
 	};
+	const testTime = test.testSelected?.duration
+		? test.testSelected.duration
+		: 0;
+	const min_score = test.testSelected?.min_score
+		? test.testSelected.min_score
+		: 0;
+	const TQT = test.testSelected?.test_question_types
+		? test.testSelected.test_question_types
+		: [];
+	let totalPoints = 0;
 	const handlePrint = useReactToPrint({
 		contentRef: componentRef,
 		documentTitle: `Curso-${course.courseStudent?.code}`,
@@ -143,7 +151,7 @@ const NewTest = () => {
 		return (
 			<>
 				<PageTitle
-					title={`Examen de ${course.courseSelected?.name} ${test.courseStudentTestSelected?.code}`}
+					title={`Examen de  ${test.courseStudentTestSelected?.code} (${test.testSelected?.code})`}
 					breadCrumbs={breadCrumbs}
 				/>
 				<LoadingPage />
@@ -187,7 +195,7 @@ const NewTest = () => {
 							>
 								Volver
 							</Button>
-							{score > 20 ? (
+							{score > min_score ? (
 								<Button
 									variant="filled"
 									color="green"
@@ -256,12 +264,11 @@ const NewTest = () => {
 			navigate('../test');
 		}
 	}
-	// console.log('horas', test.courseStudentTestSelected);
 
 	return (
 		<div className="container">
 			<PageTitle
-				title={`Examen de ${course.courseSelected?.name} ${course.courseSelected?.course_type.name} ${course.courseSelected?.course_level.name} ${test.courseStudentTestSelected?.code}`}
+				title={`Examen de  ${test.courseStudentTestSelected?.code} (${test.testSelected?.code})`}
 				breadCrumbs={breadCrumbs}
 			/>
 			{dateTest && (
@@ -269,27 +276,31 @@ const NewTest = () => {
 					<div className="flex flex-row gap-4 justify-start">
 						<Countdown
 							startTime={dateTest.format('HH:mm')}
-							totalMinutes={120}
+							totalMinutes={testTime}
 							setActive={setTestActive}
 						/>
-						<div className=" mx-auto p-6 bg-white shadow-lg rounded-lg">
-							<Typography
-								variant="h5"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								hora de inicio: {dateTest.format('HH:mm a')}
-							</Typography>
-							<Typography
-								variant="h5"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Hora de cierre:{' '}
-								{dateTest.add(2, 'hours').format('HH:mm a')}
-							</Typography>
+						<div className="mx-auto p-6 bg-white shadow-lg rounded-lg">
+							<div className="flex flex-row gap-3 ">
+								<Typography
+									variant="h5"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Hora de inicio: {dateTest.format('hh:mm a')}
+								</Typography>
+								<Typography
+									variant="h5"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Hora de fin:{' '}
+									{dateTest
+										.add(testTime, 'minutes')
+										.format('hh:mm a')}
+								</Typography>
+							</div>
 							<div className="flex flex-col justify-between">
 								<Typography
 									variant="h6"
@@ -297,154 +308,51 @@ const NewTest = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									CONTENIDO:
+									Contenido la prueba:
 								</Typography>
-								<div className="flex flex-row justify-between gap-3">
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										30 Preguntas de seleccion simple
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										01 Punto c/u
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										30 Puntos.
-									</Typography>
-								</div>
+								{TQT.map((tqt, index) => {
+									const amount = tqt.amount;
+									const value = tqt.question_type?.value
+										? tqt.question_type.value
+										: 0;
+									const totalPointsQuestion = amount * value;
+									totalPoints = totalPoints + totalPointsQuestion;
+									return (
+										<div
+											key={`tqt-${index}`}
+											className="flex flex-row justify-between gap-3"
+										>
+											<Typography
+												variant="lead"
+												className="text-sm"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{amount} {tqt.question_type?.name}
+											</Typography>
+											<Typography
+												variant="lead"
+												className="text-sm"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{value} Punto c/u
+											</Typography>
+											<Typography
+												variant="lead"
+												className="text-sm"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{totalPointsQuestion} Puntos.
+											</Typography>
+										</div>
+									);
+								})}
 
-								<div className="flex flex-row justify-between gap-3">
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										15 Preguntas de selección múltiple
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										02 Puntos c/u
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										30 Puntos.
-									</Typography>
-								</div>
-								<div className="flex flex-row justify-between gap-3">
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										10 Preguntas de verdadero y falso
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										1,5 Puntos c/u
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										15 Puntos.
-									</Typography>
-								</div>
-								<div className="flex flex-row justify-between gap-3">
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										1 Pregunta de completación
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										9 Puntos
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										9 Puntos.
-									</Typography>
-								</div>
-								<div className="flex flex-row justify-between gap-3">
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										4 Preguntas de desarrollo
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										4 Puntos c/u
-									</Typography>
-									<Typography
-										variant="lead"
-										className="text-sm"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										16 puntos.
-									</Typography>
-								</div>
 								<hr />
 								<Typography
 									className="text-sm text-end"
@@ -453,7 +361,7 @@ const NewTest = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									100 puntos.
+									{totalPoints} puntos.
 								</Typography>
 							</div>
 						</div>
@@ -509,8 +417,7 @@ const NewTest = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									El examen tendrá una duración de una hora y media
-									(02:00 HRS) o (120 Mins) .
+									El examen tendrá una duración de {testTime} minutos.
 								</ListItem>
 								<ListItem
 									placeholder={undefined}
@@ -525,8 +432,8 @@ const NewTest = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									La mínima aprobatoria en el puntaje total será 85
-									puntos.
+									La mínima aprobatoria en el puntaje total será{' '}
+									{min_score} puntos.
 								</ListItem>
 							</List>
 						</div>

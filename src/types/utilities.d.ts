@@ -1,3 +1,4 @@
+import { question } from './utilities.d';
 export type dataResponseTypeAxios = {
     resp: any;
     status: number;
@@ -77,6 +78,7 @@ export type testQuestionType = {
     amount: number;
     course_id: number;
     question_type_id: number;
+    question_type?: questionType;
     test_id: number;
     status: boolean;
     createdAt?: string;
@@ -140,6 +142,7 @@ export type student = {
 export type course = {
     id: number | null;
     name: string;
+    tests?: test[];
     description: string;
     hours: number;
     days: number;
