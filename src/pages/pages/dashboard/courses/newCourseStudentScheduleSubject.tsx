@@ -34,9 +34,11 @@ const NewCourseSubject = ({
 	student_id,
 	SD,
 	schedule,
+	approve,
 }: {
 	hours: number;
 	subjectItem: subject;
+	approve: boolean | undefined;
 	user: UserState;
 	course_student: courseStudent | null;
 	student_id: number;
@@ -140,6 +142,7 @@ const NewCourseSubject = ({
 								<div className="flex flex-col gap-2">
 									<Input
 										type="date"
+										disabled={approve}
 										label="Fecha"
 										{...register('date', {
 											required: {
@@ -161,6 +164,7 @@ const NewCourseSubject = ({
 										type="time"
 										label="Hora de inicio"
 										required={true}
+										disabled={approve}
 										{...register('hour', {
 											required: {
 												value: true,
@@ -181,6 +185,7 @@ const NewCourseSubject = ({
 									<div className="flex flex-col gap-2">
 										<Input
 											type="text"
+											disabled={approve}
 											{...register('classTime', {
 												required: {
 													value: true,
@@ -229,6 +234,7 @@ const NewCourseSubject = ({
 											<Select
 												label="Selecionar Instructor"
 												placeholder={undefined}
+												disabled={approve}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 												{...field}

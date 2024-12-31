@@ -218,6 +218,7 @@ export type courseStudent = {
     regulation: number;
     date: string | null;
     score?: number;
+    approve?: boolean;
     code: string;
     createdAt: string;
     updatedAt: string;
@@ -228,6 +229,7 @@ export type courseStudentTest = {
     course_id: number;
     course?: course;
     score: number;
+    approve?: boolean;
     test_id: number;
     test?: test;
     attempts: number;

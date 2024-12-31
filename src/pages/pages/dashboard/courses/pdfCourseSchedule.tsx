@@ -173,10 +173,8 @@ const PDFCourseSchedule = ({
 										<tr>
 											<td className="border border-gray-800 px-4 text-left text-xs">
 												Resultados del examen:{' '}
-												{course.courseStudent.score >= 85
-													? course.courseStudent.score
-													: ''}{' '}
-												%
+												{course.courseStudent.approve &&
+													course.courseStudent.score}
 											</td>
 											<td className="border border-gray-800 px-4 text-left text-xs">
 												Corregido el: 100%
@@ -200,10 +198,8 @@ const PDFCourseSchedule = ({
 										<tr>
 											<td className="border border-gray-800 px-4  text-left text-xs">
 												Resultados para repetir:{' '}
-												{course.courseStudent.score < 85
-													? course.courseStudent.score
-													: ''}{' '}
-												%
+												{course.courseStudent.approve === false &&
+													`${course.courseStudent.score} Puntos`}
 											</td>
 											<td className="border border-gray-800 px-4  text-left text-xs">
 												Corregido el: 100%

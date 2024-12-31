@@ -229,6 +229,7 @@ const NewCourse = () => {
 							<div className="">
 								<Select
 									label="Selecionar Piloto"
+									disabled={course.courseStudent?.approve}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									value={`${studentSelect?.student?.id}`}
@@ -291,6 +292,7 @@ const NewCourse = () => {
 							<Input
 								type="date"
 								label="Fecha de inicio"
+								disabled={course.courseStudent?.approve}
 								value={
 									course.courseStudent?.date
 										? moment(course.courseStudent.date).format(
@@ -315,6 +317,7 @@ const NewCourse = () => {
 									}
 									label="PIC"
 									color="red"
+									disabled={course.courseStudent?.approve}
 									onChange={() => {
 										handleChangeRadio(1, 'type_trip');
 									}}
@@ -328,6 +331,7 @@ const NewCourse = () => {
 										course.courseStudent?.type_trip === 2
 									}
 									label="SIC"
+									disabled={course.courseStudent?.approve}
 									color="red"
 									onChange={() => {
 										handleChangeRadio(2, 'type_trip');
@@ -342,6 +346,7 @@ const NewCourse = () => {
 										course.courseStudent?.type_trip === 3
 									}
 									label="TRIP"
+									disabled={course.courseStudent?.approve}
 									onChange={() => {
 										handleChangeRadio(3, 'type_trip');
 									}}
@@ -368,6 +373,7 @@ const NewCourse = () => {
 										defaultChecked={
 											course.courseStudent?.license === 1
 										}
+										disabled={course.courseStudent?.approve}
 										label="ATP"
 										onChange={() => {
 											handleChangeRadio(1, 'license');
@@ -384,6 +390,7 @@ const NewCourse = () => {
 										}
 										label="Commercial"
 										color="red"
+										disabled={course.courseStudent?.approve}
 										onChange={() => {
 											handleChangeRadio(2, 'license');
 										}}
@@ -394,6 +401,7 @@ const NewCourse = () => {
 
 									<Radio
 										name="license"
+										disabled={course.courseStudent?.approve}
 										defaultChecked={
 											course.courseStudent?.license === 3
 										}
@@ -422,6 +430,7 @@ const NewCourse = () => {
 								<div className="flex gap-10">
 									<Radio
 										name="regulation"
+										disabled={course.courseStudent?.approve}
 										defaultChecked={
 											course.courseStudent?.regulation === 1
 										}
@@ -436,6 +445,7 @@ const NewCourse = () => {
 									/>
 									<Radio
 										name="regulation"
+										disabled={course.courseStudent?.approve}
 										defaultChecked={
 											course.courseStudent?.regulation === 2
 										}
@@ -540,6 +550,9 @@ const NewCourse = () => {
 																	hours={hours}
 																	subjectItem={subjectItem}
 																	user={user}
+																	approve={
+																		course.courseStudent?.approve
+																	}
 																	course_student={
 																		course.courseStudent
 																	}
@@ -581,6 +594,19 @@ const NewCourse = () => {
 						<AccordionBody>
 							{course.courseStudent?.score && (
 								<>
+									{course.courseStudent.approve && (
+										<div className="flex flex-col">
+											<Typography
+												variant="h3"
+												color="light-green"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												El piloto aprobo el examen
+											</Typography>
+										</div>
+									)}
 									<div className="grid grid-cols-3 gap-4 py-2 px-2">
 										<div className="flex flex-row gap-2">
 											<Typography
@@ -588,18 +614,18 @@ const NewCourse = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Resulatos del Examen %
+												Resulatos del Examen
 											</Typography>
 
 											<Input
 												type="number"
 												inputMode="numeric"
 												value={
-													course.courseStudent.score > 1
+													course.courseStudent.approve
 														? course.courseStudent.score
 														: 0
 												}
-												label="Resultado "
+												label="Puntos "
 												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
@@ -607,7 +633,6 @@ const NewCourse = () => {
 											/>
 										</div>
 										<div className="flex flex-row gap-2 justify-center">
-											{}
 											{course.courseStudent?.score >= 0 && (
 												<Typography
 													variant="small"
@@ -647,14 +672,18 @@ const NewCourse = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Resultados para repetir examen %
+												Resultados para repetir examen
 											</Typography>
 
 											<Input
 												type="number"
 												inputMode="numeric"
-												value={course.courseStudent.score}
-												label="Resultado "
+												value={
+													course.courseStudent.approve === false
+														? course.courseStudent.score
+														: 0
+												}
+												label="Puntos "
 												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}

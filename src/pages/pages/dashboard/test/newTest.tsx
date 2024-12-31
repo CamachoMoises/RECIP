@@ -167,15 +167,39 @@ const NewTest = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						Examen finalizado
+						Examen finalizado usted{' '}
+						{score >= min_score ? '(Aprobó)' : '(Reprobó)'}
 					</DialogHeader>
 					<DialogBody
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						El examen a finalizado si calificacion total es {score}
-						/100
+						<div className="flex flex-col justify-center">
+							<Typography
+								variant="lead"
+								className="text-center"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								El examen a finalizado su calificacion final es{' '}
+								{score}
+								/100
+							</Typography>
+							{score < min_score && (
+								<Typography
+									variant="lead"
+									className="text-center"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									La calificacion minima para aprobar era de{' '}
+									{min_score}
+								</Typography>
+							)}
+						</div>
 					</DialogBody>
 					<DialogFooter
 						placeholder={undefined}
@@ -195,7 +219,7 @@ const NewTest = () => {
 							>
 								Volver
 							</Button>
-							{score > min_score ? (
+							{score >= min_score ? (
 								<Button
 									variant="filled"
 									color="green"
