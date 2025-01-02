@@ -10,7 +10,6 @@ import {
 } from '@material-tailwind/react';
 import {
 	breadCrumbsItems,
-	daySubjectType,
 	subject,
 } from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
@@ -142,32 +141,22 @@ const CourseDetail = () => {
 				</>
 			);
 		}
-		let hoursToDays: daySubjectType[] = [];
-
-		if (subject.subjectList) {
-			const subjectDays = subject.subjectList.map((sub) => {
-				const dayT = sub.subject_days;
-				const dayS = dayT?.map((DT) => {
-					if (DT.status) {
-						return DT.day;
-					}
-				});
-				let day: number = -1;
-				if (dayS) {
-					if (dayS.length > 0) {
-						day = dayS[0] ? dayS[0] : -1;
-					}
-				}
-				return { day: day, hours: sub.hours };
-			});
-			hoursToDays = subjectDays;
-		}
 
 		if (selectedCourse) {
 			const days = Array.from(
 				{ length: selectedCourse.days },
 				(_, i) => ({ id: i, name: `Dia ${i + 1}` })
 			);
+
+			const hoursByDays = subject.subjectList.flatMap((sub) => {
+				const daysActive =
+					sub.subject_days?.filter((SD) => SD.status) || [];
+				return daysActive.map((SD) => ({
+					day: SD.day,
+					hours: sub.hours,
+				}));
+			});
+			console.log(hoursByDays);
 			return (
 				<>
 					<PageTitle
@@ -239,21 +228,25 @@ const CourseDetail = () => {
 											{course.courseSelected.course_type.id != 2 ? (
 												<>
 													{days.map((day, index) => {
-														let hoursD = 0;
-														hoursToDays.forEach((HTD) => {
-															if (HTD.day === day.id + 1) {
-																hoursD = hoursD + HTD.hours;
-															}
-														});
+														let hours = 0;
+														console.log(day, index, 'OJO');
+														const hoursDay = hoursByDays.filter(
+															(HbD) => HbD.day === day.id + 1
+														);
+														hours = hoursDay.reduce(
+															(sum, SD) => sum + SD.hours,
+															0
+														);
+
 														return (
 															<div className="flex flex-col gap-2">
 																<span
 																	key={`dayDetails-${index}`}
 																	className={
-																		hoursD > 8 ? 'text-red-700' : ''
+																		hours > 8 ? 'text-red-700' : ''
 																	}
 																>
-																	{day.name}: {hoursD} horas de
+																	{day.name}: {hours} horas de
 																	instruccion
 																</span>
 															</div>
