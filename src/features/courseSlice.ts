@@ -16,7 +16,7 @@ const initialState: CourseState = {
     error: null, // Inicializar como null
 };
 export const fetchCourses = createAsyncThunk<course[]>(
-    'user/fetchCourses',
+    'course/fetchCourses',
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault('api/courses');
@@ -28,7 +28,7 @@ export const fetchCourses = createAsyncThunk<course[]>(
 );
 
 export const fetchCoursesStudents = createAsyncThunk<courseStudent[]>(
-    'user/fetchCoursesStudents',
+    'course/fetchCoursesStudents',
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault('api/courses/coursesStudents');
@@ -39,8 +39,22 @@ export const fetchCoursesStudents = createAsyncThunk<courseStudent[]>(
     }
 );
 
+export const fetchCoursesStudentsTests = createAsyncThunk<courseStudent[], number>(
+    'course/fetchCoursesStudentsTests',
+    async (course_type_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault('api/courses/coursesStudents',
+                { course_type_id: course_type_id }
+            );
+            return response.resp;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const fetchCourse = createAsyncThunk<course, number>(
-    'user/fetchCourse',
+    'course/fetchCourse',
     async (id, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault(`api/courses/course/${id}`);
@@ -52,7 +66,7 @@ export const fetchCourse = createAsyncThunk<course, number>(
 );
 
 export const fetchCourseStudent = createAsyncThunk<courseStudent, number>(
-    'user/fetchCourseStudent',
+    'course/fetchCourseStudent',
     async (id, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault(`api/courses/courseStudent/${id}`);
@@ -64,7 +78,7 @@ export const fetchCourseStudent = createAsyncThunk<courseStudent, number>(
 );
 
 export const fetchSchedule = createAsyncThunk<schedule[], number>(
-    'user/fetchSchedule',
+    'course/fetchSchedule',
     async (id, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault(`api/courses/schedule/${id}`);
@@ -189,6 +203,20 @@ const courseSlice = createSlice({
                 state.courseStudentList = action.payload;
             })
             .addCase(fetchCoursesStudents.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+
+            //Reducers para la acción fetchCoursesStudentsTests
+            .addCase(fetchCoursesStudentsTests.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCoursesStudentsTests.fulfilled, (state, action: PayloadAction<courseStudent[]>) => {
+                state.status = 'succeeded';
+                state.courseStudentList = action.payload;
+            })
+            .addCase(fetchCoursesStudentsTests.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

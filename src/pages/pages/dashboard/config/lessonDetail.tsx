@@ -1,6 +1,6 @@
 import {
 	Button,
-	ButtonGroup,
+	// ButtonGroup,
 	Input,
 	Switch,
 	Typography,
@@ -9,14 +9,20 @@ import {
 	subjectLesson,
 	subjectLessonDays,
 } from '../../../../types/utilities';
-import { ArrowDown, ArrowUp, Pencil, Save, X } from 'lucide-react';
+import {
+	// ArrowDown,
+	// ArrowUp,
+	Pencil,
+	Save,
+	X,
+} from 'lucide-react';
 import { useState } from 'react';
 
 const LessonDetail = ({
 	SL,
 	days,
 	subjectLessonDays,
-	maxOrderLessonSelected,
+	// maxOrderLessonSelected,
 	handleChangeStatusDay,
 	handleEditLesson,
 }: {
@@ -43,9 +49,9 @@ const LessonDetail = ({
 		status: boolean
 	) => Promise<void>;
 }) => {
-	const maxOrderLesson = maxOrderLessonSelected
-		? maxOrderLessonSelected
-		: -1;
+	// const maxOrderLesson = maxOrderLessonSelected
+	// 	? maxOrderLessonSelected
+	// 	: -1;
 	const [editLesson, setEditLesson] = useState(false);
 	const [lessonName, setLessonName] = useState(SL.name);
 	const [isActive, setIsActive] = useState(SL.status);
@@ -141,27 +147,28 @@ const LessonDetail = ({
 					</>
 				)}
 			</div>
-			<ButtonGroup
+			<div className="flex flex-row gap-2 ">
+				{/* <ButtonGroup
 				size="sm"
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
-			>
-				<Button
+			> */}
+				{/* <Button
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 					disabled={SL.order <= 1 || editLesson}
-					// onClick={() =>
-					// 	handleSwitchSubject(
-					// 		subject,
-					// 		index,
-					// 		'up'
-					// 	)
-					// }
+					onClick={() =>
+						handleSwitchSubject(
+							subject,
+							index,
+							'up'
+						)
+					}
 				>
 					<ArrowUp size={12} />
-				</Button>
+				</Button> */}
 
 				<Button
 					placeholder={undefined}
@@ -175,7 +182,6 @@ const LessonDetail = ({
 				{editLesson && (
 					<Button
 						placeholder={undefined}
-						variant={editLesson ? 'outlined' : 'filled'}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 						disabled={!lessonName}
@@ -191,22 +197,23 @@ const LessonDetail = ({
 						<Save size={12} />
 					</Button>
 				)}
-				<Button
+				{/* <Button
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 					disabled={maxOrderLesson <= SL.order || editLesson}
-					// onClick={() =>
-					// 	handleSwitchSubject(
-					// 		subject,
-					// 		index,
-					// 		'down'
-					// 	)
-					// }
+					onClick={() =>
+						handleSwitchSubject(
+							subject,
+							index,
+							'down'
+						)
+					}
 				>
 					<ArrowDown size={12} />
-				</Button>
-			</ButtonGroup>
+				</Button> */}
+				{/* </ButtonGroup> */}
+			</div>
 		</>
 	);
 };

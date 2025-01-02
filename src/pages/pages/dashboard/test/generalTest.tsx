@@ -7,8 +7,7 @@ import { fetchSubjects } from '../../../../features/subjectSlice';
 import {
 	fetchCourse,
 	fetchCourseStudent,
-	fetchCourses,
-	fetchCoursesStudents,
+	fetchCoursesStudentsTests,
 } from '../../../../features/courseSlice';
 import {
 	breadCrumbsItems,
@@ -40,12 +39,11 @@ const breadCrumbs: breadCrumbsItems[] = [
 const GeneralTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
-	const { course, test } = useSelector((state: RootState) => {
-		return { course: state.courses, test: state.tests };
+	const { course } = useSelector((state: RootState) => {
+		return { course: state.courses };
 	});
 	useEffect(() => {
-		dispatch(fetchCourses());
-		dispatch(fetchCoursesStudents());
+		dispatch(fetchCoursesStudentsTests(1));
 	}, [dispatch]);
 	const navigateCourseStudentTest = async (
 		CS: courseStudent,
@@ -63,7 +61,7 @@ const GeneralTest = () => {
 		await dispatch(fetchTest(CST.test_id));
 		navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
 	};
-	console.log(test.testSelected);
+	console.log(course.courseStudentList);
 
 	if (course.status === 'loading') {
 		return (

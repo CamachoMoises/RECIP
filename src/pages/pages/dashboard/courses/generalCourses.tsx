@@ -23,17 +23,11 @@ import {
 	fetchCourses,
 	fetchCoursesStudents,
 	fetchSchedule,
-	setDay,
 } from '../../../../features/courseSlice';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 
-import {
-	// BookCheck,
-	CalendarCheck,
-	// Pencil,
-	// Plus
-} from 'lucide-react';
+import { CalendarCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchSubjects } from '../../../../features/subjectSlice';
 import {
@@ -53,22 +47,23 @@ const GeneralCourses = () => {
 
 	const { courseList, courseStudentList, status, error } =
 		useSelector((state: RootState) => {
-			return (
-				state.courses || {
-					courseList: [],
-					status: 'idle2',
-					error: null,
-				}
-			);
+			return state.courses;
 		});
-	dispatch(setDay(1));
 	useEffect(() => {
 		dispatch(fetchCourses());
 		dispatch(fetchCoursesStudents());
 	}, [dispatch]);
 
 	const handleNewCourseSchedule = async (course_id: number) => {
-		dispatch(createCourseStudent(course_id));
+		const CS = await dispatch(
+			createCourseStudent(course_id)
+		).unwrap();
+		await dispatch(fetchSubjects(CS.course_id ? CS.course_id : -1));
+		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
+		await dispatch(fetchInstructors());
+		await dispatch(fetchStudents());
+		await dispatch(fetchSchedule(CS.id ? CS.id : -1));
+		navigate(`../new_course/${CS.id}/${CS.course_id}`);
 	};
 	const navigateCourseStudent = async (CS: courseStudent) => {
 		await dispatch(fetchSubjects(CS.course_id ? CS.course_id : -1));
@@ -153,26 +148,6 @@ const GeneralCourses = () => {
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														{/* <Button
-																title="Editar el Curso"
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
-																onClick={() => handleOpenEdit(course)}
-															>
-																<Pencil size={20} />
-															</Button>
-															<Button
-																title="Secciones del Curso"
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
-																onClick={() =>
-																	navigate(`../course/${course.id}`)
-																}
-															>
-																<BookCheck size={20} />
-															</Button> */}
 														<Button
 															title="Agendar nuevo curso"
 															className="flex flex-col justify-center text-center align-middle"

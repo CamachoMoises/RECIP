@@ -20,12 +20,14 @@ import { fetchSubjects } from '../../../../features/subjectSlice';
 import {
 	fetchCourse,
 	fetchCourseStudent,
+	fetchCoursesStudentsTests,
 	fetchSchedule,
 } from '../../../../features/courseSlice';
 import {
 	fetchInstructors,
 	fetchStudents,
 } from '../../../../features/userSlice';
+import { useEffect } from 'react';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Dashboard',
@@ -48,6 +50,10 @@ const GeneralAssessment = () => {
 			);
 		}
 	);
+
+	useEffect(() => {
+		dispatch(fetchCoursesStudentsTests(2));
+	}, [dispatch]);
 	const navigateCourseStudentAssessment = async (
 		CL: courseStudent
 	) => {
