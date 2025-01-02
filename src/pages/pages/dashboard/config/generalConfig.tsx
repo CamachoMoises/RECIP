@@ -258,7 +258,7 @@ const GeneralConfig = () => {
 																<Pencil size={20} />
 															</Button>
 															<Button
-																title="Asignaciones del Curso"
+																title="Secciones del Curso"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}

@@ -489,7 +489,7 @@ const NewCourse = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Asignaciones del Curso
+							Secciones del Curso
 						</AccordionHeader>
 						<AccordionBody>
 							<Tabs

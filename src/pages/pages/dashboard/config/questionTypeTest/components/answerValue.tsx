@@ -39,6 +39,7 @@ const AnswerValue = ({
 						onPointerLeaveCapture={undefined}
 						value={answerState}
 						required
+						maxLength={500}
 						onChange={(e) => {
 							setAnswerState(e.target.value);
 						}}

@@ -10,15 +10,12 @@ import {
 } from '@material-tailwind/react';
 import {
 	breadCrumbsItems,
-	course,
-	courseLevel,
 	courseStudent,
-	courseType,
 } from '../../../../types/utilities';
 import PageTitle from '../../../../components/PageTitle';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
 	createCourseStudent,
 	fetchCourse,
@@ -27,14 +24,10 @@ import {
 	fetchCoursesStudents,
 	fetchSchedule,
 	setDay,
-	setLastCourseStudentCreatedId,
-	setLastCreatedId,
 } from '../../../../features/courseSlice';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
-import { axiosGetDefault } from '../../../../services/axios';
-import ModalFormCourse from './modalFormCourse';
-import toast from 'react-hot-toast';
+
 import {
 	// BookCheck,
 	CalendarCheck,
@@ -57,84 +50,23 @@ const GeneralCourses = () => {
 	const dispatch = useDispatch<AppDispatch>();
 
 	const navigate = useNavigate();
-	const [courseSelected, setCourseSelected] = useState<course | null>(
-		null
-	);
-	const [courseTypes, setCourseTypes] = useState<courseType[] | null>(
-		null
-	);
-	const [courseLevel, setCourseLevel] = useState<
-		courseLevel[] | null
-	>(null);
-	const {
-		courseList,
-		courseStudentList,
-		status,
-		error,
-		lastCreatedId,
-		lastCourseStudentCreatedId,
-		courseStudent,
-	} = useSelector((state: RootState) => {
-		return (
-			state.courses || {
-				courseList: [],
-				status: 'idle2',
-				error: null,
-			}
-		);
-	});
-	const [openNewCourse, setOpenNewCourse] = useState(false);
+
+	const { courseList, courseStudentList, status, error } =
+		useSelector((state: RootState) => {
+			return (
+				state.courses || {
+					courseList: [],
+					status: 'idle2',
+					error: null,
+				}
+			);
+		});
 	dispatch(setDay(1));
 	useEffect(() => {
 		dispatch(fetchCourses());
 		dispatch(fetchCoursesStudents());
 	}, [dispatch]);
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const handleOpenEdit = async (course: course | null = null) => {
-		const { resp, status } = await axiosGetDefault(
-			'api/courses/courseTypes'
-		);
-		const dataLevel = await axiosGetDefault(
-			'api/courses/courseLevel'
-		);
-		if (
-			status > 199 &&
-			status < 400 &&
-			dataLevel.status > 199 &&
-			dataLevel.status < 400
-		) {
-			setCourseTypes(resp);
-			setCourseLevel(dataLevel.resp);
-			setCourseSelected(course);
-			setOpenNewCourse(!openNewCourse);
-		} else {
-			toast.error('Ocurrio un error al consultar el servidor');
-		}
-	};
-
-	useEffect(() => {
-		const editCourse = (id: number) => {
-			const EC = courseList.find((course) => course.id === id);
-			if (EC) {
-				handleOpenEdit(EC);
-			} else {
-				// toast.error('No se pudo encontrar el curso');
-			}
-		};
-
-		if (lastCreatedId) {
-			editCourse(lastCreatedId); // Ejecuta la lógica para editar el curso según `lastCreatedId`
-			dispatch(setLastCreatedId(null));
-		}
-	}, [lastCreatedId, dispatch, courseList, handleOpenEdit]);
-
-	useEffect(() => {
-		if (lastCourseStudentCreatedId && courseStudent) {
-			dispatch(setLastCourseStudentCreatedId(null));
-			navigateCourseStudent(courseStudent);
-		}
-	}, [lastCourseStudentCreatedId, courseStudent, dispatch]);
 	const handleNewCourseSchedule = async (course_id: number) => {
 		dispatch(createCourseStudent(course_id));
 	};
@@ -231,7 +163,7 @@ const GeneralCourses = () => {
 																<Pencil size={20} />
 															</Button>
 															<Button
-																title="Asignaciones del Curso"
+																title="Secciones del Curso"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
@@ -342,15 +274,6 @@ const GeneralCourses = () => {
 					</CardBody>
 				</Card>
 			</div>
-			{openNewCourse && courseTypes && courseLevel && (
-				<ModalFormCourse
-					courseSelected={courseSelected}
-					openNewCourse={openNewCourse}
-					handleOpen={handleOpenEdit}
-					courseTypes={courseTypes}
-					courseLevel={courseLevel}
-				/>
-			)}
 		</div>
 	);
 };

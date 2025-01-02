@@ -32,6 +32,7 @@ const QuestionHeader = ({
 						onPointerLeaveCapture={undefined}
 						value={headerState}
 						required
+						maxLength={500}
 						onChange={(e) => {
 							setHeaderState(e.target.value);
 						}}

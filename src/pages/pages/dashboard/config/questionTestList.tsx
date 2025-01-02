@@ -134,7 +134,7 @@ const QuestionTestList = () => {
 						<div className="flex flex-col">
 							<Button
 								size="sm"
-								title="Agregar examen"
+								title="Agregar pregunta"
 								variant="filled"
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}

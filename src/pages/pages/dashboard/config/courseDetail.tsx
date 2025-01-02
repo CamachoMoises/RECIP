@@ -19,6 +19,7 @@ import { AppDispatch, RootState } from '../../../../store';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
+	fetchSubject,
 	fetchSubjects,
 	updateSubject,
 } from '../../../../features/subjectSlice';
@@ -40,10 +41,10 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 const CourseDetail = () => {
 	const dispatch = useDispatch<AppDispatch>();
-
 	const navigate = useNavigate();
-	const [subjectSelected, setSubjectSelected] =
-		useState<subject | null>(null);
+	const [subjectSelectedId, setSubjectSelectedId] = useState<
+		number | null
+	>(null);
 	const [openNewSubject, setOpenNewSubject] = useState(false);
 	const { course, subject } = useSelector((state: RootState) => {
 		return { course: state.courses, subject: state.subjects };
@@ -51,20 +52,33 @@ const CourseDetail = () => {
 
 	const { id } = useParams<{ id: string }>();
 	useEffect(() => {
-		dispatch(fetchSubjects(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener las asignaciones
-		dispatch(fetchCourse(parseInt(id ? id : '-1'))); // Llamada al thunk para obtener los usuarios
+		dispatch(fetchSubjects(parseInt(id ? id : '-1')));
+		dispatch(fetchCourse(parseInt(id ? id : '-1')));
 	}, [dispatch, id]);
+
+	useEffect(() => {
+		if (subjectSelectedId) {
+			dispatch(fetchSubject(subjectSelectedId)); // Llamada al thunk para obtener las secciones
+		}
+	}, [dispatch, subjectSelectedId]);
 	if (!id || !course.courseSelected) {
-		navigate('/dashboard/config');
+		// navigate('/dashboard/config');
 	} else {
 		const selectedCourse = course.courseSelected;
 		const subjectList = subject.subjectList;
 		const error = subject.error;
 		const status = subject.status;
-		const maxOrderNumber = subject.maxOrderNumber;
-
-		const handleOpenEdit = (subject: subject | null = null) => {
-			setSubjectSelected(subject);
+		const maxOrderSubject = subject.maxOrderSubject;
+		const maxOrderLessonSelected = subject.maxOrderLesson;
+		const handleOpenEdit = async (
+			subjectId: number | null = null
+		) => {
+			setSubjectSelectedId(subjectId);
+			if (openNewSubject) {
+				await dispatch(
+					fetchSubjects(selectedCourse.id ? selectedCourse.id : -1)
+				);
+			}
 			setOpenNewSubject(!openNewSubject);
 		};
 		const handleSwitchSubject = async (
@@ -222,24 +236,43 @@ const CourseDetail = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{days.map((day, index) => {
-												let hoursD = 0;
-												hoursToDays.forEach((HTD) => {
-													if (HTD.day === day.id + 1) {
-														hoursD = hoursD + HTD.hours;
-													}
-												});
-												return (
-													<span
-														key={`dayDetails-${index}`}
-														className={
-															hoursD > 8 ? 'text-red-700' : ''
-														}
-													>
-														{day.name}: {hoursD} horas \{'     '}
-													</span>
-												);
-											})}
+											{course.courseSelected.course_type.id != 2 ? (
+												<>
+													{days.map((day, index) => {
+														let hoursD = 0;
+														hoursToDays.forEach((HTD) => {
+															if (HTD.day === day.id + 1) {
+																hoursD = hoursD + HTD.hours;
+															}
+														});
+														return (
+															<div className="flex flex-col gap-2">
+																<span
+																	key={`dayDetails-${index}`}
+																	className={
+																		hoursD > 8 ? 'text-red-700' : ''
+																	}
+																>
+																	{day.name}: {hoursD} horas de
+																	instruccion
+																</span>
+															</div>
+														);
+													})}
+												</>
+											) : (
+												<>
+													{days.map((day, index) => {
+														return (
+															<div className="flex flex-col gap-2">
+																<span key={`dayDetails-${index}`}>
+																	{day.name}: 8 horas de instruccion
+																</span>
+															</div>
+														);
+													})}
+												</>
+											)}
 										</Typography>
 									</div>
 								</CardBody>
@@ -264,7 +297,7 @@ const CourseDetail = () => {
 										onPointerLeaveCapture={undefined}
 										variant="h5"
 									>
-										Asignaciones
+										Secciones
 									</Typography>
 									<Button
 										fullWidth
@@ -273,7 +306,7 @@ const CourseDetail = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										className="flex flex-row justify-center text-center"
-										onClick={() => handleOpenEdit()}
+										onClick={() => handleOpenEdit(-1)}
 									>
 										<Plus />
 									</Button>
@@ -294,8 +327,10 @@ const CourseDetail = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												{subject.subjectList.map((subject, index) => {
-													const subjectDays = subject.subject_days;
+												{subjectList.map((subject, index) => {
+													const subjectDays = subject.subject_days
+														? subject.subject_days
+														: [];
 													return (
 														<ListItem
 															className={`flex justify-between ${
@@ -314,13 +349,16 @@ const CourseDetail = () => {
 																>
 																	{subject.name}
 																</Typography>
-																<Typography
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																>
-																	horas: ({subject.hours})
-																</Typography>
+																{course.courseSelected?.course_type
+																	.id != 2 && (
+																	<Typography
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																	>
+																		horas: ({subject.hours})
+																	</Typography>
+																)}
 
 																{!subject.status && (
 																	<Typography
@@ -333,41 +371,50 @@ const CourseDetail = () => {
 																	</Typography>
 																)}
 															</div>
+
 															<div className="flex w-max gap-3">
 																{days.map((day) => {
 																	let check = false;
-
-																	if (subjectDays) {
-																		check = subjectDays.some(
-																			(sd) =>
-																				sd.day === day.id + 1 &&
-																				sd.status
-																		);
-																	}
+																	check = subjectDays.some(
+																		(sd) =>
+																			sd.day === day.id + 1 &&
+																			sd.status
+																	);
+																	const labelView =
+																		course.courseSelected?.course_type
+																			.id != 2 || check;
 																	return (
 																		<div
 																			className="flex flex-col gap-1"
 																			key={`day-${day.id}`}
 																		>
-																			<label>{day.name}</label>
+																			{labelView && (
+																				<label>{day.name}</label>
+																			)}
 
-																			<Switch
-																				defaultChecked={check}
-																				onChange={(event) => {
-																					handleChangeStatusDay(
-																						event,
-																						day,
-																						subject.id
-																					);
-																				}}
-																				crossOrigin={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																			/>
+																			{course.courseSelected
+																				?.course_type.id != 2 && (
+																				<>
+																					<Switch
+																						defaultChecked={check}
+																						disabled={!subject.status}
+																						onChange={(event) => {
+																							handleChangeStatusDay(
+																								event,
+																								day,
+																								subject.id
+																							);
+																						}}
+																						crossOrigin={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																					/>
+																				</>
+																			)}
 																		</div>
 																	);
 																})}
@@ -399,7 +446,7 @@ const CourseDetail = () => {
 																	onPointerEnterCapture={undefined}
 																	onPointerLeaveCapture={undefined}
 																	onClick={() =>
-																		handleOpenEdit(subject)
+																		handleOpenEdit(subject.id)
 																	}
 																>
 																	<Pencil size={12} />
@@ -409,8 +456,8 @@ const CourseDetail = () => {
 																	onPointerEnterCapture={undefined}
 																	onPointerLeaveCapture={undefined}
 																	disabled={
-																		maxOrderNumber
-																			? maxOrderNumber <=
+																		maxOrderSubject
+																			? maxOrderSubject <=
 																			  subject.order
 																			: true
 																	}
@@ -437,9 +484,9 @@ const CourseDetail = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 												variant="h6"
+												className="text-center"
 											>
-												{' '}
-												Sin actividades creadas
+												Sin secciones creadas
 											</Typography>
 										</div>
 									)}
@@ -449,10 +496,13 @@ const CourseDetail = () => {
 					</div>
 					{openNewSubject && (
 						<ModalFormSubject
-							subjectSelected={subjectSelected}
+							subjectSelected={subject.subjectSelected}
 							openNewSubject={openNewSubject}
 							handleOpen={handleOpenEdit}
-							maxOrderNumber={maxOrderNumber}
+							maxOrderSubject={maxOrderSubject}
+							maxOrderLessonSelected={maxOrderLessonSelected}
+							courseType={course.courseSelected.course_type.id}
+							days={days}
 						/>
 					)}
 				</>

@@ -1,4 +1,4 @@
-import { question } from './utilities.d';
+import { question, subject } from './utilities.d';
 export type dataResponseTypeAxios = {
     resp: any;
     status: number;
@@ -47,6 +47,7 @@ export type subject = {
     course?: course;
     course_id: number;
     subject_days?: subjectDays[];
+    subject_lessons?: subjectLesson[];
     createdAt?: string;
     updatedAt?: string;
 }
@@ -55,11 +56,43 @@ export type subjectDays = {
     course_id: number;
     subject_id: number;
     day: number;
+    classTime: number;
     subject?: subject;
     status: boolean;
     createdAt?: string;
     updatedAt?: string;
 }
+
+export type subjectLesson = {
+    id: number | null;
+    course_id: number;
+    course?: course;
+    subject_id: number;
+    subject?: subject;
+    subject_lesson_days?: subjectLessonDays[];
+    name: string;
+    order: number;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
+export type subjectLessonDays = {
+    id: number | null;
+    course_id: number;
+    course?: course;
+    subject_id: number;
+    subject?: subject;
+    subject_lesson_id: number;
+    subject_lesson?: subjectLesson;
+    subject_days_id: number;
+    subject_days?: subjectDays;
+    day: number;
+    classTime: number;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export type test = {
     id: number;
     course_id: number;
@@ -315,7 +348,9 @@ export interface subjectState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     lastCreatedId: number | null;
     error: string | null;
-    maxOrderNumber: number | null;
+    maxOrderSubject: number | null;
+    maxOrderLesson: number | null;
+    subjectSelected: subject | null;
 }
 
 export interface testState {
