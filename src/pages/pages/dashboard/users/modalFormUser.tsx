@@ -23,6 +23,7 @@ import {
 import PhoneInput, { CountryData } from 'react-phone-input-2';
 import countries from 'world-countries';
 import { getFlagEmoji } from '../../../../services/utilities';
+import { axiosGetDefault } from '../../../../services/axios';
 type Inputs = {
 	name: string;
 	doc_number: number;
@@ -88,7 +89,7 @@ const ModalFormUser = ({
 	// );
 	const password = useRef({});
 	password.current = watch('password', '');
-
+	const newForm = userSelect ? false : true;
 	const [isActive, setIsActive] = useState(
 		userSelect ? userSelect?.is_active : true
 	);
@@ -101,6 +102,14 @@ const ModalFormUser = ({
 	const [passwordShown, setPasswordShown] = useState(false);
 	const togglePasswordVisiblity = () => {
 		setPasswordShown((cur) => !cur);
+	};
+
+	const validateUserEmail = async (value: string) => {
+		const response = await axiosGetDefault(
+			`api/users/userEmailValidate/${value}`
+		);
+		const respData: boolean = response?.resp.exist;
+		return respData;
 	};
 
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -204,31 +213,6 @@ const ModalFormUser = ({
 									</span>
 								)}
 							</div>
-							{/* <div className="">
-								<Input
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									type="text"
-									label="Telefono"
-									maxLength={20}
-									placeholder="Telefono"
-									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-									crossOrigin={undefined}
-									{...register('phone', {
-										required: {
-											value: true,
-											message: 'El telefono es requerido',
-										},
-									})}
-								/>
-								{errors.phone && (
-									<span className="text-red-500 text-sm/[8px] py-2">
-										{errors.phone.message}
-									</span>
-								)}
-							</div> */}
-							{/* Teléfono */}
-							{/* Mostrar bandera seleccionada */}
 
 							<div>
 								<Controller
@@ -376,6 +360,15 @@ const ModalFormUser = ({
 											value: true,
 											message: 'El email de usuario es requerido',
 										},
+										validate: async (value: string) => {
+											let res;
+											if (!newForm && userSelect?.email === value) {
+												res = false;
+											} else {
+												res = await validateUserEmail(value);
+											}
+											return !res || 'Ya existe el usuario';
+										},
 									})}
 								/>
 								{errors.email && (
@@ -403,8 +396,19 @@ const ModalFormUser = ({
 									}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 									crossOrigin={undefined}
-									{...register('password')}
+									{...register('password', {
+										required: {
+											value: newForm,
+											message:
+												'La contraseña de usuario es requerida',
+										},
+									})}
 								/>
+								{errors.password && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.password.message}
+									</span>
+								)}
 							</div>
 							<div className="">
 								<Input
@@ -428,9 +432,9 @@ const ModalFormUser = ({
 										},
 									})}
 								/>
-								{errors.password && (
+								{errors.password2 && (
 									<span className="text-red-500 text-sm/[8px] py-2">
-										{errors.password.message}
+										{errors.password2.message}
 									</span>
 								)}
 							</div>
