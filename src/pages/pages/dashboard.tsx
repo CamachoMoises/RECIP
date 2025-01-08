@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import Icons from './dashboard/icons';
 import UsersTable from './dashboard/users/usersTable';
 import GeneralCourses from './dashboard/courses/generalCourses';
@@ -13,8 +13,22 @@ import GeneralTest from './dashboard/test/generalTest';
 import GeneralConfig from './dashboard/config/generalConfig';
 import TestList from './dashboard/config/testList';
 import QuestionTestList from './dashboard/config/questionTestList';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 const Dashboard = () => {
+	const navigate = useNavigate();
+
+	const auth = useSelector((state: RootState) => {
+		return state.auth;
+	});
+	useEffect(() => {
+		if (!auth.token) {
+			navigate('/login');
+		}
+	}, [auth.token, navigate]);
+
 	return (
 		<div className="video-container">
 			<div className="flex flex-col p-2">

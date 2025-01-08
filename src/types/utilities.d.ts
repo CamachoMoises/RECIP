@@ -317,6 +317,14 @@ export type courseStudentTestAnswer = {
     createdAt?: string;
     updatedAt?: string;
 }
+export interface credentials {
+    email: string;
+    password?: string;
+    rememberMe?: boolean;
+    user?: user | null;
+    token?: string | null;
+}
+
 
 export interface UserState {
     userSelected: user | null;
@@ -357,12 +365,18 @@ export interface testState {
     questionList: question[];
     questionSelected: question | null;
     answerList: answer[];
-
     courseStudentTestSelected: courseStudentTest | null;
     courseStudentTestQuestionList: courseStudentTestQuestion[];
     courseStudentTestQuestionSelected: courseStudentTestQuestion | null;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     lastCreatedId: number | null;
     error: string | null;
+}
+
+export interface authState {
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+    token: string | null | undefined,
+    user?: user | null;
 }
 

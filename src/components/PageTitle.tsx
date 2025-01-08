@@ -79,7 +79,7 @@ export default function PageTitle({
 										onPointerLeaveCapture={undefined}
 									>
 										<a
-											onClick={() => navigate('/')}
+											onClick={() => navigate('/dashboard')}
 											className="opacity-60"
 										>
 											<Home size={13} />

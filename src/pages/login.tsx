@@ -3,15 +3,52 @@ import {
 	Card,
 	CardBody,
 	CardFooter,
-	CardHeader,
 	Input,
 	Typography,
 } from '@material-tailwind/react';
-import { KeyRound } from 'lucide-react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-
+import { AppDispatch, RootState } from '../store';
+import { credentials } from '../types/utilities';
+import { loginUser } from '../features/authSlice';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+type Inputs = {
+	email: string;
+	password: string;
+};
 const Login = () => {
 	const navigate = useNavigate();
+	const dispatch = useDispatch<AppDispatch>();
+	const auth = useSelector((state: RootState) => {
+		return state.auth;
+	});
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<Inputs>({});
+	const onSubmit: SubmitHandler<Inputs> = async (data) => {
+		console.log(data);
+		const req: credentials = {
+			email: data.email,
+			password: data.password,
+		};
+		await dispatch(loginUser(req)).unwrap();
+	};
+	useEffect(() => {
+		if (auth.token) {
+			toast.success('Bienvenido');
+			navigate('/dashboard');
+		}
+	}, [auth.token, navigate]);
+
+	useEffect(() => {
+		if (auth.status === 'failed') {
+			toast.error(auth.error);
+		}
+	}, [auth.status, auth.error]);
 
 	return (
 		<>
@@ -39,78 +76,73 @@ const Login = () => {
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					<CardHeader
-						variant="filled"
-						color="blue-gray"
-						className="mb-4 grid h-28 place-items-center"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<Typography
-							variant="h3"
-							color="white"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Iniciar sesión
-						</Typography>
-					</CardHeader>
 					<CardBody
 						className="flex flex-col gap-4"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<form>
-							<div className="mb-1 flex flex-col gap-6">
-								<Typography
-									variant="h6"
-									color="blue-gray"
-									className="-mb-3"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Correo
-								</Typography>
-								<Input
-									type="email"
-									size="lg"
-									maxLength={254}
-									crossOrigin={undefined}
-									name="Correo"
-									placeholder="nombre@joyarteydecoracion.com"
-									className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								/>
-								<Typography
-									variant="h6"
-									color="blue-gray"
-									className="-mb-3"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Contraseña
-								</Typography>
-								<Input
-									name="password"
-									size="lg"
-									type="password"
-									crossOrigin={undefined}
-									maxLength={20}
-									placeholder="********"
-									className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-									labelProps={{
-										className:
-											'before:content-none after:content-none',
-									}}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								/>
+						<Typography
+							variant="h2"
+							color="black"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Iniciar sesión
+						</Typography>
+						{/* <code>{JSON.stringify(auth.error, null, 4)}</code>
+						<code>{JSON.stringify(auth.status, null, 4)}</code> */}
+						<form onSubmit={handleSubmit(onSubmit)}>
+							<div className="mb-1 flex flex-col gap-12 mt-14">
+								<div>
+									<Input
+										type="email"
+										size="lg"
+										maxLength={254}
+										className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+										crossOrigin={undefined}
+										placeholder="nombre@correo.com"
+										label="Correo"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										{...register('email', {
+											required: {
+												value: true,
+												message: 'El Correo es requerido',
+											},
+										})}
+									/>
+									{errors.email && (
+										<span className="text-red-500 text-sm/[8px] py-2">
+											{errors.email.message}
+										</span>
+									)}
+								</div>
+								<div>
+									<Input
+										size="lg"
+										type="password"
+										className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+										crossOrigin={undefined}
+										maxLength={20}
+										label="Contraseña"
+										placeholder="********"
+										{...register('password', {
+											required: {
+												value: true,
+												message: 'La contraseña es requerida',
+											},
+										})}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									/>
+									{errors.password && (
+										<span className="text-red-500 text-sm/[8px] py-2">
+											{errors.password.message}
+										</span>
+									)}
+								</div>
 							</div>
 							<Button
 								type="submit"
@@ -120,9 +152,9 @@ const Login = () => {
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								onClick={() => {
-									navigate('../dashboard');
-								}}
+								// onClick={() => {
+								// 	navigate('../dashboard');
+								// }}
 							>
 								Ingresar
 							</Button>
