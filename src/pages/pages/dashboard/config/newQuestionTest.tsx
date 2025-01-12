@@ -13,17 +13,20 @@ import { createQuestionTest } from '../../../../features/testSlice';
 type Inputs = {
 	header: string;
 };
+
 const NewQuestionTest = ({
 	open,
 	testId,
 	courseId,
 	questionTypeId,
+	testQuestionTypeId,
 	setOpen,
 }: {
 	open: boolean;
 	testId: number;
 	courseId: number;
 	questionTypeId: number;
+	testQuestionTypeId: number;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -38,6 +41,7 @@ const NewQuestionTest = ({
 			test_id: testId,
 			course_id: courseId,
 			question_type_id: questionTypeId,
+			test_question_type_id: testQuestionTypeId,
 		};
 		await dispatch(createQuestionTest(dataTest));
 		setOpen(false);

@@ -32,10 +32,16 @@ const QuestionTestList = () => {
 	const { test } = useSelector((state: RootState) => {
 		return { test: state.tests };
 	});
-	const { course_id, test_id, question_type_id } = useParams<{
+	const {
+		course_id,
+		test_id,
+		question_type_id,
+		test_question_type_id,
+	} = useParams<{
 		course_id: string;
 		test_id: string;
 		question_type_id: string;
+		test_question_type_id: string;
 	}>();
 	const dispatch = useDispatch<AppDispatch>();
 	const [open, setOpen] = useState(false);
@@ -46,6 +52,9 @@ const QuestionTestList = () => {
 				test_id: test_id ? parseInt(test_id) : -1,
 				question_type_id: question_type_id
 					? parseInt(question_type_id)
+					: -1,
+				test_question_type_id: test_question_type_id
+					? parseInt(test_question_type_id)
 					: -1,
 			})
 		);
@@ -200,15 +209,21 @@ const QuestionTestList = () => {
 					);
 				})}
 			</div>
-			{open && course_id && test_id && question_type_id && (
-				<NewQuestionTest
-					open={open}
-					testId={parseInt(test_id)}
-					courseId={parseInt(course_id)}
-					questionTypeId={parseInt(question_type_id)}
-					setOpen={setOpen}
-				/>
-			)}
+
+			{open &&
+				course_id &&
+				test_id &&
+				question_type_id &&
+				test_question_type_id && (
+					<NewQuestionTest
+						open={open}
+						testId={parseInt(test_id)}
+						courseId={parseInt(course_id)}
+						questionTypeId={parseInt(question_type_id)}
+						testQuestionTypeId={parseInt(test_question_type_id)}
+						setOpen={setOpen}
+					/>
+				)}
 		</div>
 	);
 };

@@ -72,7 +72,7 @@ const Dashboard = () => {
 							/>
 							<Route path="config/test/:id" element={<TestList />} />
 							<Route
-								path="config/testQuestion/:course_id/:test_id/:question_type_id"
+								path="config/testQuestion/:course_id/:test_id/:question_type_id/:test_question_type_id"
 								element={<QuestionTestList />}
 							/>
 							<Route

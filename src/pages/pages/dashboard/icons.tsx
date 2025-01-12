@@ -65,7 +65,7 @@ const Icons = () => {
 							<Plane size={50} />
 						</div>{' '}
 						<br />
-						Registro Pilotos y/o Participantes
+						Pilotos / Participantes
 					</Button>
 				</div>
 				<div>

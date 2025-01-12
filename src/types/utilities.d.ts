@@ -135,6 +135,8 @@ export type question = {
     course?: course;
     question_type_id: number;
     question_type?: questionType;
+    test_question_type_id: number;
+    test_question_type?: testQuestionType;
     test_id: number;
     test?: test;
     status: boolean;

@@ -55,12 +55,13 @@ export const fetchTests = createAsyncThunk<test[], number>(
     }
 );
 
-export const fetchQuestions = createAsyncThunk<question[], { test_id: number, question_type_id: number }>(
+export const fetchQuestions = createAsyncThunk<question[], { test_id: number, question_type_id: number, test_question_type_id: number }>(
     'user/fetchQuestions',
-    async ({ test_id, question_type_id }, { rejectWithValue }) => {
+    async ({ test_id, question_type_id, test_question_type_id }, { rejectWithValue }) => {
         try {
             const response = await axiosGetDefault(`api/test/questions/${test_id}`, {
-                question_type_id: question_type_id
+                question_type_id,
+                test_question_type_id
             });
             return response.resp;
         } catch (error: any) {
@@ -118,7 +119,7 @@ export const updateTest = createAsyncThunk<test, test>(
     }
 );
 // Acción para Crear una pregunta
-export const createQuestionTest = createAsyncThunk<question, { course_id: number, test_id: number, question_type_id: number, header: string }>(
+export const createQuestionTest = createAsyncThunk<question, { course_id: number, test_id: number, question_type_id: number, test_question_type_id: number, header: string }>(
     'questionTypes/createQuestionTest',
     async (questionTestData, { rejectWithValue }) => {
         try {

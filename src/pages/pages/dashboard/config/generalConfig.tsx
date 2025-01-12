@@ -31,9 +31,9 @@ import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import {
 	fetchQuestionTypes,
-	updateQuestionTypes,
+	// updateQuestionTypes,
 } from '../../../../features/testSlice';
-import QuestionType from './questionType';
+// import QuestionType from './questionType';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -89,20 +89,20 @@ const GeneralConfig = () => {
 			toast.error('Ocurrio un error al consultar el servidor');
 		}
 	};
-	const updateQuestionTypeFunc = async (
-		questionTypeId: number,
-		value: number
-	) => {
-		const questionType = test.questionTypes.find(
-			(QT) => QT.id === questionTypeId
-		);
-		if (questionType) {
-			const newQuestionType = { ...questionType, value: value };
-			dispatch(updateQuestionTypes(newQuestionType));
-		} else {
-			toast.error('No se encontro el tipo de pregunta');
-		}
-	};
+	// const updateQuestionTypeFunc = async (
+	// 	questionTypeId: number,
+	// 	value: number
+	// ) => {
+	// 	const questionType = test.questionTypes.find(
+	// 		(QT) => QT.id === questionTypeId
+	// 	);
+	// 	if (questionType) {
+	// 		const newQuestionType = { ...questionType, value: value };
+	// 		dispatch(updateQuestionTypes(newQuestionType));
+	// 	} else {
+	// 		toast.error('No se encontro el tipo de pregunta');
+	// 	}
+	// };
 	useEffect(() => {
 		const editCourse = (id: number) => {
 			const EC = course.courseList.find((course) => course.id === id);
@@ -293,7 +293,7 @@ const GeneralConfig = () => {
 									);
 								})}
 							</div>
-							<Typography
+							{/* <Typography
 								variant="h4"
 								className="mt-6"
 								placeholder={undefined}
@@ -315,7 +315,7 @@ const GeneralConfig = () => {
 										</div>
 									);
 								})}
-							</div>
+							</div> */}
 						</AccordionBody>
 					</Accordion>
 				</CardBody>

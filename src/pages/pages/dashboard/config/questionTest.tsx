@@ -121,7 +121,7 @@ const QuestionTest = ({
 							onPointerLeaveCapture={undefined}
 							onClick={() => {
 								navigate(
-									`../config/testQuestion/${TQT.course_id}/${TQT.test_id}/${QT.id}`
+									`../config/testQuestion/${TQT.course_id}/${TQT.test_id}/${QT.id}/${TQT.id}`
 								);
 							}}
 						>

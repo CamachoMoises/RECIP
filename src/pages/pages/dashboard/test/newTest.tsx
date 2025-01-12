@@ -336,9 +336,7 @@ const NewTest = () => {
 								</Typography>
 								{TQT.map((tqt, index) => {
 									const amount = tqt.amount;
-									const value = tqt.question_type?.value
-										? tqt.question_type.value
-										: 0;
+									const value = tqt.value;
 									const totalPointsQuestion = amount * value;
 									totalPoints = totalPoints + totalPointsQuestion;
 									return (
