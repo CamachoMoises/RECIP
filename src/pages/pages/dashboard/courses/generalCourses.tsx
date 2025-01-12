@@ -194,7 +194,7 @@ const GeneralCourses = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Agenda de Cursos a pilotos
+							Agenda de Cursos a pilotos o participantes
 						</Typography>
 						<List
 							placeholder={undefined}

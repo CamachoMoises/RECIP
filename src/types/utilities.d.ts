@@ -109,6 +109,7 @@ export type test = {
 export type testQuestionType = {
     id: number;
     amount: number;
+    value: number;
     course_id: number;
     question_type_id: number;
     question_type?: questionType;

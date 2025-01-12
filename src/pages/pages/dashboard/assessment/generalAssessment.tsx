@@ -16,7 +16,7 @@ import {
 	ListItemPrefix,
 	Typography,
 } from '@material-tailwind/react';
-import { fetchSubjects } from '../../../../features/subjectSlice';
+import { fetchSubjectsLesson } from '../../../../features/subjectSlice';
 import {
 	fetchCourse,
 	fetchCourseStudent,
@@ -39,15 +39,7 @@ const GeneralAssessment = () => {
 	const navigate = useNavigate();
 	const { courseStudentList, status, error } = useSelector(
 		(state: RootState) => {
-			console.log(state);
-
-			return (
-				state.courses || {
-					courseList: [],
-					status: 'idle2',
-					error: null,
-				}
-			);
+			return state.courses;
 		}
 	);
 
@@ -57,7 +49,9 @@ const GeneralAssessment = () => {
 	const navigateCourseStudentAssessment = async (
 		CL: courseStudent
 	) => {
-		await dispatch(fetchSubjects(CL.course_id ? CL.course_id : -1));
+		await dispatch(
+			fetchSubjectsLesson(CL.course_id ? CL.course_id : -1)
+		);
 		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
 		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
 		await dispatch(fetchInstructors());
@@ -113,7 +107,7 @@ const GeneralAssessment = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{CL.code}
+										{CL.code} kk
 									</ListItemPrefix>
 									<div>
 										<Typography

@@ -24,6 +24,19 @@ export const fetchSubjects = createAsyncThunk<subject[], number>(
     }
 );
 
+export const fetchSubjectsLesson = createAsyncThunk<subject[], number>(
+    'user/fetchSubjectsLesson',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetDefault(`api/subjects/lesson/course/${id}`);
+            return response.resp;
+
+        } catch (error: any) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const fetchSubject = createAsyncThunk<subject, number>(
     'user/fetchSubject',
     async (id, { rejectWithValue }) => {
@@ -115,6 +128,21 @@ const subjectSlice = createSlice({
                 }
             })
             .addCase(fetchSubjects.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción fetchSubjectsLesson
+
+            .addCase(fetchSubjectsLesson.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchSubjectsLesson.fulfilled, (state, action: PayloadAction<subject[]>) => {
+                state.status = 'succeeded';
+                state.subjectList = action.payload;
+
+            })
+            .addCase(fetchSubjectsLesson.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

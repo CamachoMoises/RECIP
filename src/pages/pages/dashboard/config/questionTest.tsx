@@ -16,12 +16,14 @@ const QuestionTest = ({
 	TQT: testQuestionType;
 	updateTestQuestion: (
 		testQuestion: testQuestionType,
-		amount: number
+		amount: number,
+		value: number
 	) => Promise<void>;
 }) => {
 	const navigate = useNavigate();
 	const [edit, setEdit] = useState(false);
 	const [amount, setAmount] = useState(TQT.amount);
+	const [value, setValue] = useState(TQT.value);
 
 	return (
 		<>
@@ -32,7 +34,7 @@ const QuestionTest = ({
 			>
 				{QT.name}: <br />
 				{edit ? (
-					<>
+					<div className="flex flex-col gap-2">
 						<Input
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -47,13 +49,28 @@ const QuestionTest = ({
 							className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 							crossOrigin={undefined}
 						/>
-					</>
+						<Input
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+							value={value}
+							onChange={(e) => {
+								setValue(parseFloat(e.target.value));
+							}}
+							type="number"
+							label="Valor"
+							placeholder="Valor"
+							maxLength={2}
+							className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+							crossOrigin={undefined}
+						/>
+					</div>
 				) : (
 					<>
 						{TQT ? (
 							<>
 								<span>
-									{TQT.amount} Pregunta{TQT.amount != 1 ? 's' : ''}
+									{TQT.amount} Pregunta{TQT.amount != 1 ? 's' : ''}{' '}
+									valor ({TQT.value} Punto{TQT.value != 1 ? 's' : ''})
 								</span>
 							</>
 						) : (
@@ -86,7 +103,7 @@ const QuestionTest = ({
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 							onClick={() => {
-								updateTestQuestion(TQT, amount);
+								updateTestQuestion(TQT, amount, value);
 								setEdit(false);
 							}}
 						>

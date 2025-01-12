@@ -293,23 +293,15 @@ const GeneralConfig = () => {
 									);
 								})}
 							</div>
-						</AccordionBody>
-					</Accordion>
-					<Accordion
-						open={open === 2}
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<AccordionHeader
-							onClick={() => handleOpen(2)}
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Tipos de preguntas
-						</AccordionHeader>
-						<AccordionBody>
+							<Typography
+								variant="h4"
+								className="mt-6"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Valor de las preguntas
+							</Typography>
 							<div className="grid grid-cols-2 gap-2">
 								{test.questionTypes.map((QT) => {
 									return (

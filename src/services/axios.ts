@@ -6,8 +6,6 @@ const apiUrl = import.meta.env.VITE_REACT_APP_API_URL;
 
 export async function axiosGetDefault(ruta: string, params = {}) {
     const token = store.getState().auth.token;
-    console.log(token);
-
     const axiosInstance = axios.create({
         timeout: 54000,
         headers: {

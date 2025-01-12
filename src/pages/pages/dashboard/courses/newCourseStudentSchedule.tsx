@@ -27,7 +27,7 @@ import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import moment from 'moment';
 import { useReactToPrint } from 'react-to-print';
-import { Printer } from 'lucide-react';
+import { Mail, Printer, Send } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
 import PDFCourseSchedule from './pdfCourseSchedule';
 // import { useNavigate } from 'react-router-dom';
@@ -456,18 +456,33 @@ const NewCourse = () => {
 								</div>
 							</div>
 						</div>
-						<div>
-							<Button
-								fullWidth
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-								onClick={() => {
-									handlePrint();
-								}}
-							>
-								<Printer />
-							</Button>
+						<div className="flex flex-row gap-3 w-full">
+							<div>
+								<Button
+									size="lg"
+									placeholder={undefined}
+									className="w-20"
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									onClick={() => {
+										handlePrint();
+									}}
+								>
+									<Mail />
+								</Button>
+							</div>
+							<div>
+								<Button
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									onClick={() => {
+										handlePrint();
+									}}
+								>
+									<Printer />
+								</Button>
+							</div>
 						</div>
 					</div>
 

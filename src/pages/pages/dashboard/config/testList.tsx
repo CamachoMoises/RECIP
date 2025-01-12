@@ -64,11 +64,13 @@ const TestList = () => {
 
 	const updateTestQuestion = async (
 		testQuestion: testQuestionType,
-		amount: number
+		amount: number,
+		value: number
 	) => {
 		const newTestQuestionType: testQuestionType = {
 			...testQuestion,
-			amount: amount,
+			amount,
+			value,
 		};
 
 		await dispatch(updateTestQuestionTypes(newTestQuestionType));
@@ -218,6 +220,7 @@ const TestList = () => {
 																id: -1,
 																course_id: TL.course_id,
 																amount: 0,
+																value: 0,
 																question_type_id: QT.id,
 																status: true,
 																test_id: TL.id,

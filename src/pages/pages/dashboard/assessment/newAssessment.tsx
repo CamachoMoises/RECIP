@@ -1,8 +1,14 @@
-import { useDispatch, useSelector } from 'react-redux';
+import {
+	// useDispatch,
+	useSelector,
+} from 'react-redux';
 import { breadCrumbsItems, user } from '../../../../types/utilities';
-import { AppDispatch, RootState } from '../../../../store';
+import {
+	// AppDispatch,
+	RootState,
+} from '../../../../store';
 import { useEffect, useRef, useState } from 'react';
-import { useReactToPrint } from 'react-to-print';
+// import { useReactToPrint } from 'react-to-print';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import PageTitle from '../../../../components/PageTitle';
@@ -27,9 +33,9 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 
 const NewAssessment = () => {
-	const componentRef = useRef<HTMLDivElement>(null);
+	// const componentRef = useRef<HTMLDivElement>(null);
 
-	const dispatch = useDispatch<AppDispatch>();
+	// const dispatch = useDispatch<AppDispatch>();
 
 	const { course, subject, user } = useSelector(
 		(state: RootState) => {
@@ -42,7 +48,7 @@ const NewAssessment = () => {
 	);
 	const [studentSelect, setStudentSelect] = useState<user | null>();
 	const studentSelectRef = useRef<user | null>();
-	const dateInputRef = useRef<HTMLInputElement | null>(null);
+	// const dateInputRef = useRef<HTMLInputElement | null>(null);
 	const typeTripRef = useRef<number>(
 		course.courseStudent?.type_trip
 			? course.courseStudent.type_trip
@@ -57,10 +63,10 @@ const NewAssessment = () => {
 			? course.courseStudent.regulation
 			: 1
 	);
-	const handlePrint = useReactToPrint({
-		contentRef: componentRef,
-		documentTitle: `Evaluacion-${course.courseStudent?.code}`,
-	});
+	// const handlePrint = useReactToPrint({
+	// 	contentRef: componentRef,
+	// 	documentTitle: `Evaluacion-${course.courseStudent?.code}`,
+	// });
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
@@ -78,7 +84,6 @@ const NewAssessment = () => {
 			}
 		};
 		if (course.courseStudent?.student?.id) {
-			console.log('student');
 			setStudentFunc(course.courseStudent.student.id);
 		}
 		if (course.courseStudent) {
@@ -87,6 +92,8 @@ const NewAssessment = () => {
 			regulationRef.current = course.courseStudent.regulation;
 		}
 	}, [course.courseStudent, user.studentList]);
+	console.log(subject.subjectList);
+
 	if (course.status === 'loading') {
 		return (
 			<>

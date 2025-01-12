@@ -62,10 +62,10 @@ const Icons = () => {
 						onClick={() => navigate('students')}
 					>
 						<div className="flex justify-center">
-							<Plane size={60} />
+							<Plane size={50} />
 						</div>{' '}
 						<br />
-						Pilotos
+						Registro Pilotos y/o Participantes
 					</Button>
 				</div>
 				<div>
