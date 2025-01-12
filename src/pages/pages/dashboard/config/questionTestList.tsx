@@ -74,7 +74,7 @@ const QuestionTestList = () => {
 		: 0;
 	const breadCrumbs: breadCrumbsItems[] = [
 		{
-			name: 'Dashboard',
+			name: 'Inicio',
 			href: '/dashboard',
 		},
 		{

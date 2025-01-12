@@ -18,7 +18,11 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../store';
 import {
 	createUser,
+	fetchInstructors,
+	fetchStudents,
 	updateUser,
+	userInstructor,
+	userStudent,
 } from '../../../../features/userSlice';
 import PhoneInput, { CountryData } from 'react-phone-input-2';
 import countries from 'world-countries';
@@ -40,12 +44,20 @@ const ModalFormUser = ({
 	openNewUser,
 	handleOpen,
 	userDocTypes,
+	module,
 }: {
 	userSelect: user | null;
 	openNewUser: boolean;
 	handleOpen: (user?: user | null) => void;
 	userDocTypes: userDocType[];
+	module: number;
 }) => {
+	//NOTE - Module names: 0 USER, 1 STUDENT, 2 INSTRUCTOR
+	const moduleName = [
+		'Usuario',
+		'Piloto / Participante',
+		'Instructor',
+	];
 	const [countryInfo, setCountryInfo] = useState<{
 		name: string;
 		flag: string;
@@ -136,7 +148,20 @@ const ModalFormUser = ({
 			if (userSelect) {
 				dispatch(updateUser(req));
 			} else {
-				dispatch(createUser(req));
+				const user = await dispatch(createUser(req)).unwrap();
+				switch (module) {
+					case 1:
+						await dispatch(userStudent(user.id ? user.id : -1));
+						await dispatch(fetchStudents());
+						break;
+					case 2:
+						await dispatch(userInstructor(user.id ? user.id : -1));
+						await dispatch(fetchInstructors());
+
+						break;
+					default:
+						break;
+				}
 			}
 		}
 	};
@@ -157,7 +182,7 @@ const ModalFormUser = ({
 				>
 					{userSelect
 						? `Editar a ${userSelect.name} ${userSelect.last_name}`
-						: 'Nuevo usuario'}
+						: `Nuevo ${moduleName[module]}`}
 				</DialogHeader>
 				<DialogBody
 					placeholder={undefined}
@@ -440,67 +465,69 @@ const ModalFormUser = ({
 							</div>
 						</div>
 						{/* <code>{JSON.stringify(errors)}</code> */}
-						<div className="flex flex-row gap-3 py-3">
-							<div className="basis-1/2">
-								<div className="flex flex-row gap-5">
-									<div>
-										<label
-											htmlFor="Nombre"
-											className="text-sx text-black"
-										>
-											Activo
-										</label>
-										<br />
-										<Switch
-											defaultChecked={userSelect ? isActive : true}
-											onChange={() => {
-												setIsActive(!isActive);
-											}}
-											crossOrigin={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										/>
-									</div>
-									<div>
-										<label
-											htmlFor="Nombre"
-											className="text-sx text-black"
-										>
-											Staff
-										</label>{' '}
-										<br />
-										<Switch
-											defaultChecked={isStaff}
-											onChange={() => {
-												setIsStaff(!isStaff);
-											}}
-											crossOrigin={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										/>
-									</div>
-									<div>
-										<label
-											htmlFor="Nombre"
-											className="text-sx text-black"
-										>
-											Super Usuario
-										</label>{' '}
-										<br />
-										<Switch
-											defaultChecked={isSuperuser}
-											onChange={() => {
-												setIsSuperuser(!isSuperuser);
-											}}
-											crossOrigin={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										/>
+						{module === 0 && (
+							<div className="flex flex-row gap-3 py-3">
+								<div className="basis-1/2">
+									<div className="flex flex-row gap-5">
+										<div>
+											<label
+												htmlFor="Nombre"
+												className="text-sx text-black"
+											>
+												Activo
+											</label>
+											<br />
+											<Switch
+												defaultChecked={userSelect ? isActive : true}
+												onChange={() => {
+													setIsActive(!isActive);
+												}}
+												crossOrigin={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											/>
+										</div>
+										<div>
+											<label
+												htmlFor="Nombre"
+												className="text-sx text-black"
+											>
+												Staff
+											</label>{' '}
+											<br />
+											<Switch
+												defaultChecked={isStaff}
+												onChange={() => {
+													setIsStaff(!isStaff);
+												}}
+												crossOrigin={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											/>
+										</div>
+										<div>
+											<label
+												htmlFor="Nombre"
+												className="text-sx text-black"
+											>
+												Super Usuario
+											</label>{' '}
+											<br />
+											<Switch
+												defaultChecked={isSuperuser}
+												onChange={() => {
+													setIsSuperuser(!isSuperuser);
+												}}
+												crossOrigin={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											/>
+										</div>
 									</div>
 								</div>
+								<div className="basis-1/2"></div>
 							</div>
-							<div className="basis-1/2"></div>
-						</div>
+						)}
 					</div>
 				</DialogBody>
 				<DialogFooter

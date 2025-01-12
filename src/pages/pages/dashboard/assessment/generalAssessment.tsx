@@ -30,7 +30,7 @@ import {
 import { useEffect } from 'react';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
-		name: 'Dashboard',
+		name: 'Inicio',
 		href: '/dashboard',
 	},
 ];

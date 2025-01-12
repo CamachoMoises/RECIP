@@ -36,12 +36,13 @@ import { axiosGetDefault } from '../../../../services/axios';
 import toast from 'react-hot-toast';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
-		name: 'Dashboard',
+		name: 'Inicio',
 		href: '/dashboard',
 	},
 ];
 const UserTable = () => {
 	const dispatch = useDispatch<AppDispatch>();
+	const [openNewUser, setOpenNewUser] = useState(false);
 	const [userSelect, setUserSelect] = useState<user | null>(null);
 	const [userDocTypes, setUserDocTypes] = useState<
 		userDocType[] | null
@@ -59,7 +60,6 @@ const UserTable = () => {
 			);
 		}
 	);
-	const [openNewUser, setOpenNewUser] = useState(false);
 	const handleOpen = async (user: user | null = null) => {
 		const { resp, status } = await axiosGetDefault(
 			'api/users/userDocType'
@@ -319,6 +319,7 @@ const UserTable = () => {
 					openNewUser={openNewUser}
 					handleOpen={handleOpen}
 					userDocTypes={userDocTypes}
+					module={0}
 				/>
 			)}
 		</div>

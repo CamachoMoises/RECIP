@@ -30,7 +30,7 @@ import { axiosPostDefault } from '../../../../services/axios';
 import { fetchCourse } from '../../../../features/courseSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
-		name: 'Dashboard',
+		name: 'Inicio',
 		href: '/dashboard',
 	},
 	{

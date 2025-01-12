@@ -34,7 +34,7 @@ import PDFCourseSchedule from './pdfCourseSchedule';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
-		name: 'Dashboard',
+		name: 'Inicio',
 		href: '/dashboard',
 	},
 	{

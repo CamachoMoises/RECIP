@@ -36,7 +36,7 @@ import {
 } from '../../../../features/userSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
-		name: 'Dashboard',
+		name: 'Inicio',
 		href: '/dashboard',
 	},
 ];

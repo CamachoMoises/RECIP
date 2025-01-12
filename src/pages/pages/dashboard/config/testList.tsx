@@ -31,7 +31,7 @@ import { Plus } from 'lucide-react';
 import NewTestModal from './newTestModal';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
-		name: 'Dashboard',
+		name: 'Inicio',
 		href: '/dashboard',
 	},
 	{

@@ -23,7 +23,7 @@ import moment from 'moment';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
-		name: 'Dashboard',
+		name: 'Inicio',
 		href: '/dashboard',
 	},
 	{
