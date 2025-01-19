@@ -19,7 +19,7 @@ const Icons = () => {
 			<div className="grid grid-cols-1 d:grid-cols-2 lg:grid-cols-4 gap-y-6 text-center px-3">
 				<div>
 					<Button
-						title="Usuarios"
+						title="Administradores"
 						className="text-center w-40 h-32"
 						variant="gradient"
 						placeholder={undefined}
@@ -31,7 +31,7 @@ const Icons = () => {
 							<UserRound size={60} />
 						</div>{' '}
 						<br />
-						Usuarios
+						Aministradores
 					</Button>
 				</div>
 				<div>

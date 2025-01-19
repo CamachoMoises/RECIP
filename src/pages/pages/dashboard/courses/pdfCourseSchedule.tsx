@@ -162,7 +162,7 @@ const PDFCourseSchedule = ({
 								columns={[
 									'Módulo',
 									'Fecha / Hora Inicio',
-									'Horas Totales',
+									`Horas Totales (48)`,
 									'Instructor',
 								]}
 								data={data}

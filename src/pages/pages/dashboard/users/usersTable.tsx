@@ -109,7 +109,7 @@ const UserTable = () => {
 
 	return (
 		<div className="container">
-			<PageTitle title="Usuarios" breadCrumbs={breadCrumbs} />
+			<PageTitle title="Administradores" breadCrumbs={breadCrumbs} />
 			{/* <code>{JSON.stringify(usersList)}</code> */}
 			<div className="flex flex-col gap-3">
 				<div className="flex flex-col">
@@ -160,7 +160,7 @@ const UserTable = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Usuarios
+							Administradores
 						</Typography>
 						<table>
 							<thead>
