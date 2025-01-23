@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authSlice from './features/authSlice.ts';
+import assessmentSlice from './features/assessmentSlice.ts';
 import counterReducer from './features/counter/counterSlice';
 import userReducer from './features/userSlice';
 import courseSlice from './features/courseSlice';
@@ -19,6 +20,7 @@ const store = configureStore({
 	reducer: {
 		auth: persistedReducer,
 		counter: counterReducer,
+		assessment: assessmentSlice,
 		users: userReducer,
 		courses: courseSlice,
 		subjects: subjectSlice,

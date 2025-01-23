@@ -27,7 +27,7 @@ import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import moment from 'moment';
 import { useReactToPrint } from 'react-to-print';
-import { Mail, Printer, Send } from 'lucide-react';
+import { Mail, Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
 import PDFCourseSchedule from './pdfCourseSchedule';
 // import { useNavigate } from 'react-router-dom';

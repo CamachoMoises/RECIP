@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from '../services/axios';
+import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from '../services/axios';
 import { UserState, user } from '../types/utilities';
 
 
@@ -18,10 +18,10 @@ export const fetchUsers = createAsyncThunk<user[]>(
 	'user/fetchUsers',
 	async (_, { rejectWithValue }) => {
 		try {
-			const response = await axiosGetDefault('api/users');
-			return response.resp;
+			const response = await axiosGetSlice('api/users');
+			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );
@@ -30,10 +30,10 @@ export const fetchUser = createAsyncThunk<user, number>(
 	'user/fetchUser',
 	async (user_id, { rejectWithValue }) => {
 		try {
-			const response = await axiosGetDefault(`api/users/user/${user_id}`);
-			return response.resp;
+			const response = await axiosGetSlice(`api/users/user/${user_id}`);
+			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );
@@ -42,10 +42,10 @@ export const fetchStudents = createAsyncThunk<user[]>(
 	'user/fetchStudents',
 	async (_, { rejectWithValue }) => {
 		try {
-			const response = await axiosGetDefault('api/users/student');
-			return response.resp;
+			const response = await axiosGetSlice('api/users/student');
+			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );
@@ -53,10 +53,10 @@ export const fetchInstructors = createAsyncThunk<user[]>(
 	'user/fetchInstructors',
 	async (_, { rejectWithValue }) => {
 		try {
-			const response = await axiosGetDefault('api/users/instructor');
-			return response.resp;
+			const response = await axiosGetSlice('api/users/instructor');
+			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );
@@ -67,10 +67,10 @@ export const createUser = createAsyncThunk<user, user>(
 	'user/createUser',
 	async (userData, { rejectWithValue }) => {
 		try {
-			const response = await axiosPostDefault('api/users', userData);
+			const response = await axiosPostSlice('api/users', userData);
 			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );
@@ -80,10 +80,10 @@ export const updateUser = createAsyncThunk<user, user>(
 	'user/updateUser',
 	async (userData, { rejectWithValue }) => {
 		try {
-			const response = await axiosPutDefault(`api/users`, userData);
+			const response = await axiosPutSlice(`api/users`, userData);
 			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );
@@ -92,10 +92,10 @@ export const userStudent = createAsyncThunk<user, number>(
 	'user/userStudent',
 	async (userData, { rejectWithValue }) => {
 		try {
-			const response = await axiosPostDefault(`api/users/student`, { user_id: userData });
+			const response = await axiosPostSlice(`api/users/student`, { user_id: userData });
 			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );
@@ -104,10 +104,10 @@ export const userInstructor = createAsyncThunk<user, number>(
 	'user/userInstructor',
 	async (userData, { rejectWithValue }) => {
 		try {
-			const response = await axiosPostDefault(`api/users/instructor`, { user_id: userData });
+			const response = await axiosPostSlice(`api/users/instructor`, { user_id: userData });
 			return response;
 		} catch (error: any) {
-			return rejectWithValue(error.response.data);
+			return rejectWithValue(error.message);
 		}
 	}
 );

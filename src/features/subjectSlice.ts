@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { subject, subjectLesson, subjectState } from '../types/utilities';
-import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
+import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 const initialState: subjectState = {
     status: 'idle',
@@ -16,10 +16,10 @@ export const fetchSubjects = createAsyncThunk<subject[], number>(
     'user/fetchSubjects',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/subjects/course/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/subjects/course/${id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -28,11 +28,11 @@ export const fetchSubjectsLesson = createAsyncThunk<subject[], number>(
     'user/fetchSubjectsLesson',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/subjects/lesson/course/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/subjects/lesson/course/${id}`);
+            return response;
 
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -41,10 +41,10 @@ export const fetchSubject = createAsyncThunk<subject, number>(
     'user/fetchSubject',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/subjects/subject/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/subjects/subject/${id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -54,10 +54,10 @@ export const createSubject = createAsyncThunk<subject, subject>(
     'subject/createSubject',
     async (subjectData, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault('api/subjects', subjectData);
+            const response = await axiosPostSlice('api/subjects', subjectData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -67,10 +67,10 @@ export const createSubjectLesson = createAsyncThunk<subject, subjectLesson>(
     'subject/createSubjectLesson',
     async (subjectLessonData, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault('api/subjects/lesson', subjectLessonData);
+            const response = await axiosPostSlice('api/subjects/lesson', subjectLessonData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -80,10 +80,10 @@ export const updateSubject = createAsyncThunk<subject, subject>(
     'subject/updateSubject',
     async (subjectData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/subjects`, subjectData);
+            const response = await axiosPutSlice(`api/subjects`, subjectData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -94,10 +94,10 @@ export const updateSubjectLesson = createAsyncThunk<subject, subjectLesson>(
     'subject/updateSubjectLesson',
     async (subjectLessonData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/subjects/lesson`, subjectLessonData);
+            const response = await axiosPutSlice(`api/subjects/lesson`, subjectLessonData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );

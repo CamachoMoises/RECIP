@@ -9,25 +9,32 @@ import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import PageTitle from '../../../../components/PageTitle';
 import {
+	Button,
+	ButtonGroup,
 	Card,
 	CardBody,
 	List,
 	ListItem,
 	ListItemPrefix,
+	ListItemSuffix,
 	Typography,
 } from '@material-tailwind/react';
-import { fetchSubjectsLesson } from '../../../../features/subjectSlice';
+// import { fetchSubjectsLesson } from '../../../../features/subjectSlice';
 import {
-	fetchCourse,
-	fetchCourseStudent,
+	// fetchCourse,
 	fetchCoursesStudentsTests,
-	fetchSchedule,
+	// fetchSchedule,
 } from '../../../../features/courseSlice';
-import {
-	fetchInstructors,
-	fetchStudents,
-} from '../../../../features/userSlice';
+// import {
+// 	fetchInstructors,
+// 	fetchStudents,
+// } from '../../../../features/userSlice';
 import { useEffect } from 'react';
+import { NotebookText } from 'lucide-react';
+import {
+	createCourseStudentAssessment,
+	fetchCourseStudentAssessment,
+} from '../../../../features/assessmentSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -37,42 +44,51 @@ const breadCrumbs: breadCrumbsItems[] = [
 const GeneralAssessment = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
-	const { courseStudentList, status, error } = useSelector(
-		(state: RootState) => {
-			return state.courses;
-		}
-	);
+	const { course, assessment } = useSelector((state: RootState) => {
+		return { course: state.courses, assessment: state.assessment };
+	});
+	console.log(course.courseStudentList);
 
 	useEffect(() => {
 		dispatch(fetchCoursesStudentsTests(2));
 	}, [dispatch]);
 	const navigateCourseStudentAssessment = async (
-		CL: courseStudent
+		CS: courseStudent
 	) => {
-		await dispatch(
-			fetchSubjectsLesson(CL.course_id ? CL.course_id : -1)
-		);
-		await dispatch(fetchCourse(CL.course_id ? CL.course_id : -1));
-		await dispatch(fetchCourseStudent(CL.id ? CL.id : -1));
-		await dispatch(fetchInstructors());
-		await dispatch(fetchStudents());
-		await dispatch(fetchSchedule(CL.id ? CL.id : -1));
-		navigate(`../course_assessment/${CL.id}/${CL.course_id}`);
+		if (CS.course_student_assessment?.id) {
+			await dispatch(
+				fetchCourseStudentAssessment(CS.course_student_assessment.id)
+			);
+		} else {
+			await dispatch(
+				createCourseStudentAssessment({
+					course_student_id: CS.id ? CS.id : -1,
+					course_id: CS.course_id,
+					student_id: CS.student_id ? CS.student_id : -1,
+				})
+			);
+		}
+
+		await dispatch(fetchCoursesStudentsTests(2));
+		navigate(`../course_assessment/${CS.id}/${CS.course_id}`);
 	};
-	if (status === 'loading') {
+	if (course.status === 'loading') {
 		return (
 			<>
 				<LoadingPage />
 			</>
 		);
 	}
-	if (status === 'failed') {
+	if (assessment.status === 'failed') {
 		return (
 			<>
-				<ErrorPage error={error ? error : 'Indefinido'} />
+				<ErrorPage
+					error={assessment.error ? assessment.error : 'Indefinido'}
+				/>
 			</>
 		);
 	}
+
 	return (
 		<div className=" container">
 			<PageTitle title="Evaluaciones" breadCrumbs={breadCrumbs} />
@@ -92,22 +108,23 @@ const GeneralAssessment = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							{courseStudentList?.map((CL) => (
+							{course.courseStudentList?.map((CS) => (
 								<ListItem
-									key={`${CL.id}.courseList`}
+									key={`${CS.id}.courseList`}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									onClick={() => {
-										navigateCourseStudentAssessment(CL);
-									}}
 								>
 									<ListItemPrefix
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{CL.code} kk
+										{CS.code}
+										<br />
+										{CS.course_student_assessment && (
+											<>Evaluacion Iniciada</>
+										)}
 									</ListItemPrefix>
 									<div>
 										<Typography
@@ -117,8 +134,8 @@ const GeneralAssessment = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CL.student?.user?.name
-												? `${CL.student.user.name} ${CL.student.user.last_name}`
+											{CS.student?.user?.name
+												? `${CS.student.user.name} ${CS.student.user.last_name}`
 												: 'Sin Piloto'}
 										</Typography>
 										<Typography
@@ -129,15 +146,41 @@ const GeneralAssessment = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CL.course?.name} {CL.course?.description} (
-											{CL.course?.course_type.name})
+											{CS.course?.name} {CS.course?.description}(
+											{CS.course?.course_level.name}) (
+											{CS.course?.course_type.name})
 										</Typography>
 									</div>
+									<ListItemSuffix
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										<ButtonGroup
+											size="sm"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<Button
+												title="Evaluacion del piloto"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+												onClick={() => {
+													navigateCourseStudentAssessment(CS);
+												}}
+											>
+												<NotebookText size={15} />
+											</Button>
+										</ButtonGroup>
+									</ListItemSuffix>
 								</ListItem>
 							))}
 						</List>
 					</CardBody>
 				</Card>
+				<code></code>
 			</div>
 		</div>
 	);

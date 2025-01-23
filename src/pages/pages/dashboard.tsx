@@ -7,7 +7,6 @@ import NewCourse from './dashboard/courses/newCourseStudentSchedule';
 import TableStudents from './dashboard/students/tableStudents';
 import TableInstructors from './dashboard/instructors/tableInstructors';
 import GeneralAssessment from './dashboard/assessment/generalAssessment';
-import NewAssessment from './dashboard/assessment/newAssessment';
 import NewTest from './dashboard/test/newTest';
 import GeneralTest from './dashboard/test/generalTest';
 import GeneralConfig from './dashboard/config/generalConfig';
@@ -16,6 +15,7 @@ import QuestionTestList from './dashboard/config/questionTestList';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import DetailAssessment from './dashboard/assessment/detailAssessment';
 
 const Dashboard = () => {
 	const navigate = useNavigate();
@@ -81,7 +81,7 @@ const Dashboard = () => {
 							/>
 							<Route
 								path="course_assessment/:id/:course_id"
-								element={<NewAssessment />}
+								element={<DetailAssessment />}
 							/>
 							<Route
 								path="new_test/:id/:course_id/:test_id"

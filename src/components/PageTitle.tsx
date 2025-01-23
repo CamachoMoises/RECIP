@@ -1,6 +1,6 @@
 'use client';
 import cn from '../lib/utils';
-import React, { useTransition } from 'react';
+import { useTransition } from 'react';
 import {
 	Breadcrumbs,
 	Button,
@@ -31,11 +31,14 @@ export default function PageTitle({
 	const location = useLocation();
 	// console.log(location.pathname);
 	const pathName = location.pathname;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isPending, startTransition] = useTransition();
 	const handleBack = () => {
 		navigate(-1);
 	};
+	if (isPending) {
+		console.log('Is pending');
+	}
+
 	return (
 		<>
 			<div className="flex flex-col py-3 gap-3">

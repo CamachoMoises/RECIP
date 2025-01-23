@@ -84,6 +84,7 @@ export type subjectLessonDays = {
     subject?: subject;
     subject_lesson_id: number;
     subject_lesson?: subjectLesson;
+    course_student_assessment_lesson_days?: courseStudentAssessmentLessonDay[]
     subject_days_id: number;
     subject_days?: subjectDays;
     day: number;
@@ -244,6 +245,7 @@ export type courseStudent = {
     course?: course
     student_id: number | null;
     course_student_tests?: courseStudentTest[];
+    course_student_assessment?: courseStudentAssessment;
     student?: student;
     type_trip: number;
     license: number;
@@ -320,6 +322,79 @@ export type courseStudentTestAnswer = {
     createdAt?: string;
     updatedAt?: string;
 }
+
+export type courseStudentAssessment = {
+    id?: number;
+    course_id: number;
+    course?: course;
+    student_id: number;
+    student?: student;
+    course_student_id: number;
+    course_student?: courseStudent;
+    score: number;
+    approve: boolean;
+    date: string;
+    code: string;
+    status: boolean;
+    finished: boolean;
+    comments: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type courseStudentAssessmentDay = {
+    id?: number;
+    course_id: number;
+    course?: course;
+    student_id: number;
+    student?: student;
+    course_student_id: number;
+    course_student?: courseStudent;
+    course_student_assessment_id: number;
+    course_student_assessment?: courseStudentAssessment;
+    day: number;
+    airport: string;
+    airstrip: string;
+    elevation: number;
+    meteorology: string;
+    temperature: number;
+    qnh: string;
+    wind: string;
+    weight: number;
+    flaps: number;
+    power: string;
+    seat: string;
+    comments: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type courseStudentAssessmentLessonDay = {
+    id?: number;
+    course_id: number;
+    course?: course;
+    student_id: number;
+    student?: student;
+    course_student_id: number;
+    course_student?: courseStudent;
+    course_student_assessment_id: number;
+    course_student_assessment?: courseStudentAssessment;
+    course_student_assessment_day_id: number;
+    course_student_assessment_day?: courseStudentAssessmentDay;
+    subject_id: number;
+    subject?: subject;
+    subject_lesson_id: number;
+    subject_lesson?: subjectLesson;
+    subject_days_id: number;
+    subject_days?: subjectDays;
+    subject_lesson_days_id: number;
+    subject_lesson_days?: subjectLessonDays;
+    item: string;
+    score: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export interface credentials {
     email: string;
     password?: string;
@@ -381,5 +456,17 @@ export interface authState {
     error: string | null;
     token: string | null | undefined,
     user?: user | null;
+}
+export interface assessmentState {
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+    courseStudentAssessmentSelected: courseStudentAssessment | null;
+    courseStudentAssessmentDayList: courseStudentAssessmentDay[];
+    courseStudentAssessmentDaySelected: courseStudentAssessmentDay | null;
+    courseStudentAssessmentLessonDayList: courseStudentAssessmentLessonDay[];
+    courseStudentAssessmentLessonDaySelected: courseStudentAssessmentLessonDay | null;
+    subjectList: subject[] | null;
+    day: number;
+
 }
 

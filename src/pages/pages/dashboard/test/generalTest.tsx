@@ -12,15 +12,19 @@ import {
 import {
 	breadCrumbsItems,
 	courseStudent,
+	instructor,
 } from '../../../../types/utilities';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import {
+	Button,
+	ButtonGroup,
 	Card,
 	CardBody,
 	List,
 	ListItem,
 	ListItemPrefix,
+	ListItemSuffix,
 	Typography,
 } from '@material-tailwind/react';
 import moment from 'moment';
@@ -29,6 +33,7 @@ import {
 	createCourseStudentTest,
 	fetchTest,
 } from '../../../../features/testSlice';
+import { NotebookText, Pencil } from 'lucide-react';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -39,8 +44,8 @@ const breadCrumbs: breadCrumbsItems[] = [
 const GeneralTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
-	const { course } = useSelector((state: RootState) => {
-		return { course: state.courses };
+	const { course, auth } = useSelector((state: RootState) => {
+		return { course: state.courses, auth: state.auth };
 	});
 	useEffect(() => {
 		dispatch(fetchCoursesStudentsTests(1));
@@ -61,8 +66,6 @@ const GeneralTest = () => {
 		await dispatch(fetchTest(CST.test_id));
 		navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
 	};
-	console.log(course.courseStudentList);
-
 	if (course.status === 'loading') {
 		return (
 			<>
@@ -101,6 +104,7 @@ const GeneralTest = () => {
 						>
 							{course.courseStudentList?.map((CL) => {
 								const maxTries = 4;
+								let instructor: instructor | undefined = undefined;
 								let active = true;
 								let dateTest = null;
 								let horas = null;
@@ -116,7 +120,15 @@ const GeneralTest = () => {
 										  )
 										: null;
 								}
-
+								if (
+									CL.student &&
+									CL.student.user?.id != auth.user?.id
+								) {
+									active = false;
+								}
+								if (CL.schedules && CL.schedules[0]) {
+									instructor = CL.schedules[0].instructor;
+								}
 								if (dateTest) {
 									const currentDate = moment();
 									horas = currentDate.diff(dateTest, 'hours', true);
@@ -130,15 +142,6 @@ const GeneralTest = () => {
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										disabled={!active}
-										onClick={() => {
-											navigateCourseStudentTest(
-												CL,
-												dateTest
-													? dateTest.format('YYYY-MM-DD')
-													: '-1'
-											);
-										}}
 									>
 										<ListItemPrefix
 											placeholder={undefined}
@@ -153,33 +156,87 @@ const GeneralTest = () => {
 												</small>
 											)}
 										</ListItemPrefix>
-										<div>
-											<Typography
-												variant="h6"
-												color="blue-gray"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{CL.student?.user?.name
-													? `${CL.student.user.name} ${CL.student.user.last_name}`
-													: 'Sin Piloto'}{' '}
-												Fecha:
-												{dateTest?.format('DD-MM-YYYY')} Hora:{' '}
-												{dateTest?.format('HH:mm')}
-											</Typography>
-											<Typography
-												variant="small"
-												color="gray"
-												className="font-normal"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{CL.course?.name} {CL.course?.description} (
-												{CL.course?.course_type.name})
-											</Typography>
+										<div className="flex flex-row ">
+											<div className="flex flex-col">
+												<Typography
+													variant="h6"
+													color="blue-gray"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													Participante:{' '}
+													{CL.student?.user?.name
+														? `${CL.student.user.name} ${CL.student.user.last_name}`
+														: 'Sin Piloto'}{' '}
+												</Typography>
+												<Typography
+													variant="small"
+													color="gray"
+													className="font-normal"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													{CL.course?.name} {CL.course?.description}
+													Fecha:({dateTest?.format('DD-MM-YYYY')})
+													Hora de inicio:({dateTest?.format('HH:mm')})
+												</Typography>
+												{instructor && (
+													<>
+														<Typography
+															variant="small"
+															color="gray"
+															className="font-normal"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															Instructor:{' '}{instructor.user?.name}{' '}
+															{instructor.user?.last_name}
+														</Typography>
+													</>
+												)}
+											</div>
 										</div>
+										<ListItemSuffix
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<ButtonGroup
+												size="sm"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												<Button
+													title="Iniciar examen"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+													disabled={!active}
+													onClick={() => {
+														navigateCourseStudentTest(
+															CL,
+															dateTest
+																? dateTest.format('YYYY-MM-DD')
+																: '-1'
+														);
+													}}
+												>
+													<Pencil size={15} />
+												</Button>
+												<Button
+													title="Revisión"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													<NotebookText size={15} />
+												</Button>
+											</ButtonGroup>
+										</ListItemSuffix>
 									</ListItem>
 								);
 							})}

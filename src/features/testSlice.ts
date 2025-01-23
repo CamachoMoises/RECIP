@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { answer, courseStudentTest, question, questionType, test, testQuestionType, testState } from '../types/utilities';
-import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
+import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 const initialState: testState = {
     status: 'idle',
@@ -22,10 +22,10 @@ export const fetchQuestionTypes = createAsyncThunk<questionType[]>(
     'user/fetchQuestionTypes',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault('api/test/questionTypes');
-            return response.resp;
+            const response = await axiosGetSlice('api/test/questionTypes');
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -34,10 +34,10 @@ export const fetchTest = createAsyncThunk<test, number>(
     'user/fetchTest',
     async (test_id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/test/${test_id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/test/test/${test_id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -47,10 +47,10 @@ export const fetchTests = createAsyncThunk<test[], number>(
     'user/fetchTests',
     async (course_id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/tests/${course_id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/test/tests/${course_id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -59,13 +59,13 @@ export const fetchQuestions = createAsyncThunk<question[], { test_id: number, qu
     'user/fetchQuestions',
     async ({ test_id, question_type_id, test_question_type_id }, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/questions/${test_id}`, {
+            const response = await axiosGetSlice(`api/test/questions/${test_id}`, {
                 question_type_id,
                 test_question_type_id
             });
-            return response.resp;
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -74,10 +74,10 @@ export const fetchAnswers = createAsyncThunk<answer[], number>(
     'user/fetchAnswers',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/answers/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/test/answers/${id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -87,10 +87,10 @@ export const updateQuestionTypes = createAsyncThunk<questionType, questionType>(
     'questionTypes/updateQuestionTypes',
     async (questionTypeData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/test/questionTypes`, questionTypeData);
+            const response = await axiosPutSlice(`api/test/questionTypes`, questionTypeData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -99,10 +99,10 @@ export const createTest = createAsyncThunk<test, { course_id: number, duration: 
     'questionTypes/createTest',
     async (testData, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault(`api/test/test`, testData);
+            const response = await axiosPostSlice(`api/test/test`, testData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -111,10 +111,10 @@ export const updateTest = createAsyncThunk<test, test>(
     'questionTypes/updateTest',
     async (testData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/test/test`, testData);
+            const response = await axiosPutSlice(`api/test/test`, testData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -123,10 +123,10 @@ export const createQuestionTest = createAsyncThunk<question, { course_id: number
     'questionTypes/createQuestionTest',
     async (questionTestData, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault(`api/test/questionTest`, questionTestData);
+            const response = await axiosPostSlice(`api/test/questionTest`, questionTestData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -137,10 +137,10 @@ export const updateQuestionTest = createAsyncThunk<question, question>(
     'questionTypes/updateQuestion',
     async (questionData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/test/questionTest`, questionData);
+            const response = await axiosPutSlice(`api/test/questionTest`, questionData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -150,10 +150,10 @@ export const createAnswerQuestionTest = createAsyncThunk<question, { course_id: 
     'questionTypes/createAnswerQuestionTest',
     async (answerQuestionTestData, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault(`api/test/answerQuestionTest`, answerQuestionTestData);
+            const response = await axiosPostSlice(`api/test/answerQuestionTest`, answerQuestionTestData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -164,10 +164,10 @@ export const updateAnswerQuestionTest = createAsyncThunk<question, { answerData:
     'questionTypes/updateAnswerQuestionTest',
     async ({ answerData, question_id }, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/test/answerQuestionTest/${question_id}`, answerData);
+            const response = await axiosPutSlice(`api/test/answerQuestionTest/${question_id}`, answerData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -176,10 +176,10 @@ export const updateTestQuestionTypes = createAsyncThunk<test, testQuestionType>(
     'questionTypes/updateTestQuestionTypes',
     async (testQuestionTypeData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/test/testQuestionTypes`, testQuestionTypeData);
+            const response = await axiosPutSlice(`api/test/testQuestionTypes`, testQuestionTypeData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -189,14 +189,14 @@ export const createCourseStudentTest = createAsyncThunk<courseStudentTest, { cou
     'course/createCourseStudentTest',
     async ({ course_student_id, date }, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault(`api/test/courseStudentTest/${course_student_id}`,
+            const response = await axiosPostSlice(`api/test/courseStudentTest/${course_student_id}`,
                 {
                     date: date
                 }
             );
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -205,10 +205,10 @@ export const fetchCourseStudentTest = createAsyncThunk<courseStudentTest, number
     'user/fetchCourseStudentTest',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/test/courseStudentTest/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/test/courseStudentTest/${id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );

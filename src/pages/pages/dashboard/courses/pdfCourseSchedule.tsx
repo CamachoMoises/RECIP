@@ -285,8 +285,8 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 						</td>
 					</tr>
 				))}
-				{add_files.map((row, index) => (
-					<tr key={index} className="hover:bg-gray-50">
+				{add_files.map((row) => (
+					<tr key={row.id} className="hover:bg-gray-50">
 						<td className="border border-gray-800 w-40 h-6 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>

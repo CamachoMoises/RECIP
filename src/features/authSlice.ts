@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { authState, credentials } from "../types/utilities";
-import { axiosPostDefault } from "../services/axios";
+import { axiosPostSlice } from "../services/axios";
 
 
 const initialState: authState = {
@@ -12,12 +12,10 @@ const initialState: authState = {
 export const loginUser = createAsyncThunk<credentials, credentials>('auth/loginUser',
     async (credentials, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault('auth/', credentials);
-            console.log(response);
-
+            const response = await axiosPostSlice('auth/', credentials);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     });
 

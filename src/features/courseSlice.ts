@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { CourseState, course, courseStudent, schedule } from '../types/utilities';
-import { axiosGetDefault, axiosPostDefault, axiosPutDefault } from "../services/axios";
+import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 
 const initialState: CourseState = {
@@ -19,10 +19,10 @@ export const fetchCourses = createAsyncThunk<course[]>(
     'course/fetchCourses',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault('api/courses');
-            return response.resp;
+            const response = await axiosGetSlice('api/courses');
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -31,10 +31,10 @@ export const fetchCoursesStudents = createAsyncThunk<courseStudent[]>(
     'course/fetchCoursesStudents',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault('api/courses/coursesStudents');
-            return response.resp;
+            const response = await axiosGetSlice('api/courses/coursesStudents');
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -43,12 +43,12 @@ export const fetchCoursesStudentsTests = createAsyncThunk<courseStudent[], numbe
     'course/fetchCoursesStudentsTests',
     async (course_type_id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault('api/courses/coursesStudents',
+            const response = await axiosGetSlice('api/courses/coursesStudents',
                 { course_type_id: course_type_id }
             );
-            return response.resp;
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -57,10 +57,10 @@ export const fetchCourse = createAsyncThunk<course, number>(
     'course/fetchCourse',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/courses/course/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/courses/course/${id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -69,10 +69,10 @@ export const fetchCourseStudent = createAsyncThunk<courseStudent, number>(
     'course/fetchCourseStudent',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/courses/courseStudent/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/courses/courseStudent/${id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -81,10 +81,10 @@ export const fetchSchedule = createAsyncThunk<schedule[], number>(
     'course/fetchSchedule',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetDefault(`api/courses/schedule/${id}`);
-            return response.resp;
+            const response = await axiosGetSlice(`api/courses/schedule/${id}`);
+            return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -95,10 +95,10 @@ export const createCourse = createAsyncThunk<course, course>(
     'course/createCourse',
     async (courseData, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault('api/courses', courseData);
+            const response = await axiosPostSlice('api/courses', courseData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -107,10 +107,10 @@ export const createCourseStudent = createAsyncThunk<courseStudent, number>(
     'course/createCourseStudent',
     async (course_id, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault(`api/courses/courseStudent/${course_id}`);
+            const response = await axiosPostSlice(`api/courses/courseStudent/${course_id}`);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -119,10 +119,10 @@ export const createSchedule = createAsyncThunk<schedule, schedule>(
     'course/createSchedule',
     async (scheduleData, { rejectWithValue }) => {
         try {
-            const response = await axiosPostDefault('api/courses/schedule', scheduleData);
+            const response = await axiosPostSlice('api/courses/schedule', scheduleData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -134,10 +134,10 @@ export const updateCourse = createAsyncThunk<course, course>(
     'course/updateCourse',
     async (courseData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/courses`, courseData);
+            const response = await axiosPutSlice(`api/courses`, courseData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -146,10 +146,10 @@ export const updateCourseStudent = createAsyncThunk<courseStudent, { course_id: 
     'course/updateCourseStudent',
     async (courseData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/courses/courseStudent/${courseData.course_id}`, courseData);
+            const response = await axiosPutSlice(`api/courses/courseStudent/${courseData.course_id}`, courseData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -158,10 +158,10 @@ export const updateSchedule = createAsyncThunk<schedule, schedule>(
     'course/updateSchedule',
     async (scheduleData, { rejectWithValue }) => {
         try {
-            const response = await axiosPutDefault(`api/courses/schedule`, scheduleData);
+            const response = await axiosPutSlice(`api/courses/schedule`, scheduleData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.message);
         }
     }
 );
