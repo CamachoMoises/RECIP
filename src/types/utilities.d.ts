@@ -64,7 +64,7 @@ export type subjectDays = {
 }
 
 export type subjectLesson = {
-    id: number | null;
+    id?: number;
     course_id: number;
     course?: course;
     subject_id: number;
@@ -77,7 +77,7 @@ export type subjectLesson = {
     updatedAt?: string;
 }
 export type subjectLessonDays = {
-    id: number | null;
+    id?: number;
     course_id: number;
     course?: course;
     subject_id: number;
@@ -391,6 +391,7 @@ export type courseStudentAssessmentLessonDay = {
     subject_lesson_days?: subjectLessonDays;
     item: string;
     score: number;
+    day?:number;
     createdAt?: string;
     updatedAt?: string;
 }

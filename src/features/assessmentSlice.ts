@@ -1,5 +1,5 @@
 import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
-import { assessmentState, courseStudentAssessment, courseStudentAssessmentDay, subject } from '../types/utilities';
+import { assessmentState, courseStudentAssessment, courseStudentAssessmentDay, courseStudentAssessmentLessonDay, subject } from '../types/utilities';
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: assessmentState = {
@@ -58,6 +58,19 @@ export const updateCourseStudentAssessmentDay = createAsyncThunk<courseStudentAs
     async (CSAD, { rejectWithValue }) => {
         try {
             const response = await axiosPutSlice(`api/assessment/updateCourseStudentAssessmentDay`, CSAD);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+)
+
+
+export const changeCourseStudentAssessmentLessonDay = createAsyncThunk<subject, courseStudentAssessmentLessonDay>(
+    'assessment/changeCourseStudentAssessmentLessonDay',
+    async (CSALD, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutSlice(`api/assessment/changeCourseStudentAssessmentLessonDay`, CSALD);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -151,6 +164,26 @@ export const assessmentSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
+            // Reducers para la acción updateCourse
+            .addCase(changeCourseStudentAssessmentLessonDay.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(changeCourseStudentAssessmentLessonDay.fulfilled, (state, action: PayloadAction<subject>) => {
+                const editedSubject = action.payload;
+                state.status = 'succeeded';
+                if (state.subjectList) {
+                    const index = state.subjectList.findIndex((subject) => subject.id === editedSubject.id);
+                    if (index !== -1) {
+                        state.subjectList[index] = editedSubject;
+                    }
+                }
+            })
+            .addCase(changeCourseStudentAssessmentLessonDay.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+
     },
 });
 
