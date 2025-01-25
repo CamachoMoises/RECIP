@@ -155,15 +155,7 @@ const DetailAssessment = () => {
 					>
 						<div className="flex flex-col gap-2 ">
 							<Typography
-								variant="h5"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								REGISTRO DE ENTRENAMIENTO DE VUELO
-							</Typography>
-							<Typography
-								variant="h5"
+								variant="h4"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -183,7 +175,7 @@ const DetailAssessment = () => {
 									assessment.courseStudentAssessmentSelected?.course
 										?.description
 								}{' '}
-								en{' '}
+								de{' '}
 								{
 									assessment.courseStudentAssessmentSelected?.course
 										?.course_type.name
@@ -383,7 +375,10 @@ const DetailAssessment = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex flex-col gap-2 ">
-							<CSAD_form day={activeStep + 1} />
+							<CSAD_form
+								day={activeStep + 1}
+								isLastStep={isLastStep}
+							/>
 						</div>
 					</CardBody>
 					<CardFooter

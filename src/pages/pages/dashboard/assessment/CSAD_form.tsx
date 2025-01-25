@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Button, Input, Textarea } from '@material-tailwind/react';
-import { Save } from 'lucide-react';
+import { Printer, Save } from 'lucide-react';
 import LessonDetails from './lessonDetails';
 import { courseStudentAssessmentDay } from '../../../../types/utilities';
 import { updateCourseStudentAssessmentDay } from '../../../../features/assessmentSlice';
@@ -20,12 +20,22 @@ type Inputs = {
 	seat: string;
 	comments: string;
 };
-const CSAD_form = ({ day }: { day: number }) => {
+const CSAD_form = ({
+	day,
+	isLastStep,
+}: {
+	day: number;
+	isLastStep: boolean;
+}) => {
 	const { assessment } = useSelector((state: RootState) => {
 		return {
 			assessment: state.assessment,
 		};
 	});
+	const dayStarted = assessment.courseStudentAssessmentDaySelected
+		?.airport
+		? true
+		: false;
 	const dispatch = useDispatch<AppDispatch>();
 
 	const {
@@ -87,11 +97,18 @@ const CSAD_form = ({ day }: { day: number }) => {
 		};
 		await dispatch(updateCourseStudentAssessmentDay(req));
 	};
+	const printCSA = async () => {
+		console.log(assessment.courseStudentAssessmentSelected?.id);
+	};
 	return (
 		<>
 			{/* Form for CSAD */}
 			<form onSubmit={handleSubmit(onSubmit)}>
-				<div className="grid grid-cols-4 gap-4 py-3">
+				<div
+					className={`grid grid-cols-4 gap-4 py-3 rounded-md ${
+						dayStarted ? '' : 'bg-orange-100'
+					}`}
+				>
 					<div>
 						<Input
 							onPointerEnterCapture={undefined}
@@ -360,12 +377,12 @@ const CSAD_form = ({ day }: { day: number }) => {
 							</span>
 						)}
 					</div>
-					<div>
+					<div className="flex flex-row gap-2">
 						<Button
 							variant="gradient"
 							color="green"
 							type="submit"
-							title="Guardar"
+							title="Guardar datos"
 							className="flex flex-row justify-center"
 							fullWidth
 							placeholder={undefined}
@@ -374,6 +391,22 @@ const CSAD_form = ({ day }: { day: number }) => {
 						>
 							<Save size={15} />
 						</Button>
+						{isLastStep && !dayStarted && (
+							<Button
+								variant="gradient"
+								onClick={async () => {
+									printCSA();
+								}}
+								title="imprimir resultados"
+								className="flex flex-row justify-center"
+								fullWidth
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<Printer size={15} />
+							</Button>
+						)}
 					</div>
 				</div>
 				<hr />

@@ -137,6 +137,7 @@ const LessonDetails = ({ day }: { day: number }) => {
 										<ListItem
 											key={`SLE-list${index2}`}
 											placeholder={undefined}
+											className={`${!score ? 'bg-orange-100' : ''}`}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
@@ -147,14 +148,14 @@ const LessonDetails = ({ day }: { day: number }) => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												{SLE.name} {score}
+												{SLE.name}
 											</Typography>
 											<ListItemSuffix
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												<div className="flex flex-row gap-2">
+												<div className="flex flex-row gap-2 px-3">
 													<Radio
 														name={`SLE-Radio-${SLE.id}`}
 														label="1"
