@@ -39,7 +39,7 @@ const LessonDetail = ({
 			id: number;
 			name: string;
 		},
-		subject_lesson_id: number | null,
+		subject_lesson_id: number | undefined,
 		subject_lesson_days_id: number
 	) => Promise<void>;
 	handleEditLesson: (

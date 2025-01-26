@@ -4,8 +4,9 @@ import { breadCrumbsItems } from '../../../../types/utilities';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import PageTitle from '../../../../components/PageTitle';
+import SignatureCanvas from 'react-signature-canvas';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
 	Button,
 	Card,
@@ -23,7 +24,18 @@ import {
 } from '../../../../features/assessmentSlice';
 import moment from 'moment';
 import CSAD_form from './CSAD_form';
-
+const day_names = [
+	'Manejo General',
+	'Manejo General y Asimétrico',
+	'Manejo de Vuelo Normal y Asimétrico',
+	'Procedimientos Anormales',
+	'Procedimientos Anormales y de Emergencia',
+	'',
+	'',
+	'',
+	'',
+	'',
+];
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -37,9 +49,19 @@ const breadCrumbs: breadCrumbsItems[] = [
 const DetailAssessment = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
-
+	const sigCanvas = useRef<SignatureCanvas>(null);
 	const [activeStep, setActiveStep] = useState(0);
+	const clear = () => {
+		sigCanvas.current?.clear();
+	};
+	const save = () => {
+		if (sigCanvas.current) {
+			const signatureData = sigCanvas.current.toDataURL(); // Obtén la firma como base64
+			console.log('Firma guardada:', signatureData);
 
+			// Aquí puedes enviar `signatureData` a tu servidor usando Axios
+		}
+	};
 	const handleNext = () =>
 		!isLastStep && setActiveStep((cur) => cur + 1);
 	const handlePrev = () =>
@@ -319,7 +341,7 @@ const DetailAssessment = () => {
 				>
 					<CardHeader
 						floated={false}
-						className="h-16 px-3"
+						className="h-24 px-3"
 						variant="gradient"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
@@ -346,14 +368,14 @@ const DetailAssessment = () => {
 									<Step
 										onClick={() => setActiveStep(index)}
 										placeholder={undefined}
-										className="h-8 w-8"
+										className="h-15 w-20"
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										<CalendarCheck className="h-5 w-5" />
-										<div className="absolute -bottom-[1.5rem] w-max text-center">
+										<CalendarCheck className="h-10 w-5" />
+										<div className="absolute -bottom-[3.5rem] w-max text-center">
 											<Typography
-												variant="h6"
+												variant="small"
 												color={
 													activeStep === index ? 'blue-gray' : 'gray'
 												}
@@ -361,7 +383,8 @@ const DetailAssessment = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												{day.name}
+												{day.name} <br />{' '}
+												<small>{day_names[index]}</small>
 											</Typography>
 										</div>
 									</Step>
@@ -396,6 +419,19 @@ const DetailAssessment = () => {
 							>
 								Prev
 							</Button>
+							<div>
+								<SignatureCanvas
+									ref={sigCanvas}
+									penColor="black"
+									canvasProps={{
+										width: 500,
+										height: 200,
+										className: 'signatureCanvas',
+									}}
+								/>
+								<button onClick={clear}>Borrar</button>
+								<button onClick={save}>Guardar Firma</button>
+							</div>
 							<Button
 								onClick={handleNext}
 								disabled={isLastStep}

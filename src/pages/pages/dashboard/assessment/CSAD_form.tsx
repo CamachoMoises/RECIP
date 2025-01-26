@@ -391,7 +391,7 @@ const CSAD_form = ({
 						>
 							<Save size={15} />
 						</Button>
-						{isLastStep && !dayStarted && (
+						{isLastStep && dayStarted && (
 							<Button
 								variant="gradient"
 								onClick={async () => {

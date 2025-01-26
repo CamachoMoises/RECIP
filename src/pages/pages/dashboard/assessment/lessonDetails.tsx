@@ -83,7 +83,7 @@ const LessonDetails = ({ day }: { day: number }) => {
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				Secciones del dia {day}
+				Session del dia {day}
 			</Typography>
 			<div className="flex flex-col gap-2 py-2">
 				{assessment.subjectList?.map((SL, index) => {
@@ -137,7 +137,7 @@ const LessonDetails = ({ day }: { day: number }) => {
 										<ListItem
 											key={`SLE-list${index2}`}
 											placeholder={undefined}
-											className={`${!score ? 'bg-orange-100' : ''}`}
+											className={`${!score ? 'bg-blue-100' : ''}`}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>

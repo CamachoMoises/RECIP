@@ -73,7 +73,7 @@ const ModalFormSubject = ({
 	const handleChangeStatusDay = async (
 		event: React.ChangeEvent<HTMLInputElement>,
 		day: { id: number; name: string },
-		subject_lesson_id: number | null,
+		subject_lesson_id: number | undefined,
 		subject_lesson_days_id: number
 	) => {
 		const req = {
@@ -92,7 +92,7 @@ const ModalFormSubject = ({
 			: 0;
 		if (subjectSelected && maxOrderLesson >= 0 && lessonState) {
 			const newLesson: subjectLesson = {
-				id: null,
+				id: undefined,
 				course_id: subjectSelected.course_id,
 				subject_id: subjectSelected.id ? subjectSelected.id : -1,
 				name: lessonState,
@@ -199,8 +199,9 @@ const ModalFormSubject = ({
 								<Input
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									type="number"
+									type="text"
 									label="Horas"
+									pattern="^\d+(\.\d+)?$"
 									disabled={courseType === 2}
 									placeholder="Horas"
 									maxLength={500}
