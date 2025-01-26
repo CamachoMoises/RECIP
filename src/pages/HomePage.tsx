@@ -6,19 +6,19 @@ const HomePage = () => {
 	const navigate = useNavigate();
 
 	const handleContactClick = () => {
-		navigate('/contact');
+		navigate('/dashboard');
 	};
 	return (
-		<>
+		<div className="py-14">
 			<Button
 				onClick={handleContactClick}
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				Ir a Contacto
+				Ir a Dashboard
 			</Button>
-		</>
+		</div>
 	);
 };
 
