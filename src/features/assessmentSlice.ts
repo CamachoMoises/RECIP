@@ -11,6 +11,7 @@ const initialState: assessmentState = {
     courseStudentAssessmentDaySelected: null,
     courseStudentAssessmentLessonDayList: [],
     courseStudentAssessmentLessonDaySelected: null,
+    daysSubjectList: null,
     day: 1,
 }
 
@@ -19,6 +20,21 @@ export const fetchCourseStudentAssessment = createAsyncThunk<courseStudentAssess
     async (course_student_assessment_id, { rejectWithValue }) => {
         try {
             const response = await axiosGetSlice(`api/assessment/courseStudentAssessment/${course_student_assessment_id}`
+            );
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+
+export const fetchAssessmentData = createAsyncThunk<{ CSA: courseStudentAssessment, CASD: subject[][] }, number>(
+    'assessment/fetchAssessmentData',
+    async (course_student_assessment_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetSlice(`api/assessment/fetchAssessmentData`,
+                { CSA_id: course_student_assessment_id }
             );
             return response;
         } catch (error: any) {
@@ -107,6 +123,22 @@ export const assessmentSlice = createSlice({
                 state.courseStudentAssessmentSelected = action.payload;
             })
             .addCase(fetchCourseStudentAssessment.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+            // Reducers para la acción fetchAssessmentData
+            .addCase(fetchAssessmentData.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchAssessmentData.fulfilled, (state, action: PayloadAction<{
+                CSA: courseStudentAssessment;
+                CASD: subject[][];
+            }>) => {
+                state.status = 'succeeded';
+                state.courseStudentAssessmentSelected = action.payload.CSA;
+                state.daysSubjectList = action.payload.CASD;
+            })
+            .addCase(fetchAssessmentData.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

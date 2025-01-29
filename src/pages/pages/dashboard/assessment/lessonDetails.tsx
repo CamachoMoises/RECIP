@@ -6,15 +6,10 @@ import {
 	// AppDispatch,
 	RootState,
 } from '../../../../store';
-import {
-	List,
-	ListItem,
-	ListItemSuffix,
-	Radio,
-	Typography,
-} from '@material-tailwind/react';
+import { List, ListItem, Typography } from '@material-tailwind/react';
 import { courseStudentAssessmentLessonDay } from '../../../../types/utilities';
 import { axiosPutDefault } from '../../../../services/axios';
+import ScoreDetail from './scoreDetail';
 
 const LessonDetails = ({ day }: { day: number }) => {
 	// const dispatch = useDispatch<AppDispatch>();
@@ -30,7 +25,9 @@ const LessonDetails = ({ day }: { day: number }) => {
 		subject_id: number,
 		subject_lesson_id: number,
 		subject_days_id: number,
-		subject_lesson_days_id: number
+		subject_lesson_days_id: number,
+		value_2: number | undefined,
+		value_3: number | undefined
 	) => {
 		const req: courseStudentAssessmentLessonDay = {
 			id: id,
@@ -63,6 +60,8 @@ const LessonDetails = ({ day }: { day: number }) => {
 			subject_lesson_days_id,
 			item: `${value}`,
 			score: value,
+			score_2: value_2,
+			score_3: value_3,
 			day: assessment.courseStudentAssessmentDaySelected?.day,
 		};
 		console.log(req);
@@ -108,132 +107,18 @@ const LessonDetails = ({ day }: { day: number }) => {
 								onPointerLeaveCapture={undefined}
 							>
 								{SL.subject_lessons?.map((SLE, index2) => {
-									let score: number | null = null;
-									let SLED_id: number | undefined = undefined;
-									let CSALD_id: number | undefined = undefined;
-									if (
-										SLE.subject_lesson_days &&
-										SLE.subject_lesson_days[0]
-									) {
-										SLED_id = SLE.subject_lesson_days[0].id;
-									}
-									if (
-										SLE.subject_lesson_days &&
-										SLE.subject_lesson_days[0] &&
-										SLE.subject_lesson_days[0]
-											.course_student_assessment_lesson_days &&
-										SLE.subject_lesson_days[0]
-											.course_student_assessment_lesson_days[0]
-									) {
-										score =
-											SLE.subject_lesson_days[0]
-												.course_student_assessment_lesson_days[0]
-												.score;
-										CSALD_id =
-											SLE.subject_lesson_days[0]
-												.course_student_assessment_lesson_days[0].id;
-									}
 									return (
 										<ListItem
 											key={`SLE-list${index2}`}
 											placeholder={undefined}
-											className={`${!score ? 'bg-blue-100' : ''}`}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											<Typography
-												variant="paragraph"
-												placeholder={undefined}
-												className="text-left"
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{SLE.name}
-											</Typography>
-											<ListItemSuffix
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												<div className="flex flex-row gap-2 px-3">
-													<Radio
-														name={`SLE-Radio-${SLE.id}`}
-														label="1"
-														value={1}
-														onChange={() => {
-															handleChangeRadio(
-																CSALD_id,
-																1,
-																SLE.subject_id,
-																SLE.id ? SLE.id : -1,
-																SLD_id,
-																SLED_id ? SLED_id : -1
-															);
-														}}
-														defaultChecked={score === 1}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														crossOrigin={undefined}
-													/>
-													<Radio
-														name={`SLE-Radio-${SLE.id}`}
-														label="2"
-														value={2}
-														onChange={() => {
-															handleChangeRadio(
-																CSALD_id,
-																2,
-																SLE.subject_id,
-																SLE.id ? SLE.id : -1,
-																SLD_id,
-																SLED_id ? SLED_id : -1
-															);
-														}}
-														defaultChecked={score === 2}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														crossOrigin={undefined}
-													/>
-													<Radio
-														name={`SLE-Radio-${SLE.id}`}
-														label="3"
-														value={3}
-														onChange={() => {
-															handleChangeRadio(
-																CSALD_id,
-																3,
-																SLE.subject_id,
-																SLE.id ? SLE.id : -1,
-																SLD_id,
-																SLED_id ? SLED_id : -1
-															);
-														}}
-														defaultChecked={score === 3}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														crossOrigin={undefined}
-													/>
-													<Radio
-														name={`SLE-Radio-${SLE.id}`}
-														label="4"
-														value={4}
-														onChange={() => {
-															handleChangeRadio(
-																CSALD_id,
-																4,
-																SLE.subject_id,
-																SLE.id ? SLE.id : -1,
-																SLD_id,
-																SLED_id ? SLED_id : -1
-															);
-														}}
-														defaultChecked={score === 4}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														crossOrigin={undefined}
-													/>
-												</div>
-											</ListItemSuffix>
+											<ScoreDetail
+												SLE={SLE}
+												SLD_id={SLD_id}
+												handleChangeRadio={handleChangeRadio}
+											/>
 										</ListItem>
 									);
 								})}

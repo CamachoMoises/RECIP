@@ -391,7 +391,9 @@ export type courseStudentAssessmentLessonDay = {
     subject_lesson_days?: subjectLessonDays;
     item: string;
     score: number;
-    day?:number;
+    score_2?: number;
+    score_3?: number
+    day?: number;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -467,6 +469,7 @@ export interface assessmentState {
     courseStudentAssessmentLessonDayList: courseStudentAssessmentLessonDay[];
     courseStudentAssessmentLessonDaySelected: courseStudentAssessmentLessonDay | null;
     subjectList: subject[] | null;
+    daysSubjectList: subject[][] | null;
     day: number;
 
 }
