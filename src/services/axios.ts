@@ -53,6 +53,7 @@ export async function axiosGetSlice(ruta: string, params = {}) {
 
     });
     try {
+
         const res = await axiosInstance.get(
             `${apiUrl}/${ruta}`,
             { params: params }
@@ -93,6 +94,8 @@ export async function axiosPostSlice(ruta: string, data: any = {}) {
         },
     });
     try {
+        console.log(apiUrl, ruta);
+
         const res = await axiosInstance.post(
             `${apiUrl}/${ruta}`,
             data
