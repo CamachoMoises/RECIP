@@ -98,7 +98,7 @@ const Icons = () => {
 							<NotebookText size={60} />
 						</div>{' '}
 						<br />
-						Reportes
+						Registros
 					</Button>
 				</div>
 				<div>
@@ -132,7 +132,7 @@ const Icons = () => {
 							<NotebookPen size={60} />
 						</div>{' '}
 						<br />
-						Evaluaciones
+						Evaluaciones FSTD
 					</Button>
 				</div>
 				<div>

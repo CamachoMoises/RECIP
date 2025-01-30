@@ -19,17 +19,20 @@ import {
 } from '@material-tailwind/react';
 import { CalendarCheck } from 'lucide-react';
 import {
+	fetchAssessmentData,
 	fetchCourseStudentAssessmentDay,
 	fetchSubjectAssessment,
 } from '../../../../features/assessmentSlice';
 import moment from 'moment';
 import CSAD_form from './CSAD_form';
+import { useReactToPrint } from 'react-to-print';
+import CSA_PDF from './CSA_PDF';
 const day_names = [
 	'Manejo General',
 	'Manejo General y Asimétrico',
 	'Manejo de Vuelo Normal y Asimétrico',
 	'Procedimientos Anormales',
-	'Procedimientos Anormales y de Emergencia',
+	'Procedimientos de Emergencia',
 	'',
 	'',
 	'',
@@ -50,6 +53,9 @@ const DetailAssessment = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
 	const sigCanvas = useRef<SignatureCanvas>(null);
+	const [isDataLoaded, setIsDataLoaded] = useState(false);
+	const componentRef = useRef<HTMLDivElement>(null);
+
 	const [activeStep, setActiveStep] = useState(0);
 	const clear = () => {
 		sigCanvas.current?.clear();
@@ -137,7 +143,26 @@ const DetailAssessment = () => {
 		student_id,
 		course_student_id,
 	]);
+	const printCSA = async () => {
+		await dispatch(
+			fetchAssessmentData(
+				assessment.courseStudentAssessmentSelected?.id
+					? assessment.courseStudentAssessmentSelected.id
+					: -1
+			)
+		);
+		setIsDataLoaded(true);
+		handlePrint();
+		// console.log(componentRef, isDataLoaded, data);
+		// setTimeout(() => {
+		// }, 5000);
+		// // ;
+	};
 
+	const handlePrint = useReactToPrint({
+		contentRef: componentRef,
+		documentTitle: `Evaluacion-${assessment.courseStudentAssessmentSelected?.code}`,
+	});
 	const [isLastStep, setIsLastStep] = useState(false);
 	const [isFirstStep, setIsFirstStep] = useState(false);
 	if (assessment.status === 'loading') {
@@ -401,6 +426,7 @@ const DetailAssessment = () => {
 							<CSAD_form
 								day={activeStep + 1}
 								isLastStep={isLastStep}
+								printCSA={printCSA}
 							/>
 						</div>
 					</CardBody>
@@ -419,7 +445,20 @@ const DetailAssessment = () => {
 							>
 								Prev
 							</Button>
-							<div>
+							<div className="border-blue-gray-800  bg-white rounded">
+								<SignatureCanvas
+									ref={sigCanvas}
+									penColor="black"
+									canvasProps={{
+										width: 500,
+										height: 200,
+										className: 'signatureCanvas',
+									}}
+								/>
+								<button onClick={clear}>Borrar</button>
+								<button onClick={save}>Guardar Firma</button>
+							</div>
+							<div className="border-blue-gray-800  bg-white rounded">
 								<SignatureCanvas
 									ref={sigCanvas}
 									penColor="black"
@@ -445,6 +484,13 @@ const DetailAssessment = () => {
 					</CardFooter>
 				</Card>
 			</div>
+			{isDataLoaded && (
+				<div style={{ display: 'none' }}>
+					<div ref={componentRef} className="flex flex-col w-full">
+						<CSA_PDF />
+					</div>
+				</div>
+			)}
 		</>
 	);
 };

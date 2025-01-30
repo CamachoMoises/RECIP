@@ -5,10 +5,8 @@ import { Button, Input, Textarea } from '@material-tailwind/react';
 import { Printer, Save } from 'lucide-react';
 import LessonDetails from './lessonDetails';
 import { courseStudentAssessmentDay } from '../../../../types/utilities';
-import {
-	fetchAssessmentData,
-	updateCourseStudentAssessmentDay,
-} from '../../../../features/assessmentSlice';
+import { updateCourseStudentAssessmentDay } from '../../../../features/assessmentSlice';
+
 type Inputs = {
 	airport: string;
 	airstrip: string;
@@ -26,9 +24,11 @@ type Inputs = {
 const CSAD_form = ({
 	day,
 	isLastStep,
+	printCSA,
 }: {
 	day: number;
 	isLastStep: boolean;
+	printCSA: () => Promise<void>;
 }) => {
 	const { assessment } = useSelector((state: RootState) => {
 		return {
@@ -100,18 +100,9 @@ const CSAD_form = ({
 		};
 		await dispatch(updateCourseStudentAssessmentDay(req));
 	};
-	const printCSA = async () => {
-		const data = await dispatch(
-			fetchAssessmentData(
-				assessment.courseStudentAssessmentSelected?.id
-					? assessment.courseStudentAssessmentSelected.id
-					: -1
-			)
-		).unwrap();
-		console.log(data);
-	};
+
 	return (
-		<>
+		<div className="content-center">
 			{/* Form for CSAD */}
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<div
@@ -453,7 +444,7 @@ const CSAD_form = ({
 					</>
 				)}
 			</form>
-		</>
+		</div>
 	);
 };
 
