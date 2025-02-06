@@ -72,7 +72,7 @@ const LessonDetails = ({ day }: { day: number }) => {
 		);
 		console.log(resp);
 	};
-	console.log(assessment.subjectList);
+	// console.log(assessment.subjectList);
 
 	return (
 		<div>

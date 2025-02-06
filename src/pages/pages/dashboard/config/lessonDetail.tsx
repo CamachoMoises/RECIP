@@ -104,6 +104,13 @@ const LessonDetail = ({
 					<div className="flex flex-col gap-1">
 						<label>Activo</label>
 						<Switch
+							className="h-full w-full checked:bg-[#134475]"
+							containerProps={{
+								className: 'w-11 h-6',
+							}}
+							circleProps={{
+								className: 'before:hidden left-0.5 border-none',
+							}}
 							defaultChecked={isActive}
 							onChange={() => {
 								setIsActive(!isActive);
@@ -127,6 +134,13 @@ const LessonDetail = ({
 								>
 									<label>{day.name}</label>
 									<Switch
+										className="h-full w-full checked:bg-[#134475]"
+										containerProps={{
+											className: 'w-11 h-6',
+										}}
+										circleProps={{
+											className: 'before:hidden left-0.5 border-none',
+										}}
 										defaultChecked={SLD?.status ? true : false}
 										onChange={(event) => {
 											handleChangeStatusDay(

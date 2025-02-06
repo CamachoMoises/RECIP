@@ -478,6 +478,14 @@ const ModalFormUser = ({
 											</label>
 											<br />
 											<Switch
+												className="h-full w-full checked:bg-[#134475]"
+												containerProps={{
+													className: 'w-11 h-6',
+												}}
+												circleProps={{
+													className:
+														'before:hidden left-0.5 border-none',
+												}}
 												defaultChecked={userSelect ? isActive : true}
 												onChange={() => {
 													setIsActive(!isActive);
@@ -496,6 +504,14 @@ const ModalFormUser = ({
 											</label>{' '}
 											<br />
 											<Switch
+												className="h-full w-full checked:bg-[#134475]"
+												containerProps={{
+													className: 'w-11 h-6',
+												}}
+												circleProps={{
+													className:
+														'before:hidden left-0.5 border-none',
+												}}
 												defaultChecked={isStaff}
 												onChange={() => {
 													setIsStaff(!isStaff);
@@ -514,6 +530,14 @@ const ModalFormUser = ({
 											</label>{' '}
 											<br />
 											<Switch
+												className="h-full w-full checked:bg-[#134475]"
+												containerProps={{
+													className: 'w-11 h-6',
+												}}
+												circleProps={{
+													className:
+														'before:hidden left-0.5 border-none',
+												}}
 												defaultChecked={isSuperuser}
 												onChange={() => {
 													setIsSuperuser(!isSuperuser);

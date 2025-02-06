@@ -163,14 +163,21 @@ const TestParams = ({
 				</ListItem>
 			</List>
 			{edit && (
-				<div className="flex flex-row gap-3 py-3">
+				<div className="flex flex-col gap-3 p-3 justify-center">
 					<div className="flex flex-row gap-5">
-						<div>
+						<div className="text-left">
 							<label htmlFor="Nombre" className="text-sx text-black">
 								Estatus
 							</label>
 							<br />
 							<Switch
+								className="h-full w-full checked:bg-[#134475]"
+								containerProps={{
+									className: 'w-11 h-6',
+								}}
+								circleProps={{
+									className: 'before:hidden left-0.5 border-none',
+								}}
 								defaultChecked={test.status}
 								onChange={() => {
 									setStatusChanged(true);
@@ -209,7 +216,7 @@ const TestParams = ({
 							setEdit(!edit);
 						}}
 					>
-						{edit ? <X size={15} /> : <Pencil size={10} />}
+						{edit ? <X size={15} /> : <Pencil size={15} />}
 					</Button>
 				</div>
 				{edit && (

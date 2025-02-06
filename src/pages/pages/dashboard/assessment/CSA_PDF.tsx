@@ -5,7 +5,7 @@ import { RootState } from '../../../../store';
 import { Typography } from '@material-tailwind/react';
 import { Check } from 'lucide-react';
 
-const CSA_PDF = () => {
+const CSA_PDF = ({ day }: { day: number }) => {
 	moment.locale('es');
 	// const day_names = [
 	// 	'Manejo General',
@@ -19,7 +19,6 @@ const CSA_PDF = () => {
 	// 	'',
 	// 	'',
 	// ];
-	const type_trip = ['', 'PIC', 'SIC', 'TRIP'];
 	const license = ['', 'ATP', 'Commercial', 'Privado'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const { assessment } = useSelector((state: RootState) => {
@@ -27,44 +26,65 @@ const CSA_PDF = () => {
 			assessment: state.assessment,
 		};
 	});
+	const days = assessment.courseStudentAssessmentSelected?.course
+		?.days
+		? Array.from(
+				{
+					length:
+						assessment.courseStudentAssessmentSelected.course.days <=
+						day
+							? assessment.courseStudentAssessmentSelected.course.days
+							: day,
+				},
+				(_, i) => ({
+					id: i,
+					name: `Dia ${i + 1}`,
+				})
+		  )
+		: [];
+	// console.log(assessment.daysSubjectList);
+
 	return (
 		<div className="printable">
-			<div className="flex flex-row justify-between">
-				<div className="flex flex-col border-4 w-full p-1 gap-2">
-					<div className="flex flex-row justify-around">
-						<img
-							src="/images/logo.png"
-							alt="Descripción de la imagen"
-							width={125}
-						/>
-
-						<div className="flex-col justify-center text-center">
-							<Typography
-								variant="h6"
-								color="black"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Registro De Entrenamiento De Vuelo Del Piloto <br />
-								{
-									assessment.courseStudentAssessmentSelected?.course
-										?.name
-								}{' '}
-								- Curso{' '}
-								{
-									assessment.courseStudentAssessmentSelected?.course
-										?.course_level.name
-								}
-							</Typography>
-						</div>
-					</div>
-					<div className="flex flex-col border-4  border-blue-gray-800  bg-white p-2 ">
+			<div className="flex flex-col text-center gap-2">
+				<img
+					src="/images/logo.png"
+					alt="Descripción de la imagen"
+					width={125}
+				/>
+				<Typography
+					variant="h5"
+					color="black"
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Registro De Entrenamiento De Vuelo Del Piloto
+				</Typography>
+				<Typography
+					variant="h5"
+					color="black"
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					{assessment.courseStudentAssessmentSelected?.course?.name} -
+					Curso{' '}
+					{
+						assessment.courseStudentAssessmentSelected?.course
+							?.course_level.name
+					}
+				</Typography>
+				<div className="flex flex-col border-4 w-full gap-2">
+					<div className="flex flex-col border border-blue-gray-800 bg-white">
 						<table className="table-auto ">
 							<tbody>
 								<tr>
-									<td className="border border-green-800 px-2 text-xs">
-										<strong> Nombre del Piloto:</strong>{' '}
+									<td
+										colSpan={2}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<strong> Nombre del Piloto:</strong> <br />
 										{
 											assessment.courseStudentAssessmentSelected
 												?.student?.user?.name
@@ -74,26 +94,12 @@ const CSA_PDF = () => {
 												?.student?.user?.last_name
 										}
 									</td>
-									<td className="border border-green-800 px-2 col-span-2 text-xs">
-										<div className="flex flex-row gap-3">
-											<strong>Tipo:</strong>{' '}
-											<Check size={15} color="green" />
-											{
-												type_trip[
-													assessment.courseStudentAssessmentSelected
-														?.course_student?.type_trip
-														? assessment
-																.courseStudentAssessmentSelected
-																?.course_student?.type_trip
-														: 0
-												]
-											}{' '}
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td className="border border-green-800 px-2  text-xs">
-										<strong>Identificacion:</strong>{' '}
+									<td
+										colSpan={2}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<strong> Documento de Identificacion:</strong>{' '}
+										<br />
 										{
 											assessment.courseStudentAssessmentSelected
 												?.student?.user?.user_doc_type?.symbol
@@ -104,35 +110,31 @@ const CSA_PDF = () => {
 												?.student?.user?.doc_number
 										}
 									</td>
-									<td className="border border-green-800 px-2  text-xs">
-										<div className="flex flex-row gap-3">
-											<strong>Licencia:</strong>
-											<Check size={15} color="green" />
-											{
-												license[
-													assessment.courseStudentAssessmentSelected
-														?.course_student?.license
-														? assessment
-																.courseStudentAssessmentSelected
-																?.course_student?.license
-														: 0
-												]
-											}
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td className="border border-green-800 px-2  text-xs">
-										<strong>Fecha de inicio:</strong>{' '}
+									<td
+										colSpan={2}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<strong>Fecha del Curso:</strong> <br />
 										{moment(
 											assessment.courseStudentAssessmentSelected
 												?.course_student?.date
 										).format('DD-MM-YYYY')}
 									</td>
+								</tr>
+								<tr>
+									<td
+										colSpan={4}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<strong> Cliente:</strong> <br />
+									</td>
 
-									<td className="border border-green-800 px-2 text-xs">
-										<div className="flex flex-row gap-3">
-											<strong>Normativa:</strong>{' '}
+									<td
+										colSpan={2}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<div className="flex flex-row gap-1">
+											<strong>Objetivos:</strong> <br />
 											<Check size={15} color="green" />
 											{
 												regulation[
@@ -148,49 +150,216 @@ const CSA_PDF = () => {
 									</td>
 								</tr>
 								<tr>
-									<td className="border border-green-800 px-2  text-xs">
-										<strong>Correo:</strong>
-										{
-											assessment.courseStudentAssessmentSelected
-												?.student?.user?.email
-										}
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong> Certificado Piloto Numero:</strong>{' '}
 									</td>
-									<td className="border border-green-800 px-2  text-xs">
-										<strong>Telefono:</strong>
-										{
-											assessment.courseStudentAssessmentSelected
-												?.student?.user?.phone
-										}
-										<div className="fle flex-row">
-											<strong>Pais:</strong>
+
+									<td
+										colSpan={2}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<div className="flex flex-row gap-1">
+											<strong> Tipo de Licencia:</strong>{' '}
+											<Check size={15} color="green" />
 											{
-												assessment.courseStudentAssessmentSelected
-													?.student?.user?.country_name
+												license[
+													assessment.courseStudentAssessmentSelected
+														?.course_student?.license
+														? assessment
+																.courseStudentAssessmentSelected
+																?.course_student?.license
+														: 0
+												]
 											}
 										</div>
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong> Curso Numero:</strong>
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong> Revisión:</strong>{' '}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong> Fecha de revisión:</strong>{' '}
+										{moment(
+											assessment.courseStudentAssessmentSelected
+												?.course_student?.date
+										).format('DD-MM-YYYY')}
+									</td>
+								</tr>
+								<tr>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong>Modelo de avión:</strong> <br />
+										{
+											assessment.courseStudentAssessmentSelected
+												?.course?.plane_model
+										}
+									</td>
+
+									<td
+										colSpan={2}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<strong>Base de operaciones piloto:</strong>{' '}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong> Certificado 360ATC::</strong>
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong> Tipo de curso:</strong> <br />
+										{
+											assessment.courseStudentAssessmentSelected
+												?.course?.name
+										}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong> País del participante:</strong> <br />
+										{
+											assessment.courseStudentAssessmentSelected
+												?.student?.user?.country_name
+										}
 									</td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
+				</div>
+				<div className="flex flex-col border-4 w-full gap-2">
+					<div className="flex flex-col border border-blue-gray-800 bg-white">
+						<table className="table-auto border-collapse border border-gray-300">
+							<thead className="bg-gray-300">
+								<tr>
+									<th
+										colSpan={3}
+										className="border border-blue-gray-800 px-2 text-xs w-36"
+									>
+										<strong>Periodo de formación </strong>
+									</th>
+									{days.map((day, index) => {
+										return (
+											<th
+												key={index}
+												className="border border-blue-gray-800 px-2 text-xs"
+											>
+												{day.id + 1}
+											</th>
+										);
+									})}
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<strong>Fecha:</strong>
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{moment(
+											assessment.courseStudentAssessmentSelected
+												?.course_student?.date
+										).format('DD-MM-YYYY')}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{moment(
+											assessment.courseStudentAssessmentSelected
+												?.course_student?.date
+										)
+											.add(days.length, 'days')
+											.format('DD-MM-YYYY')}
+									</td>
+								</tr>
+								<tr>
+									<td
+										colSpan={3}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<strong>Iniciales de instructor</strong>
+									</td>
+									{days.map((day, index) => {
+										return (
+											<td
+												key={`td-${index}`}
+												className="border border-blue-gray-800 px-2 text-xs"
+											>
+												{day.id + 1} FF
+											</td>
+										);
+									})}
+								</tr>
+							</tbody>
+						</table>
+						{assessment.daysSubjectList?.map((sub, index) => {
+							return (
+								<table
+									key={`subject-${index}`}
+									className="table-auto border-collapse border border-gray-300"
+								>
+									<thead className="bg-gray-300">
+										<tr>
+											<th
+												colSpan={3}
+												className="border border-blue-gray-800 px-2 text-xs w-36"
+											>
+												<strong>{sub.name}</strong>
+											</th>
+											{days.map((day, index) => {
+												return (
+													<th
+														key={index}
+														className="border border-blue-gray-800 px-2 w-16 text-xs"
+													>
+														{day.id + 1}
+													</th>
+												);
+											})}
+										</tr>
+									</thead>
+									<tbody>
+										{sub.subject_lessons?.map((SL, index) => {
+											return (
+												<tr key={`SL-${index}`}>
+													<td
+														colSpan={3}
+														className="border border-blue-gray-800 px-2 text-xs w-36"
+													>
+														<strong>{SL.name}</strong>
+													</td>
+													{days.map((day, index) => {
+														const dayActive =
+															SL.subject_lesson_days?.find(
+																(SLD) => SLD.day === day.id + 1
+															);
+														const CSALD =
+															dayActive?.course_student_assessment_lesson_days;
+														const tryCount =
+															CSALD && CSALD.length > 0
+																? CSALD[0]
+																: null;
 
-					<div className="flex flex-col">
-						<div className="flex w-full bg-white border border-blue-gray-800">
-							<Typography
-								variant="h6"
-								color="black"
-								className="text-center w-full"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Cronograma de la{' '}
-								{
-									assessment.courseStudentAssessmentSelected?.course
-										?.name
-								}
-							</Typography>
-						</div>
+														return (
+															<td
+																key={`td-${index}`}
+																className={`border border-blue-gray-800 w-16 px-2 text-xs ${
+																	dayActive ? 'bg-gray-400' : ''
+																}`}
+															>
+																{tryCount?.score}{' '}
+																{tryCount?.score_2 &&
+																	tryCount.score <= 2 &&
+																	` / ${tryCount.score_2}`}
+																{tryCount?.score_3 &&
+																	tryCount.score_2 &&
+																	tryCount.score_2 <= 2 &&
+																	` / ${tryCount.score_3}`}
+															</td>
+														);
+													})}
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							);
+						})}
 					</div>
 				</div>
 			</div>

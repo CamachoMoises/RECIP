@@ -16,18 +16,18 @@ type Inputs = {
 	qnh: string;
 	wind: string;
 	weight: number;
-	flaps: number;
+	flaps: string;
 	power: string;
+	takeoff: number;
+	landing: number;
 	seat: string;
 	comments: string;
 };
 const CSAD_form = ({
 	day,
-	isLastStep,
 	printCSA,
 }: {
 	day: number;
-	isLastStep: boolean;
 	printCSA: () => Promise<void>;
 }) => {
 	const { assessment } = useSelector((state: RootState) => {
@@ -63,13 +63,14 @@ const CSAD_form = ({
 			flaps: assessment.courseStudentAssessmentDaySelected?.flaps,
 			power: assessment.courseStudentAssessmentDaySelected?.power,
 			seat: assessment.courseStudentAssessmentDaySelected?.seat,
+			takeoff: assessment.courseStudentAssessmentDaySelected?.takeoff,
+			landing: assessment.courseStudentAssessmentDaySelected?.landing,
 			comments:
 				assessment.courseStudentAssessmentDaySelected?.comments,
 		},
 	});
 
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
-		console.log(data);
 		const req: courseStudentAssessmentDay = {
 			...data,
 			id: assessment.courseStudentAssessmentDaySelected?.id
@@ -312,7 +313,6 @@ const CSAD_form = ({
 							type="text"
 							label="Flaps"
 							placeholder="Flaps"
-							pattern="^\d+(\.\d+)?$"
 							maxLength={20}
 							className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 							crossOrigin={undefined}
@@ -392,7 +392,7 @@ const CSAD_form = ({
 						>
 							<Save size={15} />
 						</Button>
-						{isLastStep && dayStarted && (
+						{dayStarted && (
 							<Button
 								variant="gradient"
 								onClick={async () => {
@@ -414,7 +414,38 @@ const CSAD_form = ({
 				{assessment.courseStudentAssessmentDaySelected?.airport && (
 					<>
 						<LessonDetails day={day} />
-						<div className="flex flex-col col-span-4 py-2">
+						<hr />
+						<div className="flex flex-row gap-2 my-3">
+							<div className="basis-1/2">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="number"
+									label="Despegues"
+									placeholder="Despegues"
+									maxLength={20}
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('takeoff', {})}
+									aria-invalid={errors.takeoff ? 'true' : 'false'}
+								/>
+							</div>
+							<div className="basis-1/2">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="number"
+									label="Aterrizajes"
+									placeholder="Aterrizajes"
+									maxLength={20}
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('landing', {})}
+									aria-invalid={errors.landing ? 'true' : 'false'}
+								/>
+							</div>
+						</div>
+						<div className="flex flex-col py-2">
 							<Textarea
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}

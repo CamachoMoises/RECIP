@@ -15,9 +15,10 @@ import {
 	CardHeader,
 	Step,
 	Stepper,
+	Switch,
 	Typography,
 } from '@material-tailwind/react';
-import { CalendarCheck } from 'lucide-react';
+import { Calendar, CalendarCheck } from 'lucide-react';
 import {
 	fetchAssessmentData,
 	fetchCourseStudentAssessmentDay,
@@ -27,6 +28,7 @@ import moment from 'moment';
 import CSAD_form from './CSAD_form';
 import { useReactToPrint } from 'react-to-print';
 import CSA_PDF from './CSA_PDF';
+import { axiosPostDefault } from '../../../../services/axios';
 const day_names = [
 	'Manejo General',
 	'Manejo General y Asimétrico',
@@ -52,6 +54,7 @@ const breadCrumbs: breadCrumbsItems[] = [
 const DetailAssessment = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
+	const [missingDay, setMissingDay] = useState(false);
 	const sigCanvas = useRef<SignatureCanvas>(null);
 	const [isDataLoaded, setIsDataLoaded] = useState(false);
 	const componentRef = useRef<HTMLDivElement>(null);
@@ -78,6 +81,7 @@ const DetailAssessment = () => {
 			assessment: state.assessment,
 		};
 	});
+
 	const CSA_id = assessment.courseStudentAssessmentSelected?.id
 		? assessment.courseStudentAssessmentSelected.id
 		: -1;
@@ -165,6 +169,26 @@ const DetailAssessment = () => {
 	});
 	const [isLastStep, setIsLastStep] = useState(false);
 	const [isFirstStep, setIsFirstStep] = useState(false);
+	const [isApproved, setIsApproved] = useState(
+		assessment.courseStudentAssessmentSelected?.approve
+			? assessment.courseStudentAssessmentSelected.approve
+			: false
+	);
+	const handleChangeStatusDay = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		setIsApproved(event.target.checked);
+		const req = {
+			approve: event.target.checked,
+			course_student_assessment_id:
+				assessment.courseStudentAssessmentSelected?.id,
+		};
+		const res = await axiosPostDefault(
+			'api/assessment/courseStudentAssessmentApprove',
+			req
+		);
+		console.log(res);
+	};
 	if (assessment.status === 'loading') {
 		return (
 			<>
@@ -181,7 +205,7 @@ const DetailAssessment = () => {
 			</>
 		);
 	}
-	console.log(assessment.courseStudentAssessmentDaySelected);
+	// console.log(assessment.courseStudentAssessmentDaySelected);
 
 	return (
 		<>
@@ -189,6 +213,7 @@ const DetailAssessment = () => {
 				title={`Evaluacion de  ${assessment.courseStudentAssessmentSelected?.student?.user?.name} ${assessment.courseStudentAssessmentSelected?.student?.user?.last_name} en ${assessment.courseStudentAssessmentSelected?.course?.name}`}
 				breadCrumbs={breadCrumbs}
 			/>
+
 			<div className="flex flex-col gap-3 w-full ">
 				<Card
 					placeholder={undefined}
@@ -356,6 +381,50 @@ const DetailAssessment = () => {
 									</div>
 								</div>
 							</div>
+							{missingDay ? (
+								<div>
+									<Typography
+										variant="h4"
+										color="red"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Faltan dias por calificar
+									</Typography>
+								</div>
+							) : (
+								<div className="flex flex-col gap-2 ">
+									<Typography
+										variant="h4"
+										color={isApproved ? 'green' : 'indigo'}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{isApproved ? 'Aprobado' : 'Por aprobar'}
+									</Typography>
+									<div className="flex flex-row text-left justify-center">
+										<Switch
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											crossOrigin={undefined}
+											ripple={false}
+											onChange={(event) => {
+												handleChangeStatusDay(event);
+											}}
+											className="h-full w-full checked:bg-[#134475]"
+											containerProps={{
+												className: 'w-11 h-6',
+											}}
+											circleProps={{
+												className:
+													'before:hidden left-0.5 border-none',
+											}}
+										/>
+									</div>
+								</div>
+							)}
 						</div>
 					</CardBody>
 				</Card>
@@ -389,6 +458,14 @@ const DetailAssessment = () => {
 							onPointerLeaveCapture={undefined}
 						>
 							{days.map((day, index) => {
+								const dayActive =
+									assessment.courseStudentAssessmentSelected?.course_student_assessment_days?.find(
+										(CSAD_D) =>
+											CSAD_D.day === day.id + 1 && CSAD_D.airport
+									);
+								if (!missingDay && !dayActive) {
+									setMissingDay(true);
+								}
 								return (
 									<Step
 										onClick={() => setActiveStep(index)}
@@ -397,10 +474,15 @@ const DetailAssessment = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										<CalendarCheck className="h-10 w-5" />
-										<div className="absolute -bottom-[3.5rem] w-max text-center">
+										{dayActive ? (
+											<CalendarCheck className="h-10 w-5" />
+										) : (
+											<Calendar className="h-10 w-5" />
+										)}
+										<div className="absolute -bottom-[3rem] w-max text-center">
 											<Typography
 												variant="small"
+												className="overflow-x-auto"
 												color={
 													activeStep === index ? 'blue-gray' : 'gray'
 												}
@@ -408,7 +490,7 @@ const DetailAssessment = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												{day.name} <br />{' '}
+												{day.name} <br />
 												<small>{day_names[index]}</small>
 											</Typography>
 										</div>
@@ -423,11 +505,7 @@ const DetailAssessment = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex flex-col gap-2 ">
-							<CSAD_form
-								day={activeStep + 1}
-								isLastStep={isLastStep}
-								printCSA={printCSA}
-							/>
+							<CSAD_form day={activeStep + 1} printCSA={printCSA} />
 						</div>
 					</CardBody>
 					<CardFooter
@@ -487,7 +565,7 @@ const DetailAssessment = () => {
 			{isDataLoaded && (
 				<div style={{ display: 'none' }}>
 					<div ref={componentRef} className="flex flex-col w-full">
-						<CSA_PDF />
+						<CSA_PDF day={activeStep + 1} />
 					</div>
 				</div>
 			)}

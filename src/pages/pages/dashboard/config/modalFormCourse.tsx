@@ -28,6 +28,7 @@ type Inputs = {
 	description: string;
 	days: string;
 	hours: number;
+	plane_model: string;
 	course_type: string;
 	course_level: string;
 };
@@ -71,6 +72,7 @@ const ModalFormCourse = ({
 			name: courseSelected?.name,
 			description: courseSelected?.description,
 			hours: courseSelected?.hours,
+			plane_model: courseSelected?.plane_model,
 			course_type: courseSelected?.course_type.id
 				? `${courseSelected.course_type.id}`
 				: '',
@@ -96,6 +98,7 @@ const ModalFormCourse = ({
 				days: parseInt(data.days),
 				type: parseInt(data.course_type),
 				level: parseInt(data.course_level),
+				plane_model: data.plane_model,
 				status: isActive,
 				course_type: newCourseType,
 				course_level: newCourseLevel,
@@ -267,6 +270,25 @@ const ModalFormCourse = ({
 								{errors.days && (
 									<span className="text-red-500">
 										La duracion del curso es requerida
+									</span>
+								)}
+							</div>
+							<div className="">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									label="Modelo del Avion (Si aplica)"
+									placeholder="Modelo del Avion (Si aplica)"
+									maxLength={500}
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('plane_model')}
+									aria-invalid={errors.plane_model ? 'true' : 'false'}
+								/>
+								{errors.plane_model && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.plane_model.message}
 									</span>
 								)}
 							</div>

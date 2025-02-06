@@ -186,6 +186,7 @@ export type course = {
     type?: number;
     level?: number;
     status: boolean;
+    plane_model?: string;
     course_type: courseType;
     course_level: courseLevel;
     createdAt?: string;
@@ -331,6 +332,7 @@ export type courseStudentAssessment = {
     student?: student;
     course_student_id: number;
     course_student?: courseStudent;
+    course_student_assessment_days?: courseStudentAssessmentDay[],
     score: number;
     approve: boolean;
     date: string;
@@ -361,8 +363,10 @@ export type courseStudentAssessmentDay = {
     qnh: string;
     wind: string;
     weight: number;
-    flaps: number;
+    flaps: string;
     power: string;
+    takeoff: number;
+    landing: number;
     seat: string;
     comments: string;
     createdAt?: string;
@@ -469,7 +473,7 @@ export interface assessmentState {
     courseStudentAssessmentLessonDayList: courseStudentAssessmentLessonDay[];
     courseStudentAssessmentLessonDaySelected: courseStudentAssessmentLessonDay | null;
     subjectList: subject[] | null;
-    daysSubjectList: subject[][] | null;
+    daysSubjectList: subject[] | null;
     day: number;
 
 }

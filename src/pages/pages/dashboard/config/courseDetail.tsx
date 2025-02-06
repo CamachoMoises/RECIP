@@ -389,6 +389,14 @@ const CourseDetail = () => {
 																				?.course_type.id != 2 && (
 																				<>
 																					<Switch
+																						className="h-full w-full checked:bg-[#134475]"
+																						containerProps={{
+																							className: 'w-11 h-6',
+																						}}
+																						circleProps={{
+																							className:
+																								'before:hidden left-0.5 border-none',
+																						}}
 																						defaultChecked={check}
 																						disabled={!subject.status}
 																						onChange={(event) => {

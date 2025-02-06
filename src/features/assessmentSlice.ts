@@ -29,7 +29,7 @@ export const fetchCourseStudentAssessment = createAsyncThunk<courseStudentAssess
 );
 
 
-export const fetchAssessmentData = createAsyncThunk<{ CSA: courseStudentAssessment, CASD: subject[][] }, number>(
+export const fetchAssessmentData = createAsyncThunk<{ CSA: courseStudentAssessment, CASD: subject[] }, number>(
     'assessment/fetchAssessmentData',
     async (course_student_assessment_id, { rejectWithValue }) => {
         try {
@@ -132,7 +132,7 @@ export const assessmentSlice = createSlice({
             })
             .addCase(fetchAssessmentData.fulfilled, (state, action: PayloadAction<{
                 CSA: courseStudentAssessment;
-                CASD: subject[][];
+                CASD: subject[];
             }>) => {
                 state.status = 'succeeded';
                 state.courseStudentAssessmentSelected = action.payload.CSA;
