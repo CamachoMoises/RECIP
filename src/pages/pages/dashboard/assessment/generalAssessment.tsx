@@ -180,7 +180,6 @@ const GeneralAssessment = () => {
 						</List>
 					</CardBody>
 				</Card>
-				<code></code>
 			</div>
 		</div>
 	);

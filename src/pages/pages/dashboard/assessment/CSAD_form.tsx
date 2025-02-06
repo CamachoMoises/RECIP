@@ -1,11 +1,18 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Button, Input, Textarea } from '@material-tailwind/react';
-import { Printer, Save } from 'lucide-react';
+import {
+	Button,
+	Input,
+	Textarea,
+	Typography,
+} from '@material-tailwind/react';
+import { Eraser, Printer, Save } from 'lucide-react';
 import LessonDetails from './lessonDetails';
 import { courseStudentAssessmentDay } from '../../../../types/utilities';
 import { updateCourseStudentAssessmentDay } from '../../../../features/assessmentSlice';
+import { useRef } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
 
 type Inputs = {
 	airport: string;
@@ -26,20 +33,31 @@ type Inputs = {
 const CSAD_form = ({
 	day,
 	printCSA,
+	isLastStep,
 }: {
 	day: number;
 	printCSA: () => Promise<void>;
+	isFirstStep: boolean;
+	isLastStep: boolean;
 }) => {
 	const { assessment } = useSelector((state: RootState) => {
 		return {
 			assessment: state.assessment,
 		};
 	});
+	const sigCanvas1 = useRef<SignatureCanvas>(null);
+	const sigCanvas2 = useRef<SignatureCanvas>(null);
+	const sigCanvas3 = useRef<SignatureCanvas>(null);
 	const dayStarted = assessment.courseStudentAssessmentDaySelected
 		?.airport
 		? true
 		: false;
 	const dispatch = useDispatch<AppDispatch>();
+	const clear = () => {
+		sigCanvas1.current?.clear();
+		sigCanvas2.current?.clear();
+		sigCanvas3.current?.clear();
+	};
 
 	const {
 		register,
@@ -99,6 +117,23 @@ const CSAD_form = ({
 				? assessment.courseStudentAssessmentDaySelected.day
 				: -1,
 		};
+		if (
+			sigCanvas1.current &&
+			sigCanvas2.current &&
+			sigCanvas3.current
+		) {
+			const signature1Data = sigCanvas1.current.toDataURL(); // Obtén la firma como base64
+			const signature2Data = sigCanvas2.current.toDataURL(); // Obtén la firma como base64
+			const signature3Data = sigCanvas3.current.toDataURL(); // Obtén la firma como base64
+			console.log(
+				'Firma guardada:',
+				signature1Data,
+				signature2Data,
+				signature3Data
+			);
+
+			// Aquí puedes enviar `signatureData` a tu servidor usando Axios
+		}
 		await dispatch(updateCourseStudentAssessmentDay(req));
 	};
 
@@ -455,15 +490,91 @@ const CSAD_form = ({
 								{...register('comments')}
 								aria-invalid={errors.comments ? 'true' : 'false'}
 							/>
-
-							<div>
+							<div className="flex flex-row gap-2 justify-center mb-2">
+								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded">
+									<Typography
+										variant="h5"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Firma del alumno
+									</Typography>
+									<SignatureCanvas
+										ref={sigCanvas1}
+										penColor="black"
+										canvasProps={{
+											width: 500,
+											height: 200,
+											className: 'signatureCanvas',
+										}}
+									/>
+									<hr />
+								</div>
+								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded">
+									<Typography
+										variant="h5"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Firma del Instructor
+									</Typography>
+									<SignatureCanvas
+										ref={sigCanvas2}
+										penColor="black"
+										canvasProps={{
+											width: 500,
+											height: 200,
+											className: 'signatureCanvas',
+										}}
+									/>
+									<hr />
+								</div>
+							</div>
+							{isLastStep && (
+								<div className="flex flex-row gap-2 justify-center m-2">
+									<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded">
+										<Typography
+											variant="h5"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											firma del FCAA
+										</Typography>
+										<SignatureCanvas
+											ref={sigCanvas3}
+											penColor="black"
+											canvasProps={{
+												width: 500,
+												height: 200,
+												className: 'signatureCanvas',
+											}}
+										/>
+										<hr />
+									</div>
+								</div>
+							)}
+							<div className="flex flex-row gap-2">
+								<Button
+									variant="gradient"
+									onClick={clear}
+									fullWidth
+									className="flex flex-row justify-center"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<Eraser size={15} />
+								</Button>
 								<Button
 									variant="gradient"
 									color="green"
 									type="submit"
+									fullWidth
 									title="Guardar"
 									className="flex flex-row justify-center"
-									fullWidth
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}

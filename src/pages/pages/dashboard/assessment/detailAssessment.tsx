@@ -4,7 +4,6 @@ import { breadCrumbsItems } from '../../../../types/utilities';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import PageTitle from '../../../../components/PageTitle';
-import SignatureCanvas from 'react-signature-canvas';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -55,22 +54,9 @@ const DetailAssessment = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
 	const [missingDay, setMissingDay] = useState(false);
-	const sigCanvas = useRef<SignatureCanvas>(null);
 	const [isDataLoaded, setIsDataLoaded] = useState(false);
 	const componentRef = useRef<HTMLDivElement>(null);
-
 	const [activeStep, setActiveStep] = useState(0);
-	const clear = () => {
-		sigCanvas.current?.clear();
-	};
-	const save = () => {
-		if (sigCanvas.current) {
-			const signatureData = sigCanvas.current.toDataURL(); // Obtén la firma como base64
-			console.log('Firma guardada:', signatureData);
-
-			// Aquí puedes enviar `signatureData` a tu servidor usando Axios
-		}
-	};
 	const handleNext = () =>
 		!isLastStep && setActiveStep((cur) => cur + 1);
 	const handlePrev = () =>
@@ -174,7 +160,7 @@ const DetailAssessment = () => {
 			? assessment.courseStudentAssessmentSelected.approve
 			: false
 	);
-	const handleChangeStatusDay = async (
+	const handleChangeStatus = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
 		setIsApproved(event.target.checked);
@@ -410,8 +396,9 @@ const DetailAssessment = () => {
 											onPointerLeaveCapture={undefined}
 											crossOrigin={undefined}
 											ripple={false}
+											defaultChecked={isApproved}
 											onChange={(event) => {
-												handleChangeStatusDay(event);
+												handleChangeStatus(event);
 											}}
 											className="h-full w-full checked:bg-[#134475]"
 											containerProps={{
@@ -505,7 +492,12 @@ const DetailAssessment = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex flex-col gap-2 ">
-							<CSAD_form day={activeStep + 1} printCSA={printCSA} />
+							<CSAD_form
+								day={activeStep + 1}
+								printCSA={printCSA}
+								isLastStep={isLastStep}
+								isFirstStep={isFirstStep}
+							/>
 						</div>
 					</CardBody>
 					<CardFooter
@@ -513,7 +505,7 @@ const DetailAssessment = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<div className="mt-16 flex justify-between">
+						<div className="mt-16 flex justify-between gap-1">
 							<Button
 								onClick={handlePrev}
 								disabled={isFirstStep}
@@ -521,34 +513,9 @@ const DetailAssessment = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Prev
+								{isFirstStep ? 'x' : `Dia ${activeStep}`}
 							</Button>
-							<div className="border-blue-gray-800  bg-white rounded">
-								<SignatureCanvas
-									ref={sigCanvas}
-									penColor="black"
-									canvasProps={{
-										width: 500,
-										height: 200,
-										className: 'signatureCanvas',
-									}}
-								/>
-								<button onClick={clear}>Borrar</button>
-								<button onClick={save}>Guardar Firma</button>
-							</div>
-							<div className="border-blue-gray-800  bg-white rounded">
-								<SignatureCanvas
-									ref={sigCanvas}
-									penColor="black"
-									canvasProps={{
-										width: 500,
-										height: 200,
-										className: 'signatureCanvas',
-									}}
-								/>
-								<button onClick={clear}>Borrar</button>
-								<button onClick={save}>Guardar Firma</button>
-							</div>
+
 							<Button
 								onClick={handleNext}
 								disabled={isLastStep}
@@ -556,7 +523,7 @@ const DetailAssessment = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Sig
+								{isLastStep ? 'x' : `Dia ${activeStep + 2}`}
 							</Button>
 						</div>
 					</CardFooter>
