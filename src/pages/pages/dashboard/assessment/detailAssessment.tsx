@@ -367,7 +367,7 @@ const DetailAssessment = () => {
 									</div>
 								</div>
 							</div>
-							{missingDay ? (
+							{missingDay && (
 								<div>
 									<Typography
 										variant="h4"
@@ -379,39 +379,37 @@ const DetailAssessment = () => {
 										Faltan dias por calificar
 									</Typography>
 								</div>
-							) : (
-								<div className="flex flex-col gap-2 ">
-									<Typography
-										variant="h4"
-										color={isApproved ? 'green' : 'indigo'}
-										placeholder={undefined}
+							)}
+							<div className="flex flex-col gap-2 ">
+								<Typography
+									variant="h4"
+									color={isApproved ? 'green' : 'indigo'}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{isApproved ? 'Aprobado' : 'Por aprobar'}
+								</Typography>
+								<div className="flex flex-row text-left justify-center">
+									<Switch
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-									>
-										{isApproved ? 'Aprobado' : 'Por aprobar'}
-									</Typography>
-									<div className="flex flex-row text-left justify-center">
-										<Switch
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-											crossOrigin={undefined}
-											ripple={false}
-											defaultChecked={isApproved}
-											onChange={(event) => {
-												handleChangeStatus(event);
-											}}
-											className="h-full w-full checked:bg-[#134475]"
-											containerProps={{
-												className: 'w-11 h-6',
-											}}
-											circleProps={{
-												className:
-													'before:hidden left-0.5 border-none',
-											}}
-										/>
-									</div>
+										crossOrigin={undefined}
+										ripple={false}
+										defaultChecked={isApproved}
+										onChange={(event) => {
+											handleChangeStatus(event);
+										}}
+										className="h-full w-full checked:bg-[#134475]"
+										containerProps={{
+											className: 'w-11 h-6',
+										}}
+										circleProps={{
+											className: 'before:hidden left-0.5 border-none',
+										}}
+									/>
 								</div>
-							)}
+							</div>
 						</div>
 					</CardBody>
 				</Card>

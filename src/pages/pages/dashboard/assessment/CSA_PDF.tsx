@@ -3,7 +3,7 @@ import './pdfStyle.css';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { Typography } from '@material-tailwind/react';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 const CSA_PDF = ({ day }: { day: number }) => {
 	moment.locale('es');
@@ -43,7 +43,20 @@ const CSA_PDF = ({ day }: { day: number }) => {
 		  )
 		: [];
 	// console.log(assessment.daysSubjectList);
+	let sumLanding = 0;
+	let sumTakeOff = 0;
+	for (const key in assessment.courseStudentAssessmentSelected
+		?.course_student_assessment_days) {
+		const landing =
+			assessment.courseStudentAssessmentSelected
+				.course_student_assessment_days[parseInt(key)].landing;
+		const takeoff =
+			assessment.courseStudentAssessmentSelected
+				.course_student_assessment_days[parseInt(key)].takeoff;
+		sumLanding += landing ? landing : 0;
 
+		sumTakeOff += takeoff ? takeoff : 0;
+	}
 	return (
 		<div className="printable">
 			<div className="flex flex-col text-center gap-2">
@@ -360,6 +373,108 @@ const CSA_PDF = ({ day }: { day: number }) => {
 								</table>
 							);
 						})}
+					</div>
+
+					<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
+						<table className="table-auto border border-gray-300">
+							<thead className="bg-gray-300">
+								<th className="border border-blue-gray-800 px-2 text-xs">
+									<strong>RESUMEN DE DESPEGUES Y ATERRIZAJES </strong>
+								</th>
+								<th className="border border-blue-gray-800 px-2 text-xs">
+									<strong>.</strong>
+								</th>
+							</thead>
+							<tbody>
+								<tr>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										DESPEGUES
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{sumTakeOff}
+									</td>
+								</tr>
+								<tr>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										ATERRIZAJES
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{sumLanding}
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
+						<table className="table-auto border border-gray-300">
+							<thead className="bg-gray-300">
+								<th className="border border-blue-gray-800 px-2 text-xs">
+									<strong>Avales</strong>
+								</th>
+								<th className="border border-blue-gray-800 px-2 text-xs">
+									<strong>Firma digital</strong>
+								</th>
+							</thead>
+							<tbody>
+								<tr>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										<div className="flex flex-row gap-2">
+											Recomendado para: Tipo evaluación de
+											habilitación.
+											{assessment.courseStudentAssessmentSelected
+												?.approve ? (
+												<Check size={15} color="green" />
+											) : (
+												<X size={15} color="red" />
+											)}
+										</div>
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										.
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
+						<table className="table-auto border border-gray-300">
+							<thead className="bg-gray-300">
+								<tr>
+									<th className="border border-blue-gray-800 px-2 text-xs">
+										<strong>Dia</strong>
+									</th>
+									<th
+										colSpan={3}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										<strong>Observaciones</strong>
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{days.map((day, index) => {
+									const dayComments =
+										assessment.courseStudentAssessmentSelected?.course_student_assessment_days?.find(
+											(CSAD_C) => CSAD_C.day === day.id + 1
+										);
+									return (
+										<tr key={`comments-${index}`}>
+											<td className="border border-blue-gray-800 px-2 text-xs">
+												{day.id + 1}
+											</td>
+											<td
+												colSpan={3}
+												className="border border-blue-gray-800 px-2 text-xs"
+											>
+												{dayComments?.comments
+													? dayComments.comments
+													: 'Sin observaciones'}
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
