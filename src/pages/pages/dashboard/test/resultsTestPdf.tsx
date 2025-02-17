@@ -23,7 +23,6 @@ const ResultsTestPdf = ({
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const questions =
 		test.courseStudentTestSelected?.course_student_test_questions;
-	console.log('Examen', test.courseStudentTestSelected);
 
 	return (
 		<div className="printable">

@@ -28,12 +28,10 @@ export async function axiosGetDefault(ruta: string, params = {}) {
         dataResponse.resp = res.data
         dataResponse.status = res.status
     } catch (error: any) {
-        console.log(error);
 
-        console.log('Error GET Axios OJO!', error?.response?.status);
         if (error?.response?.status === 403) {
             store.dispatch(logout());
-            window.location.reload();
+            // window.location.reload();
         }
         const errorStatus = error?.response?.status
         dataResponse.resp = {}
@@ -94,8 +92,6 @@ export async function axiosPostSlice(ruta: string, data: any = {}) {
         },
     });
     try {
-        console.log(apiUrl, ruta);
-
         const res = await axiosInstance.post(
             `${apiUrl}/${ruta}`,
             data
@@ -147,7 +143,7 @@ const handleError = (error: any) => {
     console.log('Error GET Axios OJO!', error?.response?.status);
     if (error?.response?.status === 403) {
         store.dispatch(logout());
-        window.location.reload();
+        // window.location.reload();
     }
     throw new Error(`${error.response.status} : ${error.response.data} `);
 }

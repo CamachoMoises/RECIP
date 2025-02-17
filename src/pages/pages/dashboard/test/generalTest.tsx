@@ -12,6 +12,7 @@ import {
 import {
 	breadCrumbsItems,
 	courseStudent,
+	courseStudentTest,
 	instructor,
 } from '../../../../types/utilities';
 import LoadingPage from '../../../../components/LoadingPage';
@@ -28,12 +29,16 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import moment from 'moment';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
 	createCourseStudentTest,
+	fetchCourseStudentTest,
 	fetchTest,
 } from '../../../../features/testSlice';
-import { NotebookText, Pencil } from 'lucide-react';
+import { ListTodo, NotebookText, Pencil } from 'lucide-react';
+import { fetchUser } from '../../../../features/userSlice';
+import ResultsTestPdf from './resultsTestPdf';
+import { useReactToPrint } from 'react-to-print';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -44,9 +49,17 @@ const breadCrumbs: breadCrumbsItems[] = [
 const GeneralTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
-	const { course, auth } = useSelector((state: RootState) => {
-		return { course: state.courses, auth: state.auth };
-	});
+	const componentRef = useRef<HTMLDivElement>(null);
+	const { course, auth, user, test } = useSelector(
+		(state: RootState) => {
+			return {
+				course: state.courses,
+				auth: state.auth,
+				user: state.users,
+				test: state.tests,
+			};
+		}
+	);
 	useEffect(() => {
 		dispatch(fetchCoursesStudentsTests(1));
 	}, [dispatch]);
@@ -66,6 +79,41 @@ const GeneralTest = () => {
 		await dispatch(fetchTest(CST.test_id));
 		navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
 	};
+	const navigateReviewTest = async (
+		CST_id: number,
+		test_id: number,
+		course_id: number,
+		CS_id: number,
+		user_id: number
+	) => {
+		console.log(CST_id, course_id, user_id);
+		navigate(
+			`../review_test/${CST_id}/${test_id}/${course_id}/${CS_id}/${user_id}`
+		);
+	};
+	const seeReults = async (
+		CST_id: number,
+		course_id: number,
+		user_id: number
+	) => {
+		const userdata = await dispatch(fetchUser(user_id)).unwrap();
+		const coursedata = await dispatch(
+			fetchCourse(course_id)
+		).unwrap();
+		const testData = await dispatch(
+			fetchCourseStudentTest(CST_id)
+		).unwrap();
+		if (coursedata && userdata && testData) {
+			seeResults();
+		}
+	};
+	const seeResults = async () => {
+		handlePrint();
+	};
+	const handlePrint = useReactToPrint({
+		contentRef: componentRef,
+		documentTitle: `Examen-${test.testSelected?.code}`,
+	});
 	if (course.status === 'loading') {
 		return (
 			<>
@@ -105,11 +153,17 @@ const GeneralTest = () => {
 							{course.courseStudentList?.map((CL) => {
 								const maxTries = 4;
 								let instructor: instructor | undefined = undefined;
+								let lastTest: courseStudentTest | undefined =
+									undefined;
+								const user_id = CL.student?.user?.id
+									? CL.student.user.id
+									: -1;
 								let active = true;
 								let dateTest = null;
 								let horas = null;
 								if (CL.course_student_tests?.length) {
 									active = CL.course_student_tests.length <= maxTries;
+									lastTest = CL.course_student_tests.slice(-1)[0];
 								}
 								if (CL.schedules?.length === 0) {
 									active = false;
@@ -149,12 +203,19 @@ const GeneralTest = () => {
 											onPointerLeaveCapture={undefined}
 										>
 											{CL.code}
-											{CL.course_student_tests && (
-												<small className="text-red-800">
-													Intentos {CL.course_student_tests.length} /{' '}
-													{maxTries}
-												</small>
-											)}
+											{CL.course_student_tests &&
+												CL.course_student_tests.length > 0 && (
+													<Typography
+														color="red"
+														variant="small"
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+													>
+														Intentos {CL.course_student_tests.length}{' '}
+														/ {maxTries}
+													</Typography>
+												)}
 										</ListItemPrefix>
 										<div className="flex flex-row ">
 											<div className="flex flex-col">
@@ -183,7 +244,7 @@ const GeneralTest = () => {
 													Hora de inicio:({dateTest?.format('HH:mm')})
 												</Typography>
 												{instructor && (
-													<>
+													<div className="flex flex-col gap-2">
 														<Typography
 															variant="small"
 															color="gray"
@@ -192,10 +253,22 @@ const GeneralTest = () => {
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 														>
-															Instructor:{' '}{instructor.user?.name}{' '}
+															Instructor: {instructor.user?.name}{' '}
 															{instructor.user?.last_name}
 														</Typography>
-													</>
+														{CL.score && (
+															<Typography
+																variant="small"
+																color="red"
+																className="font-normal"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+															>
+																Calificacion: {CL.score} Puntos
+															</Typography>
+														)}
+													</div>
 												)}
 											</div>
 										</div>
@@ -227,14 +300,50 @@ const GeneralTest = () => {
 												>
 													<Pencil size={15} />
 												</Button>
-												<Button
-													title="Revisión"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													<NotebookText size={15} />
-												</Button>
+												{CL.score &&
+													lastTest &&
+													CL.student?.user?.id && (
+														<Button
+															title="Respuestas"
+															disabled={
+																active &&
+																CL.student?.user?.id != auth.user?.id
+															}
+															onClick={() => {
+																seeReults(
+																	lastTest.id,
+																	CL.course_id,
+																	user_id
+																);
+															}}
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															<ListTodo size={15} />
+														</Button>
+													)}
+												{CL.score &&
+													lastTest &&
+													CL.student?.user?.id && (
+														<Button
+															title="Revisión"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															onClick={() => {
+																navigateReviewTest(
+																	lastTest.id,
+																	lastTest.test_id,
+																	CL.course_id,
+																	lastTest?.course_student_id,
+																	user_id
+																);
+															}}
+														>
+															<NotebookText size={15} />
+														</Button>
+													)}
 											</ButtonGroup>
 										</ListItemSuffix>
 									</ListItem>
@@ -243,6 +352,11 @@ const GeneralTest = () => {
 						</List>
 					</CardBody>
 				</Card>
+			</div>
+			<div style={{ display: 'none' }}>
+				<div ref={componentRef} className="flex flex-col w-full">
+					<ResultsTestPdf course={course} test={test} user={user} />
+				</div>
 			</div>
 		</div>
 	);

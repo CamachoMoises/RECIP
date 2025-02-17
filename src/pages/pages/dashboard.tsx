@@ -16,6 +16,7 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import DetailAssessment from './dashboard/assessment/detailAssessment';
+import ReviewTest from './dashboard/test/reviewTest';
 
 const Dashboard = () => {
 	const navigate = useNavigate();
@@ -86,6 +87,10 @@ const Dashboard = () => {
 							<Route
 								path="new_test/:id/:course_id/:test_id"
 								element={<NewTest />}
+							/>
+							<Route
+								path="review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id"
+								element={<ReviewTest />}
 							/>
 						</Routes>
 					</div>

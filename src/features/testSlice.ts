@@ -212,6 +212,22 @@ export const fetchCourseStudentTest = createAsyncThunk<courseStudentTest, number
         }
     }
 );
+export const updateCourseStudentTestScore = createAsyncThunk<courseStudentTest, { course_student_test_id: number, course_student_test_answer_id: number, score: number }>(
+    'user/updateCourseStudentTestScore',
+    async ({ course_student_test_id, course_student_test_answer_id, score }, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutSlice(`api/test/updateCourseStudentTestScore/`, {
+                course_student_test_id,
+                course_student_test_answer_id,
+                score
+
+            });
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 
 const testSlice = createSlice({
     name: 'subject',
@@ -432,6 +448,20 @@ const testSlice = createSlice({
                 state.courseStudentTestSelected = newCourseStudentTest;
             })
             .addCase(fetchCourseStudentTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+            // Reducers para la acción createCourseStudent
+            .addCase(updateCourseStudentTestScore.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateCourseStudentTestScore.fulfilled, (state, action: PayloadAction<courseStudentTest>) => {
+                const newCourseStudentTest = action.payload;
+
+                state.status = 'succeeded';
+                state.courseStudentTestSelected = newCourseStudentTest;
+            })
+            .addCase(updateCourseStudentTestScore.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

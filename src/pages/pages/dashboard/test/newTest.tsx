@@ -78,7 +78,6 @@ const NewTest = () => {
 				course_student_test_id: course_student_test_id,
 			}
 		);
-		console.log('dip');
 		const userdata = await dispatch(
 			fetchUser(
 				course.courseStudent?.student?.user_id
@@ -115,7 +114,7 @@ const NewTest = () => {
 	let totalPoints = 0;
 	const handlePrint = useReactToPrint({
 		contentRef: componentRef,
-		documentTitle: `Curso-${course.courseStudent?.code}`,
+		documentTitle: `Examen-${test.testSelected?.code}`,
 	});
 	const [testActive, setTestActive] = useState<boolean>(true);
 	// eslint-disable-next-line react-hooks/exhaustive-deps

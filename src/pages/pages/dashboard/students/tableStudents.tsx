@@ -20,6 +20,7 @@ import { Plus } from 'lucide-react';
 import { axiosGetDefault } from '../../../../services/axios';
 import toast from 'react-hot-toast';
 import ModalFormUser from '../users/modalFormUser';
+import { PermissionsValidate } from '../../../../services/permissionsValidate';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -51,6 +52,7 @@ const TableStudents = () => {
 	useEffect(() => {
 		dispatch(fetchStudents());
 	}, [dispatch]);
+	const validated = PermissionsValidate(['instructor', 'staff']);
 	return (
 		<>
 			<PageTitle
@@ -82,6 +84,7 @@ const TableStudents = () => {
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
+									disabled={!validated}
 									className="flex flex-col text-center justify-center "
 									onClick={() => {
 										handleOpen(null);
@@ -113,6 +116,7 @@ const TableStudents = () => {
 									<ListItem
 										key={`${student.id}.courseList`}
 										placeholder={undefined}
+										disabled={!validated}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										onClick={() => handleOpen(student)}
@@ -133,7 +137,7 @@ const TableStudents = () => {
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													Piloto
+													Piloto{' '}
 												</Typography>
 												<Typography
 													variant="small"

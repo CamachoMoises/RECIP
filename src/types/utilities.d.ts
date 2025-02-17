@@ -365,8 +365,8 @@ export type courseStudentAssessmentDay = {
     weight: number;
     flaps: string;
     power: string;
-    takeoff: number;
-    landing: number;
+    takeoff?: number;
+    landing?: number;
     seat: string;
     comments: string;
     createdAt?: string;

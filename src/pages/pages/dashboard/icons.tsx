@@ -10,6 +10,7 @@ import {
 	UserRound,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { PermissionsValidate } from '../../../services/permissionsValidate';
 
 const Icons = () => {
 	const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Icons = () => {
 						variant="gradient"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
+						disabled={!PermissionsValidate(['staff'])}
 						onPointerLeaveCapture={undefined}
 						onClick={() => navigate('users')}
 					>
@@ -36,11 +38,12 @@ const Icons = () => {
 				</div>
 				<div>
 					<Button
-						title="Grupos"
+						title="Cursos"
 						className="text-center w-40 h-32"
 						variant="gradient"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
+						disabled={!PermissionsValidate(['staff', 'instructor'])}
 						onPointerLeaveCapture={undefined}
 						onClick={() => navigate('courses')}
 					>
@@ -59,6 +62,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						disabled={!PermissionsValidate(['staff'])}
 						onClick={() => navigate('students')}
 					>
 						<div className="flex justify-center">
@@ -76,6 +80,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						disabled={!PermissionsValidate(['instructor', 'staff'])}
 						onClick={() => navigate('instructors')}
 					>
 						<div className="flex justify-center">
@@ -93,6 +98,7 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						disabled={!PermissionsValidate([])}
 					>
 						<div className="flex justify-center">
 							<NotebookText size={60} />
@@ -106,6 +112,7 @@ const Icons = () => {
 						title="Examenes"
 						className="text-center w-40 h-32"
 						variant="gradient"
+						disabled={!PermissionsValidate(['student', 'instructor'])}
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
@@ -125,6 +132,7 @@ const Icons = () => {
 						variant="gradient"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
+						disabled={!PermissionsValidate(['instructor'])}
 						onPointerLeaveCapture={undefined}
 						onClick={() => navigate('assessment')}
 					>
@@ -144,6 +152,7 @@ const Icons = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 						onClick={() => navigate('config')}
+						disabled={!PermissionsValidate(['staff'])}
 					>
 						<div className="flex justify-center">
 							<Cog size={60} />
