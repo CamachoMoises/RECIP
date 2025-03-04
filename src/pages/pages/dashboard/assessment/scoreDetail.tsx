@@ -93,7 +93,7 @@ const ScoreDetail = ({
 				<div className="flex flex-col gap-2 px-3">
 					<div
 						className={`flex flex-row gap-2 px-3 ${
-							!score ? 'bg-blue-100 rounded' : ''
+							!score ? 'bg-blue-100 rounded-sm' : ''
 						}`}
 					>
 						<Radio
@@ -186,7 +186,7 @@ const ScoreDetail = ({
 						/>
 					</div>
 					{score && score <= 2 && (
-						<div className="flex flex-row gap-2 px-3 bg-red-100 rounded">
+						<div className="flex flex-row gap-2 px-3 bg-red-100 rounded-sm">
 							<Radio
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="1"
@@ -279,7 +279,7 @@ const ScoreDetail = ({
 					)}
 
 					{score && score_2 && score_2 <= 2 && (
-						<div className="flex flex-row gap-2 px-3 bg-red-100 rounded">
+						<div className="flex flex-row gap-2 px-3 bg-red-100 rounded-sm">
 							<Radio
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="1"

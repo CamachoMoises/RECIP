@@ -109,9 +109,9 @@ const NewCourseSubject = ({
 			<div
 				className={`grid grid-cols-4 gap-4 py-2 px-2 ${
 					schedule && SD && student_id > 0
-						? 'bg-green-100 rounded'
+						? 'bg-green-100 rounded-sm'
 						: ''
-				} ${!SD || student_id < 0 ? 'bg-gray-300 rounded ' : ''}`}
+				} ${!SD || student_id < 0 ? 'bg-gray-300 rounded-sm ' : ''}`}
 			>
 				<div className="flex flex-col gap-2">
 					<Typography

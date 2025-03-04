@@ -389,7 +389,7 @@ const NewTest = () => {
 					</div>
 					<br />
 					<div className="flex flex-row gap-4 justify-start">
-						<div className="mx-auto p-6 bg-white shadow-lg rounded w-full">
+						<div className="mx-auto p-6 bg-white shadow-lg rounded-sm w-full">
 							<Typography
 								variant="h5"
 								placeholder={undefined}

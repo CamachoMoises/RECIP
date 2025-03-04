@@ -310,7 +310,7 @@ const NewAssessment = () => {
 													<td
 														className={
 															classes +
-															` ${!SD ? 'bg-gray-300 rounded ' : ''}`
+															` ${!SD ? 'bg-gray-300 rounded-sm ' : ''}`
 														}
 														key={`${day.id}-file`}
 													>

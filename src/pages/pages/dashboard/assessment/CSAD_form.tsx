@@ -491,7 +491,7 @@ const CSAD_form = ({
 								aria-invalid={errors.comments ? 'true' : 'false'}
 							/>
 							<div className="flex flex-row gap-2 justify-center mb-2">
-								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded">
+								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded-sm">
 									<Typography
 										variant="h5"
 										placeholder={undefined}
@@ -511,7 +511,7 @@ const CSAD_form = ({
 									/>
 									<hr />
 								</div>
-								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded">
+								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded-sm">
 									<Typography
 										variant="h5"
 										placeholder={undefined}
@@ -534,7 +534,7 @@ const CSAD_form = ({
 							</div>
 							{isLastStep && (
 								<div className="flex flex-row gap-2 justify-center m-2">
-									<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded">
+									<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded-sm">
 										<Typography
 											variant="h5"
 											placeholder={undefined}
