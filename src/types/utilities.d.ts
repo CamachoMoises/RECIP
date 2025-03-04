@@ -43,6 +43,7 @@ export type subject = {
     name: string;
     order: number;
     status: boolean;
+    is_schedulable: boolean;
     hours: number;
     course?: course;
     course_id: number;

@@ -51,7 +51,13 @@ const CourseDetail = () => {
 
 	const { id } = useParams<{ id: string }>();
 	useEffect(() => {
-		dispatch(fetchSubjects(parseInt(id ? id : '-1')));
+		dispatch(
+			fetchSubjects({
+				course_id: parseInt(id ? id : '-1'),
+				status: false,
+				is_schedulable: false,
+			})
+		);
 		dispatch(fetchCourse(parseInt(id ? id : '-1')));
 	}, [dispatch, id]);
 
@@ -75,7 +81,11 @@ const CourseDetail = () => {
 			setSubjectSelectedId(subjectId);
 			if (openNewSubject) {
 				await dispatch(
-					fetchSubjects(selectedCourse.id ? selectedCourse.id : -1)
+					fetchSubjects({
+						course_id: selectedCourse.id ? selectedCourse.id : -1,
+						status: false,
+						is_schedulable: false,
+					})
 				);
 			}
 			setOpenNewSubject(!openNewSubject);
@@ -109,7 +119,13 @@ const CourseDetail = () => {
 
 			await dispatch(updateSubject(subject_a));
 			await dispatch(updateSubject(subject_b));
-			await dispatch(fetchSubjects(parseInt(id)));
+			await dispatch(
+				fetchSubjects({
+					course_id: parseInt(id),
+					status: false,
+					is_schedulable: false,
+				})
+			);
 		};
 		const handleChangeStatusDay = async (
 			event: React.ChangeEvent<HTMLInputElement>,
@@ -290,7 +306,7 @@ const CourseDetail = () => {
 										onPointerLeaveCapture={undefined}
 										variant="h5"
 									>
-										Secciones
+										Secciones/ Modulos
 									</Typography>
 									<Button
 										fullWidth

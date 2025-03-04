@@ -12,11 +12,16 @@ const initialState: subjectState = {
     subjectSelected: null,
 };
 
-export const fetchSubjects = createAsyncThunk<subject[], number>(
+export const fetchSubjects = createAsyncThunk<subject[], { course_id: number, status: boolean, is_schedulable: boolean }>(
     'user/fetchSubjects',
-    async (id, { rejectWithValue }) => {
+    async ({ course_id, status, is_schedulable }, { rejectWithValue }) => {
         try {
-            const response = await axiosGetSlice(`api/subjects/course/${id}`);
+            const response = await axiosGetSlice(`api/subjects/course/${course_id}`,
+                {
+                    status,
+                    is_schedulable
+                }
+            );
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);

@@ -58,7 +58,13 @@ const GeneralCourses = () => {
 		const CS = await dispatch(
 			createCourseStudent(course_id)
 		).unwrap();
-		await dispatch(fetchSubjects(CS.course_id ? CS.course_id : -1));
+		await dispatch(
+			fetchSubjects({
+				course_id: CS.course_id ? CS.course_id : -1,
+				status: true,
+				is_schedulable: true,
+			})
+		);
 		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
 		await dispatch(fetchInstructors());
 		await dispatch(fetchStudents());
@@ -66,7 +72,13 @@ const GeneralCourses = () => {
 		navigate(`../new_course/${CS.id}/${CS.course_id}`);
 	};
 	const navigateCourseStudent = async (CS: courseStudent) => {
-		await dispatch(fetchSubjects(CS.course_id ? CS.course_id : -1));
+		await dispatch(
+			fetchSubjects({
+				course_id: CS.course_id ? CS.course_id : -1,
+				status: true,
+				is_schedulable: true,
+			})
+		);
 		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
 		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
 		await dispatch(fetchInstructors());

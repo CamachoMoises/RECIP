@@ -67,7 +67,13 @@ const GeneralTest = () => {
 		CS: courseStudent,
 		date: string
 	) => {
-		await dispatch(fetchSubjects(CS.course_id ? CS.course_id : -1));
+		await dispatch(
+			fetchSubjects({
+				course_id: CS.course_id ? CS.course_id : -1,
+				status: true,
+				is_schedulable: true,
+			})
+		);
 		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
 		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
 		const CST = await dispatch(

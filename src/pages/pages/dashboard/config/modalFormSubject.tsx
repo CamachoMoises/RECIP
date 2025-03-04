@@ -56,6 +56,9 @@ const ModalFormSubject = ({
 	const [isActive, setIsActive] = useState(
 		subjectSelected ? subjectSelected?.status : true
 	);
+	const [isSchedulable, setSchedulable] = useState(
+		subjectSelected ? subjectSelected?.is_schedulable : true
+	);
 	const subject_lessons = subjectSelected?.subject_lessons
 		? subjectSelected.subject_lessons
 		: [];
@@ -133,6 +136,7 @@ const ModalFormSubject = ({
 				: 1,
 			course_id: parseInt(id ? id : '-1'),
 			status: isActive,
+			is_schedulable: isSchedulable,
 		};
 		if (subjectSelected) {
 			await dispatch(updateSubject(newSubject));
@@ -235,33 +239,61 @@ const ModalFormSubject = ({
 						<div className="flex flex-row gap-3 py-3">
 							<div className="basis-1/2">
 								<div className="flex flex-row gap-5">
-									<div>
-										<label
-											htmlFor="Nombre"
-											className="text-sx text-black"
-										>
-											Activo
-										</label>
-										<br />
-										<Switch
-											className="h-full w-full checked:bg-[#134475]"
-											containerProps={{
-												className: 'w-11 h-6',
-											}}
-											circleProps={{
-												className:
-													'before:hidden left-0.5 border-none',
-											}}
-											defaultChecked={
-												subjectSelected ? isActive : true
-											}
-											onChange={() => {
-												setIsActive(!isActive);
-											}}
-											crossOrigin={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										/>
+									<div className="flex flex-row gap-3">
+										<div className="flex flex-col gap-1">
+											<label
+												htmlFor="Nombre"
+												className="text-sx text-black"
+											>
+												Activo
+											</label>
+											<Switch
+												className="h-full w-full checked:bg-[#134475]"
+												containerProps={{
+													className: 'w-11 h-6',
+												}}
+												circleProps={{
+													className:
+														'before:hidden left-0.5 border-none',
+												}}
+												defaultChecked={
+													subjectSelected ? isActive : true
+												}
+												onChange={() => {
+													setIsActive(!isActive);
+												}}
+												crossOrigin={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											/>
+										</div>
+										<div className="flex flex-col gap-1">
+											<label
+												htmlFor="Nombre"
+												className="text-sx text-black"
+											>
+												Programable
+											</label>
+											<Switch
+												className="h-full w-full checked:bg-[#134475]"
+												containerProps={{
+													className: 'w-11 h-6',
+												}}
+												circleProps={{
+													className:
+														'before:hidden left-0.5 border-none',
+												}}
+												defaultChecked={
+													subjectSelected ? isSchedulable : true
+												}
+												onChange={() => {
+													setSchedulable(!isSchedulable);
+												}}
+												crossOrigin={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											/>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -304,7 +336,7 @@ const ModalFormSubject = ({
 										variant="h5"
 										className="text-center"
 									>
-										Temas de la seccion
+										Temas del Modulo
 									</Typography>
 									{openNewSubjectLesson && (
 										<div className="flex flex-col w-full">
