@@ -12,7 +12,7 @@ import GeneralTest from './dashboard/test/generalTest';
 import GeneralConfig from './dashboard/config/generalConfig';
 import TestList from './dashboard/config/testList';
 import QuestionTestList from './dashboard/config/questionTestList';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import DetailAssessment from './dashboard/assessment/detailAssessment';
@@ -24,6 +24,23 @@ const Dashboard = () => {
 	const auth = useSelector((state: RootState) => {
 		return state.auth;
 	});
+	const [isVisible, setIsVisible] = useState(true);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.scrollY > 200) {
+				setIsVisible(false);
+			} else {
+				setIsVisible(true);
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
 	useEffect(() => {
 		if (!auth.token) {
 			navigate('/login');
@@ -34,21 +51,27 @@ const Dashboard = () => {
 		<div className="video-container">
 			<div className="flex flex-col p-2">
 				<div className=" flex flex-row gap-3 ">
-					<div className="my-6">
-						<video
-							className="rounded-lg shadow-lg"
-							width="170"
-							height="170"
-							loop
-							autoPlay
-							muted
-						>
-							<source
-								src="/video/video_background.mp4"
-								type="video/mp4"
-							/>
-							Tu navegador no soporta el elemento de video.
-						</video>
+					<div
+						className={`transition-all duration-1000 ${
+							isVisible ? 'opacity-100' : 'opacity-0 hidden'
+						}`}
+					>
+						<div className="my-6">
+							<video
+								className="rounded-lg shadow-lg"
+								width="170"
+								height="170"
+								loop
+								autoPlay
+								muted
+							>
+								<source
+									src="/video/video_background.mp4"
+									type="video/mp4"
+								/>
+								Tu navegador no soporta el elemento de video.
+							</video>
+						</div>
 					</div>
 					<div className="w-full my-6">
 						{/* <PageTitle title="Configuración" breadCrumbs={[]} /> */}
