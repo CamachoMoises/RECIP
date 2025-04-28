@@ -13,6 +13,10 @@ const initialState: assessmentState = {
     courseStudentAssessmentLessonDaySelected: null,
     daysSubjectList: null,
     day: 1,
+    currentPage: 1,
+    pageSize: 10,
+    totalPages: 1,
+    totalItems: 0
 }
 
 export const fetchCourseStudentAssessment = createAsyncThunk<courseStudentAssessment, number>(

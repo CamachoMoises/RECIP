@@ -12,8 +12,12 @@ const initialState: CourseState = {
     courseStudentList: null,
     scheduleList: [],
     lastCourseStudentCreatedId: null,
-    lastCreatedId: null, //
+    lastCreatedId: null,
     error: null, // Inicializar como null
+    currentPage: 1,
+    pageSize: 10,
+    totalPages: 1,
+    totalItems: 0
 };
 export const fetchCourses = createAsyncThunk<course[]>(
     'course/fetchCourses',
@@ -27,11 +31,14 @@ export const fetchCourses = createAsyncThunk<course[]>(
     }
 );
 
-export const fetchCoursesStudents = createAsyncThunk<courseStudent[]>(
+export const fetchCoursesStudents = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number }>(
     'course/fetchCoursesStudents',
-    async (_, { rejectWithValue }) => {
+    async ({ currentPage, pageSize }, { rejectWithValue }) => {
         try {
-            const response = await axiosGetSlice('api/courses/coursesStudents');
+            const response = await axiosGetSlice('api/courses/coursesStudents', {
+                currentPage, pageSize
+            });
+
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -39,12 +46,12 @@ export const fetchCoursesStudents = createAsyncThunk<courseStudent[]>(
     }
 );
 
-export const fetchCoursesStudentsTests = createAsyncThunk<courseStudent[], number>(
+export const fetchCoursesStudentsTests = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number, course_type_id: number }>(
     'course/fetchCoursesStudentsTests',
-    async (course_type_id, { rejectWithValue }) => {
+    async ({ currentPage, pageSize, course_type_id }, { rejectWithValue }) => {
         try {
             const response = await axiosGetSlice('api/courses/coursesStudents',
-                { course_type_id: course_type_id }
+                { currentPage, pageSize, course_type_id }
             );
             return response;
         } catch (error: any) {
@@ -198,9 +205,13 @@ const courseSlice = createSlice({
             .addCase(fetchCoursesStudents.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchCoursesStudents.fulfilled, (state, action: PayloadAction<courseStudent[]>) => {
+            .addCase(fetchCoursesStudents.fulfilled, (state, action: PayloadAction<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }>) => {
                 state.status = 'succeeded';
-                state.courseStudentList = action.payload;
+                state.courseStudentList = action.payload.data;
+                state.currentPage = action.payload.currentPage;
+                state.totalPages = action.payload.totalPages;
+                state.pageSize = action.payload.pageSize;
+                state.totalItems = action.payload.totalItems;
             })
             .addCase(fetchCoursesStudents.rejected, (state, action) => {
                 state.status = 'failed';
@@ -212,9 +223,13 @@ const courseSlice = createSlice({
             .addCase(fetchCoursesStudentsTests.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchCoursesStudentsTests.fulfilled, (state, action: PayloadAction<courseStudent[]>) => {
+            .addCase(fetchCoursesStudentsTests.fulfilled, (state, action: PayloadAction<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }>) => {
                 state.status = 'succeeded';
-                state.courseStudentList = action.payload;
+                state.courseStudentList = action.payload.data;
+                state.currentPage = action.payload.currentPage;
+                state.totalPages = action.payload.totalPages;
+                state.pageSize = action.payload.pageSize
+                state.totalItems = action.payload.totalItems
             })
             .addCase(fetchCoursesStudentsTests.rejected, (state, action) => {
                 state.status = 'failed';

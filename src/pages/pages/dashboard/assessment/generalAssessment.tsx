@@ -13,6 +13,7 @@ import {
 	ButtonGroup,
 	Card,
 	CardBody,
+	IconButton,
 	List,
 	ListItem,
 	ListItemPrefix,
@@ -29,8 +30,12 @@ import {
 // 	fetchInstructors,
 // 	fetchStudents,
 // } from '../../../../features/userSlice';
-import { useEffect } from 'react';
-import { NotebookText } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+	ChevronLeft,
+	ChevronRight,
+	NotebookText,
+} from 'lucide-react';
 import {
 	createCourseStudentAssessment,
 	fetchCourseStudentAssessment,
@@ -47,11 +52,62 @@ const GeneralAssessment = () => {
 	const { course, assessment } = useSelector((state: RootState) => {
 		return { course: state.courses, assessment: state.assessment };
 	});
-	console.log(course.courseStudentList);
+	const currentPage = course.currentPage;
+	const pageSize = course.pageSize;
+	const totalPages = course.totalPages;
+	const totalItems = course.totalItems;
+	const [active, setActive] = useState(currentPage);
+	// console.log(course.courseStudentList);
+	const getItemProps = (index: number) =>
+		({
+			variant: active === index ? 'filled' : 'text',
+			color: 'gray',
+			onClick: async () => {
+				await dispatch(
+					fetchCoursesStudentsTests({
+						pageSize,
+						currentPage: index,
+						course_type_id: 1,
+					})
+				);
+				setActive(index);
+			},
+			className: 'rounded-full',
+		} as any);
+	const next = async () => {
+		if (active === totalPages) return;
+		console.log('ojo');
 
+		setActive(active + 1);
+		await dispatch(
+			fetchCoursesStudentsTests({
+				pageSize,
+				currentPage: active + 1,
+				course_type_id: 1,
+			})
+		);
+	};
+
+	const prev = async () => {
+		if (active === 1) return;
+		setActive(active - 1);
+		await dispatch(
+			fetchCoursesStudentsTests({
+				pageSize,
+				currentPage: active - 1,
+				course_type_id: 1,
+			})
+		);
+	};
 	useEffect(() => {
-		dispatch(fetchCoursesStudentsTests(2));
-	}, [dispatch]);
+		dispatch(
+			fetchCoursesStudentsTests({
+				pageSize: course.pageSize,
+				currentPage: course.currentPage,
+				course_type_id: 2,
+			})
+		);
+	}, [dispatch, course.pageSize, course.currentPage]);
 	const navigateCourseStudentAssessment = async (
 		CS: courseStudent
 	) => {
@@ -69,7 +125,13 @@ const GeneralAssessment = () => {
 			);
 		}
 
-		await dispatch(fetchCoursesStudentsTests(2));
+		await dispatch(
+			fetchCoursesStudentsTests({
+				pageSize: course.pageSize,
+				currentPage: course.currentPage,
+				course_type_id: 2,
+			})
+		);
 		navigate(`../course_assessment/${CS.id}/${CS.course_id}`);
 	};
 	if (course.status === 'loading') {
@@ -88,7 +150,13 @@ const GeneralAssessment = () => {
 			</>
 		);
 	}
-
+	const pages =
+		totalPages > 0
+			? Array.from({ length: totalPages }, (_, i) => ({
+					id: i,
+					name: `Pagina ${i + 1}`,
+			  }))
+			: [];
 	return (
 		<div className=" container">
 			<PageTitle title="Evaluaciones" breadCrumbs={breadCrumbs} />
@@ -178,6 +246,61 @@ const GeneralAssessment = () => {
 								</ListItem>
 							))}
 						</List>
+						{totalPages > 1 && (
+							<>
+								<div className="flex flex-col w-full text-center">
+									<small> Total:{totalItems}</small>
+								</div>
+								<div className="flex w-full justify-center gap-4">
+									<Button
+										variant="text"
+										className="flex items-center gap-2 rounded-full"
+										onClick={() => {
+											prev();
+										}}
+										disabled={active === 1}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										<ChevronLeft
+											strokeWidth={2}
+											className="h-4 w-4"
+										/>
+										Prev
+									</Button>
+									<div className="flex items-center gap-2">
+										{pages.map((page) => {
+											return (
+												<IconButton
+													key={page.name}
+													{...getItemProps(page.id + 1)}
+												>
+													{page.id + 1}
+												</IconButton>
+											);
+										})}
+									</div>
+									<Button
+										variant="text"
+										className="flex items-center gap-2 rounded-full"
+										onClick={() => {
+											next();
+										}}
+										disabled={active === totalPages}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Sig
+										<ChevronRight
+											strokeWidth={2}
+											className="h-4 w-4"
+										/>
+									</Button>
+								</div>
+							</>
+						)}
 					</CardBody>
 				</Card>
 			</div>

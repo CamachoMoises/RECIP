@@ -10,6 +10,10 @@ const initialState: subjectState = {
     maxOrderLesson: null,
     error: null,
     subjectSelected: null,
+    currentPage: 1,
+    pageSize: 10,
+    totalPages: 1,
+    totalItems: 0
 };
 
 export const fetchSubjects = createAsyncThunk<subject[], { course_id: number, status: boolean, is_schedulable: boolean }>(

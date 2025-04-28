@@ -432,6 +432,10 @@ export interface CourseState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
     lastCreatedId: number | null;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
 }
 
 export interface subjectState {
@@ -442,6 +446,10 @@ export interface subjectState {
     maxOrderSubject: number | null;
     maxOrderLesson: number | null;
     subjectSelected: subject | null;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
 }
 
 export interface testState {
@@ -457,6 +465,10 @@ export interface testState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     lastCreatedId: number | null;
     error: string | null;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
 }
 
 export interface authState {
@@ -476,6 +488,10 @@ export interface assessmentState {
     subjectList: subject[] | null;
     daysSubjectList: subject[] | null;
     day: number;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
 
 }
 

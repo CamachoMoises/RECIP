@@ -15,6 +15,10 @@ const initialState: testState = {
     courseStudentTestQuestionSelected: null,
     lastCreatedId: null,
     error: null,
+    currentPage: 1,
+    pageSize: 10,
+    totalPages: 1,
+    totalItems: 0
 };
 
 // Acción asíncrona para obtener los tipos de preguntas
