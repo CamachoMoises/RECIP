@@ -2,7 +2,7 @@ import {
 	Button,
 	Card,
 	CardBody,
-	CardFooter,
+	// CardFooter,
 	Input,
 	Typography,
 } from '@material-tailwind/react';
@@ -14,29 +14,30 @@ import { credentials } from '../types/utilities';
 import { loginUser } from '../features/authSlice';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+
 type Inputs = {
 	email: string;
 	password: string;
 };
+
 const Login = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
-	const auth = useSelector((state: RootState) => {
-		return state.auth;
-	});
+	const auth = useSelector((state: RootState) => state.auth);
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
 	} = useForm<Inputs>({});
+
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
-		console.log(data);
 		const req: credentials = {
 			email: data.email,
 			password: data.password,
 		};
 		await dispatch(loginUser(req)).unwrap();
 	};
+
 	useEffect(() => {
 		if (auth.token) {
 			toast.success('Bienvenido');
@@ -51,12 +52,11 @@ const Login = () => {
 	}, [auth.status, auth.error]);
 
 	return (
-		<>
-			<div className="fixed left-8 z-20 mt-10">
+		<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen">
+			{/* Video */}
+			<div className="order-2 sm:order-1 w-full sm:w-auto flex justify-center">
 				<video
-					className="rounded-lg shadow-lg"
-					width="550"
-					height="550"
+					className="rounded-lg shadow-lg w-full max-w-md"
 					loop
 					autoPlay
 					muted
@@ -68,10 +68,11 @@ const Login = () => {
 					Tu navegador no soporta el elemento de video.
 				</video>
 			</div>
-			<div className="flex flex-row w-full fixed justify-center my-16 ms-32">
+
+			{/* Formulario */}
+			<div className="order-1 sm:order-2 w-full max-w-sm">
 				<Card
-					className="w-96"
-					shadow={true}
+					className="w-full shadow-lg"
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
@@ -91,21 +92,19 @@ const Login = () => {
 						>
 							Iniciar sesión
 						</Typography>
-						{/* <code>{JSON.stringify(auth.error, null, 4)}</code>
-						<code>{JSON.stringify(auth.status, null, 4)}</code> */}
 						<form onSubmit={handleSubmit(onSubmit)}>
-							<div className="mb-1 flex flex-col gap-12 mt-14">
+							<div className="mb-1 flex flex-col gap-6 mt-8">
 								<div>
 									<Input
+										crossOrigin={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
 										type="email"
 										size="lg"
 										maxLength={254}
-										className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-										crossOrigin={undefined}
+										className="bg-slate-400 rounded-md p-2 w-full mb-2 text-slate-900"
 										placeholder="nombre@correo.com"
 										label="Correo"
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
 										{...register('email', {
 											required: {
 												value: true,
@@ -114,17 +113,19 @@ const Login = () => {
 										})}
 									/>
 									{errors.email && (
-										<span className="text-red-500 text-sm/[8px] py-2">
+										<span className="text-red-500 text-sm py-2">
 											{errors.email.message}
 										</span>
 									)}
 								</div>
 								<div>
 									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										crossOrigin={undefined}
 										size="lg"
 										type="password"
-										className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-										crossOrigin={undefined}
+										className="bg-slate-400 rounded-md p-2 w-full mb-2 text-slate-900"
 										maxLength={20}
 										label="Contraseña"
 										placeholder="********"
@@ -134,11 +135,9 @@ const Login = () => {
 												message: 'La contraseña es requerida',
 											},
 										})}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
 									/>
 									{errors.password && (
-										<span className="text-red-500 text-sm/[8px] py-2">
+										<span className="text-red-500 text-sm py-2">
 											{errors.password.message}
 										</span>
 									)}
@@ -147,7 +146,7 @@ const Login = () => {
 							<Button
 								type="submit"
 								color="blue-gray"
-								className="mt-6 flex justify-center"
+								className="mt-6"
 								fullWidth
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
@@ -160,23 +159,10 @@ const Login = () => {
 							</Button>
 						</form>
 					</CardBody>
-					<CardFooter
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						{/* {errors.length > 0 && (
-							<span className="text-red-500 text-center w-full">
-								Acceso no autorizado
-							</span>
-						)} */}
-						{/* <span className="text-red-500 text-center w-full">
-							Acceso no autorizado
-						</span> */}{' '}
-					</CardFooter>
+					{/* <CardFooter>Opcional: mensajes de error</CardFooter> */}
 				</Card>
 			</div>
-		</>
+		</div>
 	);
 };
 

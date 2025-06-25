@@ -194,7 +194,7 @@ const GeneralConfig = () => {
 								</div>
 							</div>
 							<br />
-							<hr />
+							<br />
 							<Typography
 								variant="h5"
 								placeholder={undefined}

@@ -51,28 +51,31 @@ const Dashboard = () => {
 		<div className="video-container">
 			<div className="flex flex-col p-2">
 				<div className=" flex flex-row gap-3 ">
-					<div
-						className={`transition-all duration-1000 ${
-							isVisible ? 'opacity-100' : 'opacity-0 hidden'
-						}`}
-					>
-						<div className="my-6">
-							<video
-								className="rounded-lg shadow-lg"
-								width="170"
-								height="170"
-								loop
-								autoPlay
-								muted
-							>
-								<source
-									src="/video/video_background.mp4"
-									type="video/mp4"
-								/>
-								Tu navegador no soporta el elemento de video.
-							</video>
+					<div className="hidden lg:block">
+						<div
+							className={`transition-all duration-1000 ${
+								isVisible ? 'opacity-100' : 'opacity-0 hidden'
+							}`}
+						>
+							<div className="my-6">
+								<video
+									className="rounded-lg shadow-lg"
+									width="170"
+									height="170"
+									loop
+									autoPlay
+									muted
+								>
+									<source
+										src="/video/video_background.mp4"
+										type="video/mp4"
+									/>
+									Tu navegador no soporta el elemento de video.
+								</video>
+							</div>
 						</div>
 					</div>
+
 					<div className="w-full my-6">
 						{/* <PageTitle title="Configuración" breadCrumbs={[]} /> */}
 						<Routes>

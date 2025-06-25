@@ -179,7 +179,7 @@ const CourseDetail = () => {
 						title={`Editar Asiganciones del curso ${selectedCourse.name}`}
 						breadCrumbs={breadCrumbs}
 					/>
-					<div className="flex lg:flex-col  gap-2">
+					<div className="flex flex-col  gap-2">
 						<div className="flex flex-row w-full">
 							<Card
 								className="flex flex-row w-full"
@@ -289,7 +289,7 @@ const CourseDetail = () => {
 						</div>
 						<div className="flex flex-row w-full">
 							<Card
-								className="flex flex-row w-full"
+								className="flex flex-row w-full overflow-x-auto whitespace-nowrap"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -331,168 +331,188 @@ const CourseDetail = () => {
 											>
 												Dias impartidos
 											</Typography>
-											<List
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{subjectList.map((subject, index) => {
-													const subjectDays = subject.subject_days
-														? subject.subject_days
-														: [];
-													return (
-														<ListItem
-															className={`flex justify-between ${
-																subject.status ? '' : 'bg-gray-400'
-															}`}
-															key={subject.id}
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															<div className="flex flex-row justify-between w-80">
-																<Typography
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																>
-																	{subject.name}
-																</Typography>
-																{course.courseSelected?.course_type
-																	.id != 2 && (
-																	<Typography
-																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
-																	>
-																		horas: ({subject.hours})
-																	</Typography>
-																)}
-
-																{!subject.status && (
-																	<Typography
-																		placeholder={undefined}
-																		color="red"
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
-																	>
-																		Inactivo
-																	</Typography>
-																)}
-															</div>
-
-															<div className="flex w-max gap-3">
-																{days.map((day) => {
-																	let check = false;
-																	check = subjectDays.some(
-																		(sd) =>
-																			sd.day === day.id + 1 &&
-																			sd.status
-																	);
-																	const labelView =
-																		course.courseSelected?.course_type
-																			.id != 2 || check;
-																	return (
-																		<div
-																			className="flex flex-col gap-1"
-																			key={`day-${day.id}`}
-																		>
-																			{labelView && (
-																				<label>{day.name}</label>
-																			)}
-
-																			{course.courseSelected
-																				?.course_type.id != 2 && (
-																				<>
-																					<Switch
-																						className="h-full w-full checked:bg-[#134475]"
-																						containerProps={{
-																							className: 'w-11 h-6',
-																						}}
-																						circleProps={{
-																							className:
-																								'before:hidden left-0.5 border-none',
-																						}}
-																						defaultChecked={check}
-																						disabled={!subject.status}
-																						onChange={(event) => {
-																							handleChangeStatusDay(
-																								event,
-																								day,
-																								subject.id
-																							);
-																						}}
-																						crossOrigin={undefined}
-																						onPointerEnterCapture={
-																							undefined
-																						}
-																						onPointerLeaveCapture={
-																							undefined
-																						}
-																					/>
-																				</>
-																			)}
-																		</div>
-																	);
-																})}
-															</div>
-															<ButtonGroup
-																size="sm"
+											<div className="flex w-dvh lg:w-full">
+												<List
+													className="w-full overflow-x-auto whitespace-nowrap"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													{subjectList.map((subject, index) => {
+														const subjectDays = subject.subject_days
+															? subject.subject_days
+															: [];
+														return (
+															<ListItem
+																className={`flex justify-between ${
+																	subject.status ? '' : 'bg-gray-400'
+																}`}
+																key={subject.id}
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
 															>
-																<Button
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																	disabled={subject.order <= 1}
-																	onClick={() =>
-																		handleSwitchSubject(
-																			subject,
-																			index,
-																			'up'
-																		)
-																	}
-																>
-																	<ArrowUp size={12} />
-																</Button>
+																<div className="flex flex-row justify-between w-80">
+																	<div className="flex w-40 overflow-x-auto whitespace-nowrap">
+																		<Typography
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			{subject.name}
+																		</Typography>
+																	</div>
+																	{course.courseSelected?.course_type
+																		.id != 2 && (
+																		<Typography
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			horas: ({subject.hours})
+																		</Typography>
+																	)}
 
-																<Button
+																	{!subject.status && (
+																		<Typography
+																			placeholder={undefined}
+																			color="red"
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			Inactivo
+																		</Typography>
+																	)}
+																</div>
+
+																<div className="flex w-max gap-3">
+																	{days.map((day) => {
+																		let check = false;
+																		check = subjectDays.some(
+																			(sd) =>
+																				sd.day === day.id + 1 &&
+																				sd.status
+																		);
+																		const labelView =
+																			course.courseSelected
+																				?.course_type.id != 2 ||
+																			check;
+																		return (
+																			<div
+																				className="flex flex-col gap-1"
+																				key={`day-${day.id}`}
+																			>
+																				{labelView && (
+																					<label>{day.name}</label>
+																				)}
+
+																				{course.courseSelected
+																					?.course_type.id != 2 && (
+																					<>
+																						<Switch
+																							className="h-full w-full checked:bg-[#134475]"
+																							containerProps={{
+																								className: 'w-11 h-6',
+																							}}
+																							circleProps={{
+																								className:
+																									'before:hidden left-0.5 border-none',
+																							}}
+																							defaultChecked={check}
+																							disabled={
+																								!subject.status
+																							}
+																							onChange={(event) => {
+																								handleChangeStatusDay(
+																									event,
+																									day,
+																									subject.id
+																								);
+																							}}
+																							crossOrigin={undefined}
+																							onPointerEnterCapture={
+																								undefined
+																							}
+																							onPointerLeaveCapture={
+																								undefined
+																							}
+																						/>
+																					</>
+																				)}
+																			</div>
+																		);
+																	})}
+																</div>
+																<ButtonGroup
+																	size="sm"
 																	placeholder={undefined}
 																	onPointerEnterCapture={undefined}
 																	onPointerLeaveCapture={undefined}
-																	onClick={() =>
-																		handleOpenEdit(subject.id)
-																	}
 																>
-																	<Pencil size={12} />
-																</Button>
-																<Button
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																	disabled={
-																		maxOrderSubject
-																			? maxOrderSubject <=
-																			  subject.order
-																			: true
-																	}
-																	onClick={() =>
-																		handleSwitchSubject(
-																			subject,
-																			index,
-																			'down'
-																		)
-																	}
-																>
-																	<ArrowDown size={12} />
-																</Button>
-															</ButtonGroup>
-														</ListItem>
-													);
-												})}
-											</List>
+																	<Button
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		disabled={subject.order <= 1}
+																		onClick={() =>
+																			handleSwitchSubject(
+																				subject,
+																				index,
+																				'up'
+																			)
+																		}
+																	>
+																		<ArrowUp size={12} />
+																	</Button>
+
+																	<Button
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		onClick={() =>
+																			handleOpenEdit(subject.id)
+																		}
+																	>
+																		<Pencil size={12} />
+																	</Button>
+																	<Button
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		disabled={
+																			maxOrderSubject
+																				? maxOrderSubject <=
+																				  subject.order
+																				: true
+																		}
+																		onClick={() =>
+																			handleSwitchSubject(
+																				subject,
+																				index,
+																				'down'
+																			)
+																		}
+																	>
+																		<ArrowDown size={12} />
+																	</Button>
+																</ButtonGroup>
+															</ListItem>
+														);
+													})}
+												</List>
+											</div>
 										</>
 									) : (
 										<div className="pt-5">

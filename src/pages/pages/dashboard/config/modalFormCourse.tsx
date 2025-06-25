@@ -119,6 +119,7 @@ const ModalFormCourse = ({
 			onPointerLeaveCapture={undefined}
 			open={openNewCourse}
 			handler={handleOpen}
+			className="overflow-y-scroll lg:overflow-hidden max-h-[90vh]"
 			size="xl"
 		>
 			<form onSubmit={handleSubmit(onSubmit)}>
@@ -137,7 +138,7 @@ const ModalFormCourse = ({
 					onPointerLeaveCapture={undefined}
 				>
 					<div className="container mx-auto p-3">
-						<div className="grid grid-cols-4 gap-4">
+						<div className=" flex flex-col lg:grid lg:grid-cols-4 gap-4">
 							<div className="">
 								<Input
 									onPointerEnterCapture={undefined}

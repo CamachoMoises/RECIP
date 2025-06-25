@@ -11,20 +11,18 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentColor);
+	}
 }
 
 body {
-	background: linear-gradient(
-		180deg,
-		rgb(250, 250, 250) 0%,
-		rgb(144, 144, 145) 50%,
-		rgb(250, 250, 250) 100%
-	);
+	background: linear-gradient(rgb(250, 250, 250) 0%, #adc5e9 100%);
+	background-attachment: fixed;
+	background-repeat: no-repeat;
+	background-size: cover;
 }

@@ -155,6 +155,7 @@ const ModalFormSubject = ({
 			onPointerLeaveCapture={undefined}
 			open={openNewSubject}
 			handler={handleOpen}
+			className="overflow-y-scroll lg:overflow-hidden max-h-[90vh]"
 			size="xl"
 		>
 			<form onSubmit={handleSubmit(onSubmit)}>
@@ -174,7 +175,7 @@ const ModalFormSubject = ({
 					onPointerLeaveCapture={undefined}
 				>
 					<div className="container mx-auto p-3">
-						<div className="flex flex-row gap-2 w-full">
+						<div className="flex flex-col lg:flex-row gap-2 w-full">
 							<div className="flex flex-col w-full">
 								<Input
 									onPointerEnterCapture={undefined}

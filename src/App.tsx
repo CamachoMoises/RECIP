@@ -17,7 +17,7 @@ import ScrollToTop from './components/scrollTop';
 function App() {
 	return (
 		<div className="min-h-screen w-full">
-			<div className=" flex flex-col pt-24 px-5 gap-3 ">
+			<div className="flex flex-col  px-5 gap-3 ">
 				<Router>
 					<div className="content">
 						<NavBar />
