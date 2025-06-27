@@ -9,10 +9,19 @@ import {
 } from '@material-tailwind/react';
 import { Eraser, Printer, Save } from 'lucide-react';
 import LessonDetails from './lessonDetails';
-import { courseStudentAssessmentDay } from '../../../../types/utilities';
-import { updateCourseStudentAssessmentDay } from '../../../../features/assessmentSlice';
-import { useRef } from 'react';
+import {
+	SignatureUrls,
+	courseStudentAssessmentDay,
+} from '../../../../types/utilities';
+import { AdvancedImage } from '@cloudinary/react';
+import {
+	saveSignatures,
+	updateCourseStudentAssessmentDay,
+} from '../../../../features/assessmentSlice';
+import { useEffect, useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
+import { cld } from '../../../../lib/utils';
+import { thumbnail } from '@cloudinary/url-gen/actions/resize';
 
 type Inputs = {
 	airport: string;
@@ -45,6 +54,70 @@ const CSAD_form = ({
 			assessment: state.assessment,
 		};
 	});
+	const [signatureUrls, setSignatureUrls] = useState<SignatureUrls>(
+		{}
+	);
+
+	// Obtener las firmas cuando cambie el CSAD_id
+	useEffect(() => {
+		const fetchSignatures = async () => {
+			if (!assessment.courseStudentAssessmentDaySelected?.id) return;
+
+			const CSAD_id =
+				assessment.courseStudentAssessmentDaySelected.id;
+
+			// Construye los public_ids según tu convención
+			const publicIds = {
+				student: `firmas/signature_1_${CSAD_id}`,
+				instructor: `firmas/signature_2_${CSAD_id}`,
+				fcaa: isLastStep
+					? `firmas/signature_3_${CSAD_id}`
+					: undefined,
+			};
+
+			setSignatureUrls({
+				student: cld
+					.image(publicIds.student)
+					.resize(thumbnail().width(200))
+					.toURL(),
+				instructor: cld
+					.image(publicIds.instructor)
+					.resize(thumbnail().width(200))
+					.toURL(),
+				fcaa: publicIds.fcaa
+					? cld
+							.image(publicIds.fcaa)
+							.resize(thumbnail().width(200))
+							.toURL()
+					: undefined,
+			});
+		};
+
+		fetchSignatures();
+	}, [assessment.courseStudentAssessmentDaySelected?.id, isLastStep]);
+
+	// Renderizar las firmas
+	const renderSignature = (type: keyof SignatureUrls) => {
+		if (!signatureUrls[type]) return null;
+
+		return (
+			<div className="signature-container">
+				<AdvancedImage
+					cldImg={cld.image(
+						`firmas/firmas/signature_${
+							type === 'student'
+								? '1'
+								: type === 'instructor'
+								? '2'
+								: '3'
+						}_${assessment.courseStudentAssessmentDaySelected?.id}`
+					)}
+					className="signature-image"
+				/>
+			</div>
+		);
+	};
+
 	const sigCanvas1 = useRef<SignatureCanvas>(null);
 	const sigCanvas2 = useRef<SignatureCanvas>(null);
 	const sigCanvas3 = useRef<SignatureCanvas>(null);
@@ -117,24 +190,54 @@ const CSAD_form = ({
 				? assessment.courseStudentAssessmentDaySelected.day
 				: -1,
 		};
+		let signature1Data = undefined;
+		let signature2Data = undefined;
+		let signature3Data = undefined;
+		if (sigCanvas1.current) {
+			const sing1 = sigCanvas1.current.isEmpty();
+			signature1Data = sing1
+				? undefined
+				: sigCanvas1.current.toDataURL();
+		}
+		if (sigCanvas2.current) {
+			const sing2 = sigCanvas2.current.isEmpty();
+			signature2Data = sing2
+				? undefined
+				: sigCanvas2.current.toDataURL();
+		}
+		if (sigCanvas3.current) {
+			const sing3 = sigCanvas3.current.isEmpty();
+			signature3Data = sing3
+				? undefined
+				: sigCanvas3.current.toDataURL();
+		}
+		const updateResult = await dispatch(
+			updateCourseStudentAssessmentDay(req)
+		);
+
 		if (
-			sigCanvas1.current &&
-			sigCanvas2.current &&
-			sigCanvas3.current
+			updateCourseStudentAssessmentDay.fulfilled.match(updateResult)
 		) {
-			const signature1Data = sigCanvas1.current.toDataURL(); // Obtén la firma como base64
-			const signature2Data = sigCanvas2.current.toDataURL(); // Obtén la firma como base64
-			const signature3Data = sigCanvas3.current.toDataURL(); // Obtén la firma como base64
+			const updatedCSAD = updateResult.payload;
 			console.log(
-				'Firma guardada:',
+				'Saving signatures if they exist...',
 				signature1Data,
 				signature2Data,
 				signature3Data
 			);
 
-			// Aquí puedes enviar `signatureData` a tu servidor usando Axios
+			// 2. Guardar firmas si existen
+			if (signature1Data || signature2Data || signature3Data) {
+				await dispatch(
+					saveSignatures({
+						CSAD_id: updatedCSAD.id ? updatedCSAD.id : -1,
+						signature1: signature1Data,
+						signature2: signature2Data,
+						signature3: signature3Data,
+					})
+				);
+			}
 		}
-		await dispatch(updateCourseStudentAssessmentDay(req));
 	};
 
 	return (
@@ -581,6 +684,14 @@ const CSAD_form = ({
 								>
 									<Save size={15} />
 								</Button>
+							</div>
+							<div className="signatures-preview">
+								<h4>Firmas Guardadas:</h4>
+								<div className="signature-grid">
+									{renderSignature('student')}
+									{renderSignature('instructor')}
+									{isLastStep && renderSignature('fcaa')}
+								</div>
 							</div>
 						</div>
 					</>

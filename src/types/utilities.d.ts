@@ -420,7 +420,11 @@ export interface UserState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
 }
-
+export interface SignatureUrls {
+    student?: string;
+    instructor?: string;
+    fcaa?: string;
+}
 export interface CourseState {
     courseList: course[];
     day: number;
@@ -492,6 +496,7 @@ export interface assessmentState {
     totalPages: number;
     pageSize: number;
     totalItems: number;
+    signatureStatus?: 'idle' | 'saving' | 'saved' | 'failed';
 
 }
 

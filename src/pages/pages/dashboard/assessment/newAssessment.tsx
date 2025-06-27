@@ -114,7 +114,7 @@ const NewAssessment = () => {
 	return (
 		<div className="container">
 			<PageTitle
-				title={`Evaluacion de ${course.courseSelected?.name}`}
+				title={`Evaluacion de 3 ${course.courseSelected?.name}`}
 				breadCrumbs={breadCrumbs}
 			/>
 			<Card
@@ -310,7 +310,9 @@ const NewAssessment = () => {
 													<td
 														className={
 															classes +
-															` ${!SD ? 'bg-gray-300 rounded-sm ' : ''}`
+															` ${
+																!SD ? 'bg-gray-300 rounded-sm ' : ''
+															}`
 														}
 														key={`${day.id}-file`}
 													>

@@ -82,7 +82,7 @@ const LessonDetails = ({ day }: { day: number }) => {
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				Session del dia {day}
+				Sessión del Dia {day}
 			</Typography>
 			<div className="flex flex-col gap-2 py-2">
 				{assessment.subjectList?.map((SL, index) => {

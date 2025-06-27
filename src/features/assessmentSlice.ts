@@ -16,7 +16,8 @@ const initialState: assessmentState = {
     currentPage: 1,
     pageSize: 10,
     totalPages: 1,
-    totalItems: 0
+    totalItems: 0,
+    signatureStatus: 'idle',
 }
 
 export const fetchCourseStudentAssessment = createAsyncThunk<courseStudentAssessment, number>(
@@ -109,6 +110,18 @@ export const fetchSubjectAssessment = createAsyncThunk<subject[], { day: number,
         }
     }
 );
+
+export const saveSignatures = createAsyncThunk<void, { CSAD_id: number; signature1?: string; signature2?: string; signature3?: string; }>
+    (
+        'assessment/saveSignatures',
+        async (signatureData, { rejectWithValue }) => {
+            try {
+                await axiosPostSlice('api/assessment/saveSignatures', signatureData);
+            } catch (error: any) {
+                return rejectWithValue(error.message);
+            }
+        }
+    );
 
 export const assessmentSlice = createSlice({
     name: 'assessment',
@@ -218,7 +231,16 @@ export const assessmentSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
-
+            .addCase(saveSignatures.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(saveSignatures.fulfilled, (state) => {
+                state.status = 'succeeded';
+            })
+            .addCase(saveSignatures.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            });
 
     },
 });

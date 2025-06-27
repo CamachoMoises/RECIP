@@ -28,18 +28,18 @@ import CSAD_form from './CSAD_form';
 import { useReactToPrint } from 'react-to-print';
 import CSA_PDF from './CSA_PDF';
 import { axiosPostDefault } from '../../../../services/axios';
-const day_names = [
-	'Manejo General',
-	'Manejo General y Asimétrico',
-	'Manejo de Vuelo Normal y Asimétrico',
-	'Procedimientos Anormales',
-	'Procedimientos de Emergencia',
-	'',
-	'',
-	'',
-	'',
-	'',
-];
+// const day_names = [
+// 	'Manejo General',
+// 	'Manejo General y Asimétrico',
+// 	'Manejo de Vuelo Normal y Asimétrico',
+// 	'Procedimientos Anormales',
+// 	'Procedimientos de Emergencia',
+// 	'',
+// 	'',
+// 	'',
+// 	'',
+// 	'',
+// ];
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -196,7 +196,7 @@ const DetailAssessment = () => {
 	return (
 		<>
 			<PageTitle
-				title={`Evaluacion de  ${assessment.courseStudentAssessmentSelected?.student?.user?.name} ${assessment.courseStudentAssessmentSelected?.student?.user?.last_name} en ${assessment.courseStudentAssessmentSelected?.course?.name}`}
+				title={`Evaluacion de ${assessment.courseStudentAssessmentSelected?.student?.user?.name} ${assessment.courseStudentAssessmentSelected?.student?.user?.last_name} en ${assessment.courseStudentAssessmentSelected?.course?.name}`}
 				breadCrumbs={breadCrumbs}
 			/>
 
@@ -464,7 +464,7 @@ const DetailAssessment = () => {
 										) : (
 											<Calendar className="h-10 w-5" />
 										)}
-										<div className="absolute -bottom-[3rem] w-max text-center">
+										<div className="absolute -bottom-[1.5rem] w-max text-center">
 											<Typography
 												variant="small"
 												className="overflow-x-auto"
@@ -476,7 +476,7 @@ const DetailAssessment = () => {
 												onPointerLeaveCapture={undefined}
 											>
 												{day.name} <br />
-												<small>{day_names[index]}</small>
+												{/* <small>{day_names[index]}</small> */}
 											</Typography>
 										</div>
 									</Step>
