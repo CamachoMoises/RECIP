@@ -1,19 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../../store';
 import {
 	fetchUsers,
 	updateUser,
 	userInstructor,
 	userStudent,
 } from '../../../../features/userSlice';
-import { AppDispatch, RootState } from '../../../../store';
 import {
 	Button,
-	ButtonGroup,
 	Card,
 	CardBody,
+	CardHeader,
 	Chip,
 	Typography,
+	Tooltip,
+	IconButton,
+	Input,
 } from '@material-tailwind/react';
 import {
 	Pencil,
@@ -22,6 +25,7 @@ import {
 	Power,
 	PowerOff,
 	Presentation,
+	Search,
 } from 'lucide-react';
 import ModalFormUser from './modalFormUser';
 import {
@@ -34,12 +38,14 @@ import ErrorPage from '../../../../components/ErrorPage';
 import LoadingPage from '../../../../components/LoadingPage';
 import { axiosGetDefault } from '../../../../services/axios';
 import toast from 'react-hot-toast';
+
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
 		href: '/dashboard',
 	},
 ];
+
 const UserTable = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [openNewUser, setOpenNewUser] = useState(false);
@@ -47,272 +53,365 @@ const UserTable = () => {
 	const [userDocTypes, setUserDocTypes] = useState<
 		userDocType[] | null
 	>(null);
+	const [searchTerm, setSearchTerm] = useState('');
 	const { usersList, status, error } = useSelector(
-		(state: RootState) => {
-			// console.log(state);
-
-			return (
-				state.users || {
-					list: [],
-					status: 'idle2',
-					error: null,
-				}
-			);
-		}
+		(state: RootState) => state.users
 	);
+
+	const filteredUsers = usersList?.filter(
+		(user) =>
+			`${user.name} ${user.last_name}`
+				.toLowerCase()
+				.includes(searchTerm.toLowerCase()) ||
+			user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			user.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			`${user.user_doc_type?.symbol}-${user.doc_number}`
+				.toLowerCase()
+				.includes(searchTerm.toLowerCase())
+	);
+
 	const handleOpen = async (user: user | null = null) => {
-		const { resp, status } = await axiosGetDefault(
-			'api/users/userDocType'
-		);
-		if (status > 199 && status < 400) {
-			setUserDocTypes(resp);
-			setUserSelect(user);
-			setOpenNewUser(!openNewUser);
-		} else {
-			toast.error('Ocurrio un error al consultar el servidor');
+		try {
+			const { resp, status } = await axiosGetDefault(
+				'api/users/userDocType'
+			);
+			if (status > 199 && status < 400) {
+				setUserDocTypes(resp);
+				setUserSelect(user);
+				setOpenNewUser(!openNewUser);
+			} else {
+				toast.error('Ocurrió un error al consultar el servidor');
+			}
+		} catch (err) {
+			toast.error('Error al cargar tipos de documento');
+			console.error(err);
 		}
 	};
+
 	const switchUser = async (user: user) => {
 		const req: user = { ...user, is_active: !user.is_active };
 		dispatch(updateUser(req));
 	};
 
 	useEffect(() => {
-		dispatch(fetchUsers()); // Llamada al thunk para obtener los usuarios
+		dispatch(fetchUsers());
 	}, [dispatch]);
 
 	if (status === 'loading') {
-		return (
-			<>
-				<LoadingPage />
-			</>
-		);
+		return <LoadingPage />;
 	}
 
 	if (status === 'failed') {
-		return (
-			<>
-				<ErrorPage error={error ? error : 'Indefinido'} />
-			</>
-		);
+		return <ErrorPage error={error || 'Error indefinido'} />;
 	}
 
 	const TABLE_HEAD = [
-		'Id',
+		'ID',
 		'Nombre',
-		'Telefono',
+		'Teléfono',
 		'Email',
 		'Tipo',
 		'Estatus',
-		'Edit',
+		'Acciones',
 	];
 
 	return (
-		<div className="container">
+		<div className="container mx-auto px-4">
 			<PageTitle title="Administradores" breadCrumbs={breadCrumbs} />
-			{/* <code>{JSON.stringify(usersList)}</code> */}
-			<div className="flex flex-col gap-3">
-				<div className="flex flex-col">
-					<Card
-						placeholder={undefined}
+
+			<div className="flex flex-col gap-6">
+				{/* Card de acciones */}
+				<Card
+					className="w-full"
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+					placeholder={undefined}
+				>
+					<CardBody
+						className="p-4 md:p-6"
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						placeholder={undefined}
 					>
-						<CardBody
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
+						<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 							<Typography
-								variant="h5"
-								placeholder={undefined}
+								variant="h4"
+								color="blue-gray"
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
+								placeholder={undefined}
 							>
-								Agregar
+								Gestión de Usuarios
 							</Typography>
-							<div className="flex flex-col">
+
+							<div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+								<div className="relative flex w-full md:w-72">
+									<Input
+										type="text"
+										placeholder="Buscar usuario..."
+										className="pr-8"
+										value={searchTerm}
+										onChange={(e) => setSearchTerm(e.target.value)}
+										containerProps={{ className: 'min-w-[100px]' }}
+										labelProps={{ className: 'hidden' }}
+										crossOrigin={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									/>
+									<Search className="absolute right-3 top-2.5 h-5 w-5 text-blue-gray-300" />
+								</div>
+
 								<Button
-									placeholder={undefined}
+									className="flex items-center gap-2"
+									color="blue"
+									onClick={() => handleOpen(null)}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									className="flex flex-col text-center justify-center "
-									onClick={() => {
-										handleOpen(null);
-									}}
+									placeholder={undefined}
 								>
-									<Plus size={15} className="mx-auto text-lg" />
+									<Plus size={18} />
+									Nuevo Usuario
 								</Button>
 							</div>
-						</CardBody>
-					</Card>
-				</div>
-				<div className="flex flex-col col-span-5">
-					<Card
-						placeholder={undefined}
+						</div>
+					</CardBody>
+				</Card>
+
+				{/* Tabla de usuarios */}
+				<Card
+					className="w-full overflow-hidden"
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+					placeholder={undefined}
+				>
+					<CardHeader
+						floated={false}
+						shadow={false}
+						color="transparent"
+						className="m-0 p-4 md:p-6 border-b"
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
-						className="h-full w-full pt-3"
+						placeholder={undefined}
 					>
 						<Typography
 							variant="h5"
-							placeholder={undefined}
+							color="blue-gray"
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
+							placeholder={undefined}
 						>
-							Administradores
+							Listado de Usuarios
 						</Typography>
-						<table>
-							<thead>
-								<tr>
-									{TABLE_HEAD.map((head) => (
-										<th
-											key={head}
-											className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
-										>
-											<Typography
-												variant="small"
-												color="blue-gray"
-												className="font-normal leading-none opacity-70 text-center"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
+						<Typography
+							variant="small"
+							color="gray"
+							className="mt-1"
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+							placeholder={undefined}
+						>
+							{filteredUsers?.length || 0} usuarios registrados
+						</Typography>
+					</CardHeader>
+
+					<CardBody
+						className="p-0"
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						placeholder={undefined}
+					>
+						<div className="overflow-x-auto">
+							<table className="w-full min-w-max">
+								<thead>
+									<tr>
+										{TABLE_HEAD.map((head) => (
+											<th
+												key={head}
+												className="border-b border-blue-gray-100 bg-blue-gray-50 py-3 px-4"
 											>
-												{head}
-											</Typography>
-										</th>
-									))}
-								</tr>
-							</thead>
-							<tbody>
-								{usersList.map((user, index) => {
-									const isLast = index === usersList.length - 1;
-									const classes = isLast
-										? 'p-4'
-										: 'p-4 border-b border-blue-gray-50';
-
-									return (
-										<tr key={user.id}>
-											<td className={classes}>
-												{user.user_doc_type?.symbol}-{user.doc_number}
-											</td>
-											<td className={classes}>
-												{user.name} {user.last_name}
-											</td>
-											<td className={classes}>{user.phone}</td>
-											<td className={classes}>{user.email}</td>
-											<td className={classes}>
-												{!user.student?.id && !user.instructor?.id
-													? 'Sin Roles'
-													: ''}
-												{user.student?.id ? 'Piloto' : ''} <br />
-												{user.instructor?.id ? 'Instructor' : ''}
-											</td>
-											<td className={classes}>
-												{user.is_active ? (
-													<Chip
-														color="green"
-														value="Activo"
-														className="text-center"
-													/>
-												) : (
-													<Chip
-														color="red"
-														value="Inativo"
-														className="text-center"
-													/>
-												)}
-											</td>
-
-											<td className={classes}>
-												<ButtonGroup
-													placeholder={undefined}
+												<Typography
+													variant="small"
+													color="blue-gray"
+													className="font-bold text-center"
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													variant="text"
-													size="sm"
-													color={user.is_active ? 'green' : 'red'}
+													placeholder={undefined}
 												>
-													{!user.student?.id && (
-														<Button
-															size="sm"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-															onClick={() => {
-																dispatch(
-																	userStudent(user.id ? user.id : -1)
-																);
-															}}
-														>
-															<Plane size={15} />
-														</Button>
-													)}
-													{!user.instructor?.id && (
-														<Button
-															size="sm"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-															onClick={() => {
-																dispatch(
-																	userInstructor(
-																		user.id ? user.id : -1
-																	)
-																);
-															}}
-														>
-															<Presentation size={15} />
-														</Button>
-													)}
-													<Button
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														className="flex flex-col text-center justify-center "
-														onClick={() => {
-															switchUser(user);
-														}}
-														title={
-															user.is_active
-																? 'Desactivar'
-																: 'Activar'
-														}
-													>
-														{user.is_active ? (
-															<PowerOff
-																size={15}
-																className="mx-auto text-lg"
-															/>
-														) : (
-															<Power
-																size={15}
-																className="mx-auto text-lg"
-															/>
-														)}
-													</Button>
-													<Button
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														onClick={() => {
-															handleOpen(user);
-														}}
-													>
-														<Pencil size={18} />
-													</Button>
-												</ButtonGroup>
+													{head}
+												</Typography>
+											</th>
+										))}
+									</tr>
+								</thead>
+								<tbody>
+									{filteredUsers?.length ? (
+										filteredUsers.map((user) => {
+											const userType = [];
+											if (user.student?.id) userType.push('Piloto');
+											if (user.instructor?.id)
+												userType.push('Instructor');
+											if (userType.length === 0)
+												userType.push('Sin Roles');
+
+											return (
+												<tr
+													key={user.id}
+													className="hover:bg-blue-gray-50/50"
+												>
+													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+														{user.user_doc_type?.symbol}-
+														{user.doc_number}
+													</td>
+													<td className="py-3 px-4 border-b border-blue-gray-100">
+														<div className="flex items-center gap-3">
+															{/* <Avatar
+																src={user.photo || undefined}
+																alt={`${user.name} ${user.last_name}`}
+																size="sm"
+																className="border-2 border-white shadow-lg shadow-blue-gray-500/10"
+																placeholder={undefined}
+															>
+																{!user.photo && (
+																	<User className="h-4 w-4" />
+																)}
+															</Avatar> */}
+															<div>
+																<Typography
+																	variant="small"
+																	color="blue-gray"
+																	className="font-semibold"
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	placeholder={undefined}
+																>
+																	{user.name} {user.last_name}
+																</Typography>
+															</div>
+														</div>
+													</td>
+													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+														{user.phone || 'N/A'}
+													</td>
+													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+														{user.email}
+													</td>
+													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+														{userType.join(' / ')}
+													</td>
+													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+														<Chip
+															color={user.is_active ? 'green' : 'red'}
+															value={
+																user.is_active ? 'Activo' : 'Inactivo'
+															}
+															className="capitalize"
+														/>
+													</td>
+													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+														<div className="flex justify-center gap-1">
+															{!user.student?.id && (
+																<Tooltip content="Hacer Piloto">
+																	<IconButton
+																		variant="text"
+																		color="blue"
+																		onClick={() =>
+																			dispatch(
+																				userStudent(user.id || -1)
+																			)
+																		}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		placeholder={undefined}
+																	>
+																		<Plane className="h-4 w-4" />
+																	</IconButton>
+																</Tooltip>
+															)}
+															{!user.instructor?.id && (
+																<Tooltip content="Hacer Instructor">
+																	<IconButton
+																		variant="text"
+																		color="amber"
+																		onClick={() =>
+																			dispatch(
+																				userInstructor(user.id || -1)
+																			)
+																		}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		placeholder={undefined}
+																	>
+																		<Presentation className="h-4 w-4" />
+																	</IconButton>
+																</Tooltip>
+															)}
+															<Tooltip
+																content={
+																	user.is_active
+																		? 'Desactivar'
+																		: 'Activar'
+																}
+															>
+																<IconButton
+																	variant="text"
+																	color={
+																		user.is_active ? 'red' : 'green'
+																	}
+																	onClick={() => switchUser(user)}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	placeholder={undefined}
+																>
+																	{user.is_active ? (
+																		<PowerOff className="h-4 w-4" />
+																	) : (
+																		<Power className="h-4 w-4" />
+																	)}
+																</IconButton>
+															</Tooltip>
+															<Tooltip content="Editar">
+																<IconButton
+																	variant="text"
+																	color="blue-gray"
+																	onClick={() => handleOpen(user)}
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	<Pencil className="h-4 w-4" />
+																</IconButton>
+															</Tooltip>
+														</div>
+													</td>
+												</tr>
+											);
+										})
+									) : (
+										<tr>
+											<td
+												colSpan={TABLE_HEAD.length}
+												className="py-6 text-center"
+											>
+												<Typography
+													variant="small"
+													color="blue-gray"
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+													placeholder={undefined}
+												>
+													No se encontraron usuarios
+												</Typography>
 											</td>
 										</tr>
-									);
-								})}
-							</tbody>
-						</table>
-					</Card>
-				</div>
+									)}
+								</tbody>
+							</table>
+						</div>
+					</CardBody>
+				</Card>
 			</div>
 
-			{/* <code>{JSON.stringify(openNewUser, null, 4)}</code> */}
+			{/* Modal */}
 			{openNewUser && userDocTypes && (
 				<ModalFormUser
 					userSelect={userSelect}
