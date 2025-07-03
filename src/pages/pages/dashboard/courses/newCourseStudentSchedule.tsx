@@ -21,7 +21,6 @@ import { breadCrumbsItems, user } from '../../../../types/utilities';
 import { AppDispatch, RootState } from '../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateCourseStudent } from '../../../../features/courseSlice';
-
 import PageTitle from '../../../../components/PageTitle';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
@@ -30,7 +29,6 @@ import { useReactToPrint } from 'react-to-print';
 import { Mail, Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
 import PDFCourseSchedule from './pdfCourseSchedule';
-// import { useNavigate } from 'react-router-dom';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -42,52 +40,49 @@ const breadCrumbs: breadCrumbsItems[] = [
 		href: '/dashboard/courses',
 	},
 ];
-const NewCourse = () => {
+
+const NewCourseStudentSchedule = () => {
 	const componentRef = useRef<HTMLDivElement>(null);
-	// const navigate = useNavigate();
-
 	const dispatch = useDispatch<AppDispatch>();
-
 	const { course, subject, user } = useSelector(
-		(state: RootState) => {
-			return {
-				course: state.courses,
-				subject: state.subjects,
-				user: state.users,
-			};
-		}
+		(state: RootState) => ({
+			course: state.courses,
+			subject: state.subjects,
+			user: state.users,
+		})
 	);
 
+	// Refs
 	const dateInputRef = useRef<HTMLInputElement | null>(null);
 	const typeTripRef = useRef<number>(
-		course.courseStudent?.type_trip
-			? course.courseStudent.type_trip
-			: 1
+		course.courseStudent?.type_trip || 1
 	);
 	const licenseRef = useRef<number>(
-		course.courseStudent?.license ? course.courseStudent.license : 1
+		course.courseStudent?.license || 1
 	);
-
 	const regulationRef = useRef<number>(
-		course.courseStudent?.regulation
-			? course.courseStudent.regulation
-			: 1
+		course.courseStudent?.regulation || 1
+	);
+	const studentSelectRef = useRef<user | null>(null);
+
+	// State
+	const [open, setOpen] = useState(1);
+	const [studentSelect, setStudentSelect] = useState<user | null>(
+		null
 	);
 
+	// Handlers
 	const handlePrint = useReactToPrint({
 		contentRef: componentRef,
 		documentTitle: `Curso-${course.courseStudent?.code}`,
 	});
-	const [open, setOpen] = useState(1);
 
 	const handleOpen = (value: number) =>
 		setOpen(open === value ? 0 : value);
-	const [studentSelect, setStudentSelect] = useState<user | null>();
-	const studentSelectRef = useRef<user | null>();
 
 	const handlePilot = (value: string | undefined) => {
 		const studentSelected = user.studentList.find(
-			(part) => part.student?.id === parseInt(value ? value : '-1')
+			(part) => part.student?.id === parseInt(value || '-1')
 		);
 		if (studentSelected) {
 			setStudentSelect(studentSelected);
@@ -95,6 +90,7 @@ const NewCourse = () => {
 		}
 		handleChange();
 	};
+
 	const handleChange = async () => {
 		if (course.courseSelected?.id && course.courseStudent?.id) {
 			dispatch(
@@ -110,6 +106,7 @@ const NewCourse = () => {
 			);
 		}
 	};
+
 	const handleChangeRadio = (id: number, type: string) => {
 		switch (type) {
 			case 'type_trip':
@@ -121,14 +118,14 @@ const NewCourse = () => {
 			case 'regulation':
 				regulationRef.current = id;
 				break;
-
 			default:
 				console.log('type error in radio Button');
-
 				break;
 		}
 		handleChange();
 	};
+
+	// Effects
 	useEffect(() => {
 		const setStudentFunc = (value: number) => {
 			const studentSelected = user.studentList.find(
@@ -139,6 +136,7 @@ const NewCourse = () => {
 				studentSelectRef.current = studentSelected;
 			}
 		};
+
 		if (course.courseStudent?.student?.id) {
 			setStudentFunc(course.courseStudent.student.id);
 		}
@@ -149,6 +147,7 @@ const NewCourse = () => {
 		}
 	}, [course.courseStudent, user.studentList]);
 
+	// Derived data
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
@@ -156,22 +155,10 @@ const NewCourse = () => {
 		  }))
 		: [];
 
-	if (course.status === 'loading') {
-		return (
-			<>
-				<LoadingPage />
-			</>
-		);
-	}
-	if (course.status === 'failed') {
-		return (
-			<>
-				<ErrorPage
-					error={course.error ? course.error : 'Indefinido'}
-				/>
-			</>
-		);
-	}
+	// Loading and error states
+	if (course.status === 'loading') return <LoadingPage />;
+	if (course.status === 'failed')
+		return <ErrorPage error={course.error || 'Indefinido'} />;
 
 	return (
 		<div className="content-center">
@@ -179,6 +166,7 @@ const NewCourse = () => {
 				title={`${course.courseSelected?.name} ${course.courseSelected?.course_level.name}`}
 				breadCrumbs={breadCrumbs}
 			/>
+
 			<Card
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
@@ -189,9 +177,8 @@ const NewCourse = () => {
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					{/* <code>{JSON.stringify(course.scheduleList, null, 4)}</code> */}
-
-					<div className="bg-blue-100 rounded-md">
+					{/* Header Section */}
+					<div className="bg-blue-100 rounded-md p-4 mb-4">
 						<Typography
 							variant="h5"
 							placeholder={undefined}
@@ -202,36 +189,37 @@ const NewCourse = () => {
 							{course.courseSelected?.course_level.name}
 						</Typography>
 						<Typography
+							variant="lead"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
-							variant="lead"
 						>
 							{course.courseSelected?.description}
 						</Typography>
 						<Typography
+							variant="lead"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
-							variant="lead"
 						>
 							{course.courseStudent?.code}
 						</Typography>
 					</div>
-					<hr />
-					<div className="grid grid-cols-7 gap-4 py-2">
-						<div className="flex flex-col col-span-3 gap-2 max-w-96">
-							<div className="">
+
+					<hr className="my-4" />
+
+					{/* Student and Course Details */}
+					<div className="grid grid-cols-1 lg:grid-cols-7 gap-4 py-2">
+						<div className="lg:col-span-3">
+							<div className="mb-4">
 								<Select
-									label="Selecionar Piloto"
+									label="Seleccionar Piloto"
 									disabled={course.courseStudent?.approve}
+									value={`${studentSelect?.student?.id}`}
+									onChange={handlePilot}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
-									value={`${studentSelect?.student?.id}`}
 									onPointerLeaveCapture={undefined}
-									onChange={(e) => {
-										handlePilot(e);
-									}}
 								>
 									{user.studentList.map((pilot) => (
 										<Option
@@ -245,45 +233,29 @@ const NewCourse = () => {
 							</div>
 
 							{studentSelect && (
-								<>
-									<div className="flex flex-row gap-3">
-										<Typography
-											variant="small"
-											className="font-bold"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Número de Identificación{' '}
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{studentSelect.doc_number}
-										</Typography>
-										<Typography
-											variant="small"
-											className="font-bold"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Telefono
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{studentSelect.phone}
-										</Typography>
-									</div>
-								</>
+								<div className="flex flex-wrap gap-3 mb-4">
+									<Typography
+										variant="small"
+										className="font-bold"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Número de Identificación:{' '}
+										{studentSelect.doc_number}
+									</Typography>
+									<Typography
+										variant="small"
+										className="font-bold"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Teléfono: {studentSelect.phone}
+									</Typography>
+								</div>
 							)}
+
 							<Input
 								type="date"
 								label="Fecha de inicio"
@@ -299,194 +271,215 @@ const NewCourse = () => {
 								inputRef={dateInputRef}
 								required={true}
 								crossOrigin={undefined}
+								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							/>
 						</div>
-						<div className="flex flex-col w-full  pl-16  col-span-4 border border-gray-400 rounded-md">
-							<div className="flex flex-row w-full gap-8 px-20">
-								<Radio
-									name="type_trip"
-									defaultChecked={
-										course.courseStudent?.type_trip === 1
-									}
-									label="PIC"
-									color="red"
-									disabled={course.courseStudent?.approve}
-									onChange={() => {
-										handleChangeRadio(1, 'type_trip');
-									}}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									crossOrigin={undefined}
-								/>
-								<Radio
-									name="type_trip"
-									defaultChecked={
-										course.courseStudent?.type_trip === 2
-									}
-									label="SIC"
-									disabled={course.courseStudent?.approve}
-									color="red"
-									onChange={() => {
-										handleChangeRadio(2, 'type_trip');
-									}}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									crossOrigin={undefined}
-								/>
-								<Radio
-									name="type_trip"
-									defaultChecked={
-										course.courseStudent?.type_trip === 3
-									}
-									label="TRIP"
-									disabled={course.courseStudent?.approve}
-									onChange={() => {
-										handleChangeRadio(3, 'type_trip');
-									}}
-									color="red"
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									crossOrigin={undefined}
-								/>
-							</div>
-							<div className="flex flex-row w-max gap-4">
-								<Typography
-									variant="h6"
-									className="pt-2"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Licencia
-								</Typography>
 
-								<div className="flex gap-10">
-									<Radio
-										name="license"
-										defaultChecked={
-											course.courseStudent?.license === 1
-										}
-										disabled={course.courseStudent?.approve}
-										label="ATP"
-										onChange={() => {
-											handleChangeRadio(1, 'license');
-										}}
-										color="red"
+						{/* Course Options */}
+						<div className="lg:col-span-4 border border-gray-400 rounded-md p-4">
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								{/* Type Trip */}
+								<div>
+									<Typography
+										variant="h6"
+										className="mb-2"
+										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-									<Radio
-										name="license"
-										defaultChecked={
-											course.courseStudent?.license === 2
-										}
-										label="Commercial"
-										color="red"
-										disabled={course.courseStudent?.approve}
-										onChange={() => {
-											handleChangeRadio(2, 'license');
-										}}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-
-									<Radio
-										name="license"
-										disabled={course.courseStudent?.approve}
-										defaultChecked={
-											course.courseStudent?.license === 3
-										}
-										label="Privado"
-										color="red"
-										onChange={() => {
-											handleChangeRadio(3, 'license');
-										}}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
+									>
+										Tipo de Viaje
+									</Typography>
+									<div className="flex flex-col gap-2">
+										<Radio
+											name="type_trip"
+											defaultChecked={
+												course.courseStudent?.type_trip === 1
+											}
+											label="PIC"
+											color="red"
+											disabled={course.courseStudent?.approve}
+											onChange={() =>
+												handleChangeRadio(1, 'type_trip')
+											}
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Radio
+											name="type_trip"
+											defaultChecked={
+												course.courseStudent?.type_trip === 2
+											}
+											label="SIC"
+											disabled={course.courseStudent?.approve}
+											color="red"
+											onChange={() =>
+												handleChangeRadio(2, 'type_trip')
+											}
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Radio
+											name="type_trip"
+											defaultChecked={
+												course.courseStudent?.type_trip === 3
+											}
+											label="TRIP"
+											disabled={course.courseStudent?.approve}
+											onChange={() =>
+												handleChangeRadio(3, 'type_trip')
+											}
+											color="red"
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+									</div>
 								</div>
-							</div>
-							<div className="flex flex-row w-max gap-4">
-								<Typography
-									variant="h6"
-									className="pt-2"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Cumplimiento de la Normativa
-								</Typography>
 
-								<div className="flex gap-10">
-									<Radio
-										name="regulation"
-										disabled={course.courseStudent?.approve}
-										defaultChecked={
-											course.courseStudent?.regulation === 1
-										}
-										label="INAC"
-										color="red"
-										onChange={() => {
-											handleChangeRadio(1, 'regulation');
-										}}
+								{/* License */}
+								<div>
+									<Typography
+										variant="h6"
+										className="mb-2"
+										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
-									<Radio
-										name="regulation"
-										disabled={course.courseStudent?.approve}
-										defaultChecked={
-											course.courseStudent?.regulation === 2
-										}
-										label="No-INAC"
-										color="red"
-										onChange={() => {
-											handleChangeRadio(2, 'regulation');
-										}}
+									>
+										Licencia
+									</Typography>
+									<div className="flex flex-col gap-2">
+										<Radio
+											name="license"
+											defaultChecked={
+												course.courseStudent?.license === 1
+											}
+											disabled={course.courseStudent?.approve}
+											label="ATP"
+											onChange={() => handleChangeRadio(1, 'license')}
+											color="red"
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Radio
+											name="license"
+											defaultChecked={
+												course.courseStudent?.license === 2
+											}
+											label="Commercial"
+											color="red"
+											disabled={course.courseStudent?.approve}
+											onChange={() => handleChangeRadio(2, 'license')}
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Radio
+											name="license"
+											disabled={course.courseStudent?.approve}
+											defaultChecked={
+												course.courseStudent?.license === 3
+											}
+											label="Privado"
+											color="red"
+											onChange={() => handleChangeRadio(3, 'license')}
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+									</div>
+								</div>
+
+								{/* Regulation */}
+								<div>
+									<Typography
+										variant="h6"
+										className="mb-2"
+										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-									/>
+									>
+										Normativa
+									</Typography>
+									<div className="flex flex-col gap-2">
+										<Radio
+											name="regulation"
+											disabled={course.courseStudent?.approve}
+											defaultChecked={
+												course.courseStudent?.regulation === 1
+											}
+											label="INAC"
+											color="red"
+											onChange={() =>
+												handleChangeRadio(1, 'regulation')
+											}
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Radio
+											name="regulation"
+											disabled={course.courseStudent?.approve}
+											defaultChecked={
+												course.courseStudent?.regulation === 2
+											}
+											label="No-INAC"
+											color="red"
+											onChange={() =>
+												handleChangeRadio(2, 'regulation')
+											}
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+									</div>
 								</div>
 							</div>
 						</div>
-						<div className="flex flex-row gap-3 w-full">
-							<div>
-								<Button
-									size="lg"
-									placeholder={undefined}
-									className="w-20"
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									onClick={() => {
-										handlePrint();
-									}}
-								>
-									<Mail />
-								</Button>
-							</div>
-							<div>
-								<Button
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									onClick={() => {
-										handlePrint();
-									}}
-								>
-									<Printer />
-								</Button>
-							</div>
+
+						{/* Action Buttons */}
+						<div className="flex gap-3 col-span-full justify-end">
+							<Button
+								size="sm"
+								className="flex items-center gap-2"
+								onClick={() => {
+									handlePrint();
+								}}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<Mail size={18} /> Enviar
+							</Button>
+							<Button
+								className="flex items-center gap-2"
+								onClick={() => {
+									handlePrint();
+								}}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<Printer size={18} /> Imprimir
+							</Button>
 						</div>
 					</div>
 
-					<hr />
+					<hr className="my-4" />
+
+					{/* Course Sections Accordion */}
 					<Accordion
 						open={open === 1}
 						placeholder={undefined}
@@ -535,7 +528,7 @@ const NewCourse = () => {
 												key={`${day.id}-day_detail`}
 												value={day.name}
 											>
-												<div className="flex flex-col gap-2 ">
+												<div className="flex flex-col gap-2">
 													{subject.subjectList.map((subjectItem) => {
 														const SD = subjectItem.subject_days?.find(
 															(sd) =>
@@ -543,9 +536,8 @@ const NewCourse = () => {
 																sd.status &&
 																subjectItem.status
 														);
-														if (SD) {
-															hours = hours + subjectItem.hours;
-														}
+														if (SD) hours = hours + subjectItem.hours;
+
 														const schedule =
 															course.scheduleList?.find(
 																(schedule) =>
@@ -570,10 +562,7 @@ const NewCourse = () => {
 																	SD={SD}
 																	student_id={
 																		studentSelectRef.current?.student
-																			?.id
-																			? studentSelectRef.current
-																					.student.id
-																			: -1
+																			?.id || -1
 																	}
 																/>
 															</div>
@@ -587,6 +576,8 @@ const NewCourse = () => {
 							</Tabs>
 						</AccordionBody>
 					</Accordion>
+
+					{/* Results Accordion */}
 					<Accordion
 						open={open === 2}
 						placeholder={undefined}
@@ -603,30 +594,29 @@ const NewCourse = () => {
 						</AccordionHeader>
 						<AccordionBody>
 							{course.courseStudent?.score && (
-								<>
+								<div className="space-y-4">
 									{course.courseStudent.approve && (
-										<div className="flex flex-col">
-											<Typography
-												variant="h3"
-												color="light-green"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												El piloto aprobo el examen
-											</Typography>
-										</div>
+										<Typography
+											variant="h3"
+											color="light-green"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											El piloto aprobó el examen
+										</Typography>
 									)}
-									<div className="grid grid-cols-3 gap-4 py-2 px-2">
-										<div className="flex flex-row gap-2">
+
+									<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+										{/* Exam Results */}
+										<div className="space-y-2">
 											<Typography
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Resulatos del Examen
+												Resultados del Examen
 											</Typography>
-
 											<Input
 												type="number"
 												inputMode="numeric"
@@ -635,48 +625,41 @@ const NewCourse = () => {
 														? course.courseStudent.score
 														: 0
 												}
-												label="Puntos "
-												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+												label="Puntos"
+												className="[&::-webkit-inner-spin-button]:appearance-none"
+												crossOrigin={undefined}
+												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
-												crossOrigin={undefined}
 											/>
 										</div>
-										<div className="flex flex-row gap-2 justify-center">
-											{course.courseStudent?.score >= 0 && (
-												<Typography
-													variant="small"
-													className="pt-3"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													Corregido el 100%
-												</Typography>
-											)}
-										</div>
-										<div className="flex flex-row gap-2">
+
+										{/* Completion Date */}
+										<div className="space-y-2">
+											<Typography
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Fecha de completado
+											</Typography>
 											<Input
 												type="date"
-												label="Fecha de completado"
-												required={true}
 												value={moment(course.courseStudent.date)
 													.add(
-														course.courseSelected?.days
-															? course.courseSelected.days
-															: -1,
+														course.courseSelected?.days || -1,
 														'days'
 													)
 													.format('YYYY-MM-DD')}
 												crossOrigin={undefined}
+												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											/>
 										</div>
-									</div>
-									<hr />
-									<div className="grid grid-cols-3 gap-4 py-2 px-2">
-										<div className="flex flex-row gap-2">
+
+										{/* Retake Results */}
+										<div className="space-y-2">
 											<Typography
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
@@ -684,92 +667,77 @@ const NewCourse = () => {
 											>
 												Resultados para repetir examen
 											</Typography>
-
 											<Input
 												type="number"
 												inputMode="numeric"
 												value={
-													course.courseStudent.approve === false
+													!course.courseStudent.approve
 														? course.courseStudent.score
 														: 0
 												}
-												label="Puntos "
-												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+												label="Puntos"
+												className="[&::-webkit-inner-spin-button]:appearance-none"
+												crossOrigin={undefined}
+												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
-												crossOrigin={undefined}
 											/>
 										</div>
-										<div className="flex flex-row gap-2 justify-center">
-											{course.courseStudent?.score >= 0 && (
+
+										{/* Course Info */}
+										<div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+											<div className="space-y-2">
 												<Typography
-													variant="small"
-													className="pt-3"
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													Corregido el 100%
+													Horas totales en clases:
 												</Typography>
-											)}
-										</div>
-										<div className="flex flex-col gap-2">
-											<Typography
-												variant="small"
-												className="pt-3"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Horas totales en clases:
-											</Typography>
-											<Input
-												type="number"
-												inputMode="numeric"
-												label="Horas"
-												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-												crossOrigin={undefined}
-												value={
-													course.courseSelected?.hours
-														? course.courseSelected.hours
-														: -1
-												}
-											/>
-											<Typography
-												variant="small"
-												className="pt-3"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Dias totales clases:
-											</Typography>
-											<Input
-												type="number"
-												inputMode="numeric"
-												label="Dias"
-												className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-												crossOrigin={undefined}
-												value={
-													course.courseSelected?.days
-														? course.courseSelected.days
-														: -1
-												}
-											/>
+												<Input
+													type="number"
+													inputMode="numeric"
+													label="Horas"
+													className="[&::-webkit-inner-spin-button]:appearance-none"
+													value={course.courseSelected?.hours || -1}
+													crossOrigin={undefined}
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												/>
+											</div>
+											<div className="space-y-2">
+												<Typography
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													Días totales clases:
+												</Typography>
+												<Input
+													type="number"
+													inputMode="numeric"
+													label="Días"
+													className="[&::-webkit-inner-spin-button]:appearance-none"
+													value={course.courseSelected?.days || -1}
+													crossOrigin={undefined}
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												/>
+											</div>
 										</div>
 									</div>
-								</>
+								</div>
 							)}
 						</AccordionBody>
 					</Accordion>
 				</CardBody>
 			</Card>
-			<div style={{ display: 'none' }}>
-				<div ref={componentRef} className="flex flex-col w-full">
+
+			{/* Hidden PDF Section */}
+			<div className="hidden">
+				<div ref={componentRef} className="w-full">
 					<PDFCourseSchedule
 						course={course}
 						subjectList={subject.subjectList}
@@ -782,4 +750,4 @@ const NewCourse = () => {
 	);
 };
 
-export default NewCourse;
+export default NewCourseStudentSchedule;

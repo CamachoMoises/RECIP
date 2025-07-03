@@ -92,7 +92,10 @@ const Login = () => {
 						>
 							Iniciar sesión
 						</Typography>
-						<form onSubmit={handleSubmit(onSubmit)}>
+						<form
+							onSubmit={handleSubmit(onSubmit)}
+							autoComplete="off"
+						>
 							<div className="mb-1 flex flex-col gap-6 mt-8">
 								<div>
 									<Input
@@ -124,6 +127,7 @@ const Login = () => {
 										onPointerLeaveCapture={undefined}
 										crossOrigin={undefined}
 										size="lg"
+										autoComplete="new-password"
 										type="password"
 										className="bg-slate-400 rounded-md p-2 w-full mb-2 text-slate-900"
 										maxLength={20}

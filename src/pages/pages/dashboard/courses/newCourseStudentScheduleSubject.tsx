@@ -20,12 +20,14 @@ import {
 	updateSchedule,
 } from '../../../../features/courseSlice';
 import moment from 'moment';
-type Inputs = {
+
+type FormInputs = {
 	date: string;
 	hour: string;
 	classTime: string;
 	instructor_id: string;
 };
+
 const NewCourseSubject = ({
 	hours,
 	subjectItem,
@@ -46,34 +48,32 @@ const NewCourseSubject = ({
 	schedule: schedule | undefined;
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
-	let dateS = schedule?.date
-		? schedule.date
-		: course_student?.date
-		? course_student.date
-		: undefined;
-	if (dateS && !schedule?.date) {
-		const newDate = moment(dateS, 'YYYY-MM-DD').add(
-			SD?.day ? SD.day - 1 : 0,
-			'days'
-		);
-		dateS = newDate.format('YYYY-MM-DD');
+
+	// Calculate initial date
+	let initialDate = schedule?.date || course_student?.date;
+	if (initialDate && !schedule?.date && SD?.day) {
+		initialDate = moment(initialDate, 'YYYY-MM-DD')
+			.add(SD.day - 1, 'days')
+			.format('YYYY-MM-DD');
 	}
+
+	// Calculate start time
 	const hoursPassed = hours - subjectItem.hours;
 	const startTime = moment('08:00', 'HH:mm').add(
 		hoursPassed,
 		'hours'
 	);
+
+	// Form setup
 	const {
 		register,
 		handleSubmit,
 		control,
 		formState: { errors },
-	} = useForm<Inputs>({
+	} = useForm<FormInputs>({
 		defaultValues: {
-			date: dateS,
-			hour: schedule?.hour
-				? schedule.hour
-				: startTime.format('HH:mm'),
+			date: initialDate ? initialDate : moment().format('YYYY-MM-DD'),
+			hour: schedule?.hour || startTime.format('HH:mm'),
 			classTime: schedule?.classTime
 				? `${schedule.classTime}`
 				: `${subjectItem.hours}`,
@@ -83,20 +83,22 @@ const NewCourseSubject = ({
 		},
 	});
 
-	const onSubmit: SubmitHandler<Inputs> = async (data) => {
-		dispatch(setDay(SD?.day ? SD.day : 1));
+	const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+		dispatch(setDay(SD?.day || 1));
+
 		const req: schedule = {
 			id: schedule?.id,
 			instructor_id: parseInt(data.instructor_id),
 			course_id: subjectItem.course_id,
-			subject_days_id: SD?.id ? SD.id : -1,
+			subject_days_id: SD?.id || -1,
 			student_id: student_id,
-			subject_id: subjectItem.id ? subjectItem.id : -1,
-			course_student_id: course_student ? course_student.id : -1,
+			subject_id: subjectItem.id || -1,
+			course_student_id: course_student?.id || -1,
 			date: data.date,
 			hour: data.hour,
-			classTime: parseFloat(data.classTime ? data.classTime : '0'),
+			classTime: parseFloat(data.classTime || '0'),
 		};
+
 		if (schedule) {
 			await dispatch(updateSchedule(req));
 		} else {
@@ -104,27 +106,33 @@ const NewCourseSubject = ({
 		}
 	};
 
+	// Determine background color based on state
+	const bgColor = () => {
+		if (!SD || student_id < 0) return 'bg-gray-300';
+		if (schedule && SD && student_id > 0) return 'bg-green-100';
+		return '';
+	};
+
 	return (
-		<>
-			<div
-				className={`grid grid-cols-4 gap-4 py-2 px-2 ${
-					schedule && SD && student_id > 0
-						? 'bg-green-100 rounded-sm'
-						: ''
-				} ${!SD || student_id < 0 ? 'bg-gray-300 rounded-sm ' : ''}`}
-			>
-				<div className="flex flex-col gap-2">
-					<Typography
-						variant="h6"
-						className="w-60"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						{subjectItem.name}
-					</Typography>
-				</div>
-				{!subjectItem.status && (
+		<div
+			className={`grid grid-cols-1 md:grid-cols-4 gap-4 py-2 px-2 rounded-sm ${bgColor()}`}
+		>
+			{/* Subject Name */}
+			<div className="md:col-span-1">
+				<Typography
+					variant="h6"
+					className="w-full"
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					{subjectItem.name}
+				</Typography>
+			</div>
+
+			{/* Inactive Subject Message */}
+			{!subjectItem.status && (
+				<div className="md:col-span-3 flex justify-center">
 					<Typography
 						variant="h5"
 						className="w-full text-center"
@@ -132,137 +140,169 @@ const NewCourseSubject = ({
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						La asignacion esta inactiva
+						La asignación está inactiva
 					</Typography>
-				)}
-				{SD && student_id > 0 && (
-					<>
-						<form onSubmit={handleSubmit(onSubmit)}>
-							<div className="flex flex-row gap-3">
-								<div className="flex flex-col gap-2">
-									<Input
-										type="date"
-										disabled={approve}
-										label="Fecha"
-										{...register('date', {
-											required: {
-												value: true,
-												message: 'la fecha es requerida',
-											},
-										})}
-										required={true}
-										crossOrigin={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									/>
-									{errors.date && (
-										<span className="text-red-500">
-											La fecha es requerida
-										</span>
-									)}
-									<Input
-										type="time"
-										label="Hora de inicio"
-										required={true}
-										disabled={approve}
-										{...register('hour', {
-											required: {
-												value: true,
-												message: 'la Hora es requerida',
-											},
-										})}
-										crossOrigin={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									/>
-									{errors.hour && (
-										<span className="text-red-500">
-											La hora es requerida
-										</span>
-									)}
-								</div>
-								<div className="flex flex-row gap-2">
-									<div className="flex flex-col gap-2">
-										<Input
-											type="text"
-											disabled={approve}
-											{...register('classTime', {
-												required: {
-													value: true,
-													message: 'la Hora es requerida',
-												},
-												validate: async (value: string) => {
-													const regex = /^\d+(\.\d+)?$/;
-													if (!regex.test(value))
-														return 'Debe ser nuemrico con decimales separados por puntos';
-													if (parseFloat(value) > subjectItem.hours) {
-														return `no debe superar las horas maximas de la asignacion ${subjectItem.hours}`;
-													}
-													return true;
-												},
-											})}
-											label="Horas de clase"
-											className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-											crossOrigin={undefined}
-										/>
-										{errors.classTime && (
-											<span className="text-red-500">
-												{errors.classTime.message}
-											</span>
-										)}
-									</div>
+				</div>
+			)}
+
+			{/* Subject Form */}
+			{SD && student_id > 0 && (
+				<form
+					onSubmit={handleSubmit(onSubmit)}
+					className="md:col-span-3"
+				>
+					<div className="flex flex-col md:flex-row gap-4">
+						{/* Date and Time Inputs */}
+						<div className="flex flex-col gap-2 w-full md:w-auto">
+							<Input
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+								type="date"
+								disabled={approve}
+								label="Fecha"
+								{...register('date', {
+									required: {
+										value: true,
+										message: 'La fecha es requerida',
+									},
+								})}
+								crossOrigin={undefined}
+								placeholder={undefined}
+							/>
+							{errors.date && (
+								<Typography
+									variant="small"
+									color="red"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{errors.date.message}
+								</Typography>
+							)}
+
+							<Input
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+								type="time"
+								label="Hora de inicio"
+								disabled={approve}
+								{...register('hour', {
+									required: {
+										value: true,
+										message: 'La hora es requerida',
+									},
+								})}
+								crossOrigin={undefined}
+								placeholder={undefined}
+							/>
+							{errors.hour && (
+								<Typography
+									variant="small"
+									color="red"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{errors.hour.message}
+								</Typography>
+							)}
+						</div>
+
+						{/* Class Hours Input */}
+						<div className="flex flex-col md:flex-row gap-2 items-center">
+							<div className="w-full">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									disabled={approve}
+									{...register('classTime', {
+										required: {
+											value: true,
+											message: 'Las horas son requeridas',
+										},
+										validate: (value: string) => {
+											const regex = /^\d+(\.\d+)?$/;
+											if (!regex.test(value)) {
+												return 'Debe ser numérico con decimales separados por puntos';
+											}
+											if (parseFloat(value) > subjectItem.hours) {
+												return `No debe superar las horas máximas (${subjectItem.hours})`;
+											}
+											return true;
+										},
+									})}
+									label="Horas de clase"
+									className="[&::-webkit-inner-spin-button]:appearance-none"
+									crossOrigin={undefined}
+									placeholder={undefined}
+								/>
+								{errors.classTime && (
 									<Typography
-										variant="h6"
+										variant="small"
+										color="red"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Max: {subjectItem.hours}Hrs
+										{errors.classTime.message}
 									</Typography>
-									<br />
-								</div>
-								<div className="flex flex-row gap-2">
-									<Controller
-										name="instructor_id"
-										control={control}
-										rules={{
-											required: true,
-										}}
-										render={({ field }) => (
-											<Select
-												label="Selecionar Instructor"
-												placeholder={undefined}
-												disabled={approve}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-												{...field}
-											>
-												{user.instructorList.map((instr) => (
-													<Option
-														key={`instr-${instr.id}`}
-														value={`${instr.instructor?.id}`}
-													>
-														{instr.name} {instr.last_name}
-													</Option>
-												))}
-											</Select>
-										)}
-									/>
-								</div>
-								<input type="submit" hidden />
-								{errors.instructor_id && (
-									<span className="text-red-500">
-										El instructor es requerido
-									</span>
 								)}
 							</div>
-						</form>
-					</>
-				)}
-			</div>
-		</>
+							<Typography
+								variant="small"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Máx: {subjectItem.hours} Hrs
+							</Typography>
+						</div>
+
+						{/* Instructor Select */}
+						<div className="w-full">
+							<Controller
+								name="instructor_id"
+								control={control}
+								rules={{ required: 'El instructor es requerido' }}
+								render={({ field }) => (
+									<Select
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										label="Seleccionar Instructor"
+										disabled={approve}
+										{...field}
+										placeholder={undefined}
+									>
+										{user.instructorList.map((instructor) => (
+											<Option
+												key={`instr-${instructor.id}`}
+												value={`${instructor.instructor?.id}`}
+											>
+												{instructor.name} {instructor.last_name}
+											</Option>
+										))}
+									</Select>
+								)}
+							/>
+							{errors.instructor_id && (
+								<Typography
+									variant="small"
+									color="red"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{errors.instructor_id.message}
+								</Typography>
+							)}
+						</div>
+					</div>
+					<input type="submit" hidden />
+				</form>
+			)}
+		</div>
 	);
 };
 
