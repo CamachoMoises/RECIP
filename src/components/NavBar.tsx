@@ -14,12 +14,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
 import { logout } from '../features/authSlice';
 import toast from 'react-hot-toast';
+import { useLocation } from 'react-router-dom';
 
 const NavBar = () => {
+	const location = useLocation();
 	const [openNav, setOpenNav] = useState(false);
 	const auth = useSelector((state: RootState) => state.auth);
 	const dispatch = useDispatch<AppDispatch>();
-
 	useEffect(() => {
 		const handleResize = () => {
 			if (window.innerWidth >= 768) {
@@ -112,6 +113,40 @@ const NavBar = () => {
 			},
 		},
 	];
+	const downloadManual = () => {
+		// Mapeo de rutas a nombres de archivo
+		const routeToManualMap: Record<string, string> = {
+			'/dashboard': 'manual_dashboard',
+			'/profile': 'manual_perfil',
+			// Agrega más rutas según sea necesario
+		};
+
+		// Obtener el nombre del manual o usar 'manual_general' como predeterminado
+		const manualName =
+			routeToManualMap[location.pathname] || 'manual_general';
+		const manualPath = `/manual/${manualName}.pdf`;
+
+		// Verificar si el archivo existe
+		fetch(manualPath, { method: 'HEAD' })
+			.then((response) => {
+				if (response.ok) {
+					const link = document.createElement('a');
+					link.href = manualPath;
+					link.download = `${manualName}.pdf`;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					toast.success(`Manual descargado: ${manualName}.pdf`);
+				} else {
+					toast.error(
+						'El manual para esta sección no está disponible'
+					);
+				}
+			})
+			.catch(() => {
+				toast.error('Error al intentar descargar el manual');
+			});
+	};
 
 	return (
 		<>
@@ -254,6 +289,30 @@ const NavBar = () => {
 								</IconButton>
 							</>
 						)}
+						<IconButton
+							variant="text"
+							className="text-white hover:bg-white/10"
+							onClick={downloadManual}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="24"
+								height="24"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<circle cx="12" cy="12" r="10" />
+								<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+								<line x1="12" y1="17" x2="12.01" y2="17" />
+							</svg>
+						</IconButton>
 					</div>
 				</div>
 
