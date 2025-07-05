@@ -33,7 +33,7 @@ const Icons = () => {
 							<UserRound size={60} />
 						</div>{' '}
 						<br />
-						Aministradores
+						Administradores
 					</Button>
 				</div>
 				<div>
