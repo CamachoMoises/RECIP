@@ -158,7 +158,7 @@ const Icons = () => {
 							<Cog size={60} />
 						</div>{' '}
 						<br />
-						Configuracion
+						Configuracion <br /> cursos
 					</Button>
 				</div>
 			</div>
