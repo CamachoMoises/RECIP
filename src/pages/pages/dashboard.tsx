@@ -67,7 +67,7 @@ const Dashboard = () => {
 									muted
 								>
 									<source
-										src="https://res.cloudinary.com/moisesinc/video/upload/v1751626055/recip_resource/video_background_fnjzr8.mp4"
+										src="https://res.cloudinary.com/moisesinc/video/upload/v1751816931/recip_resource/avion2_drrbld.mp4"
 										type="video/mp4"
 									/>
 									Tu navegador no soporta el elemento de video.

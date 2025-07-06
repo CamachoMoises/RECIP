@@ -152,7 +152,10 @@ const GeneralCourses = () => {
 			: [];
 	return (
 		<div className="container">
-			<PageTitle title="Cursos" breadCrumbs={breadCrumbs} />
+			<PageTitle
+				title="Cursos Iniciales y Periodicos "
+				breadCrumbs={breadCrumbs}
+			/>
 			<div className="flex flex-col">
 				<Card
 					placeholder={undefined}
