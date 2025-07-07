@@ -16,12 +16,11 @@ import ScrollToTop from './components/scrollTop';
 
 function App() {
 	return (
-		<div className="min-h-screen w-full">
-			<div className="flex flex-col  px-5 gap-3 ">
-				<Router>
+		<div>
+			<Router>
+				<NavBar />
+				<div className="flex flex-col  gap-3">
 					<div className="content">
-						<NavBar />
-
 						<div className="w-full">
 							<ScrollToTop />
 							<Routes>
@@ -38,9 +37,9 @@ function App() {
 							</Routes>
 						</div>
 					</div>
-				</Router>
+				</div>
 				{/* <Counter /> */}
-			</div>
+			</Router>
 		</div>
 	);
 }
