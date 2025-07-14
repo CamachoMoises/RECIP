@@ -53,6 +53,14 @@ const ModalFormCourse = ({
 		{ value: '5', label: '5 dias' },
 		{ value: '6', label: '6 dias' },
 		{ value: '7', label: '7 dias' },
+		{ value: '8', label: '8 dias' },
+		{ value: '9', label: '9 dias' },
+		{ value: '10', label: '10 dias' },
+		{ value: '11', label: '11 dias' },
+		{ value: '12', label: '12 dias' },
+		{ value: '13', label: '13 dias' },
+		{ value: '14', label: '14 dias' },
+		{ value: '15', label: '15 dias' },
 	];
 
 	// Implementación del modal para el formulario de nuevo curso o edición de un curso
