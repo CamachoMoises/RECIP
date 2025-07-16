@@ -1,4 +1,5 @@
 import {
+	Button,
 	Input,
 	Option,
 	Select,
@@ -20,6 +21,7 @@ import {
 	updateSchedule,
 } from '../../../../features/courseSlice';
 import moment from 'moment';
+import { Save } from 'lucide-react';
 
 type FormInputs = {
 	date: string;
@@ -261,7 +263,6 @@ const NewCourseSubject = ({
 								Máx: {subjectItem.hours} Hrs
 							</Typography>
 						</div>
-
 						{/* Instructor Select */}
 						<div className="w-full">
 							<Controller
@@ -300,7 +301,21 @@ const NewCourseSubject = ({
 								</Typography>
 							)}
 						</div>
+						<div className="flex justify-center align-bottom py-6 px-2 ">
+							<Button
+								variant="gradient"
+								color="green"
+								type="submit"
+								disabled={approve || !canViewContent}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<Save size={18} />
+							</Button>
+						</div>
 					</div>
+
 					<input type="submit" hidden />
 				</form>
 			)}

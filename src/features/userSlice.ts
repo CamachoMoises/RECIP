@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from '../services/axios';
-import { UserState, user } from '../types/utilities';
+import { StatusParam, UserState, user } from '../types/utilities';
 
 
 
@@ -38,22 +38,22 @@ export const fetchUser = createAsyncThunk<user, number>(
 	}
 );
 
-export const fetchStudents = createAsyncThunk<user[]>(
+export const fetchStudents = createAsyncThunk<user[], StatusParam | undefined>(
 	'user/fetchStudents',
-	async (_, { rejectWithValue }) => {
+	async (params = {}, { rejectWithValue }) => {
 		try {
-			const response = await axiosGetSlice('api/users/student');
+			const response = await axiosGetSlice(`api/users/student`, params);
 			return response;
 		} catch (error: any) {
 			return rejectWithValue(error.message);
 		}
 	}
 );
-export const fetchInstructors = createAsyncThunk<user[]>(
+export const fetchInstructors = createAsyncThunk<user[], StatusParam | undefined>(
 	'user/fetchInstructors',
-	async (_, { rejectWithValue }) => {
+	async (params = {}, { rejectWithValue }) => {
 		try {
-			const response = await axiosGetSlice('api/users/instructor');
+			const response = await axiosGetSlice(`api/users/instructor`, params);
 			return response;
 		} catch (error: any) {
 			return rejectWithValue(error.message);

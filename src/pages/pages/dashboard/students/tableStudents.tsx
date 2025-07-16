@@ -72,7 +72,7 @@ const TableStudents = () => {
 	};
 
 	useEffect(() => {
-		dispatch(fetchStudents());
+		dispatch(fetchStudents({ status: true }));
 	}, [dispatch]);
 
 	return (

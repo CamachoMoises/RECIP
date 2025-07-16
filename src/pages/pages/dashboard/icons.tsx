@@ -100,7 +100,8 @@ const Icons = () => {
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
-						disabled={!PermissionsValidate([])}
+						// disabled={!PermissionsValidate([])}
+						disabled={!PermissionsValidate(['super_user'])}
 					>
 						<div className="flex justify-center">
 							<NotebookText size={60} />

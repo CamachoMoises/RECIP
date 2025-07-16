@@ -8,6 +8,7 @@ import {
 	ListItem,
 	ListItemPrefix,
 	Typography,
+	Collapse,
 } from '@material-tailwind/react';
 import {
 	breadCrumbsItems,
@@ -62,6 +63,14 @@ const GeneralCourses = () => {
 	} = useSelector((state: RootState) => {
 		return state.courses;
 	});
+	const [open, setOpen] = useState(false);
+
+	const toggleOpen = () => {
+		setOpen((cur) => {
+			console.log('Cambiando estado a:', !cur);
+			return !cur;
+		});
+	};
 	const canViewContent = PermissionsValidate(['staff', 'instructor']);
 	useEffect(() => {
 		dispatch(fetchCourses());
@@ -108,12 +117,13 @@ const GeneralCourses = () => {
 			})
 		);
 		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
-		await dispatch(fetchInstructors());
-		await dispatch(fetchStudents());
+		await dispatch(fetchInstructors({ status: true }));
+		await dispatch(fetchStudents({ status: true }));
 		await dispatch(fetchSchedule(CS.id ? CS.id : -1));
 		navigate(`../new_course/${CS.id}/${CS.course_id}`);
 	};
 	const navigateCourseStudent = async (CS: courseStudent) => {
+		console.log('OJOOOOO');
 		await dispatch(
 			fetchSubjects({
 				course_id: CS.course_id ? CS.course_id : -1,
@@ -123,8 +133,8 @@ const GeneralCourses = () => {
 		);
 		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
 		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
-		await dispatch(fetchInstructors());
-		await dispatch(fetchStudents());
+		await dispatch(fetchInstructors({ status: true }));
+		await dispatch(fetchStudents({ status: true }));
 		await dispatch(fetchSchedule(CS.id ? CS.id : -1));
 		navigate(`../new_course/${CS.id}/${CS.course_id}`);
 	};
@@ -151,12 +161,13 @@ const GeneralCourses = () => {
 			  }))
 			: [];
 	return (
-		<div className="container">
-			<PageTitle
-				title="Cursos Iniciales y Periodicos "
-				breadCrumbs={breadCrumbs}
-			/>
-			<div className="flex flex-col">
+		<>
+			<div className="container">
+				<PageTitle
+					title="Cursos Iniciales y Periodicos "
+					breadCrumbs={breadCrumbs}
+				/>
+
 				{canViewContent && (
 					<Card
 						placeholder={undefined}
@@ -168,210 +179,237 @@ const GeneralCourses = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<div className="grid grid-cols-2 gap-2">
-								{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
-								{courseList.map((course) => {
-									return (
-										<div key={course.id}>
-											<Card
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												<CardBody
+							<Button
+								fullWidth
+								color="blue"
+								onClick={toggleOpen}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Ajendar Nuevo Curso
+							</Button>
+						</CardBody>
+					</Card>
+				)}
+				{canViewContent && (
+					<Collapse open={open}>
+						<Card
+							className="mt-4"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<CardBody
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<div className="grid grid-cols-2 gap-2">
+									{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
+									{courseList.map((course) => {
+										return (
+											<div key={course.id}>
+												<Card
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													className="flex flex-col justify-center"
 												>
-													<Typography
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture
-														variant="lead"
-													>
-														{course.name}
-													</Typography>
-													<Typography
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture
-														variant="small"
-													>
-														{course.course_level.name}
-													</Typography>
-													<Typography
+													<CardBody
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
+														className="flex flex-col justify-center"
 													>
-														{course.course_type.name}
-													</Typography>
-													<div className="flex flex-row justify-center">
-														<ButtonGroup
-															size="sm"
+														<Typography
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture
+															variant="lead"
+														>
+															{course.name}
+														</Typography>
+														<Typography
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture
+															variant="small"
+														>
+															{course.course_level.name}
+														</Typography>
+														<Typography
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 														>
-															<Button
-																title="Agendar nuevo curso"
-																className="flex flex-col justify-center text-center align-middle"
+															{course.course_type.name}
+														</Typography>
+														<div className="flex flex-row justify-center">
+															<ButtonGroup
+																size="sm"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
-																onClick={() =>
-																	handleNewCourseSchedule(
-																		course.id ? course.id : -1
-																	)
-																}
 															>
-																Agendar nuevo curso
-																<div className="flex flex-row w-full justify-center">
-																	<CalendarCheck size={20} />
-																</div>
-															</Button>
-														</ButtonGroup>
-													</div>
-												</CardBody>
-											</Card>
-										</div>
-									);
-								})}
-							</div>
-						</CardBody>
-					</Card>
+																<Button
+																	title="Agendar nuevo curso"
+																	className="flex flex-col justify-center text-center align-middle"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	onClick={() =>
+																		handleNewCourseSchedule(
+																			course.id ? course.id : -1
+																		)
+																	}
+																>
+																	Agendar nuevo curso
+																	<div className="flex flex-row w-full justify-center">
+																		<CalendarCheck size={20} />
+																	</div>
+																</Button>
+															</ButtonGroup>
+														</div>
+													</CardBody>
+												</Card>
+											</div>
+										);
+									})}
+								</div>
+							</CardBody>
+						</Card>
+					</Collapse>
 				)}
-			</div>
 
-			<div className="flex flex-col pt-4">
-				<Card
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-				>
-					<CardBody
+				<div className="flex flex-col pt-4">
+					<Card
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<Typography
-							variant="h5"
+						<CardBody
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Agenda de Cursos a pilotos o participantes
-						</Typography>
-						<List
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							{courseStudentList?.map((CL) => (
-								<ListItem
-									key={`${CL.id}.courseList`}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									onClick={() => {
-										navigateCourseStudent(CL);
-									}}
-								>
-									<ListItemPrefix
+							<Typography
+								variant="h5"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Agenda de Cursos a Pilotos/Participantes
+							</Typography>
+							<List
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								{courseStudentList?.map((CL) => (
+									<ListItem
+										key={`${CL.id}.courseList`}
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
+										onClick={() => {
+											navigateCourseStudent(CL);
+										}}
 									>
-										{CL.code}
-									</ListItemPrefix>
-									<div>
-										<Typography
-											variant="h6"
-											color="blue-gray"
+										<ListItemPrefix
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CL.student?.user?.name
-												? `${CL.student.user.name} ${CL.student.user.last_name}`
-												: 'Sin Piloto'}
-										</Typography>
-										<Typography
-											variant="small"
-											color="gray"
-											className="font-normal"
+											{CL.code}sssssssssssss
+										</ListItemPrefix>
+										<div>
+											<Typography
+												variant="h6"
+												color="blue-gray"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{CL.student?.user?.name
+													? `${CL.student.user.name} ${CL.student.user.last_name}`
+													: 'Sin Piloto'}
+											</Typography>
+											<Typography
+												variant="small"
+												color="gray"
+												className="font-normal"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{CL.course?.name} (
+												{CL.course?.course_level.name}-
+												{CL.course?.course_type.name})
+											</Typography>
+										</div>
+									</ListItem>
+								))}
+							</List>
+							{totalPages > 1 && (
+								<>
+									<div className="flex flex-col w-full text-center">
+										<small> Total:{totalItems}</small>
+									</div>
+									<div className="flex w-full justify-center gap-4">
+										<Button
+											variant="text"
+											className="flex items-center gap-2 rounded-full"
+											onClick={() => {
+												prev();
+											}}
+											disabled={active === 1}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CL.course?.name} (
-											{CL.course?.course_level.name}-
-											{CL.course?.course_type.name})
-										</Typography>
+											<ChevronLeft
+												strokeWidth={2}
+												className="h-4 w-4"
+											/>
+											Prev
+										</Button>
+										<div className="flex items-center gap-2">
+											{pages.map((page) => {
+												return (
+													<IconButton
+														key={page.name}
+														{...getItemProps(page.id + 1)}
+													>
+														{page.id + 1}
+													</IconButton>
+												);
+											})}
+										</div>
+										<Button
+											variant="text"
+											className="flex items-center gap-2 rounded-full"
+											onClick={() => {
+												next();
+											}}
+											disabled={active === totalPages}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Sig
+											<ChevronRight
+												strokeWidth={2}
+												className="h-4 w-4"
+											/>
+										</Button>
 									</div>
-								</ListItem>
-							))}
-						</List>
-						{totalPages > 1 && (
-							<>
-								<div className="flex flex-col w-full text-center">
-									<small> Total:{totalItems}</small>
-								</div>
-								<div className="flex w-full justify-center gap-4">
-									<Button
-										variant="text"
-										className="flex items-center gap-2 rounded-full"
-										onClick={() => {
-											prev();
-										}}
-										disabled={active === 1}
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										<ChevronLeft
-											strokeWidth={2}
-											className="h-4 w-4"
-										/>
-										Prev
-									</Button>
-									<div className="flex items-center gap-2">
-										{pages.map((page) => {
-											return (
-												<IconButton
-													key={page.name}
-													{...getItemProps(page.id + 1)}
-												>
-													{page.id + 1}
-												</IconButton>
-											);
-										})}
-									</div>
-									<Button
-										variant="text"
-										className="flex items-center gap-2 rounded-full"
-										onClick={() => {
-											next();
-										}}
-										disabled={active === totalPages}
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Sig
-										<ChevronRight
-											strokeWidth={2}
-											className="h-4 w-4"
-										/>
-									</Button>
-								</div>
-							</>
-						)}
-					</CardBody>
-				</Card>
+								</>
+							)}
+						</CardBody>
+					</Card>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 

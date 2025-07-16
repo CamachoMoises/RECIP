@@ -73,7 +73,7 @@ const TableInstructors = () => {
 	};
 
 	useEffect(() => {
-		dispatch(fetchInstructors());
+		dispatch(fetchInstructors({ status: true }));
 	}, [dispatch]);
 
 	return (

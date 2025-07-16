@@ -218,7 +218,7 @@ export interface breadCrumbsItems {
     href: string;
     parametros?: [];
 }
-
+export type StatusParam = { status?: boolean };
 export interface user {
     doc_number: number;
     email: string;
