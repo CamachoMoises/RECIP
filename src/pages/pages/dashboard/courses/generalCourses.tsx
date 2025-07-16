@@ -320,7 +320,7 @@ const GeneralCourses = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CL.code}sssssssssssss
+											{CL.code}
 										</ListItemPrefix>
 										<div>
 											<Typography
