@@ -17,11 +17,11 @@ export const PermissionsValidate = (permissions: SpecificWordsArray, type: 'and'
     permissions.forEach((permission) => {
         if (type === 'and' || validate === false) {
             switch (permission) {
-                case 'super_user':
-                    if (!auth.user?.is_superuser) {
-                        return false
-                    }
-                    break;
+                // case 'super_user':
+                //     if (!auth.user?.is_superuser) {
+                //         return false
+                //     }
+                //     break;
                 case 'staff':
                     validate = auth.user?.is_staff ? true : false;
                     break;

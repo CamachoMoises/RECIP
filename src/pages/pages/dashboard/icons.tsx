@@ -43,7 +43,9 @@ const Icons = () => {
 						variant="gradient"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
-						disabled={!PermissionsValidate(['staff', 'instructor'])}
+						disabled={
+							!PermissionsValidate(['staff', 'instructor', 'student'])
+						}
 						onPointerLeaveCapture={undefined}
 						onClick={() => navigate('courses')}
 					>

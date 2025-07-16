@@ -37,6 +37,7 @@ const NewCourseSubject = ({
 	SD,
 	schedule,
 	approve,
+	canViewContent,
 }: {
 	hours: number;
 	subjectItem: subject;
@@ -46,6 +47,7 @@ const NewCourseSubject = ({
 	student_id: number;
 	SD: subjectDays | undefined;
 	schedule: schedule | undefined;
+	canViewContent: boolean;
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
 
@@ -158,7 +160,7 @@ const NewCourseSubject = ({
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 								type="date"
-								disabled={approve}
+								disabled={approve || !canViewContent}
 								label="Fecha"
 								{...register('date', {
 									required: {
@@ -186,7 +188,7 @@ const NewCourseSubject = ({
 								onPointerLeaveCapture={undefined}
 								type="time"
 								label="Hora de inicio"
-								disabled={approve}
+								disabled={approve || !canViewContent}
 								{...register('hour', {
 									required: {
 										value: true,
@@ -216,7 +218,7 @@ const NewCourseSubject = ({
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									type="text"
-									disabled={approve}
+									disabled={approve || !canViewContent}
 									{...register('classTime', {
 										required: {
 											value: true,
@@ -271,7 +273,7 @@ const NewCourseSubject = ({
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										label="Seleccionar Instructor"
-										disabled={approve}
+										disabled={approve || !canViewContent}
 										{...field}
 										placeholder={undefined}
 									>

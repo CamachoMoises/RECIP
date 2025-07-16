@@ -29,6 +29,7 @@ import { useReactToPrint } from 'react-to-print';
 import { Mail, Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
 import PDFCourseSchedule from './pdfCourseSchedule';
+import { PermissionsValidate } from '../../../../services/permissionsValidate';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -42,6 +43,7 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 
 const NewCourseStudentSchedule = () => {
+	const canViewContent = PermissionsValidate(['staff', 'instructor']);
 	const componentRef = useRef<HTMLDivElement>(null);
 	const dispatch = useDispatch<AppDispatch>();
 	const { course, subject, user } = useSelector(
@@ -214,7 +216,9 @@ const NewCourseStudentSchedule = () => {
 							<div className="mb-4">
 								<Select
 									label="Seleccionar Piloto"
-									disabled={course.courseStudent?.approve}
+									disabled={
+										course.courseStudent?.approve || !canViewContent
+									}
 									value={`${studentSelect?.student?.id}`}
 									onChange={handlePilot}
 									placeholder={undefined}
@@ -259,7 +263,9 @@ const NewCourseStudentSchedule = () => {
 							<Input
 								type="date"
 								label="Fecha de inicio"
-								disabled={course.courseStudent?.approve}
+								disabled={
+									course.courseStudent?.approve || !canViewContent
+								}
 								value={
 									course.courseStudent?.date
 										? moment(course.courseStudent.date).format(
@@ -299,7 +305,10 @@ const NewCourseStudentSchedule = () => {
 											}
 											label="PIC"
 											color="red"
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											onChange={() =>
 												handleChangeRadio(1, 'type_trip')
 											}
@@ -314,7 +323,10 @@ const NewCourseStudentSchedule = () => {
 												course.courseStudent?.type_trip === 2
 											}
 											label="SIC"
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											color="red"
 											onChange={() =>
 												handleChangeRadio(2, 'type_trip')
@@ -330,7 +342,10 @@ const NewCourseStudentSchedule = () => {
 												course.courseStudent?.type_trip === 3
 											}
 											label="TRIP"
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											onChange={() =>
 												handleChangeRadio(3, 'type_trip')
 											}
@@ -360,7 +375,10 @@ const NewCourseStudentSchedule = () => {
 											defaultChecked={
 												course.courseStudent?.license === 1
 											}
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											label="ATP"
 											onChange={() => handleChangeRadio(1, 'license')}
 											color="red"
@@ -376,7 +394,10 @@ const NewCourseStudentSchedule = () => {
 											}
 											label="Commercial"
 											color="red"
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											onChange={() => handleChangeRadio(2, 'license')}
 											crossOrigin={undefined}
 											placeholder={undefined}
@@ -385,7 +406,10 @@ const NewCourseStudentSchedule = () => {
 										/>
 										<Radio
 											name="license"
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											defaultChecked={
 												course.courseStudent?.license === 3
 											}
@@ -414,7 +438,10 @@ const NewCourseStudentSchedule = () => {
 									<div className="flex flex-col gap-2">
 										<Radio
 											name="regulation"
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											defaultChecked={
 												course.courseStudent?.regulation === 1
 											}
@@ -430,7 +457,10 @@ const NewCourseStudentSchedule = () => {
 										/>
 										<Radio
 											name="regulation"
-											disabled={course.courseStudent?.approve}
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
 											defaultChecked={
 												course.courseStudent?.regulation === 2
 											}
@@ -451,18 +481,20 @@ const NewCourseStudentSchedule = () => {
 
 						{/* Action Buttons */}
 						<div className="flex gap-3 col-span-full justify-end">
-							<Button
-								size="sm"
-								className="flex items-center gap-2"
-								onClick={() => {
-									handlePrint();
-								}}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								<Mail size={18} /> Enviar
-							</Button>
+							{canViewContent && (
+								<Button
+									size="sm"
+									className="flex items-center gap-2"
+									onClick={() => {
+										handlePrint();
+									}}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<Mail size={18} /> Enviar
+								</Button>
+							)}
 							<Button
 								className="flex items-center gap-2"
 								onClick={() => {
@@ -564,6 +596,7 @@ const NewCourseStudentSchedule = () => {
 																		studentSelectRef.current?.student
 																			?.id || -1
 																	}
+																	canViewContent={canViewContent}
 																/>
 															</div>
 														);

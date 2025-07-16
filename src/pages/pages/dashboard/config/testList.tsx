@@ -27,8 +27,9 @@ import QuestionTest from './questionTest';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import TestParams from './testParams';
-import { Plus } from 'lucide-react';
+import { Plus, Upload } from 'lucide-react';
 import NewTestModal from './newTestModal';
+import ExcelUploadComponent from './excelUploadComponent';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -43,6 +44,7 @@ const TestList = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
+	const [openExcelUpload, setOpenExcelUpload] = useState(false);
 	const { id } = useParams<{ id: string }>();
 	const { course, test } = useSelector((state: RootState) => {
 		return { course: state.courses, test: state.tests };
@@ -135,21 +137,34 @@ const TestList = () => {
 							>
 								Cantidad de examenes {test.testList.length}
 							</Typography>
-							<div className="flex flex-col">
-								<Button
-									size="sm"
-									title="Agregar examen"
-									variant="filled"
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									onClick={() => {
-										setOpen(!open);
-									}}
-									placeholder={undefined}
-								>
-									<Plus size={15} className="mx-auto text-lg" />
-								</Button>
-							</div>
+								<div className="flex flex-col gap-2">
+									<Button
+										size="sm"
+										title="Agregar examen"
+										variant="filled"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										onClick={() => {
+											setOpen(!open);
+										}}
+										placeholder={undefined}
+									>
+										<Plus size={15} className="mx-auto text-lg" />
+									</Button>
+									<Button
+										size="sm"
+										title="Subir preguntas desde Excel"
+										variant="outlined"
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										onClick={() => {
+											setOpenExcelUpload(!openExcelUpload);
+										}}
+										placeholder={undefined}
+									>
+										<Upload size={15} className="mx-auto text-lg" />
+									</Button>
+								</div>
 						</div>
 					</CardBody>
 				</Card>
@@ -268,6 +283,15 @@ const TestList = () => {
 						);
 					})}
 				</div>
+				{openExcelUpload && (
+					<ExcelUploadComponent
+						open={openExcelUpload}
+						setOpen={setOpenExcelUpload}
+						courseId={course.courseSelected?.id || -1}
+						questionTypes={test.questionTypes}
+						testList={test.testList}
+					/>
+				)}
 			</div>
 			{open && course.courseSelected && (
 				<>

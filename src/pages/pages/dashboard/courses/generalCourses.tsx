@@ -39,6 +39,7 @@ import {
 	fetchInstructors,
 	fetchStudents,
 } from '../../../../features/userSlice';
+import { PermissionsValidate } from '../../../../services/permissionsValidate';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -61,7 +62,7 @@ const GeneralCourses = () => {
 	} = useSelector((state: RootState) => {
 		return state.courses;
 	});
-
+	const canViewContent = PermissionsValidate(['staff', 'instructor']);
 	useEffect(() => {
 		dispatch(fetchCourses());
 		dispatch(fetchCoursesStudents({ currentPage, pageSize }));
@@ -82,8 +83,6 @@ const GeneralCourses = () => {
 
 	const next = async () => {
 		if (active === totalPages) return;
-		console.log('ojo');
-
 		setActive(active + 1);
 		await dispatch(
 			fetchCoursesStudents({ currentPage: active + 1, pageSize })
@@ -143,6 +142,7 @@ const GeneralCourses = () => {
 			</>
 		);
 	}
+
 	const pages =
 		totalPages > 0
 			? Array.from({ length: totalPages }, (_, i) => ({
@@ -157,89 +157,91 @@ const GeneralCourses = () => {
 				breadCrumbs={breadCrumbs}
 			/>
 			<div className="flex flex-col">
-				<Card
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-				>
-					<CardBody
+				{canViewContent && (
+					<Card
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<div className="grid grid-cols-2 gap-2">
-							{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
-							{courseList.map((course) => {
-								return (
-									<div key={course.id}>
-										<Card
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											<CardBody
+						<CardBody
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<div className="grid grid-cols-2 gap-2">
+								{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
+								{courseList.map((course) => {
+									return (
+										<div key={course.id}>
+											<Card
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
-												className="flex flex-col justify-center"
 											>
-												<Typography
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture
-													variant="lead"
-												>
-													{course.name}
-												</Typography>
-												<Typography
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture
-													variant="small"
-												>
-													{course.course_level.name}
-												</Typography>
-												<Typography
+												<CardBody
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
+													className="flex flex-col justify-center"
 												>
-													{course.course_type.name}
-												</Typography>
-												<div className="flex flex-row justify-center">
-													<ButtonGroup
-														size="sm"
+													<Typography
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture
+														variant="lead"
+													>
+														{course.name}
+													</Typography>
+													<Typography
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture
+														variant="small"
+													>
+														{course.course_level.name}
+													</Typography>
+													<Typography
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														<Button
-															title="Agendar nuevo curso"
-															className="flex flex-col justify-center text-center align-middle"
+														{course.course_type.name}
+													</Typography>
+													<div className="flex flex-row justify-center">
+														<ButtonGroup
+															size="sm"
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
-															onClick={() =>
-																handleNewCourseSchedule(
-																	course.id ? course.id : -1
-																)
-															}
 														>
-															Agendar nuevo curso
-															<div className="flex flex-row w-full justify-center">
-																<CalendarCheck size={20} />
-															</div>
-														</Button>
-													</ButtonGroup>
-												</div>
-											</CardBody>
-										</Card>
-									</div>
-								);
-							})}
-						</div>
-					</CardBody>
-				</Card>
+															<Button
+																title="Agendar nuevo curso"
+																className="flex flex-col justify-center text-center align-middle"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+																onClick={() =>
+																	handleNewCourseSchedule(
+																		course.id ? course.id : -1
+																	)
+																}
+															>
+																Agendar nuevo curso
+																<div className="flex flex-row w-full justify-center">
+																	<CalendarCheck size={20} />
+																</div>
+															</Button>
+														</ButtonGroup>
+													</div>
+												</CardBody>
+											</Card>
+										</div>
+									);
+								})}
+							</div>
+						</CardBody>
+					</Card>
+				)}
 			</div>
 
 			<div className="flex flex-col pt-4">
