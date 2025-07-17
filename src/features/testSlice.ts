@@ -63,7 +63,7 @@ export const fetchQuestions = createAsyncThunk<question[], { test_id: number, qu
     'user/fetchQuestions',
     async ({ test_id, question_type_id, test_question_type_id }, { rejectWithValue }) => {
         try {
-            const response = await axiosGetSlice(`api/test/questions/${test_id}`, {
+            const response = await axiosGetSlice(`api/test/questions/by-test/${test_id}`, {
                 question_type_id,
                 test_question_type_id
             });

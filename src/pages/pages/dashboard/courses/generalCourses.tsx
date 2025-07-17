@@ -187,7 +187,7 @@ const GeneralCourses = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Ajendar Nuevo Curso
+								Agendar Nuevo Curso
 							</Button>
 						</CardBody>
 					</Card>

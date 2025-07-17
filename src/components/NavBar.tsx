@@ -8,12 +8,29 @@ import {
 	Avatar,
 	MenuList,
 	MenuItem,
+	Popover,
+	PopoverHandler,
+	PopoverContent,
+	Button,
 } from '@material-tailwind/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
 import { logout } from '../features/authSlice';
 import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
+const manualRoutes = {
+	dashboard: {
+		users: 'manual_users',
+		instructors: 'manual_instructors',
+		students: 'manual_students',
+		courses: 'manual_courses',
+		new_course: 'manual_new_course',
+		_: 'manual_dashboard', // fallback para /dashboard
+	},
+	login: 'manual_login',
+	profile: 'manual_perfil',
+	_: 'manual_general', // fallback global
+};
 interface menuItems {
 	id: string;
 	icon: React.ReactNode;
@@ -91,20 +108,39 @@ const NavBar = () => {
 			},
 		},
 	];
-	const downloadManual = () => {
-		// Mapeo de rutas a nombres de archivo
-		const routeToManualMap: Record<string, string> = {
-			'/dashboard': 'manual_dashboard',
-			'/profile': 'manual_perfil',
-			// Agrega más rutas según sea necesario
-		};
+	const resolveManualNameFromPath = (
+		path: string,
+		manualTree: Record<string, any>
+	): string => {
+		const segments = path.split('/').filter(Boolean); // elimina vacíos
 
-		// Obtener el nombre del manual o usar 'manual_general' como predeterminado
-		const manualName =
-			routeToManualMap[location.pathname] || 'manual_general';
+		let current: any = manualTree;
+
+		for (const segment of segments) {
+			if (typeof current === 'string') {
+				// Si ya llegamos a una hoja (manual directo), la devolvemos
+				return current;
+			}
+
+			if (current[segment]) {
+				current = current[segment];
+			} else if (current._) {
+				return current._;
+			} else {
+				break;
+			}
+		}
+
+		// Si después del recorrido no se llegó a una hoja, devolver fallback
+		return typeof current === 'string'
+			? current
+			: current._ || manualTree._ || 'manual_general';
+	};
+	const downloadManual = () => {
+		const path = location.pathname;
+		const manualName = resolveManualNameFromPath(path, manualRoutes);
 		const manualPath = `/manual/${manualName}.pdf`;
 
-		// Verificar si el archivo existe
 		fetch(manualPath, { method: 'HEAD' })
 			.then((response) => {
 				if (response.ok) {
@@ -262,30 +298,54 @@ const NavBar = () => {
 								</IconButton>
 							</>
 						)}
-						<IconButton
-							variant="text"
-							className="text-white hover:bg-white/10"
-							onClick={downloadManual}
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="24"
-								height="24"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
+
+						<Popover placement="bottom">
+							<PopoverHandler>
+								<IconButton
+									variant="text"
+									className="text-white hover:bg-white/10"
+									// onClick={downloadManual}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<circle cx="12" cy="12" r="10" />
+										<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+										<line x1="12" y1="17" x2="12.01" y2="17" />
+									</svg>
+								</IconButton>
+							</PopoverHandler>
+							<PopoverContent
+								className="z-50"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
 							>
-								<circle cx="12" cy="12" r="10" />
-								<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-								<line x1="12" y1="17" x2="12.01" y2="17" />
-							</svg>
-						</IconButton>
+								<div className="flex">
+									<Button
+										color="blue"
+										variant="gradient"
+										onClick={downloadManual}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										descargar Manual de uso
+									</Button>
+								</div>
+							</PopoverContent>
+						</Popover>
 					</div>
 				</div>
 

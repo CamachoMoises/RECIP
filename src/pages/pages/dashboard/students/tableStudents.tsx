@@ -104,14 +104,14 @@ const TableStudents = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Gestión de Pilotos
+								Gestión de Participantes
 							</Typography>
 
 							<div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
 								<div className="relative flex w-full md:w-72">
 									<Input
 										type="text"
-										placeholder="Buscar piloto..."
+										placeholder="Buscar Participantes..."
 										className="pr-8"
 										value={searchTerm}
 										onChange={(e) => setSearchTerm(e.target.value)}
@@ -134,7 +134,7 @@ const TableStudents = () => {
 									onPointerLeaveCapture={undefined}
 								>
 									<Plus size={18} />
-									Nuevo Piloto
+									Nuevo Participante
 								</Button>
 							</div>
 						</div>
@@ -164,7 +164,7 @@ const TableStudents = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Listado de Pilotos
+							Listado de Participantes
 						</Typography>
 					</CardHeader>
 
