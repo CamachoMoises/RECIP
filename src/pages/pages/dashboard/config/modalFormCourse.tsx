@@ -200,7 +200,7 @@ const ModalFormCourse = ({
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 											{...field}
-											label="Seleccionar Nivel de curso"
+											label="Seleccionar Tipo de curso"
 										>
 											{courseTypes.map((courseType) => (
 												<Option
@@ -287,8 +287,9 @@ const ModalFormCourse = ({
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									type="text"
-									label="Modelo del Avion (Si aplica)"
-									placeholder="Modelo del Avion (Si aplica)"
+									required
+									label="Modelo del Avion"
+									placeholder="Modelo del Avion"
 									maxLength={500}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 									crossOrigin={undefined}
