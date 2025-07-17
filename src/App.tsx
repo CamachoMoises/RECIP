@@ -9,10 +9,10 @@ import AboutUs from './pages/AboutUs';
 import ContactPage from './pages/ContactPage';
 import NavBar from './components/NavBar';
 import Login from './pages/login';
-import NuevoCurso from './pages/pages/nuevoCurso';
 import './App.css';
 import Dashboard from './pages/pages/dashboard';
 import ScrollToTop from './components/scrollTop';
+import NotFound from './pages/notFound';
 
 function App() {
 	return (
@@ -30,10 +30,8 @@ function App() {
 								<Route path="/contact" element={<ContactPage />} />
 								<Route path="/login" element={<Login />} />
 								<Route path="/dashboard/*" element={<Dashboard />} />
-								<Route
-									path="/nuevoCurso/*"
-									element={<NuevoCurso />}
-								/>
+
+								<Route path="*" element={<NotFound />} />
 							</Routes>
 						</div>
 					</div>
