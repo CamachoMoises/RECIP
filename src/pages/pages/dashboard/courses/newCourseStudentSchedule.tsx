@@ -539,6 +539,7 @@ const NewCourseStudentSchedule = () => {
 									{days.map((day) => (
 										<Tab
 											key={day.id}
+											className="bg-green-300 hover:bg-green-100 rounded-sm"
 											value={day.name}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}

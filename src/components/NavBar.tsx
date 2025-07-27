@@ -18,6 +18,7 @@ import { AppDispatch, RootState } from '../store';
 import { logout } from '../features/authSlice';
 import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
+import { LockIcon } from 'lucide-react';
 const manualRoutes = {
 	dashboard: {
 		users: 'manual_users',
@@ -177,7 +178,7 @@ const NavBar = () => {
 						</Typography>
 						<Typography
 							variant="small"
-							className="hidden sm:block text-center text-xs md:text-sm"
+							className="hidden sm:block text-center text-xs md:text-lg"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -193,46 +194,64 @@ const NavBar = () => {
 							<>
 								{/* Menú desktop (visible en md y superior) */}
 								<div className="hidden md:block">
-									<Menu>
-										<MenuHandler>
-											<Avatar
-												variant="circular"
-												alt="User Avatar"
-												className="cursor-pointer"
-												src="/images/user.png"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											/>
-										</MenuHandler>
-										<MenuList
+									<div className="flex flex-row gap-1">
+										<Button
+											variant="text"
+											size="sm"
+											title="Cerrar sesión"
+											ripple={false}
+											onClick={() => {
+												dispatch(logout());
+												toast.success('Sesión finalizada');
+												setOpenNav(false);
+											}}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{menuItems.map((item) => (
-												<MenuItem
-													key={item.id}
-													className="flex items-center gap-2"
+											<LockIcon className="h-4 w-4 text-white" />
+										</Button>
+										<Menu>
+											<MenuHandler>
+												<Avatar
+													variant="circular"
+													alt="User Avatar"
+													className="cursor-pointer"
+													src="/images/user.png"
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													onClick={item.action || undefined}
-												>
-													{item.icon}
-													<Typography
-														variant="small"
-														className="font-medium"
+												/>
+											</MenuHandler>
+											<MenuList
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{menuItems.map((item) => (
+													<MenuItem
+														key={item.id}
+														className="flex items-center gap-2"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
+														onClick={item.action || undefined}
 													>
-														{item.label}
-													</Typography>
-												</MenuItem>
-											))}
-										</MenuList>
-									</Menu>
+														{item.icon}
+														<Typography
+															variant="small"
+															className="font-medium"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															{item.label}
+														</Typography>
+													</MenuItem>
+												))}
+											</MenuList>
+										</Menu>
+									</div>
 								</div>
 
 								{/* Botón de menú hamburguesa (visible en móviles) */}
