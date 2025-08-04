@@ -345,6 +345,7 @@ const NavBar = () => {
 									<Button
 										color="blue"
 										variant="gradient"
+										size="sm"
 										onClick={() => {
 											downloadManual('page');
 										}}
@@ -358,6 +359,7 @@ const NavBar = () => {
 										<Button
 											color="deep-orange"
 											variant="gradient"
+											size="sm"
 											onClick={() => {
 												downloadManual('example');
 											}}

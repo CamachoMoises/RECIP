@@ -149,7 +149,7 @@ const ModalFormCourse = ({
 					onPointerLeaveCapture={undefined}
 				>
 					<div className="container mx-auto p-3">
-						<div className=" flex flex-col lg:grid lg:grid-cols-4 gap-4">
+						<div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
 							<div className="">
 								<Input
 									onPointerEnterCapture={undefined}
