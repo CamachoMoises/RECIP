@@ -123,11 +123,21 @@ const NavBar = () => {
 			? current
 			: current._ || manualTree._ || 'manual_general';
 	};
-	const downloadManual = () => {
-		const path = location.pathname;
-		const manualName = resolveManualNameFromPath(path, manualRoutes);
-		const manualPath = `/manual/${manualName}.pdf`;
-
+	const downloadManual = (type: string) => {
+		let manualPath = '';
+		if (!auth.user) {
+			toast.error('Debe iniciar sesión para descargar el manual');
+			return;
+		} else if (type === 'page') {
+			const path = location.pathname;
+			const manualName = resolveManualNameFromPath(
+				path,
+				manualRoutes
+			);
+			manualPath = `/manual/${manualName}.pdf`;
+		} else if (type === 'example' && auth.user.is_superuser) {
+			manualPath = '/manual/manual_example.pdf';
+		}
 		fetch(manualPath, { method: 'HEAD' })
 			.then((response) => {
 				if (response.ok) {
@@ -331,17 +341,33 @@ const NavBar = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<div className="flex">
+								<div className="flex flex-row gap-1">
 									<Button
 										color="blue"
 										variant="gradient"
-										onClick={downloadManual}
+										onClick={() => {
+											downloadManual('page');
+										}}
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
 										descargar Manual de uso
 									</Button>
+									{auth.user?.is_superuser && (
+										<Button
+											color="deep-orange"
+											variant="gradient"
+											onClick={() => {
+												downloadManual('example');
+											}}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Descargar Ejemplo de uso
+										</Button>
+									)}
 								</div>
 							</PopoverContent>
 						</Popover>

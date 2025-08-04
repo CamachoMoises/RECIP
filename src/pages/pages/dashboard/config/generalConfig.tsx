@@ -60,6 +60,7 @@ const GeneralConfig = () => {
 	const { course, test } = useSelector((state: RootState) => {
 		return { course: state.courses, test: state.tests };
 	});
+
 	useEffect(() => {
 		dispatch(fetchCourses());
 		dispatch(fetchQuestionTypes());
@@ -109,7 +110,7 @@ const GeneralConfig = () => {
 			if (EC) {
 				handleOpenEdit(EC);
 			} else {
-				// toast.error('No se pudo encontrar el curso');
+				toast.error('No se pudo encontrar el curso');
 			}
 		};
 
@@ -225,6 +226,14 @@ const GeneralConfig = () => {
 														variant="lead"
 													>
 														{course.name}
+													</Typography>
+													<Typography
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture
+														variant="small"
+													>
+														{course.code}
 													</Typography>
 													<Typography
 														placeholder={undefined}

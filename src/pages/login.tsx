@@ -12,8 +12,9 @@ import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../store';
 import { credentials } from '../types/utilities';
 import { loginUser } from '../features/authSlice';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { EyeIcon, EyeOff } from 'lucide-react';
 
 type Inputs = {
 	email: string;
@@ -50,7 +51,13 @@ const Login = () => {
 			toast.error(auth.error);
 		}
 	}, [auth.status, auth.error]);
-
+	const [passwordShown, setPasswordShown] = useState(false);
+	const togglePasswordVisiblity = () => {
+		setPasswordShown((cur) => !cur);
+		setTimeout(() => {
+			setPasswordShown(false);
+		}, 1000);
+	};
 	return (
 		<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen">
 			{/* Video */}
@@ -128,10 +135,19 @@ const Login = () => {
 										crossOrigin={undefined}
 										size="lg"
 										autoComplete="new-password"
-										type="password"
 										className="bg-slate-400 rounded-md p-2 w-full mb-2 text-slate-900"
 										maxLength={20}
 										label="Contraseña"
+										type={passwordShown ? 'text' : 'password'}
+										icon={
+											<i onClick={togglePasswordVisiblity}>
+												{passwordShown ? (
+													<EyeIcon className="h-5 w-5" />
+												) : (
+													<EyeOff className="h-5 w-5" />
+												)}
+											</i>
+										}
 										placeholder="********"
 										{...register('password', {
 											required: {

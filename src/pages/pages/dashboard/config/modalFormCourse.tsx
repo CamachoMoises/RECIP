@@ -26,6 +26,7 @@ import { AppDispatch } from '../../../../store';
 type Inputs = {
 	name: string;
 	description: string;
+	code: string;
 	days: string;
 	hours: number;
 	plane_model: string;
@@ -79,6 +80,7 @@ const ModalFormCourse = ({
 		defaultValues: {
 			name: courseSelected?.name,
 			description: courseSelected?.description,
+			code: courseSelected?.code,
 			hours: courseSelected?.hours,
 			plane_model: courseSelected?.plane_model,
 			course_type: courseSelected?.course_type.id
@@ -102,6 +104,7 @@ const ModalFormCourse = ({
 				id: courseSelected?.id ? courseSelected.id : null,
 				name: data.name,
 				description: data.description,
+				code: data.code,
 				hours: data.hours,
 				days: parseInt(data.days),
 				type: parseInt(data.course_type),
@@ -168,6 +171,30 @@ const ModalFormCourse = ({
 								{errors.name && (
 									<span className="text-red-500 text-sm/[8px] py-2">
 										{errors.name.message}
+									</span>
+								)}
+							</div>
+							<div className="">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									label="Codigo"
+									placeholder="Codigo"
+									maxLength={500}
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('code', {
+										required: {
+											value: true,
+											message: 'El Codigo es requerido',
+										},
+									})}
+									aria-invalid={errors.code ? 'true' : 'false'}
+								/>
+								{errors.code && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.code.message}
 									</span>
 								)}
 							</div>

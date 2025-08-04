@@ -235,6 +235,14 @@ const GeneralCourses = () => {
 															onPointerLeaveCapture
 															variant="small"
 														>
+															{course.code}
+														</Typography>
+														<Typography
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture
+															variant="small"
+														>
 															{course.course_level.name}
 														</Typography>
 														<Typography

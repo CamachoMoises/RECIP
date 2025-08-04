@@ -114,6 +114,16 @@ const ModalFormUser = ({
 	const [passwordShown, setPasswordShown] = useState(false);
 	const togglePasswordVisiblity = () => {
 		setPasswordShown((cur) => !cur);
+		setTimeout(() => {
+			setPasswordShown(false);
+		}, 1000);
+	};
+	const [passwordConfShown, setPasswordConfShown] = useState(false);
+	const togglePasswordConfVisiblity = () => {
+		setPasswordConfShown((cur) => !cur);
+		setTimeout(() => {
+			setPasswordConfShown(false);
+		}, 1000);
 	};
 
 	const validateUserEmail = async (value: string) => {
@@ -190,7 +200,7 @@ const ModalFormUser = ({
 					onPointerLeaveCapture={undefined}
 				>
 					<div className="container mx-auto p-3">
-						<div className="grid grid-cols-3 gap-4">
+						<div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
 							<div className="">
 								<Input
 									onPointerEnterCapture={undefined}
@@ -238,7 +248,29 @@ const ModalFormUser = ({
 									</span>
 								)}
 							</div>
-
+							<div className="">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									label="Cedula"
+									maxLength={20}
+									placeholder="Cedula"
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('doc_number', {
+										required: {
+											value: true,
+											message: 'La cedula es requerida',
+										},
+									})}
+								/>
+								{errors.doc_number && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.doc_number.message}
+									</span>
+								)}
+							</div>
 							<div>
 								<Controller
 									name="country_name"
@@ -347,30 +379,8 @@ const ModalFormUser = ({
 									</span>
 								)}
 							</div>
-							<div className="">
-								<Input
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									type="text"
-									label="Cedula"
-									maxLength={20}
-									placeholder="Cedula"
-									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-									crossOrigin={undefined}
-									{...register('doc_number', {
-										required: {
-											value: true,
-											message: 'La cedula es requerida',
-										},
-									})}
-								/>
-								{errors.doc_number && (
-									<span className="text-red-500 text-sm/[8px] py-2">
-										{errors.doc_number.message}
-									</span>
-								)}
-							</div>
-							<div className="col-span-2">
+
+							<div className="col-span-3">
 								<Input
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -402,7 +412,7 @@ const ModalFormUser = ({
 									</span>
 								)}
 							</div>
-							<div className="col-span-2">
+							<div className="">
 								<Input
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -439,10 +449,19 @@ const ModalFormUser = ({
 								<Input
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									type="password"
 									label="Confirmar Contraseña"
 									placeholder="Contraseña"
 									maxLength={20}
+									type={passwordConfShown ? 'text' : 'password'}
+									icon={
+										<i onClick={togglePasswordConfVisiblity}>
+											{passwordConfShown ? (
+												<EyeIcon className="h-5 w-5" />
+											) : (
+												<EyeOff className="h-5 w-5" />
+											)}
+										</i>
+									}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
 									crossOrigin={undefined}
 									{...register('password2', {

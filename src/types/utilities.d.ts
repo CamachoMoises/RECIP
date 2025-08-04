@@ -182,6 +182,7 @@ export type course = {
     name: string;
     tests?: test[];
     description: string;
+    code: string;
     hours: number;
     days: number;
     type?: number;
