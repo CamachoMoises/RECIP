@@ -143,7 +143,7 @@ const Icons = () => {
 							<NotebookPen size={60} />
 						</div>{' '}
 						<br />
-						Evaluaciones FSTD
+						Evaluaciones FSTD / ATD
 					</Button>
 				</div>
 				<div>

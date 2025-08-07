@@ -18,7 +18,7 @@ import { AppDispatch, RootState } from '../store';
 import { logout } from '../features/authSlice';
 import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
-import { LockIcon } from 'lucide-react';
+import { DoorOpen } from 'lucide-react';
 const manualRoutes = {
 	dashboard: {
 		users: 'manual_users',
@@ -219,7 +219,7 @@ const NavBar = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											<LockIcon className="h-4 w-4 text-white" />
+											<DoorOpen className="h-4 w-4 text-white" />
 										</Button>
 										<Menu>
 											<MenuHandler>
