@@ -171,81 +171,96 @@ const GeneralAssessment = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<List
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							{course.courseStudentList?.map((CS) => (
-								<ListItem
-									key={`${CS.id}.courseList`}
+						{course.courseStudentList?.length === 0 ? (
+							<>
+								<Typography
+									variant="h2"
+									color="blue-gray"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									<ListItemPrefix
+									Sin evaluaciones cargadas
+								</Typography>
+							</>
+						) : (
+							<List
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								{course.courseStudentList?.map((CS) => (
+									<ListItem
+										key={`${CS.id}.courseList`}
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{CS.code}
-										<br />
-										{CS.course_student_assessment && (
-											<>Evaluacion Iniciada</>
-										)}
-									</ListItemPrefix>
-									<div>
-										<Typography
-											variant="h6"
-											color="blue-gray"
+										<ListItemPrefix
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CS.student?.user?.name
-												? `${CS.student.user.name} ${CS.student.user.last_name}`
-												: 'Sin Piloto'}
-										</Typography>
-										<Typography
-											variant="small"
-											color="gray"
-											className="font-normal"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{CS.course?.name} {CS.course?.description}(
-											{CS.course?.course_level.name}) (
-											{CS.course?.course_type.name})
-										</Typography>
-									</div>
-									<ListItemSuffix
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										<ButtonGroup
-											size="sm"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											<Button
-												title="Evaluacion del piloto"
+											{CS.code}
+											<br />
+											{CS.course_student_assessment && (
+												<>Evaluacion Iniciada</>
+											)}
+										</ListItemPrefix>
+										<div>
+											<Typography
+												variant="h6"
+												color="blue-gray"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
-												onClick={() => {
-													navigateCourseStudentAssessment(CS);
-												}}
 											>
-												<NotebookText size={15} />
-											</Button>
-										</ButtonGroup>
-									</ListItemSuffix>
-								</ListItem>
-							))}
-						</List>
+												{CS.student?.user?.name
+													? `${CS.student.user.name} ${CS.student.user.last_name}`
+													: 'Sin Piloto'}
+											</Typography>
+											<Typography
+												variant="small"
+												color="gray"
+												className="font-normal"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{CS.course?.name} {CS.course?.description}(
+												{CS.course?.course_level.name}) (
+												{CS.course?.course_type.name})
+											</Typography>
+										</div>
+										<ListItemSuffix
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<ButtonGroup
+												size="sm"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												<Button
+													title="Evaluacion del piloto"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+													onClick={() => {
+														navigateCourseStudentAssessment(CS);
+													}}
+												>
+													<NotebookText size={15} />
+												</Button>
+											</ButtonGroup>
+										</ListItemSuffix>
+									</ListItem>
+								))}
+							</List>
+						)}
+
 						{totalPages > 1 && (
 							<>
 								<div className="flex flex-col w-full text-center">

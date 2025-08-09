@@ -222,134 +222,134 @@ const GeneralTest = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<List
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							{course.courseStudentList?.map((CL) => {
-								const maxTries = 4;
-								let instructor: instructor | undefined = undefined;
-								let lastTest: courseStudentTest | undefined =
-									undefined;
-								const user_id = CL.student?.user?.id
-									? CL.student.user.id
-									: -1;
-								let active = true;
-								let dateTest = null;
-								let horas = null;
-								const exams_submitted =
-									CL.course_student_tests?.length || 0;
+						{course.courseStudentList?.length === 0 ? (
+							<>
+								<Typography
+									variant="h2"
+									color="blue-gray"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Sin exámenes cargados
+								</Typography>
+							</>
+						) : (
+							<List
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								{course.courseStudentList?.map((CL) => {
+									const maxTries = 4;
+									let instructor: instructor | undefined = undefined;
+									let lastTest: courseStudentTest | undefined =
+										undefined;
+									const user_id = CL.student?.user?.id
+										? CL.student.user.id
+										: -1;
+									let active = true;
+									let dateTest = null;
+									let horas = null;
+									const exams_submitted =
+										CL.course_student_tests?.length || 0;
 
-								if (exams_submitted > 0) {
-									active = exams_submitted <= maxTries;
-									lastTest = CL.course_student_tests?.slice(-1)[0];
-								}
+									if (exams_submitted > 0) {
+										active = exams_submitted <= maxTries;
+										lastTest = CL.course_student_tests?.slice(-1)[0];
+									}
 
-								if (CL.schedules?.length === 0) {
-									active = false;
-								} else {
-									dateTest = CL.schedules
-										? moment(
-												`${CL.schedules[0].date} ${CL.schedules[0].hour}`
-										  )
-										: null;
-								}
+									if (CL.schedules?.length === 0) {
+										active = false;
+									} else {
+										dateTest = CL.schedules
+											? moment(
+													`${CL.schedules[0].date} ${CL.schedules[0].hour}`
+											  )
+											: null;
+									}
 
-								const selfUser =
-									auth.user?.id === CL.student?.user?.id;
-								let selfInstructor = false;
+									const selfUser =
+										auth.user?.id === CL.student?.user?.id;
+									let selfInstructor = false;
 
-								if (!selfUser) {
-									active = false;
-								}
+									if (!selfUser) {
+										active = false;
+									}
 
-								if (CL.schedules && CL.schedules[0]) {
-									instructor = CL.schedules[0].instructor;
-									selfInstructor =
-										instructor?.user?.id === auth.user?.id;
-								}
+									if (CL.schedules && CL.schedules[0]) {
+										instructor = CL.schedules[0].instructor;
+										selfInstructor =
+											instructor?.user?.id === auth.user?.id;
+									}
 
-								if (dateTest) {
-									const currentDate = moment();
-									horas = currentDate.diff(dateTest, 'hours', true);
-								}
+									if (dateTest) {
+										const currentDate = moment();
+										horas = currentDate.diff(dateTest, 'hours', true);
+									}
 
-								if (!horas || horas < 0 || horas > 2) {
-									active = false;
-								}
+									if (!horas || horas < 0 || horas > 2) {
+										active = false;
+									}
 
-								return (
-									<ListItem
-										key={`${CL.id}.courseList`}
-										className="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-4 sm:py-3"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										<div className="flex flex-col sm:flex-row w-full gap-3">
-											<div className="flex flex-col w-full">
-												<div className="flex items-center justify-between">
-													<Typography
-														variant="h6"
-														className="text-sm sm:text-base font-semibold text-blue-gray-800"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														{CL.code}
-													</Typography>
-
-													{selfUser && exams_submitted > 0 && (
+									return (
+										<ListItem
+											key={`${CL.id}.courseList`}
+											className="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-4 sm:py-3"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<div className="flex flex-col sm:flex-row w-full gap-3">
+												<div className="flex flex-col w-full">
+													<div className="flex items-center justify-between">
 														<Typography
-															variant="small"
-															className="text-xs sm:text-sm text-red-600 bg-red-50 px-2 py-1 rounded"
+															variant="h6"
+															className="text-sm sm:text-base font-semibold text-blue-gray-800"
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 														>
-															Intentos {exams_submitted} / {maxTries}
+															{CL.code}
 														</Typography>
-													)}
-												</div>
 
-												<div className="mt-2">
-													<Typography
-														variant="small"
-														className="text-xs sm:text-sm font-semibold text-gray-700"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														Participante:
-													</Typography>
-													<Typography
-														variant="small"
-														className="text-xs sm:text-sm text-gray-800"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														{CL.student?.user?.name
-															? `${CL.student.user.name} ${CL.student.user.last_name}`
-															: 'Sin Piloto'}
-													</Typography>
+														{selfUser && exams_submitted > 0 && (
+															<Typography
+																variant="small"
+																className="text-xs sm:text-sm text-red-600 bg-red-50 px-2 py-1 rounded"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+															>
+																Intentos {exams_submitted} /{' '}
+																{maxTries}
+															</Typography>
+														)}
+													</div>
 
-													<div className="mt-1 flex flex-wrap gap-x-4">
+													<div className="mt-2">
 														<Typography
 															variant="small"
-															className="text-xs sm:text-sm text-gray-700"
+															className="text-xs sm:text-sm font-semibold text-gray-700"
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 														>
-															<span className="font-semibold">
-																Curso:
-															</span>{' '}
-															{CL.course?.name}
+															Participante:
+														</Typography>
+														<Typography
+															variant="small"
+															className="text-xs sm:text-sm text-gray-800"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															{CL.student?.user?.name
+																? `${CL.student.user.name} ${CL.student.user.last_name}`
+																: 'Sin Piloto'}
 														</Typography>
 
-														{dateTest && (
+														<div className="mt-1 flex flex-wrap gap-x-4">
 															<Typography
 																variant="small"
 																className="text-xs sm:text-sm text-gray-700"
@@ -358,152 +358,81 @@ const GeneralTest = () => {
 																onPointerLeaveCapture={undefined}
 															>
 																<span className="font-semibold">
-																	Fecha:
+																	Curso:
 																</span>{' '}
-																{dateTest.format('DD-MM-YYYY')}
+																{CL.course?.name}
 															</Typography>
-														)}
 
-														{dateTest && (
+															{dateTest && (
+																<Typography
+																	variant="small"
+																	className="text-xs sm:text-sm text-gray-700"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	<span className="font-semibold">
+																		Fecha:
+																	</span>{' '}
+																	{dateTest.format('DD-MM-YYYY')}
+																</Typography>
+															)}
+
+															{dateTest && (
+																<Typography
+																	variant="small"
+																	className="text-xs sm:text-sm text-gray-700"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	<span className="font-semibold">
+																		Hora:
+																	</span>{' '}
+																	{dateTest.format('HH:mm')}
+																</Typography>
+															)}
+														</div>
+
+														{instructor && (
 															<Typography
 																variant="small"
-																className="text-xs sm:text-sm text-gray-700"
+																className="text-xs sm:text-sm text-gray-700 mt-1"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
 															>
 																<span className="font-semibold">
-																	Hora:
+																	Instructor:
 																</span>{' '}
-																{dateTest.format('HH:mm')}
+																{instructor.user?.name}{' '}
+																{instructor.user?.last_name}
 															</Typography>
 														)}
-													</div>
 
-													{instructor && (
-														<Typography
-															variant="small"
-															className="text-xs sm:text-sm text-gray-700 mt-1"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															<span className="font-semibold">
-																Instructor:
-															</span>{' '}
-															{instructor.user?.name}{' '}
-															{instructor.user?.last_name}
-														</Typography>
-													)}
-
-													{CL.score && selfUser && (
-														<Typography
-															variant="small"
-															className="text-xs sm:text-sm font-semibold text-red-600 mt-1"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															Calificación: {CL.score} Puntos
-														</Typography>
-													)}
-												</div>
-											</div>
-
-											<div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
-												<div className="hidden sm:flex">
-													<div className="flex flex-row items-center gap-2">
-														<Button
-															title="Iniciar examen"
-															className="flex items-center gap-1 px-2 sm:px-3"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-															disabled={!active}
-															onClick={() => {
-																navigateCourseStudentTest(
-																	CL,
-																	dateTest
-																		? dateTest.format('YYYY-MM-DD')
-																		: '-1'
-																);
-															}}
-														>
-															<Pencil size={15} />
-														</Button>
-
-														{CL.score &&
-															lastTest &&
-															CL.student?.user?.id && (
-																<Button
-																	title="Respuestas"
-																	className="flex items-center gap-1 px-2 sm:px-3"
-																	disabled={active || !selfUser}
-																	onClick={() => {
-																		seeReults(
-																			lastTest.id,
-																			CL.course_id,
-																			user_id
-																		);
-																	}}
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																>
-																	<ListTodo size={15} />
-																</Button>
-															)}
-
-														{CL.score &&
-															lastTest &&
-															CL.student?.user?.id && (
-																<Button
-																	title="Revisión"
-																	className="flex items-center gap-1 px-2 sm:px-3"
-																	disabled={
-																		!selfInstructor ||
-																		exams_submitted === 0
-																	}
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																	onClick={() => {
-																		navigateReviewTest(
-																			lastTest.id,
-																			lastTest.test_id,
-																			CL.course_id,
-																			lastTest?.course_student_id,
-																			user_id
-																		);
-																	}}
-																>
-																	<NotebookText size={15} />
-																</Button>
-															)}
-													</div>
-												</div>
-
-												{/* Menú para móviles */}
-												<div className="sm:hidden">
-													<Menu>
-														<MenuHandler>
-															<IconButton
-																variant="text"
-																className="rounded-full"
+														{CL.score && selfUser && (
+															<Typography
+																variant="small"
+																className="text-xs sm:text-sm font-semibold text-red-600 mt-1"
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
 															>
-																<MoreVertical size={20} />
-															</IconButton>
-														</MenuHandler>
-														<MenuList
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															<MenuItem
-																className="flex items-center gap-2"
+																Calificación: {CL.score} Puntos
+															</Typography>
+														)}
+													</div>
+												</div>
+
+												<div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
+													<div className="hidden sm:flex">
+														<div className="flex flex-row items-center gap-2">
+															<Button
+																title="Iniciar examen"
+																className="flex items-center gap-1 px-2 sm:px-3"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
 																disabled={!active}
 																onClick={() => {
 																	navigateCourseStudentTest(
@@ -513,19 +442,16 @@ const GeneralTest = () => {
 																			: '-1'
 																	);
 																}}
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
 															>
 																<Pencil size={15} />
-																<span>Iniciar examen</span>
-															</MenuItem>
+															</Button>
 
 															{CL.score &&
 																lastTest &&
 																CL.student?.user?.id && (
-																	<MenuItem
-																		className="flex items-center gap-2"
+																	<Button
+																		title="Respuestas"
+																		className="flex items-center gap-1 px-2 sm:px-3"
 																		disabled={active || !selfUser}
 																		onClick={() => {
 																			seeReults(
@@ -539,19 +465,22 @@ const GeneralTest = () => {
 																		onPointerLeaveCapture={undefined}
 																	>
 																		<ListTodo size={15} />
-																		<span>Ver respuestas</span>
-																	</MenuItem>
+																	</Button>
 																)}
 
 															{CL.score &&
 																lastTest &&
 																CL.student?.user?.id && (
-																	<MenuItem
-																		className="flex items-center gap-2"
+																	<Button
+																		title="Revisión"
+																		className="flex items-center gap-1 px-2 sm:px-3"
 																		disabled={
 																			!selfInstructor ||
 																			exams_submitted === 0
 																		}
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
 																		onClick={() => {
 																			navigateReviewTest(
 																				lastTest.id,
@@ -561,23 +490,119 @@ const GeneralTest = () => {
 																				user_id
 																			);
 																		}}
-																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
 																	>
 																		<NotebookText size={15} />
-																		<span>Revisión</span>
-																	</MenuItem>
+																	</Button>
 																)}
-														</MenuList>
-													</Menu>
+														</div>
+													</div>
+
+													{/* Menú para móviles */}
+													<div className="sm:hidden">
+														<Menu>
+															<MenuHandler>
+																<IconButton
+																	variant="text"
+																	className="rounded-full"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	<MoreVertical size={20} />
+																</IconButton>
+															</MenuHandler>
+															<MenuList
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+															>
+																<MenuItem
+																	className="flex items-center gap-2"
+																	disabled={!active}
+																	onClick={() => {
+																		navigateCourseStudentTest(
+																			CL,
+																			dateTest
+																				? dateTest.format(
+																						'YYYY-MM-DD'
+																				  )
+																				: '-1'
+																		);
+																	}}
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	<Pencil size={15} />
+																	<span>Iniciar examen</span>
+																</MenuItem>
+
+																{CL.score &&
+																	lastTest &&
+																	CL.student?.user?.id && (
+																		<MenuItem
+																			className="flex items-center gap-2"
+																			disabled={active || !selfUser}
+																			onClick={() => {
+																				seeReults(
+																					lastTest.id,
+																					CL.course_id,
+																					user_id
+																				);
+																			}}
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			<ListTodo size={15} />
+																			<span>Ver respuestas</span>
+																		</MenuItem>
+																	)}
+
+																{CL.score &&
+																	lastTest &&
+																	CL.student?.user?.id && (
+																		<MenuItem
+																			className="flex items-center gap-2"
+																			disabled={
+																				!selfInstructor ||
+																				exams_submitted === 0
+																			}
+																			onClick={() => {
+																				navigateReviewTest(
+																					lastTest.id,
+																					lastTest.test_id,
+																					CL.course_id,
+																					lastTest?.course_student_id,
+																					user_id
+																				);
+																			}}
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			<NotebookText size={15} />
+																			<span>Revisión</span>
+																		</MenuItem>
+																	)}
+															</MenuList>
+														</Menu>
+													</div>
 												</div>
 											</div>
-										</div>
-									</ListItem>
-								);
-							})}
-						</List>
+										</ListItem>
+									);
+								})}
+							</List>
+						)}
 
 						{totalPages > 1 && (
 							<div className="mt-6">

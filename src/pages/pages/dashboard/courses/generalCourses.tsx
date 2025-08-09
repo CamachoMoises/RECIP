@@ -308,56 +308,71 @@ const GeneralCourses = () => {
 							>
 								Agenda de Cursos a Pilotos/Participantes
 							</Typography>
-							<List
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								{courseStudentList?.map((CL) => (
-									<ListItem
-										key={`${CL.id}.courseList`}
+							{courseStudentList?.length === 0 ? (
+								<>
+									<Typography
+										variant="h2"
+										color="blue-gray"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										onClick={() => {
-											navigateCourseStudent(CL);
-										}}
 									>
-										<ListItemPrefix
+										Sin cursos agendados
+									</Typography>
+								</>
+							) : (
+								<List
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{courseStudentList?.map((CL) => (
+										<ListItem
+											key={`${CL.id}.courseList`}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
+											onClick={() => {
+												navigateCourseStudent(CL);
+											}}
 										>
-											{CL.code}
-										</ListItemPrefix>
-										<div>
-											<Typography
-												variant="h6"
-												color="blue-gray"
+											<ListItemPrefix
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												{CL.student?.user?.name
-													? `${CL.student.user.name} ${CL.student.user.last_name}`
-													: 'Sin Piloto'}
-											</Typography>
-											<Typography
-												variant="small"
-												color="gray"
-												className="font-normal"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{CL.course?.name} (
-												{CL.course?.course_level.name}-
-												{CL.course?.course_type.name})
-											</Typography>
-										</div>
-									</ListItem>
-								))}
-							</List>
+												{CL.code}
+											</ListItemPrefix>
+											<div>
+												<Typography
+													variant="h6"
+													color="blue-gray"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													{CL.student?.user?.name
+														? `${CL.student.user.name} ${CL.student.user.last_name}`
+														: 'Sin Piloto'}
+												</Typography>
+												<Typography
+													variant="small"
+													color="gray"
+													className="font-normal"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													{CL.course?.name} (
+													{CL.course?.course_level.name}-
+													{CL.course?.course_type.name})
+												</Typography>
+											</div>
+										</ListItem>
+									))}
+								</List>
+							)}
+
 							{totalPages > 1 && (
 								<>
 									<div className="flex flex-col w-full text-center">
