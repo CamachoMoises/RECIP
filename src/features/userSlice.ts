@@ -6,6 +6,7 @@ import { StatusParam, UserState, user } from '../types/utilities';
 
 const initialState: UserState = {
 	status: 'idle',
+	userLogged: null,
 	userSelected: null,
 	usersList: [],
 	studentList: [],
@@ -25,7 +26,19 @@ export const fetchUsers = createAsyncThunk<user[]>(
 		}
 	}
 );
+// Nuevo thunk para obtener el usuario logueado
+export const fetchCurrentUser = createAsyncThunk<user>(
+	"user/fetchCurrentUser",
+	async (_, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetSlice('api/users/me');
+			return response;
 
+		} catch (error: any) {
+			return rejectWithValue(error.response?.data || "Error al obtener usuario");
+		}
+	}
+);
 export const fetchUser = createAsyncThunk<user, number>(
 	'user/fetchUser',
 	async (user_id, { rejectWithValue }) => {
@@ -60,7 +73,6 @@ export const fetchInstructors = createAsyncThunk<user[], StatusParam | undefined
 		}
 	}
 );
-
 
 // Acción para crear un usuario
 export const createUser = createAsyncThunk<user, user>(
@@ -127,6 +139,18 @@ const userSlice = createSlice({
 				state.usersList = action.payload;
 			})
 			.addCase(fetchUsers.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+			// Reducers para la acción fetchUsers
+			.addCase(fetchCurrentUser.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchCurrentUser.fulfilled, (state, action: PayloadAction<user>) => {
+				state.status = 'succeeded';
+				state.userLogged = action.payload;
+			})
+			.addCase(fetchCurrentUser.rejected, (state, action) => {
 				state.status = 'failed';
 				state.error = action.payload as string;
 			})

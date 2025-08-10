@@ -414,6 +414,7 @@ export interface credentials {
 
 
 export interface UserState {
+    userLogged: user | null;
     userSelected: user | null;
     usersList: user[];
     studentList: user[];

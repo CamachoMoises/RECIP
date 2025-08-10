@@ -12,6 +12,7 @@ import {
 	PopoverHandler,
 	PopoverContent,
 	Button,
+	Chip,
 } from '@material-tailwind/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
@@ -19,6 +20,7 @@ import { logout } from '../features/authSlice';
 import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
 import { DoorOpen } from 'lucide-react';
+import { fetchCurrentUser } from '../features/userSlice';
 const manualRoutes = {
 	dashboard: {
 		users: 'manual_users',
@@ -44,7 +46,15 @@ const NavBar = () => {
 	const location = useLocation();
 	const [openNav, setOpenNav] = useState(false);
 	const auth = useSelector((state: RootState) => state.auth);
+	const { userLogged } = useSelector(
+		(state: RootState) => state.users
+	);
 	const dispatch = useDispatch<AppDispatch>();
+	useEffect(() => {
+		if (auth.user) {
+			dispatch(fetchCurrentUser());
+		}
+	}, [auth.user, dispatch]);
 	useEffect(() => {
 		const handleResize = () => {
 			if (window.innerWidth >= 768) {
@@ -152,6 +162,21 @@ const NavBar = () => {
 				toast.error('Error al intentar acceder al manual');
 			});
 	};
+	const is_active = userLogged
+		? userLogged.is_active
+			? true
+			: false
+		: false;
+	const is_superuser = userLogged
+		? userLogged.is_active
+			? true
+			: false
+		: false;
+	const is_staff = userLogged
+		? userLogged.is_staff
+			? true
+			: false
+		: false;
 
 	return (
 		<>
@@ -205,22 +230,51 @@ const NavBar = () => {
 								{/* Menú desktop (visible en md y superior) */}
 								<div className="hidden md:block">
 									<div className="flex flex-row gap-1">
-										<Button
-											variant="text"
-											size="sm"
-											title="Cerrar sesión"
-											ripple={false}
-											onClick={() => {
-												dispatch(logout());
-												toast.success('Sesión finalizada');
-												setOpenNav(false);
-											}}
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											<DoorOpen className="h-4 w-4 text-white" />
-										</Button>
+										{is_superuser && (
+											<Chip
+												value="Admin"
+												color="deep-orange"
+												size="sm"
+												className="px-2 py-1"
+											/>
+										)}
+										{is_staff && (
+											<Chip
+												value="Staff"
+												color="blue-gray"
+												size="sm"
+												className="px-2 py-1"
+											/>
+										)}
+										{is_active && (
+											<Chip
+												value="Activo"
+												color="green"
+												size="sm"
+												className="px-2 py-1"
+											/>
+										)}
+										<div className="flex flex-col items-center">
+											<Button
+												variant="text"
+												size="sm"
+												ripple={false}
+												onClick={() => {
+													dispatch(logout());
+													toast.success('Sesión finalizada');
+													setOpenNav(false);
+												}}
+												className="p-2"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												<DoorOpen className="h-4 w-4 text-white" />
+											</Button>
+											<span className="text-[10px] text-white mt-1">
+												Cerrar sesión
+											</span>
+										</div>
 										<Menu>
 											<MenuHandler>
 												<Avatar
