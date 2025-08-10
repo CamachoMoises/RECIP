@@ -171,9 +171,10 @@ const Login = () => {
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								// onClick={() => {
-								// 	navigate('../dashboard');
-								// }}
+								onClick={() => {
+									//mostrar un toast indicando la consulta
+									toast.success('Iniciando sesión...');
+								}}
 							>
 								Ingresar
 							</Button>
