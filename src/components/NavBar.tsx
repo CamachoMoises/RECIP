@@ -230,29 +230,34 @@ const NavBar = () => {
 								{/* Menú desktop (visible en md y superior) */}
 								<div className="hidden md:block">
 									<div className="flex flex-row gap-1">
-										{is_superuser && (
-											<Chip
-												value="Admin"
-												color="deep-orange"
-												size="sm"
-												className="px-2 py-1"
-											/>
-										)}
+										<div className="flex flex-col items-center gap-1">
+											{is_superuser && (
+												<Chip
+													value="Admin"
+													color="deep-orange"
+													size="sm"
+													className="px-2 py-1"
+												/>
+											)}
+
+											{is_active && (
+												<Chip
+													value="Activo"
+													color="green"
+													size="sm"
+													className="px-2 py-1"
+												/>
+											)}
+										</div>
 										{is_staff && (
-											<Chip
-												value="Staff"
-												color="blue-gray"
-												size="sm"
-												className="px-2 py-1"
-											/>
-										)}
-										{is_active && (
-											<Chip
-												value="Activo"
-												color="green"
-												size="sm"
-												className="px-2 py-1"
-											/>
+											<div className="flex flex-col items-center gap-1">
+												<Chip
+													value="Staff"
+													color="blue-gray"
+													size="sm"
+													className="px-2 py-1"
+												/>
+											</div>
 										)}
 										<div className="flex flex-col items-center">
 											<Button
@@ -269,7 +274,7 @@ const NavBar = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												<DoorOpen className="h-4 w-4 text-white" />
+												<DoorOpen className="h-6 w-6 text-white" />
 											</Button>
 											<span className="text-[10px] text-white mt-1">
 												Cerrar sesión
