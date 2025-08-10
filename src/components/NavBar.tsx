@@ -5,7 +5,6 @@ import {
 	Collapse,
 	Menu,
 	MenuHandler,
-	Avatar,
 	MenuList,
 	MenuItem,
 	Popover,
@@ -21,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
 import { DoorOpen } from 'lucide-react';
 import { fetchCurrentUser } from '../features/userSlice';
+import { formatUserName } from '../services/utilities';
 const manualRoutes = {
 	dashboard: {
 		users: 'manual_users',
@@ -230,35 +230,6 @@ const NavBar = () => {
 								{/* Menú desktop (visible en md y superior) */}
 								<div className="hidden md:block">
 									<div className="flex flex-row gap-1">
-										<div className="flex flex-col items-center gap-1">
-											{is_superuser && (
-												<Chip
-													value="Admin"
-													color="deep-orange"
-													size="sm"
-													className="px-2 py-1"
-												/>
-											)}
-
-											{is_active && (
-												<Chip
-													value="Activo"
-													color="green"
-													size="sm"
-													className="px-2 py-1"
-												/>
-											)}
-										</div>
-										{is_staff && (
-											<div className="flex flex-col items-center gap-1">
-												<Chip
-													value="Staff"
-													color="blue-gray"
-													size="sm"
-													className="px-2 py-1"
-												/>
-											</div>
-										)}
 										<div className="flex flex-col items-center">
 											<Button
 												variant="text"
@@ -280,17 +251,53 @@ const NavBar = () => {
 												Cerrar sesión
 											</span>
 										</div>
+										<div className="flex flex-col items-center gap-1">
+											{is_superuser && (
+												<Chip
+													value="Admin"
+													color="blue-gray"
+													size="sm"
+													className="px-2 py-1"
+												/>
+											)}
+
+											{is_staff && (
+												<Chip
+													value="Staff"
+													color="blue-gray"
+													size="sm"
+													className="px-2 py-1"
+												/>
+											)}
+										</div>
+
 										<Menu>
 											<MenuHandler>
-												<Avatar
-													variant="circular"
-													alt="User Avatar"
-													className="cursor-pointer"
-													src="/images/user.png"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												/>
+												{userLogged?.name ? (
+													<div className="flex flex-col items-center gap-2">
+														<Chip
+															value={formatUserName(userLogged.name)}
+															color="blue-gray"
+															size="sm"
+															className="px-2 py-1"
+														/>
+														<Chip
+															value={formatUserName(
+																userLogged.last_name
+															)}
+															color="blue-gray"
+															size="sm"
+															className="px-2 py-1"
+														/>
+													</div>
+												) : (
+													<Chip
+														value="Usuario"
+														color="blue-gray"
+														size="sm"
+														className="px-2 py-1"
+													/>
+												)}
 											</MenuHandler>
 											<MenuList
 												placeholder={undefined}
@@ -444,15 +451,29 @@ const NavBar = () => {
 						<div className="flex flex-col p-4 gap-2">
 							{/* Información del usuario */}
 							<div className="flex items-center gap-3 p-2 bg-blue-gray-200 rounded-lg">
-								<Avatar
-									variant="circular"
-									alt="User Avatar"
-									className="cursor-pointer"
-									src="/images/user.png"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								/>
+								{userLogged?.name ? (
+									<div className="flex flex-col items-center gap-2">
+										<Chip
+											value={formatUserName(userLogged.name)}
+											color="blue-gray"
+											size="sm"
+											className="px-2 py-1"
+										/>
+										<Chip
+											value={formatUserName(userLogged.last_name)}
+											color="blue-gray"
+											size="sm"
+											className="px-2 py-1"
+										/>
+									</div>
+								) : (
+									<Chip
+										value="Usuario"
+										color="blue-gray"
+										size="sm"
+										className="px-2 py-1"
+									/>
+								)}
 								<div>
 									<Typography
 										variant="paragraph"
