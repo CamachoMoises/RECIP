@@ -29,6 +29,8 @@ const manualRoutes = {
 		courses: 'manual_courses',
 		new_course: 'manual_new_course',
 		config: 'manual_config',
+		test: 'manual_test',
+		assessment: 'manual_assessment',
 		_: 'manual_dashboard', // fallback para /dashboard
 	},
 	login: 'manual_login',
@@ -162,11 +164,6 @@ const NavBar = () => {
 				toast.error('Error al intentar acceder al manual');
 			});
 	};
-	const is_active = userLogged
-		? userLogged.is_active
-			? true
-			: false
-		: false;
 	const is_superuser = userLogged
 		? userLogged.is_active
 			? true
