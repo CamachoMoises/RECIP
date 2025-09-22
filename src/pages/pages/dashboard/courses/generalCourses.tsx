@@ -306,7 +306,8 @@ const GeneralCourses = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Agenda de Cursos a Pilotos/Participantes
+								Agenda de programas de instrucción para Pilotos
+								Participantes en curso
 							</Typography>
 							{courseStudentList?.length === 0 ? (
 								<>
