@@ -133,7 +133,6 @@ const NewCourseSubject = ({
 					{subjectItem.name}
 				</Typography>
 			</div>
-
 			{/* Inactive Subject Message */}
 			{!subjectItem.status && (
 				<div className="md:col-span-3 flex justify-center">
@@ -148,7 +147,6 @@ const NewCourseSubject = ({
 					</Typography>
 				</div>
 			)}
-
 			{/* Subject Form */}
 			{SD && student_id > 0 && (
 				<form
