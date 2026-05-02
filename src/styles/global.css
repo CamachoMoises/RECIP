@@ -73,8 +73,8 @@
 }
 
 [data-theme="light"] .glass-panel {
-	background: white;
-	border: 1px solid rgba(49, 130, 206, 0.1);
+	background: rgba(255, 255, 255, 0.95);
+	border: 1px solid rgba(49, 130, 206, 0.15);
 }
 
 .aviation-gradient {

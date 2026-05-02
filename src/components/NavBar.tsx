@@ -179,7 +179,7 @@ const NavBar = () => {
 
 return (
 		<>
-			<div className="fixed top-2 z-50 w-[98%] left-[1%] rounded-2xl p-3 glass-card-dark text-white animate-fade-in">
+			<div className={`fixed top-2 z-50 w-[98%] left-[1%] rounded-2xl p-3 glass-card-dark animate-fade-in ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
 				<div className="flex items-center justify-between">
 					<div className="flex flex-col items-center">
 						<img
@@ -192,7 +192,7 @@ return (
 					<div className="absolute left-1/2 transform -translate-x-1/2">
 						<Typography
 							variant="h1"
-							className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-center bg-gradient-to-r from-blue-300 via-white to-blue-300 bg-clip-text text-transparent"
+							className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-center ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -201,7 +201,7 @@ return (
 						</Typography>
 						<Typography
 							variant="small"
-							className="hidden sm:block text-center text-sm md:text-lg text-blue-200 font-medium"
+							className={`hidden sm:block text-center text-sm md:text-lg font-medium ${theme === 'dark' ? 'text-blue-300' : 'text-slate-600'}`}
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -303,7 +303,7 @@ return (
 														{item.icon}
 														<Typography
 															variant="small"
-															className="font-medium text-white"
+															className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
@@ -498,7 +498,7 @@ return (
 									)}
 									<Typography
 										variant="small"
-										className="font-medium text-white"
+										className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -533,7 +533,7 @@ return (
 									</div>
 									<Typography
 										variant="small"
-										className="font-medium text-white"
+										className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}

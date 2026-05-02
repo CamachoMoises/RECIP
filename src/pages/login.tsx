@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { EyeIcon, EyeOff, Plane } from 'lucide-react';
 import '../styles/global.css';
+import { useTheme } from '../hooks/useTheme';
 
 type Inputs = {
 	email: string;
@@ -23,6 +24,7 @@ type Inputs = {
 
 const Login = () => {
 	const navigate = useNavigate();
+	const { theme } = useTheme();
 	const dispatch = useDispatch<AppDispatch>();
 	const auth = useSelector((state: RootState) => state.auth);
 	const {
@@ -84,7 +86,7 @@ const Login = () => {
 			</div>
 
 			<div className="order-1 sm:order-2 w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.2s' }}>
-				<Card className="glass-panel border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10">
+				<Card className="glass-panel border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10" style={{ background: theme === 'dark' ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)' }}>
 					<CardBody className="flex flex-col gap-6 p-8">
 						<div className="text-center">
 							<div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 mb-4 shadow-lg shadow-blue-500/30">
@@ -92,7 +94,7 @@ const Login = () => {
 							</div>
 							<Typography
 								variant="h2"
-								className="text-gradient font-bold"
+								className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -101,7 +103,7 @@ const Login = () => {
 							</Typography>
 							<Typography
 								variant="paragraph"
-								className="text-gray-500 mt-2"
+								className={`mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-slate-500'}`}
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
