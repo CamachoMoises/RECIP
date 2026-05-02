@@ -18,9 +18,10 @@ import { AppDispatch, RootState } from '../store';
 import { logout } from '../features/authSlice';
 import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
-import { DoorOpen } from 'lucide-react';
+import { DoorOpen, Sun, Moon } from 'lucide-react';
 import { fetchCurrentUser } from '../features/userSlice';
 import { formatUserName } from '../services/utilities';
+import { useTheme } from '../hooks/useTheme';
 const manualRoutes = {
 	dashboard: {
 		users: 'manual_users',
@@ -48,6 +49,7 @@ const NavBar = () => {
 	const location = useLocation();
 	const [openNav, setOpenNav] = useState(false);
 	const auth = useSelector((state: RootState) => state.auth);
+	const { theme, toggle: toggleTheme } = useTheme();
 	const { userLogged } = useSelector(
 		(state: RootState) => state.users
 	);
@@ -175,33 +177,22 @@ const NavBar = () => {
 			: false
 		: false;
 
-	return (
+return (
 		<>
-			<div className="fixed top-1 z-50 w-full border-2 border-white rounded-xl p-3 bg-[#2A4D77] text-white">
+			<div className="fixed top-2 z-50 w-[98%] left-[1%] rounded-2xl p-3 glass-card-dark text-white animate-fade-in">
 				<div className="flex items-center justify-between">
-					{/* Logo y RIF - Siempre visibles */}
 					<div className="flex flex-col items-center">
 						<img
 							src="/images/logo.png"
 							alt="Logo RECIP"
-							className="w-10 h-10 lg:h-16 lg:w-28 object-contain bg-white px-2 rounded-md shadow-sm"
+							className="w-12 h-12 lg:h-16 lg:w-32 object-contain bg-white/95 px-3 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
 						/>
-						{/* <Typography
-							variant="small"
-							className="text-xs sm:text-sm md:text-base font-medium"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							J-500255586
-						</Typography> */}
 					</div>
 
-					{/* Título centrado - Responsive */}
 					<div className="absolute left-1/2 transform -translate-x-1/2">
 						<Typography
 							variant="h1"
-							className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-center"
+							className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-center bg-gradient-to-r from-blue-300 via-white to-blue-300 bg-clip-text text-transparent"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -210,60 +201,58 @@ const NavBar = () => {
 						</Typography>
 						<Typography
 							variant="small"
-							className="hidden sm:block text-center text-xs md:text-lg"
+							className="hidden sm:block text-center text-sm md:text-lg text-blue-200 font-medium"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Registro de Evaluación, Capacitación e Instrucción del
+							Registro de Evaluación, Capacitación e instrucción del
 							Piloto
 						</Typography>
 					</div>
 
-					{/* Menú de usuario */}
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-3">
 						{auth.user && (
 							<>
-								{/* Menú desktop (visible en md y superior) */}
 								<div className="hidden md:block">
-									<div className="flex flex-row gap-1">
+									<div className="flex flex-row items-center gap-3">
 										<div className="flex flex-col items-center">
 											<Button
 												variant="text"
 												size="sm"
-												ripple={false}
+												ripple={true}
 												onClick={() => {
 													dispatch(logout());
 													toast.success('Sesión finalizada');
 													setOpenNav(false);
 												}}
-												className="p-2"
+												className="p-2 hover:bg-white/10 rounded-xl transition-all duration-300"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												<DoorOpen className="h-6 w-6 text-white" />
+												<DoorOpen className="h-6 w-6 text-blue-200" />
 											</Button>
-											<span className="text-[10px] text-white mt-1">
-												Cerrar sesión
+											<span className="text-xs text-blue-300 mt-1 font-medium">
+												Salir
 											</span>
 										</div>
-										<div className="flex flex-col items-center gap-1">
+										<div className="flex flex-col items-center gap-2">
 											{is_superuser && (
 												<Chip
 													value="Admin"
-													color="blue-gray"
+													color="blue"
 													size="sm"
-													className="px-2 py-1"
+													className="px-3 py-1 bg-blue-500/30 border border-blue-400/50"
 												/>
 											)}
 
 											{is_staff && (
 												<Chip
 													value="Staff"
-													color="blue-gray"
+													color="cyan"
 													size="sm"
-													className="px-2 py-1"
+													className="px-3 py-1 bg-cyan-500/30 border border-cyan-400/50"
 												/>
 											)}
 										</div>
@@ -271,32 +260,33 @@ const NavBar = () => {
 										<Menu>
 											<MenuHandler>
 												{userLogged?.name ? (
-													<div className="flex flex-col items-center gap-2">
+													<div className="flex flex-col items-center gap-2 cursor-pointer hover:bg-white/10 p-2 rounded-xl transition-all duration-300">
 														<Chip
 															value={formatUserName(userLogged.name)}
-															color="blue-gray"
+															color="blue"
 															size="sm"
-															className="px-2 py-1"
+															className="px-3 py-1 bg-blue-500/30 border border-blue-400/50"
 														/>
 														<Chip
 															value={formatUserName(
 																userLogged.last_name
 															)}
-															color="blue-gray"
+															color="blue"
 															size="sm"
-															className="px-2 py-1"
+															className="px-3 py-1 bg-blue-500/30 border border-blue-400/50"
 														/>
 													</div>
 												) : (
 													<Chip
 														value="Usuario"
-														color="blue-gray"
+														color="blue"
 														size="sm"
-														className="px-2 py-1"
+														className="px-3 py-1 bg-blue-500/30 border border-blue-400/50"
 													/>
 												)}
 											</MenuHandler>
 											<MenuList
+												className="glass-card-dark border border-blue-500/30"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
@@ -304,7 +294,7 @@ const NavBar = () => {
 												{menuItems.map((item) => (
 													<MenuItem
 														key={item.id}
-														className="flex items-center gap-2"
+														className="flex items-center gap-3 hover:bg-white/10 rounded-lg transition-all duration-200"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
@@ -313,7 +303,7 @@ const NavBar = () => {
 														{item.icon}
 														<Typography
 															variant="small"
-															className="font-medium"
+															className="font-medium text-white"
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
@@ -327,10 +317,9 @@ const NavBar = () => {
 									</div>
 								</div>
 
-								{/* Botón de menú hamburguesa (visible en móviles) */}
 								<IconButton
 									variant="text"
-									className="md:hidden text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent"
+									className="md:hidden text-white hover:bg-white/10 focus:bg-white/10 active:bg-white/20 rounded-xl transition-all duration-300"
 									ripple={false}
 									onClick={() => setOpenNav(!openNav)}
 									placeholder={undefined}
@@ -341,7 +330,7 @@ const NavBar = () => {
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											fill="none"
-											className="h-6 w-6"
+											className="h-7 w-7"
 											viewBox="0 0 24 24"
 											stroke="currentColor"
 											strokeWidth={2}
@@ -355,7 +344,7 @@ const NavBar = () => {
 									) : (
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
-											className="h-6 w-6"
+											className="h-7 w-7"
 											fill="none"
 											stroke="currentColor"
 											strokeWidth={2}
@@ -371,20 +360,35 @@ const NavBar = () => {
 							</>
 						)}
 
+						<IconButton
+							variant="text"
+							className="text-blue-200 hover:bg-white/10 rounded-xl transition-all duration-300"
+							ripple={false}
+							onClick={toggleTheme}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							{theme === 'dark' ? (
+								<Sun className="w-5 h-5" />
+							) : (
+								<Moon className="w-5 h-5" />
+							)}
+						</IconButton>
+
 						<Popover placement="bottom">
 							<PopoverHandler>
 								<IconButton
 									variant="text"
-									className="text-white hover:bg-white/10"
-									// onClick={downloadManual}
+									className="text-blue-200 hover:bg-white/10 rounded-xl transition-all duration-300"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
-										width="24"
-										height="24"
+										width="22"
+										height="22"
 										viewBox="0 0 24 24"
 										fill="none"
 										stroke="currentColor"
@@ -399,16 +403,17 @@ const NavBar = () => {
 								</IconButton>
 							</PopoverHandler>
 							<PopoverContent
-								className="z-50"
+								className="z-50 glass-card-dark border border-blue-500/30"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<div className="flex flex-row gap-1">
+								<div className="flex flex-col gap-2">
 									<Button
 										color="blue"
 										variant="gradient"
 										size="sm"
+										className="shadow-lg shadow-blue-500/20"
 										onClick={() => {
 											downloadManual('page');
 										}}
@@ -416,13 +421,14 @@ const NavBar = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										descargar Manual de uso
+										Manual de Usuario
 									</Button>
 									{auth.user?.is_superuser && (
 										<Button
-											color="deep-orange"
+											color="orange"
 											variant="gradient"
 											size="sm"
+											className="shadow-lg shadow-orange-500/20"
 											onClick={() => {
 												downloadManual('example');
 											}}
@@ -430,7 +436,7 @@ const NavBar = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Descargar Ejemplo de uso
+											Ejemplo de Uso
 										</Button>
 									)}
 								</div>
@@ -439,58 +445,82 @@ const NavBar = () => {
 					</div>
 				</div>
 
-				{/* Menú colapsable para móviles */}
 				<Collapse
 					open={openNav}
-					className="mt-2 rounded-lg bg-blue-gray-300"
+					className="mt-3 rounded-xl bg-slate-800/80 backdrop-blur-lg border border-blue-500/20"
 				>
 					{auth.user && (
-						<div className="flex flex-col p-4 gap-2">
-							{/* Información del usuario */}
-							<div className="flex items-center gap-3 p-2 bg-blue-gray-200 rounded-lg">
+						<div className="flex flex-col p-4 gap-3">
+							<div className="flex items-center gap-3 p-3 bg-blue-900/30 rounded-xl border border-blue-500/20">
 								{userLogged?.name ? (
-									<div className="flex flex-col items-center gap-2">
+									<div className="flex flex-col items-center gap-2 w-full">
 										<Chip
 											value={formatUserName(userLogged.name)}
-											color="blue-gray"
+											color="blue"
 											size="sm"
-											className="px-2 py-1"
+											className="px-3 py-1 bg-blue-500/30 border border-blue-400/50"
 										/>
 										<Chip
 											value={formatUserName(userLogged.last_name)}
-											color="blue-gray"
+											color="blue"
 											size="sm"
-											className="px-2 py-1"
+											className="px-3 py-1 bg-blue-500/30 border border-blue-400/50"
 										/>
 									</div>
 								) : (
 									<Chip
 										value="Usuario"
-										color="blue-gray"
+										color="blue"
 										size="sm"
-										className="px-2 py-1"
+										className="px-3 py-1 bg-blue-500/30 border border-blue-400/50"
 									/>
 								)}
-								<div>
+								<Typography
+									variant="paragraph"
+									className="font-semibold text-white"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{auth.user.name} {auth.user.last_name}
+								</Typography>
+							</div>
+
+							<div
+								className="flex items-center justify-between p-3 rounded-xl bg-blue-900/20 border border-blue-500/20"
+								onClick={toggleTheme}
+							>
+								<div className="flex items-center gap-3">
+									{theme === 'dark' ? (
+										<Sun className="w-5 h-5 text-blue-300" />
+									) : (
+										<Moon className="w-5 h-5 text-blue-300" />
+									)}
 									<Typography
-										variant="paragraph"
-										className="font-semibold"
+										variant="small"
+										className="font-medium text-white"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{auth.user.name} {auth.user.last_name}
+										{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
 									</Typography>
+								</div>
+								<div className="w-10 h-6 bg-blue-600 rounded-full relative transition-colors">
+									<div
+										className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+											theme === 'dark' ? 'left-1' : 'left-5'
+										}`}
+									/>
 								</div>
 							</div>
 
-							{/* Elementos del menú */}
 							{menuItems.map((item) => (
 								<div
 									key={item.id}
-									className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-blue-gray-200 ${
+									className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all duration-200 ${
 										item.id === 'logout'
-											? 'mt-2 border-t border-blue-gray-400 pt-4'
+											? 'mt-2 border-t border-blue-500/30 pt-4'
 											: ''
 									}`}
 									onClick={() => {
@@ -498,12 +528,12 @@ const NavBar = () => {
 										else setOpenNav(false);
 									}}
 								>
-									<div className="w-6 flex justify-center">
+									<div className="w-6 flex justify-center text-blue-300">
 										{item.icon}
 									</div>
 									<Typography
 										variant="small"
-										className="font-medium"
+										className="font-medium text-white"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -516,7 +546,7 @@ const NavBar = () => {
 					)}
 				</Collapse>
 			</div>
-			<div className="bg-white mx-auto  sm:w-12 h-20 md:w-9 rounded-full shadow-md" />
+			<div className="h-24" />
 		</>
 	);
 };

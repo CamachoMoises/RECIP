@@ -2,7 +2,6 @@ import {
 	Button,
 	Card,
 	CardBody,
-	// CardFooter,
 	Input,
 	Typography,
 } from '@material-tailwind/react';
@@ -14,7 +13,8 @@ import { credentials } from '../types/utilities';
 import { loginUser } from '../features/authSlice';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { EyeIcon, EyeOff } from 'lucide-react';
+import { EyeIcon, EyeOff, Plane } from 'lucide-react';
+import '../styles/global.css';
 
 type Inputs = {
 	email: string;
@@ -51,104 +51,104 @@ const Login = () => {
 			toast.error(auth.error);
 		}
 	}, [auth.status, auth.error]);
+
 	const [passwordShown, setPasswordShown] = useState(false);
-	const togglePasswordVisiblity = () => {
-		setPasswordShown((cur) => !cur);
-		setTimeout(() => {
-			setPasswordShown(false);
-		}, 1000);
-	};
+
 	return (
-		<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen">
-			{/* Video */}
-			<div className="order-2 sm:order-1 w-full sm:w-auto flex justify-center">
-				<video
-					className="rounded-lg shadow-lg w-full max-w-md"
-					loop
-					autoPlay
-					muted
-				>
-					<source
-						src="https://res.cloudinary.com/moisesinc/video/upload/v1751816208/recip_resource/avion2_drrbld.mp4"
-						type="video/mp4"
-					/>
-					Tu navegador no soporta el elemento de video.
-				</video>
+		<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen p-4 relative overflow-hidden">
+			<div className="absolute inset-0 aviation-gradient opacity-20" />
+			<div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full blur-3xl opacity-10 animate-float" />
+			<div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-10 animate-float" style={{ animationDelay: '-2s' }} />
+
+			<div className="order-2 sm:order-1 w-full sm:w-auto flex justify-center animate-scale-in">
+				<div className="relative">
+					<video
+						className="rounded-2xl shadow-2xl shadow-blue-500/20 w-full max-w-md border-2 border-blue-500/30"
+						loop
+						autoPlay
+						muted
+					>
+						<source
+							src="https://res.cloudinary.com/moisesinc/video/upload/v1751816208/recip_resource/avion2_drrbld.mp4"
+							type="video/mp4"
+						/>
+						Tu navegador no soporta el elemento de video.
+					</video>
+					<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 glass-panel-dark px-6 py-2 flex items-center gap-2">
+						<Plane className="w-5 h-5 text-blue-400" />
+						<Typography className="text-white font-medium">
+							Escuela de Aviación
+						</Typography>
+					</div>
+				</div>
 			</div>
 
-			{/* Formulario */}
-			<div className="order-1 sm:order-2 w-full max-w-sm">
-				<Card
-					className="w-full shadow-lg"
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-				>
-					<CardBody
-						className="flex flex-col gap-4"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<Typography
-							variant="h2"
-							color="black"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Iniciar sesión
-						</Typography>
-						<form
-							onSubmit={handleSubmit(onSubmit)}
-							autoComplete="off"
-						>
-							<div className="mb-1 flex flex-col gap-6 mt-8">
-								<div>
-									<Input
-										crossOrigin={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										type="email"
-										size="lg"
-										maxLength={254}
-										className="bg-slate-400 rounded-md p-2 w-full mb-2 text-slate-900"
-										placeholder="nombre@correo.com"
-										label="Correo"
-										{...register('email', {
-											required: {
-												value: true,
-												message: 'El Correo es requerido',
-											},
-										})}
-									/>
-									{errors.email && (
-										<span className="text-red-500 text-sm py-2">
-											{errors.email.message}
-										</span>
-									)}
-								</div>
-								<div>
+			<div className="order-1 sm:order-2 w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.2s' }}>
+				<Card className="glass-panel border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10">
+					<CardBody className="flex flex-col gap-6 p-8">
+						<div className="text-center">
+							<div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 mb-4 shadow-lg shadow-blue-500/30">
+								<Plane className="w-8 h-8 text-white" />
+							</div>
+							<Typography
+								variant="h2"
+								className="text-gradient font-bold"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								R.E.C.I.P.
+							</Typography>
+							<Typography
+								variant="paragraph"
+								className="text-gray-500 mt-2"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Ingresa a tu cuenta
+							</Typography>
+						</div>
+
+						<form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="flex flex-col gap-5">
+							<div>
+								<Input
+									crossOrigin={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="email"
+									size="lg"
+									maxLength={254}
+									className="glass-input !bg-white/90 !text-gray-800"
+									placeholder="correo@ejemplo.com"
+									labelProps={{ className: "text-gray-500" }}
+									{...register('email', {
+										required: {
+											value: true,
+											message: 'El correo es requerido',
+										},
+									})}
+								/>
+								{errors.email && (
+									<span className="text-red-500 text-sm mt-2 block">
+										{errors.email.message}
+									</span>
+								)}
+							</div>
+
+							<div>
+								<div className="relative">
 									<Input
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 										crossOrigin={undefined}
 										size="lg"
 										autoComplete="new-password"
-										className="bg-slate-400 rounded-md p-2 w-full mb-2 text-slate-900"
+										className="glass-input !bg-white/90 !text-gray-800 pr-12"
 										maxLength={20}
-										label="Contraseña"
+										labelProps={{ className: "text-gray-500" }}
 										type={passwordShown ? 'text' : 'password'}
-										icon={
-											<i onClick={togglePasswordVisiblity}>
-												{passwordShown ? (
-													<EyeIcon className="h-5 w-5" />
-												) : (
-													<EyeOff className="h-5 w-5" />
-												)}
-											</i>
-										}
-										placeholder="********"
+										placeholder="••••••••"
 										{...register('password', {
 											required: {
 												value: true,
@@ -156,31 +156,52 @@ const Login = () => {
 											},
 										})}
 									/>
-									{errors.password && (
-										<span className="text-red-500 text-sm py-2">
-											{errors.password.message}
-										</span>
-									)}
+									<button
+										type="button"
+										className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors"
+										onClick={() => setPasswordShown(!passwordShown)}
+									>
+										{passwordShown ? (
+											<EyeOff className="h-5 w-5" />
+										) : (
+											<EyeIcon className="h-5 w-5" />
+										)}
+									</button>
 								</div>
+								{errors.password && (
+									<span className="text-red-500 text-sm mt-2 block">
+										{errors.password.message}
+									</span>
+								)}
 							</div>
+
 							<Button
 								type="submit"
-								color="blue-gray"
-								className="mt-6"
+								className="glass-button py-3 text-base shadow-lg shadow-blue-500/20"
 								fullWidth
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								onClick={() => {
-									//mostrar un toast indicando la consulta
-									toast.success('Iniciando sesión...');
-								}}
 							>
-								Ingresar
+								<span className="flex items-center justify-center gap-2">
+									<Plane className="w-4 h-4" />
+									Iniciar Sesión
+								</span>
 							</Button>
 						</form>
+
+						<div className="text-center pt-2 border-t border-gray-200">
+							<Typography
+								variant="small"
+								className="text-gray-400"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Registro de Evaluación, Capacitación e instrucción del Piloto
+							</Typography>
+						</div>
 					</CardBody>
-					{/* <CardFooter>Opcional: mensajes de error</CardFooter> */}
 				</Card>
 			</div>
 		</div>

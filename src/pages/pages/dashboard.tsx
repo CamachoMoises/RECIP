@@ -48,9 +48,9 @@ const Dashboard = () => {
 	}, [auth.token, navigate]);
 
 	return (
-		<div className="video-container">
-			<div className="flex flex-col p-2">
-				<div className=" flex flex-row gap-3 ">
+		<div className="min-h-screen bg-transparent p-4">
+			<div className="flex flex-col gap-4">
+				<div className="flex flex-row gap-4">
 					<div className="hidden lg:block">
 						<div
 							className={`transition-all duration-1000 ${
@@ -59,9 +59,9 @@ const Dashboard = () => {
 						>
 							<div className="my-6">
 								<video
-									className="rounded-lg shadow-lg"
-									width="170"
-									height="170"
+									className="rounded-2xl shadow-2xl shadow-blue-500/20 border-2 border-blue-500/30 animate-glow"
+									width="180"
+									height="180"
 									loop
 									autoPlay
 									muted
@@ -77,48 +77,49 @@ const Dashboard = () => {
 					</div>
 
 					<div className="w-full my-6">
-						{/* <PageTitle title="Configuración" breadCrumbs={[]} /> */}
-						<Routes>
-							<Route path="/" element={<Icons />} />
-							<Route path="users" element={<UsersTable />} />
-							<Route path="courses" element={<GeneralCourses />} />
-							<Route path="students" element={<TableStudents />} />
-							<Route path="config" element={<GeneralConfig />} />
-							<Route
-								path="instructors"
-								element={<TableInstructors />}
-							/>
-							<Route
-								path="assessment"
-								element={<GeneralAssessment />}
-							/>
-							<Route path="test" element={<GeneralTest />} />
-							<Route
-								path="config/course/:id"
-								element={<CourseDetail />}
-							/>
-							<Route path="config/test/:id" element={<TestList />} />
-							<Route
-								path="config/testQuestion/:course_id/:test_id/:question_type_id/:test_question_type_id"
-								element={<QuestionTestList />}
-							/>
-							<Route
-								path="new_course/:id/:course_id"
-								element={<NewCourse />}
-							/>
-							<Route
-								path="course_assessment/:id/:course_id"
-								element={<DetailAssessment />}
-							/>
-							<Route
-								path="new_test/:id/:course_id/:test_id"
-								element={<NewTest />}
-							/>
-							<Route
-								path="review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id"
-								element={<ReviewTest />}
-							/>
-						</Routes>
+						<div className="glass-panel p-6 animate-fade-up">
+							<Routes>
+								<Route path="/" element={<Icons />} />
+								<Route path="users" element={<UsersTable />} />
+								<Route path="courses" element={<GeneralCourses />} />
+								<Route path="students" element={<TableStudents />} />
+								<Route path="config" element={<GeneralConfig />} />
+								<Route
+									path="instructors"
+									element={<TableInstructors />}
+								/>
+								<Route
+									path="assessment"
+									element={<GeneralAssessment />}
+								/>
+								<Route path="test" element={<GeneralTest />} />
+								<Route
+									path="config/course/:id"
+									element={<CourseDetail />}
+								/>
+								<Route path="config/test/:id" element={<TestList />} />
+								<Route
+									path="config/testQuestion/:course_id/:test_id/:question_type_id/:test_question_type_id"
+									element={<QuestionTestList />}
+								/>
+								<Route
+									path="new_course/:id/:course_id"
+									element={<NewCourse />}
+								/>
+								<Route
+									path="course_assessment/:id/:course_id"
+									element={<DetailAssessment />}
+								/>
+								<Route
+									path="new_test/:id/:course_id/:test_id"
+									element={<NewTest />}
+								/>
+								<Route
+									path="review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id"
+									element={<ReviewTest />}
+								/>
+							</Routes>
+						</div>
 					</div>
 				</div>
 			</div>

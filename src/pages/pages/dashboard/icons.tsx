@@ -11,158 +11,120 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
+import '../../../styles/global.css';
+
+const iconItems = [
+	{
+		id: 'users',
+		title: 'Administradores',
+		icon: UserRound,
+		permission: ['staff'],
+		route: 'users',
+		color: 'from-blue-600 to-blue-800',
+	},
+	{
+		id: 'courses',
+		title: 'Cursos',
+		icon: Newspaper,
+		permission: ['staff', 'instructor', 'student'],
+		route: 'courses',
+		color: 'from-emerald-600 to-emerald-800',
+	},
+	{
+		id: 'students',
+		title: 'Pilotos / Participantes',
+		icon: Plane,
+		permission: ['staff'],
+		route: 'students',
+		color: 'from-sky-600 to-sky-800',
+	},
+	{
+		id: 'instructors',
+		title: 'Instructores',
+		icon: Presentation,
+		permission: ['instructor', 'staff'],
+		route: 'instructors',
+		color: 'from-violet-600 to-violet-800',
+	},
+	{
+		id: 'records',
+		title: 'Registros',
+		icon: NotebookText,
+		permission: ['super_user'],
+		route: null,
+		color: 'from-amber-600 to-amber-800',
+	},
+	{
+		id: 'tests',
+		title: 'Exámenes',
+		icon: BookOpenCheck,
+		permission: ['student', 'instructor'],
+		route: 'test',
+		color: 'from-rose-600 to-rose-800',
+	},
+	{
+		id: 'assessment',
+		title: 'Evaluaciones FSTD / ATD',
+		icon: NotebookPen,
+		permission: ['instructor'],
+		route: 'assessment',
+		color: 'from-cyan-600 to-cyan-800',
+	},
+	{
+		id: 'config',
+		title: 'Configuración Cursos',
+		icon: Cog,
+		permission: ['staff'],
+		route: 'config',
+		color: 'from-slate-600 to-slate-800',
+	},
+];
 
 const Icons = () => {
 	const navigate = useNavigate();
 
 	return (
-		<div>
-			<div className="grid grid-cols-1 d:grid-cols-2 lg:grid-cols-4 gap-y-6 text-center px-3">
-				<div>
-					<Button
-						title="Administradores"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						disabled={!PermissionsValidate(['staff'])}
-						onPointerLeaveCapture={undefined}
-						onClick={() => navigate('users')}
-					>
-						<div className="flex justify-center">
-							<UserRound size={60} />
-						</div>{' '}
-						<br />
-						Administradores
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Cursos"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						disabled={
-							!PermissionsValidate(['staff', 'instructor', 'student'])
-						}
-						onPointerLeaveCapture={undefined}
-						onClick={() => navigate('courses')}
-					>
-						<div className="flex justify-center">
-							<Newspaper size={60} />
-						</div>{' '}
-						<br />
-						Cursos
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Pilotos"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-						disabled={!PermissionsValidate(['staff'])}
-						onClick={() => navigate('students')}
-					>
-						<div className="flex justify-center">
-							<Plane size={50} />
-						</div>{' '}
-						<br />
-						Pilotos / Participantes
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Formas de pago"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-						disabled={!PermissionsValidate(['instructor', 'staff'])}
-						onClick={() => navigate('instructors')}
-					>
-						<div className="flex justify-center">
-							<Presentation size={60} />
-						</div>{' '}
-						<br />
-						Instructores
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Reportes"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-						// disabled={!PermissionsValidate([])}
-						disabled={!PermissionsValidate(['super_user'])}
-					>
-						<div className="flex justify-center">
-							<NotebookText size={60} />
-						</div>{' '}
-						<br />
-						Registros
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Examenes"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						disabled={!PermissionsValidate(['student', 'instructor'])}
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-						onClick={() => navigate('test')}
-					>
-						<div className="flex justify-center">
-							<BookOpenCheck size={60} />
-						</div>{' '}
-						<br />
-						Examenes
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Evaluacion"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						disabled={!PermissionsValidate(['instructor'])}
-						onPointerLeaveCapture={undefined}
-						onClick={() => navigate('assessment')}
-					>
-						<div className="flex justify-center">
-							<NotebookPen size={60} />
-						</div>{' '}
-						<br />
-						Evaluaciones FSTD / ATD
-					</Button>
-				</div>
-				<div>
-					<Button
-						title="Configuracion"
-						className="text-center w-40 h-32"
-						variant="gradient"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-						onClick={() => navigate('config')}
-						disabled={!PermissionsValidate(['staff'])}
-					>
-						<div className="flex justify-center">
-							<Cog size={60} />
-						</div>{' '}
-						<br />
-						Configuracion <br /> cursos
-					</Button>
+		<div className="p-4">
+			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+				{iconItems.map((item) => {
+					const isDisabled = !PermissionsValidate(item.permission);
+					const IconComponent = item.icon;
+
+					return (
+						<div key={item.id} className="animate-fade-up" style={{ animationDelay: `${iconItems.indexOf(item) * 0.1}s` }}>
+							<Button
+								title={item.title}
+								className={`text-center h-36 w-full transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+									isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+								}`}
+								variant="gradient"
+								color="blue"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								disabled={isDisabled}
+								onPointerLeaveCapture={undefined}
+								onClick={() => item.route && navigate(item.route)}
+							>
+								<div className="flex flex-col items-center gap-3">
+									<div className={`p-3 rounded-xl bg-gradient-to-br ${item.color} shadow-lg`}>
+										<IconComponent size={36} className="text-white" />
+									</div>
+									<span className="text-sm font-semibold leading-tight">
+										{item.title}
+									</span>
+								</div>
+							</Button>
+						</div>
+					);
+				})}
+			</div>
+
+			<div className="mt-8 text-center animate-fade-up" style={{ animationDelay: '0.8s' }}>
+				<div className="inline-flex items-center gap-2 glass-panel-dark px-6 py-3">
+					<Plane className="w-5 h-5 text-blue-400" />
+					<span className="text-blue-200 font-medium">
+						Sistema de Gestión de Formación Aeronáutica
+					</span>
 				</div>
 			</div>
 		</div>

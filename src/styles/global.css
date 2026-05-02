@@ -1,0 +1,321 @@
+:root {
+	--aviation-navy: #0f172a;
+	--aviation-dark-blue: #1e3a5f;
+	--aviation-blue: #3182ce;
+	--aviation-light: #ebf8ff;
+	--aviation-accent: #ed8936;
+	--aviation-silver: #e2e8f0;
+	--aviation-gold: #f6ad55;
+	--glass-white: rgba(255, 255, 255, 0.97);
+	--glass-border: rgba(49, 130, 206, 0.25);
+	--glass-dark: rgba(15, 23, 42, 0.95);
+	--shadow-blue: rgba(49, 130, 206, 0.25);
+	--transition-fast: 0.2s ease;
+	--transition-normal: 0.3s ease;
+	--transition-slow: 0.5s ease;
+	--radius-sm: 8px;
+	--radius-md: 12px;
+	--radius-lg: 16px;
+	--radius-xl: 24px;
+	--bg-primary: #0f172a;
+	--bg-secondary: #1e3a5f;
+	--bg-card: rgba(255, 255, 255, 0.97);
+	--text-primary: #f8fafc;
+	--text-secondary: #cbd5e1;
+	--text-muted: #94a3b8;
+}
+
+[data-theme="light"] {
+	--aviation-navy: #1e3a5f;
+	--aviation-dark-blue: #3182ce;
+	--aviation-blue: #0ea5e9;
+	--aviation-light: #f0f9ff;
+	--aviation-accent: #f59e0b;
+	--aviation-silver: #cbd5e1;
+	--aviation-gold: #fbbf24;
+	--glass-white: rgba(255, 255, 255, 0.95);
+	--glass-border: rgba(49, 130, 206, 0.15);
+	--glass-dark: rgba(248, 250, 252, 0.95);
+	--shadow-blue: rgba(49, 130, 206, 0.15);
+	--bg-primary: #f1f5f9;
+	--bg-secondary: #e2e8f0;
+	--bg-card: rgba(255, 255, 255, 0.98);
+	--text-primary: #0f172a;
+	--text-secondary: #475569;
+	--text-muted: #64748b;
+}
+
+.glass-panel {
+	background: var(--bg-card);
+	backdrop-filter: blur(16px);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius-lg);
+	box-shadow: 
+		0 8px 32px rgba(0, 0, 0, 0.12),
+		inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.glass-panel-dark {
+	background: var(--glass-dark);
+	backdrop-filter: blur(16px);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius-lg);
+	box-shadow: 
+		0 8px 32px rgba(0, 0, 0, 0.1),
+		0 0 60px var(--shadow-blue);
+}
+
+[data-theme="light"] .glass-panel-dark {
+	background: rgba(255, 255, 255, 0.95);
+	box-shadow: 
+		0 8px 32px rgba(0, 0, 0, 0.08),
+		0 0 60px var(--shadow-blue);
+}
+
+[data-theme="light"] .glass-panel {
+	background: white;
+	border: 1px solid rgba(49, 130, 206, 0.1);
+}
+
+.aviation-gradient {
+	background: linear-gradient(135deg, var(--aviation-navy) 0%, var(--aviation-dark-blue) 50%, var(--aviation-blue) 100%);
+}
+
+.gold-accent-gradient {
+	background: linear-gradient(135deg, #b45309 0%, var(--aviation-gold) 50%, #f6ad55 100%);
+}
+
+.glass-input {
+	background: rgba(255, 255, 255, 0.9);
+	border: 2px solid transparent;
+	border-radius: var(--radius-md);
+	transition: all var(--transition-normal);
+}
+
+.glass-input:focus {
+	border-color: var(--aviation-blue);
+	box-shadow: 
+		0 0 0 4px rgba(49, 130, 206, 0.15),
+		0 4px 12px rgba(49, 130, 206, 0.1);
+	background: white;
+	outline: none;
+}
+
+[data-theme="light"] .glass-input {
+	background: white;
+	border: 1px solid #cbd5e1;
+}
+
+[data-theme="light"] .glass-input:focus {
+	border-color: var(--aviation-blue);
+	background: white;
+}
+
+.glass-button {
+	background: linear-gradient(135deg, var(--aviation-navy) 0%, var(--aviation-dark-blue) 100%);
+	border: none;
+	border-radius: var(--radius-md);
+	color: white;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all var(--transition-normal);
+	position: relative;
+	overflow: hidden;
+}
+
+.glass-button:hover {
+	background: linear-gradient(135deg, var(--aviation-dark-blue) 0%, var(--aviation-blue) 100%);
+	transform: translateY(-2px);
+	box-shadow: 
+		0 8px 24px var(--shadow-blue),
+		0 0 40px rgba(49, 130, 206, 0.15);
+}
+
+.glass-button:active {
+	transform: translateY(0);
+}
+
+.card-hover {
+	transition: all var(--transition-normal);
+}
+
+.card-hover:hover {
+	transform: translateY(-6px);
+	box-shadow: 
+		0 20px 40px rgba(0, 0, 0, 0.15),
+		0 0 60px var(--shadow-blue);
+}
+
+[data-theme="light"] .card-hover:hover {
+	box-shadow: 
+		0 20px 40px rgba(0, 0, 0, 0.1),
+		0 0 30px var(--shadow-blue);
+}
+
+.shimmer {
+	position: relative;
+	overflow: hidden;
+}
+
+.shimmer::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 255, 255, 0.2),
+		transparent
+	);
+	animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+	100% {
+		left: 100%;
+	}
+}
+
+.animate-float {
+	animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+.animate-fade-up {
+	animation: fadeUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-scale-in {
+	animation: scaleIn 0.4s ease-out forwards;
+}
+
+@keyframes scaleIn {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.animate-glow {
+	animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+	from {
+		box-shadow: 0 0 20px var(--shadow-blue);
+	}
+	to {
+		box-shadow: 0 0 40px var(--shadow-blue), 0 0 80px rgba(49, 130, 206, 0.1);
+	}
+}
+
+.text-gradient {
+	background: linear-gradient(135deg, #60a5fa 0%, #f0f9ff 50%, #60a5fa 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+[data-theme="light"] .text-gradient {
+	background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0284c7 100%);
+	-webkit-background-clip: text;
+}
+
+.text-gradient-gold {
+	background: linear-gradient(135deg, #f6ad55 0%, #faf089 50%, #f6ad55 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: linear-gradient(180deg, var(--aviation-navy) 0%, var(--aviation-dark-blue) 100%);
+	border-radius: 5px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+	background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+}
+
+::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, var(--aviation-blue) 0%, #60a5fa 100%);
+	border-radius: 5px;
+	border: 2px solid var(--aviation-navy);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+	border: 2px solid #e2e8f0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(180deg, #60a5fa 0%, #93c5fd 100%);
+}
+
+::selection {
+	background: rgba(49, 130, 206, 0.3);
+	color: white;
+}
+
+[data-theme="light"] ::selection {
+	background: rgba(49, 130, 206, 0.2);
+	color: #0f172a;
+}
+
+.text-primary {
+	color: var(--text-primary);
+}
+
+.text-secondary {
+	color: var(--text-secondary);
+}
+
+.text-muted {
+	color: var(--text-muted);
+}
+
+.bg-primary {
+	background-color: var(--bg-primary);
+}
+
+.bg-secondary {
+	background-color: var(--bg-secondary);
+}
+
+.bg-card {
+	background-color: var(--bg-card);
+}
+
+.transition-theme {
+	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
