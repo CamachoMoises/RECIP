@@ -43,8 +43,8 @@ const ReviewTest = () => {
 			user: state.users,
 		};
 	});
-	const type_trip = ['', 'PIC', 'SIC', 'TRIP'];
-	const license = ['', 'ATP', 'Commercial', 'Privado'];
+	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const { CST_id, test_id, course_id, CS_id, user_id } = useParams<{
 		CST_id: string;

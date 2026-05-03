@@ -60,7 +60,10 @@ const Login = () => {
 		<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen p-4 relative overflow-hidden">
 			<div className="absolute inset-0 aviation-gradient opacity-20" />
 			<div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full blur-3xl opacity-10 animate-float" />
-			<div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-10 animate-float" style={{ animationDelay: '-2s' }} />
+			<div
+				className="absolute bottom-20 right-20 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-10 animate-float"
+				style={{ animationDelay: '-2s' }}
+			/>
 
 			<div className="order-2 sm:order-1 w-full sm:w-auto flex justify-center animate-scale-in">
 				<div className="relative">
@@ -76,17 +79,22 @@ const Login = () => {
 						/>
 						Tu navegador no soporta el elemento de video.
 					</video>
-					<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 glass-panel-dark px-6 py-2 flex items-center gap-2">
-						<Plane className="w-5 h-5 text-blue-400" />
-						<Typography className="text-white font-medium">
-							Escuela de Aviación
-						</Typography>
-					</div>
 				</div>
 			</div>
 
-			<div className="order-1 sm:order-2 w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.2s' }}>
-				<Card className="glass-panel border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10" style={{ background: theme === 'dark' ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)' }}>
+			<div
+				className="order-1 sm:order-2 w-full max-w-sm animate-fade-up"
+				style={{ animationDelay: '0.2s' }}
+			>
+				<Card
+					className="glass-panel border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
+					style={{
+						background:
+							theme === 'dark'
+								? 'rgba(30, 41, 59, 0.95)'
+								: 'rgba(255, 255, 255, 0.95)',
+					}}
+				>
 					<CardBody className="flex flex-col gap-6 p-8">
 						<div className="text-center">
 							<div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 mb-4 shadow-lg shadow-blue-500/30">
@@ -112,7 +120,11 @@ const Login = () => {
 							</Typography>
 						</div>
 
-						<form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="flex flex-col gap-5">
+						<form
+							onSubmit={handleSubmit(onSubmit)}
+							autoComplete="off"
+							className="flex flex-col gap-5"
+						>
 							<div>
 								<Input
 									crossOrigin={undefined}
@@ -123,7 +135,7 @@ const Login = () => {
 									maxLength={254}
 									className="glass-input !bg-white/90 !text-gray-800"
 									placeholder="correo@ejemplo.com"
-									labelProps={{ className: "text-gray-500" }}
+									labelProps={{ className: 'text-gray-500' }}
 									{...register('email', {
 										required: {
 											value: true,
@@ -148,7 +160,7 @@ const Login = () => {
 										autoComplete="new-password"
 										className="glass-input !bg-white/90 !text-gray-800 pr-12"
 										maxLength={20}
-										labelProps={{ className: "text-gray-500" }}
+										labelProps={{ className: 'text-gray-500' }}
 										type={passwordShown ? 'text' : 'password'}
 										placeholder="••••••••"
 										{...register('password', {
@@ -200,7 +212,8 @@ const Login = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Registro de Evaluación, Capacitación e instrucción del Piloto
+								Registro de Evaluación, Capacitación e instrucción del
+								Piloto
 							</Typography>
 						</div>
 					</CardBody>

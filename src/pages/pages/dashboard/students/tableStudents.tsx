@@ -21,7 +21,7 @@ import {
 import { useEffect, useState } from 'react';
 import { fetchStudents } from '../../../../features/userSlice';
 import { Plus, Search, Pencil, Trash2, User } from 'lucide-react';
-import { axiosGetDefault } from '../../../../services/axios';
+import { axiosGetDefault, axiosPutDefault } from '../../../../services/axios';
 import toast from 'react-hot-toast';
 import ModalFormUser from '../users/modalFormUser';
 import { PermissionsValidate } from '../../../../services/permissionsValidate';
@@ -68,6 +68,23 @@ const TableStudents = () => {
 			setOpenNewUser(!openNewUser);
 		} else {
 			toast.error('Ocurrió un error al consultar el servidor');
+		}
+	};
+
+	const handleRefreshData = () => {
+		dispatch(fetchStudents({ status: true }));
+	};
+
+	const handleDisableStudent = async (userId: number) => {
+		try {
+			await axiosPutDefault('api/users/disable-role', {
+				user_id: userId,
+				role: 'student',
+			});
+			toast.success('Participante deshabilitado correctamente');
+			handleRefreshData();
+		} catch (error) {
+			toast.error('Error al deshabilitar participante');
 		}
 	};
 
@@ -335,6 +352,7 @@ const TableStudents = () => {
 															variant="text"
 															color="red"
 															disabled={!validated}
+															onClick={() => handleDisableStudent(student.id)}
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
@@ -361,6 +379,7 @@ const TableStudents = () => {
 					handleOpen={handleOpen}
 					userDocTypes={userDocTypes}
 					module={1}
+					onSuccess={handleRefreshData}
 				/>
 			)}
 		</>

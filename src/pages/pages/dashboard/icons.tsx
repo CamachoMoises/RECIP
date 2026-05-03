@@ -91,7 +91,13 @@ const Icons = () => {
 					const IconComponent = item.icon;
 
 					return (
-						<div key={item.id} className="animate-fade-up" style={{ animationDelay: `${iconItems.indexOf(item) * 0.1}s` }}>
+						<div
+							key={item.id}
+							className="animate-fade-up"
+							style={{
+								animationDelay: `${iconItems.indexOf(item) * 0.1}s`,
+							}}
+						>
 							<Button
 								title={item.title}
 								className={`text-center h-36 w-full transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
@@ -106,7 +112,9 @@ const Icons = () => {
 								onClick={() => item.route && navigate(item.route)}
 							>
 								<div className="flex flex-col items-center gap-3">
-									<div className={`p-3 rounded-xl bg-gradient-to-br ${item.color} shadow-lg`}>
+									<div
+										className={`p-3 rounded-xl bg-gradient-to-br ${item.color} shadow-lg`}
+									>
 										<IconComponent size={36} className="text-white" />
 									</div>
 									<span className="text-sm font-semibold leading-tight">
@@ -119,11 +127,14 @@ const Icons = () => {
 				})}
 			</div>
 
-			<div className="mt-8 text-center animate-fade-up" style={{ animationDelay: '0.8s' }}>
+			<div
+				className="mt-8 text-center animate-fade-up"
+				style={{ animationDelay: '0.8s' }}
+			>
 				<div className="inline-flex items-center gap-2 glass-panel-dark px-6 py-3">
 					<Plane className="w-5 h-5 text-blue-400" />
 					<span className="text-blue-200 font-medium">
-						Sistema de Gestión de Formación Aeronáutica
+						Sistema de instrucción y entrenamiento
 					</span>
 				</div>
 			</div>

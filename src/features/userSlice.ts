@@ -74,6 +74,17 @@ export const fetchInstructors = createAsyncThunk<user[], StatusParam | undefined
 	}
 );
 
+export const disableRole = createAsyncThunk<void, { user_id: number; role: string }>(
+	'user/disableRole',
+	async ({ user_id, role }, { rejectWithValue }) => {
+		try {
+			await axiosPutSlice('api/users/disable-role', { user_id, role });
+		} catch (error: any) {
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
 // Acción para crear un usuario
 export const createUser = createAsyncThunk<user, user>(
 	'user/createUser',

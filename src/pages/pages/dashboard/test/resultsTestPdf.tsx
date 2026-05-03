@@ -18,8 +18,8 @@ const ResultsTestPdf = ({
 	course: CourseState;
 	user: UserState;
 }) => {
-	const type_trip = ['', 'PIC', 'SIC', 'TRIP'];
-	const license = ['', 'ATP', 'Commercial', 'Privado'];
+	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const questions =
 		test.courseStudentTestSelected?.course_student_test_questions;
@@ -105,7 +105,7 @@ const ResultsTestPdf = ({
 									<td className="border border-green-800 px-2  text-xs">
 										<strong>Fecha de inicio:</strong>{' '}
 										{moment(course.courseStudent?.date).format(
-											'DD-MM-YYYY'
+											'DD-MM-YYYY',
 										)}
 									</td>
 
@@ -162,7 +162,7 @@ const ResultsTestPdf = ({
 					let multiResp: number = 0;
 					let findAnswer = null;
 					const correctAnswers = question.question?.answers?.filter(
-						(QA) => QA.is_correct
+						(QA) => QA.is_correct,
 					);
 					const type = question.question?.question_type_id;
 
@@ -174,8 +174,8 @@ const ResultsTestPdf = ({
 									parseInt(
 										question.course_student_test_answer?.resp
 											? question.course_student_test_answer.resp
-											: '-1'
-									)
+											: '-1',
+									),
 							);
 							if (findAnswer) {
 								respData.shift();
@@ -187,12 +187,12 @@ const ResultsTestPdf = ({
 							findAnswer = JSON.parse(
 								question.course_student_test_answer?.resp
 									? question.course_student_test_answer.resp
-									: '[]'
+									: '[]',
 							);
 							for (const answer of findAnswer) {
 								if (answer.check) {
 									findAnswerMulti = question.question?.answers?.find(
-										(ans) => ans.id === answer.id
+										(ans) => ans.id === answer.id,
 									);
 									if (findAnswerMulti) {
 										multiResp++;
@@ -200,7 +200,7 @@ const ResultsTestPdf = ({
 									respData.push(
 										findAnswerMulti?.value
 											? findAnswerMulti.value
-											: ''
+											: '',
 									);
 								}
 							}
@@ -215,8 +215,8 @@ const ResultsTestPdf = ({
 									parseInt(
 										question.course_student_test_answer?.resp
 											? question.course_student_test_answer.resp
-											: '-1'
-									)
+											: '-1',
+									),
 							);
 							if (findAnswer) {
 								respData.shift();
@@ -228,7 +228,7 @@ const ResultsTestPdf = ({
 							findAnswer = JSON.parse(
 								question.course_student_test_answer?.resp
 									? question.course_student_test_answer.resp
-									: '[]'
+									: '[]',
 							);
 
 							if (findAnswer.length > 0) {
@@ -241,7 +241,7 @@ const ResultsTestPdf = ({
 							findAnswer = JSON.parse(
 								question.course_student_test_answer?.resp
 									? question.course_student_test_answer.resp
-									: '[]'
+									: '[]',
 							);
 
 							if (findAnswer.length > 0) {

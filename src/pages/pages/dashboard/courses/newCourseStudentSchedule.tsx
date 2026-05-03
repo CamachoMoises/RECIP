@@ -51,26 +51,26 @@ const NewCourseStudentSchedule = () => {
 			course: state.courses,
 			subject: state.subjects,
 			user: state.users,
-		})
+		}),
 	);
 
 	// Refs
 	const dateInputRef = useRef<HTMLInputElement | null>(null);
 	const typeTripRef = useRef<number>(
-		course.courseStudent?.type_trip || 1
+		course.courseStudent?.type_trip || 1,
 	);
 	const licenseRef = useRef<number>(
-		course.courseStudent?.license || 1
+		course.courseStudent?.license || 1,
 	);
 	const regulationRef = useRef<number>(
-		course.courseStudent?.regulation || 1
+		course.courseStudent?.regulation || 1,
 	);
 	const studentSelectRef = useRef<user | null>(null);
 
 	// State
 	const [open, setOpen] = useState(1);
 	const [studentSelect, setStudentSelect] = useState<user | null>(
-		null
+		null,
 	);
 
 	// Handlers
@@ -84,7 +84,7 @@ const NewCourseStudentSchedule = () => {
 
 	const handlePilot = (value: string | undefined) => {
 		const studentSelected = user.studentList.find(
-			(part) => part.student?.id === parseInt(value || '-1')
+			(part) => part.student?.id === parseInt(value || '-1'),
 		);
 		if (studentSelected) {
 			setStudentSelect(studentSelected);
@@ -104,7 +104,7 @@ const NewCourseStudentSchedule = () => {
 					typeTrip: typeTripRef.current,
 					license: licenseRef.current,
 					regulation: regulationRef.current,
-				})
+				}),
 			);
 		}
 	};
@@ -131,7 +131,7 @@ const NewCourseStudentSchedule = () => {
 	useEffect(() => {
 		const setStudentFunc = (value: number) => {
 			const studentSelected = user.studentList.find(
-				(part) => part.student?.id == value
+				(part) => part.student?.id == value,
 			);
 			if (studentSelected) {
 				setStudentSelect(studentSelected);
@@ -154,7 +154,7 @@ const NewCourseStudentSchedule = () => {
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
 				name: `Dia ${i + 1}`,
-		  }))
+			}))
 		: [];
 
 	// Loading and error states
@@ -269,8 +269,8 @@ const NewCourseStudentSchedule = () => {
 								value={
 									course.courseStudent?.date
 										? moment(course.courseStudent.date).format(
-												'YYYY-MM-DD'
-										  )
+												'YYYY-MM-DD',
+											)
 										: undefined
 								}
 								onChange={handleChange}
@@ -295,7 +295,7 @@ const NewCourseStudentSchedule = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Tipo de Viaje
+										Gerarquia
 									</Typography>
 									<div className="flex flex-col gap-2">
 										<Radio
@@ -341,13 +341,32 @@ const NewCourseStudentSchedule = () => {
 											defaultChecked={
 												course.courseStudent?.type_trip === 3
 											}
-											label="TRIP"
+											label="SFI"
 											disabled={
 												course.courseStudent?.approve ||
 												!canViewContent
 											}
 											onChange={() =>
 												handleChangeRadio(3, 'type_trip')
+											}
+											color="red"
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Radio
+											name="type_trip"
+											defaultChecked={
+												course.courseStudent?.type_trip === 4
+											}
+											label="SFE"
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
+											onChange={() =>
+												handleChangeRadio(4, 'type_trip')
 											}
 											color="red"
 											crossOrigin={undefined}
@@ -416,6 +435,23 @@ const NewCourseStudentSchedule = () => {
 											label="Privado"
 											color="red"
 											onChange={() => handleChangeRadio(3, 'license')}
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Radio
+											name="license"
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
+											defaultChecked={
+												course.courseStudent?.license === 4
+											}
+											label="FANB"
+											color="red"
+											onChange={() => handleChangeRadio(4, 'license')}
 											crossOrigin={undefined}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
@@ -567,7 +603,7 @@ const NewCourseStudentSchedule = () => {
 															(sd) =>
 																sd.day === day.id + 1 &&
 																sd.status &&
-																subjectItem.status
+																subjectItem.status,
 														);
 														if (SD) hours = hours + subjectItem.hours;
 
@@ -576,7 +612,7 @@ const NewCourseStudentSchedule = () => {
 																(schedule) =>
 																	schedule.subject_id ===
 																		subjectItem.id &&
-																	schedule.subject_days_id === SD?.id
+																	schedule.subject_days_id === SD?.id,
 															);
 
 														return (
@@ -682,7 +718,7 @@ const NewCourseStudentSchedule = () => {
 												value={moment(course.courseStudent.date)
 													.add(
 														course.courseSelected?.days || -1,
-														'days'
+														'days',
 													)
 													.format('YYYY-MM-DD')}
 												crossOrigin={undefined}

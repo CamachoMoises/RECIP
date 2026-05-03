@@ -45,12 +45,14 @@ const ModalFormUser = ({
 	handleOpen,
 	userDocTypes,
 	module,
+	onSuccess,
 }: {
 	userSelect: user | null;
 	openNewUser: boolean;
 	handleOpen: (user?: user | null) => void;
 	userDocTypes: userDocType[];
 	module: number;
+	onSuccess?: () => void;
 }) => {
 	//NOTE - Module names: 0 USER, 1 STUDENT, 2 INSTRUCTOR
 	const moduleName = [
@@ -154,9 +156,9 @@ const ModalFormUser = ({
 			};
 			console.log(req);
 
-			handleOpen();
 			if (userSelect) {
-				dispatch(updateUser(req));
+				await dispatch(updateUser(req));
+				if (onSuccess) onSuccess();
 			} else {
 				const user = await dispatch(createUser(req)).unwrap();
 				switch (module) {
@@ -172,7 +174,9 @@ const ModalFormUser = ({
 					default:
 						break;
 				}
+				if (onSuccess) onSuccess();
 			}
+			handleOpen();
 		}
 	};
 	return (

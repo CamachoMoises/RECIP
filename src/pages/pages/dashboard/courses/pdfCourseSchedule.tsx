@@ -22,8 +22,8 @@ const PDFCourseSchedule = ({
 }) => {
 	moment.locale('es');
 	const data = course.scheduleList;
-	const type_trip = ['', 'PIC', 'SIC', 'TRIP'];
-	const license = ['', 'ATP', 'Commercial', 'Privado'];
+	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	return (
 		<div className="printable">
@@ -69,7 +69,7 @@ const PDFCourseSchedule = ({
 									</td>
 									<td className="border border-green-800 px-2 col-span-2 text-xs">
 										<div className="flex flex-row gap-3">
-											<strong>Tipo:</strong>{' '}
+											<strong>Gerarquia:</strong>{' '}
 											<Check size={15} color="green" />
 											{
 												type_trip[
@@ -105,7 +105,7 @@ const PDFCourseSchedule = ({
 									<td className="border border-green-800 px-2  text-xs">
 										<strong>Fecha de inicio:</strong>{' '}
 										{moment(course.courseStudent?.date).format(
-											'DD-MM-YYYY'
+											'DD-MM-YYYY',
 										)}
 									</td>
 
@@ -188,7 +188,7 @@ const PDFCourseSchedule = ({
 																course.courseSelected?.days
 																	? course.courseSelected.days
 																	: -1,
-																'days'
+																'days',
 															)
 															.format('DD-MM-YYYY')}
 													</>
@@ -249,7 +249,7 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 			? Array.from({ length: 18 - data.length }, (_, i) => ({
 					id: i,
 					name: `item ${i + 1}`,
-			  }))
+				}))
 			: [];
 	return (
 		<table className="table-auto border-collapse border border-gray-300">

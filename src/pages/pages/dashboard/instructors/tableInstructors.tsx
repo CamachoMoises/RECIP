@@ -14,7 +14,7 @@ import {
 	Chip,
 } from '@material-tailwind/react';
 import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
-import { axiosGetDefault } from '../../../../services/axios';
+import { axiosGetDefault, axiosPutDefault } from '../../../../services/axios';
 import toast from 'react-hot-toast';
 import PageTitle from '../../../../components/PageTitle';
 import ModalFormUser from '../users/modalFormUser';
@@ -69,6 +69,23 @@ const TableInstructors = () => {
 			setOpenNewUser(!openNewUser);
 		} else {
 			toast.error('Ocurrió un error al consultar el servidor');
+		}
+	};
+
+	const handleRefreshData = () => {
+		dispatch(fetchInstructors({ status: true }));
+	};
+
+	const handleDisableInstructor = async (userId: number) => {
+		try {
+			await axiosPutDefault('api/users/disable-role', {
+				user_id: userId,
+				role: 'instructor',
+			});
+			toast.success('Instructor deshabilitado correctamente');
+			handleRefreshData();
+		} catch (error) {
+			toast.error('Error al deshabilitar instructor');
 		}
 	};
 
@@ -338,6 +355,7 @@ const TableInstructors = () => {
 															variant="text"
 															color="red"
 															disabled={!validated}
+															onClick={() => handleDisableInstructor(instructor.id)}
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
@@ -364,6 +382,7 @@ const TableInstructors = () => {
 					handleOpen={handleOpen}
 					userDocTypes={userDocTypes}
 					module={2}
+					onSuccess={handleRefreshData}
 				/>
 			)}
 		</>

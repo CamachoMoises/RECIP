@@ -19,7 +19,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 	// 	'',
 	// 	'',
 	// ];
-	const license = ['', 'ATP', 'Commercial', 'Privado'];
+	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const { assessment } = useSelector((state: RootState) => {
 		return {
@@ -39,8 +39,8 @@ const CSA_PDF = ({ day }: { day: number }) => {
 				(_, i) => ({
 					id: i,
 					name: `Dia ${i + 1}`,
-				})
-		  )
+				}),
+			)
 		: [];
 	// console.log(assessment.daysSubjectList);
 	let sumLanding = 0;
@@ -130,7 +130,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 										<strong>Fecha del Curso:</strong> <br />
 										{moment(
 											assessment.courseStudentAssessmentSelected
-												?.course_student?.date
+												?.course_student?.date,
 										).format('DD-MM-YYYY')}
 									</td>
 								</tr>
@@ -196,7 +196,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 										<strong> Fecha de revisión:</strong>{' '}
 										{moment(
 											assessment.courseStudentAssessmentSelected
-												?.course_student?.date
+												?.course_student?.date,
 										).format('DD-MM-YYYY')}
 									</td>
 								</tr>
@@ -268,13 +268,13 @@ const CSA_PDF = ({ day }: { day: number }) => {
 									<td className="border border-blue-gray-800 px-2 text-xs">
 										{moment(
 											assessment.courseStudentAssessmentSelected
-												?.course_student?.date
+												?.course_student?.date,
 										).format('DD-MM-YYYY')}
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
 										{moment(
 											assessment.courseStudentAssessmentSelected
-												?.course_student?.date
+												?.course_student?.date,
 										)
 											.add(days.length, 'days')
 											.format('DD-MM-YYYY')}
@@ -339,7 +339,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 													{days.map((day, index) => {
 														const dayActive =
 															SL.subject_lesson_days?.find(
-																(SLD) => SLD.day === day.id + 1
+																(SLD) => SLD.day === day.id + 1,
 															);
 														const CSALD =
 															dayActive?.course_student_assessment_lesson_days;
@@ -455,7 +455,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 								{days.map((day, index) => {
 									const dayComments =
 										assessment.courseStudentAssessmentSelected?.course_student_assessment_days?.find(
-											(CSAD_C) => CSAD_C.day === day.id + 1
+											(CSAD_C) => CSAD_C.day === day.id + 1,
 										);
 									return (
 										<tr key={`comments-${index}`}>
