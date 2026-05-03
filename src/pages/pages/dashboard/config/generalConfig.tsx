@@ -47,10 +47,10 @@ const GeneralConfig = () => {
 	const navigate = useNavigate();
 	const [openNewCourse, setOpenNewCourse] = useState(false);
 	const [courseSelected, setCourseSelected] = useState<course | null>(
-		null
+		null,
 	);
 	const [courseTypes, setCourseTypes] = useState<courseType[] | null>(
-		null
+		null,
 	);
 	const [courseLevel, setCourseLevel] = useState<
 		courseLevel[] | null
@@ -71,10 +71,10 @@ const GeneralConfig = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const handleOpenEdit = async (course: course | null = null) => {
 		const { resp, status } = await axiosGetDefault(
-			'api/courses/courseTypes'
+			'api/courses/courseTypes',
 		);
 		const dataLevel = await axiosGetDefault(
-			'api/courses/courseLevel'
+			'api/courses/courseLevel',
 		);
 		if (
 			status > 199 &&
@@ -219,14 +219,24 @@ const GeneralConfig = () => {
 													onPointerLeaveCapture={undefined}
 													className="flex flex-col justify-center"
 												>
-													<Typography
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture
-														variant="lead"
-													>
-														{course.name}
-													</Typography>
+													<div className="relative group">
+														<Typography
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture
+															variant="lead"
+															className="truncate cursor-pointer"
+														>
+															{course.name.length > 40
+																? course.name.substring(0, 40) + '...'
+																: course.name}
+														</Typography>
+														{course.name.length > 40 && (
+															<div className="absolute z-50 hidden group-hover:block bg-gray-800 text-white text-sm px-3 py-2 rounded-md shadow-lg -top-8 left-0 w-max max-w-xs whitespace-normal">
+																{course.name}
+															</div>
+														)}
+													</div>
 													<Typography
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
@@ -273,7 +283,7 @@ const GeneralConfig = () => {
 																onPointerLeaveCapture={undefined}
 																onClick={() =>
 																	navigate(
-																		`../config/course/${course.id}`
+																		`../config/course/${course.id}`,
 																	)
 																}
 															>
@@ -288,7 +298,7 @@ const GeneralConfig = () => {
 																disabled={course.course_type.id !== 1}
 																onClick={() =>
 																	navigate(
-																		`../config/test/${course.id}`
+																		`../config/test/${course.id}`,
 																	)
 																}
 															>

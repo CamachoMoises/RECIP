@@ -174,6 +174,7 @@ export type student = {
     user_id: number;
     status: boolean;
     user?: user;
+    photo?: string;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -229,15 +230,16 @@ export interface user {
     is_superuser: boolean;
     last_name: string;
     name: string;
-    student?: student;
-    instructor?: instructor;
+    student?: student | null;
+    instructor?: instructor | null;
     password?: string;
     phone: string;
+    photo?: string;
     country_name?: string;
     flag: string | null;
     uuid: string | null;
     user_doc_type_id?: number;
-    user_doc_type?: userDocType
+    user_doc_type?: userDocType;
     createdAt?: string;
     updatedAt?: string;
 }

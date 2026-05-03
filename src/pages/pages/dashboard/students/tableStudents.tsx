@@ -20,7 +20,7 @@ import {
 } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
 import { fetchStudents } from '../../../../features/userSlice';
-import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, User } from 'lucide-react';
 import { axiosGetDefault } from '../../../../services/axios';
 import toast from 'react-hot-toast';
 import ModalFormUser from '../users/modalFormUser';
@@ -42,7 +42,7 @@ const TableStudents = () => {
 	>(null);
 	const [searchTerm, setSearchTerm] = useState('');
 	const { studentList } = useSelector(
-		(state: RootState) => state.users
+		(state: RootState) => state.users,
 	);
 
 	const validated = PermissionsValidate(['instructor', 'staff']);
@@ -55,12 +55,12 @@ const TableStudents = () => {
 			student.email
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase()) ||
-			student.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+			student.phone?.toLowerCase().includes(searchTerm.toLowerCase()),
 	);
 
 	const handleOpen = async (user: user | null = null) => {
 		const { resp, status } = await axiosGetDefault(
-			'api/users/userDocType'
+			'api/users/userDocType',
 		);
 		if (status > 199 && status < 400) {
 			setUserDocTypes(resp);
@@ -236,17 +236,23 @@ const TableStudents = () => {
 										>
 											<td className="py-3 px-4 border-b border-blue-gray-50">
 												<div className="flex items-center gap-3">
-													<Avatar
-														src={student.email || undefined}
-														alt={`${student.name} ${student.last_name}`}
-														variant="circular"
-														size="sm"
-														placeholder={undefined}
-														withBorder={true}
-														className="border-2 border-white shadow-lg shadow-blue-gray-500/10"
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													/>
+													{student.photo ? (
+														<Avatar
+															src={student.photo}
+															alt={`${student.name} ${student.last_name}`}
+															variant="circular"
+															size="sm"
+															placeholder={undefined}
+															withBorder={true}
+															className="border-2 border-white shadow-lg shadow-blue-gray-500/10"
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														/>
+													) : (
+														<div className="w-10 h-10 rounded-full bg-blue-gray-100 flex items-center justify-center">
+															<User className="h-5 w-5 text-blue-gray-500" />
+														</div>
+													)}
 													<div>
 														<Typography
 															variant="small"

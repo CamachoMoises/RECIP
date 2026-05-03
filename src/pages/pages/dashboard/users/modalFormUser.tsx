@@ -248,29 +248,7 @@ const ModalFormUser = ({
 									</span>
 								)}
 							</div>
-							<div className="">
-								<Input
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									type="text"
-									label="Cedula"
-									maxLength={20}
-									placeholder="Cedula"
-									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-									crossOrigin={undefined}
-									{...register('doc_number', {
-										required: {
-											value: true,
-											message: 'La cedula es requerida',
-										},
-									})}
-								/>
-								{errors.doc_number && (
-									<span className="text-red-500 text-sm/[8px] py-2">
-										{errors.doc_number.message}
-									</span>
-								)}
-							</div>
+
 							<div>
 								<Controller
 									name="country_name"
@@ -379,7 +357,29 @@ const ModalFormUser = ({
 									</span>
 								)}
 							</div>
-
+							<div className="">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									label="Cedula"
+									maxLength={20}
+									placeholder="Cedula"
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('doc_number', {
+										required: {
+											value: true,
+											message: 'La cedula es requerida',
+										},
+									})}
+								/>
+								{errors.doc_number && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.doc_number.message}
+									</span>
+								)}
+							</div>
 							<div className="col-span-3">
 								<Input
 									onPointerEnterCapture={undefined}

@@ -353,7 +353,7 @@ const CourseDetail = () => {
 																onPointerLeaveCapture={undefined}
 															>
 																<div className="flex flex-row justify-between w-80">
-																	<div className="flex w-40 overflow-x-auto whitespace-nowrap">
+																	<div className="relative flex w-40 group">
 																		<Typography
 																			placeholder={undefined}
 																			onPointerEnterCapture={
@@ -362,9 +362,17 @@ const CourseDetail = () => {
 																			onPointerLeaveCapture={
 																				undefined
 																			}
+																			className="truncate cursor-pointer"
 																		>
-																			{subject.name}
+																			{subject.name.length > 15
+																				? subject.name.substring(0, 15) + '...'
+																				: subject.name}
 																		</Typography>
+																		{subject.name.length > 15 && (
+																			<div className="absolute z-50 hidden group-hover:block bg-gray-800 text-white text-sm px-3 py-2 rounded-md shadow-lg -top-8 left-0 w-max max-w-xs whitespace-normal">
+																				{subject.name}
+																			</div>
+																		)}
 																	</div>
 																	{course.courseSelected?.course_type
 																		.id != 2 && (
