@@ -31,13 +31,18 @@ export const fetchCourses = createAsyncThunk<course[]>(
     }
 );
 
-export const fetchCoursesStudents = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number }>(
+export const fetchCoursesStudents = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number, status?: boolean }>(
     'course/fetchCoursesStudents',
-    async ({ currentPage, pageSize }, { rejectWithValue }) => {
+    async ({ currentPage, pageSize, status }, { rejectWithValue }) => {
         try {
-            const response = await axiosGetSlice('api/courses/coursesStudents', {
-                currentPage, pageSize
-            });
+            const params: { currentPage: number; pageSize: number; status?: boolean } = {
+                currentPage,
+                pageSize,
+            };
+            if (status !== undefined) {
+                params.status = status;
+            }
+            const response = await axiosGetSlice('api/courses/coursesStudents', params);
 
             return response;
         } catch (error: any) {
@@ -116,6 +121,18 @@ export const createCourseStudent = createAsyncThunk<courseStudent, number>(
         try {
             const response = await axiosPostSlice(`api/courses/courseStudent/${course_id}`);
             return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+// Acción para actualizar el estado de un curso estudiante
+export const updateCourseStudentStatus = createAsyncThunk<{ id: number; status: boolean }, { courseStudentId: number; status: boolean }>(
+    'course/updateCourseStudentStatus',
+    async ({ courseStudentId, status }, { rejectWithValue }) => {
+        try {
+            await axiosPutSlice(`api/courses/courseStudent/${courseStudentId}/status`, { status });
+            return { id: courseStudentId, status };
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -303,6 +320,11 @@ const courseSlice = createSlice({
             .addCase(createCourseStudent.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
+            })
+
+            // Reducers para la acción updateCourseStudentStatus
+            .addCase(updateCourseStudentStatus.fulfilled, (state, action) => {
+                // Estado actualizado, la lista se vuelve a cargar desde el componente
             })
 
             // Reducers para la acción createSchedule

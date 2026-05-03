@@ -25,6 +25,7 @@ import {
 	fetchCourses,
 	fetchCoursesStudents,
 	fetchSchedule,
+	updateCourseStudentStatus,
 } from '../../../../features/courseSlice';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
@@ -33,6 +34,8 @@ import {
 	CalendarCheck,
 	ChevronLeft,
 	ChevronRight,
+	Trash2,
+	Check,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchSubjects } from '../../../../features/subjectSlice';
@@ -41,6 +44,7 @@ import {
 	fetchStudents,
 } from '../../../../features/userSlice';
 import { PermissionsValidate } from '../../../../services/permissionsValidate';
+import toast from 'react-hot-toast';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -57,13 +61,20 @@ const GeneralCourses = () => {
 		status,
 		error,
 		currentPage,
-		pageSize,
 		totalPages,
 		totalItems,
 	} = useSelector((state: RootState) => {
 		return state.courses;
 	});
+	const { userLogged } = useSelector(
+		(state: RootState) => state.users,
+	);
+	const isAdmin = userLogged?.is_active === true;
 	const [open, setOpen] = useState(false);
+	const [togglingId, setTogglingId] = useState<number | null>(null);
+	const [statusFilter, setStatusFilter] = useState<
+		boolean | undefined
+	>(true);
 
 	const toggleOpen = () => {
 		setOpen((cur) => {
@@ -72,49 +83,62 @@ const GeneralCourses = () => {
 		});
 	};
 	const canViewContent = PermissionsValidate(['staff', 'instructor']);
+
+	const fetchWithFilter = (page: number = 1) => {
+		dispatch(
+			fetchCoursesStudents({
+				currentPage: page,
+				pageSize: fixedPageSize,
+				status: statusFilter,
+			}),
+		);
+	};
+
 	useEffect(() => {
 		dispatch(fetchCourses());
-		dispatch(fetchCoursesStudents({ currentPage, pageSize }));
-	}, [dispatch, currentPage, pageSize]);
-	const [active, setActive] = useState(currentPage);
+		fetchWithFilter(1);
+	}, [dispatch, statusFilter]);
+	const [active, setActive] = useState(1);
+
+	useEffect(() => {
+		setActive(currentPage);
+	}, [currentPage]);
+
+	const fixedPageSize = 5;
 	const getItemProps = (index: number) =>
 		({
 			variant: active === index ? 'filled' : 'text',
 			color: 'gray',
 			onClick: async () => {
-				await dispatch(
-					fetchCoursesStudents({ currentPage: index, pageSize })
-				);
+				fetchWithFilter(index);
 				setActive(index);
 			},
 			className: 'rounded-full',
-		} as any);
+		}) as any;
 
 	const next = async () => {
 		if (active === totalPages) return;
-		setActive(active + 1);
-		await dispatch(
-			fetchCoursesStudents({ currentPage: active + 1, pageSize })
-		);
+		const nextPage = active + 1;
+		setActive(nextPage);
+		fetchWithFilter(nextPage);
 	};
 
 	const prev = async () => {
 		if (active === 1) return;
-		setActive(active - 1);
-		await dispatch(
-			fetchCoursesStudents({ currentPage: active - 1, pageSize })
-		);
+		const prevPage = active - 1;
+		setActive(prevPage);
+		fetchWithFilter(prevPage);
 	};
 	const handleNewCourseSchedule = async (course_id: number) => {
 		const CS = await dispatch(
-			createCourseStudent(course_id)
+			createCourseStudent(course_id),
 		).unwrap();
 		await dispatch(
 			fetchSubjects({
 				course_id: CS.course_id ? CS.course_id : -1,
 				status: true,
 				is_schedulable: true,
-			})
+			}),
 		);
 		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
 		await dispatch(fetchInstructors({ status: true }));
@@ -123,13 +147,12 @@ const GeneralCourses = () => {
 		navigate(`../new_course/${CS.id}/${CS.course_id}`);
 	};
 	const navigateCourseStudent = async (CS: courseStudent) => {
-		console.log('OJOOOOO');
 		await dispatch(
 			fetchSubjects({
 				course_id: CS.course_id ? CS.course_id : -1,
 				status: true,
 				is_schedulable: true,
-			})
+			}),
 		);
 		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
 		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
@@ -138,6 +161,32 @@ const GeneralCourses = () => {
 		await dispatch(fetchSchedule(CS.id ? CS.id : -1));
 		navigate(`../new_course/${CS.id}/${CS.course_id}`);
 	};
+
+	const handleToggleStatus = async (
+		courseStudentId: number,
+		currentStatus: boolean,
+	) => {
+		setTogglingId(courseStudentId);
+		try {
+			await dispatch(
+				updateCourseStudentStatus({
+					courseStudentId,
+					status: !currentStatus,
+				}),
+			).unwrap();
+			toast.success(
+				!currentStatus
+					? 'Registro habilitado'
+					: 'Registro deshabilitado',
+			);
+			fetchWithFilter(active);
+		} catch (error) {
+			toast.error('Error al actualizar el estado');
+		} finally {
+			setTogglingId(null);
+		}
+	};
+
 	if (status === 'loading') {
 		return (
 			<>
@@ -158,7 +207,7 @@ const GeneralCourses = () => {
 			? Array.from({ length: totalPages }, (_, i) => ({
 					id: i,
 					name: `Pagina ${i + 1}`,
-			  }))
+				}))
 			: [];
 	return (
 		<>
@@ -267,7 +316,7 @@ const GeneralCourses = () => {
 																	onPointerLeaveCapture={undefined}
 																	onClick={() =>
 																		handleNewCourseSchedule(
-																			course.id ? course.id : -1
+																			course.id ? course.id : -1,
 																		)
 																	}
 																>
@@ -309,6 +358,49 @@ const GeneralCourses = () => {
 								Agenda de Programas de Instrucción para Pilotos
 								Participantes en Curso
 							</Typography>
+
+							<div className="flex justify-center gap-2 mb-4">
+								<Button
+									size="sm"
+									variant={
+										statusFilter === undefined ? 'filled' : 'outlined'
+									}
+									color="blue"
+									onClick={() => setStatusFilter(undefined)}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Todos
+								</Button>
+								<Button
+									size="sm"
+									variant={
+										statusFilter === true ? 'filled' : 'outlined'
+									}
+									color="green"
+									onClick={() => setStatusFilter(true)}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Activos
+								</Button>
+								<Button
+									size="sm"
+									variant={
+										statusFilter === false ? 'filled' : 'outlined'
+									}
+									color="red"
+									onClick={() => setStatusFilter(false)}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Inactivos
+								</Button>
+							</div>
+
 							{courseStudentList?.length === 0 ? (
 								<>
 									<Typography
@@ -333,17 +425,22 @@ const GeneralCourses = () => {
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
+											className={`flex justify-between ${CL.status === false ? 'opacity-50' : ''}`}
 											onClick={() => {
-												navigateCourseStudent(CL);
+												if (CL.status !== false) {
+													navigateCourseStudent(CL);
+												}
 											}}
 										>
-											<ListItemPrefix
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{CL.code}
-											</ListItemPrefix>
+											<div className="flex items-center gap-4">
+												<ListItemPrefix
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													{CL.code}
+												</ListItemPrefix>
+											</div>
 											<div>
 												<Typography
 													variant="h6"
@@ -368,6 +465,34 @@ const GeneralCourses = () => {
 													{CL.course?.course_level.name}-
 													{CL.course?.course_type.name})
 												</Typography>
+											</div>
+											<div onClick={(e) => e.stopPropagation()}>
+												{isAdmin && (
+													<IconButton
+														variant={
+															CL.status === false ? 'filled' : 'text'
+														}
+														color={
+															CL.status === false ? 'green' : 'red'
+														}
+														onClick={() =>
+															handleToggleStatus(
+																CL.id,
+																CL.status !== false,
+															)
+														}
+														disabled={togglingId === CL.id}
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+													>
+														{CL.status === false ? (
+															<Check className="h-4 w-4" />
+														) : (
+															<Trash2 className="h-4 w-4" />
+														)}
+													</IconButton>
+												)}
 											</div>
 										</ListItem>
 									))}

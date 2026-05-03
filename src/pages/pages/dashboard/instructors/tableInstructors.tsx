@@ -41,7 +41,7 @@ const TableInstructors = () => {
 	>(null);
 	const [searchTerm, setSearchTerm] = useState('');
 	const { instructorList } = useSelector(
-		(state: RootState) => state.users
+		(state: RootState) => state.users,
 	);
 
 	const validated = PermissionsValidate(['instructor', 'staff']);
@@ -56,12 +56,12 @@ const TableInstructors = () => {
 				.includes(searchTerm.toLowerCase()) ||
 			instructor.phone
 				?.toLowerCase()
-				.includes(searchTerm.toLowerCase())
+				.includes(searchTerm.toLowerCase()),
 	);
 
 	const handleOpen = async (user: user | null = null) => {
 		const { resp, status } = await axiosGetDefault(
-			'api/users/userDocType'
+			'api/users/userDocType',
 		);
 		if (status > 199 && status < 400) {
 			setUserDocTypes(resp);
@@ -245,19 +245,6 @@ const TableInstructors = () => {
 										>
 											<td className="py-3 px-4 border-b border-blue-gray-100">
 												<div className="flex items-center gap-3">
-													{/* <Avatar
-														src={instructor.email || undefined}
-														alt={`${instructor.name} ${instructor.last_name}`}
-														variant="circular"
-														size="sm"
-														withBorder={true}
-														className="border-2 border-white shadow-lg shadow-blue-gray-500/10"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														<User className="h-4 w-4" />
-													</Avatar> */}
 													<div>
 														<Typography
 															variant="small"

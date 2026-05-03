@@ -286,7 +286,7 @@ return (
 												)}
 											</MenuHandler>
 											<MenuList
-												className="glass-card-dark border border-blue-500/30"
+												className={`glass-card-dark border border-blue-500/30 ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
@@ -294,7 +294,7 @@ return (
 												{menuItems.map((item) => (
 													<MenuItem
 														key={item.id}
-														className="flex items-center gap-3 hover:bg-white/10 rounded-lg transition-all duration-200"
+														className={`flex items-center gap-3 rounded-lg transition-all duration-200 ${theme === 'dark' ? 'hover:bg-white/10 text-white' : 'hover:bg-slate-100 text-slate-800'}`}
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
@@ -319,7 +319,7 @@ return (
 
 								<IconButton
 									variant="text"
-									className="md:hidden text-white hover:bg-white/10 focus:bg-white/10 active:bg-white/20 rounded-xl transition-all duration-300"
+									className={`md:hidden ${theme === 'dark' ? 'text-white' : 'text-slate-800'} hover:bg-white/10 focus:bg-white/10 active:bg-white/20 rounded-xl transition-all duration-300`}
 									ripple={false}
 									onClick={() => setOpenNav(!openNav)}
 									placeholder={undefined}
