@@ -51,7 +51,7 @@ const NavBar = () => {
 	const auth = useSelector((state: RootState) => state.auth);
 	const { theme, toggle: toggleTheme } = useTheme();
 	const { userLogged } = useSelector(
-		(state: RootState) => state.users
+		(state: RootState) => state.users,
 	);
 	const dispatch = useDispatch<AppDispatch>();
 	useEffect(() => {
@@ -111,7 +111,7 @@ const NavBar = () => {
 	];
 	const resolveManualNameFromPath = (
 		path: string,
-		manualTree: Record<string, any>
+		manualTree: Record<string, any>,
 	): string => {
 		const segments = path.split('/').filter(Boolean); // elimina vacíos
 
@@ -146,7 +146,7 @@ const NavBar = () => {
 			const path = location.pathname;
 			const manualName = resolveManualNameFromPath(
 				path,
-				manualRoutes
+				manualRoutes,
 			);
 			manualPath = `/manual/${manualName}.pdf`;
 		} else if (type === 'example' && auth.user.is_superuser) {
@@ -158,7 +158,7 @@ const NavBar = () => {
 					window.open(manualPath, '_blank');
 				} else {
 					toast.error(
-						'El manual para esta sección no está disponible'
+						'El manual para esta sección no está disponible',
 					);
 				}
 			})
@@ -177,16 +177,20 @@ const NavBar = () => {
 			: false
 		: false;
 
-return (
+	return (
 		<>
-			<div className={`fixed top-2 z-50 w-[98%] left-[1%] rounded-2xl p-3 glass-card-dark animate-fade-in ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+			<div
+				className={`fixed top-2 z-50 w-[98%] left-[1%] rounded-2xl p-3 glass-card-dark animate-fade-in ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}
+			>
 				<div className="flex items-center justify-between">
 					<div className="flex flex-col items-center">
-						<img
-							src="/images/logo.png"
-							alt="Logo RECIP"
-							className="w-12 h-12 lg:h-16 lg:w-32 object-contain bg-white/95 px-3 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
-						/>
+						<a href="/dashboard" className="flex items-center gap-2">
+							<img
+								src="/images/logo.png"
+								alt="Logo RECIP"
+								className="w-12 h-12 lg:h-16 lg:w-32 object-contain bg-white/95 px-3 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
+							/>
+						</a>
 					</div>
 
 					<div className="absolute left-1/2 transform -translate-x-1/2">
@@ -269,7 +273,7 @@ return (
 														/>
 														<Chip
 															value={formatUserName(
-																userLogged.last_name
+																userLogged.last_name,
 															)}
 															color="blue"
 															size="sm"
