@@ -255,6 +255,9 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 		<table className="table-auto border-collapse border border-gray-300">
 			<thead className="bg-gray-100">
 				<tr>
+					<th className="border border-gray-800 text-center text-xs w-6">
+						<strong>Id</strong>
+					</th>
 					{columns.map((col, index) => (
 						<th
 							key={index}
@@ -268,8 +271,10 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 			<tbody>
 				{data.map((row, index) => (
 					<tr key={index} className="hover:bg-gray-50">
-						<td className="border border-gray-800 w-40 overflow-hidden bg-white text-xs text-center font-bold">
+						<td className="border border-gray-800 w-6 overflow-hidden bg-white text-xs text-center font-bold">
 							{index ? <>{index} </> : ' '}
+						</td>
+						<td className="border border-gray-800 w-40 overflow-hidden bg-white text-xs text-center font-bold">
 							{row.subject.name}
 						</td>
 						<td className="border border-gray-800 bg-white text-xs text-center">
@@ -287,7 +292,10 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 				))}
 				{add_files.map((row) => (
 					<tr key={row.id} className="hover:bg-gray-50">
-						<td className="border border-gray-800 w-40 h-6 bg-gray-600 text-xs text-center font-bold">
+						<td className="border border-gray-800 w-6 h-6 bg-gray-600 text-xs text-center font-bold">
+							{' '}
+						</td>
+						<td className="border border-gray-800  h-6 bg-gray-600 text-xs text-center font-bold">
 							{' '}
 						</td>
 						<td className="border border-gray-800  h-6 bg-gray-600 text-xs text-center font-bold">

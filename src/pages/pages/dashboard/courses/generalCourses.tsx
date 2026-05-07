@@ -36,6 +36,8 @@ import {
 	ChevronRight,
 	Trash2,
 	Check,
+	Eye,
+	Pencil,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchSubjects } from '../../../../features/subjectSlice';
@@ -69,7 +71,7 @@ const GeneralCourses = () => {
 	const { userLogged } = useSelector(
 		(state: RootState) => state.users,
 	);
-	const isAdmin = userLogged?.is_active === true;
+	const isAdmin = userLogged?.is_superuser === true;
 	const [open, setOpen] = useState(false);
 	const [togglingId, setTogglingId] = useState<number | null>(null);
 	const [statusFilter, setStatusFilter] = useState<
@@ -160,6 +162,22 @@ const GeneralCourses = () => {
 		await dispatch(fetchStudents({ status: true }));
 		await dispatch(fetchSchedule(CS.id ? CS.id : -1));
 		navigate(`../new_course/${CS.id}/${CS.course_id}`);
+	};
+
+	const navigateViewCourseStudent = async (CS: courseStudent) => {
+		await dispatch(
+			fetchSubjects({
+				course_id: CS.course_id ? CS.course_id : -1,
+				status: true,
+				is_schedulable: true,
+			}),
+		);
+		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
+		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
+		await dispatch(fetchInstructors({ status: true }));
+		await dispatch(fetchStudents({ status: true }));
+		await dispatch(fetchSchedule(CS.id ? CS.id : -1));
+		navigate(`../view_course/${CS.id}/${CS.course_id}`);
 	};
 
 	const handleToggleStatus = async (
@@ -358,48 +376,51 @@ const GeneralCourses = () => {
 								Agenda de Programas de Instrucción para Pilotos
 								Participantes en Curso
 							</Typography>
-
-							<div className="flex justify-center gap-2 mb-4">
-								<Button
-									size="sm"
-									variant={
-										statusFilter === undefined ? 'filled' : 'outlined'
-									}
-									color="blue"
-									onClick={() => setStatusFilter(undefined)}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Todos
-								</Button>
-								<Button
-									size="sm"
-									variant={
-										statusFilter === true ? 'filled' : 'outlined'
-									}
-									color="green"
-									onClick={() => setStatusFilter(true)}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Activos
-								</Button>
-								<Button
-									size="sm"
-									variant={
-										statusFilter === false ? 'filled' : 'outlined'
-									}
-									color="red"
-									onClick={() => setStatusFilter(false)}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Inactivos
-								</Button>
-							</div>
+							{canViewContent && (
+								<div className="flex justify-center gap-2 mb-4">
+									<Button
+										size="sm"
+										variant={
+											statusFilter === undefined
+												? 'filled'
+												: 'outlined'
+										}
+										color="blue"
+										onClick={() => setStatusFilter(undefined)}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Todos
+									</Button>
+									<Button
+										size="sm"
+										variant={
+											statusFilter === true ? 'filled' : 'outlined'
+										}
+										color="green"
+										onClick={() => setStatusFilter(true)}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Activos
+									</Button>
+									<Button
+										size="sm"
+										variant={
+											statusFilter === false ? 'filled' : 'outlined'
+										}
+										color="red"
+										onClick={() => setStatusFilter(false)}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Inactivos
+									</Button>
+								</div>
+							)}
 
 							{courseStudentList?.length === 0 ? (
 								<>
@@ -425,12 +446,8 @@ const GeneralCourses = () => {
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
+											onClick={() => navigateViewCourseStudent(CL)}
 											className={`flex justify-between ${CL.status === false ? 'opacity-50' : ''}`}
-											onClick={() => {
-												if (CL.status !== false) {
-													navigateCourseStudent(CL);
-												}
-											}}
 										>
 											<div className="flex items-center gap-4">
 												<ListItemPrefix
@@ -466,7 +483,38 @@ const GeneralCourses = () => {
 													{CL.course?.course_type.name})
 												</Typography>
 											</div>
-											<div onClick={(e) => e.stopPropagation()}>
+											<div
+												onClick={(e) => e.stopPropagation()}
+												className="flex items-center gap-2"
+											>
+												<IconButton
+													variant="text"
+													color="blue"
+													onClick={() =>
+														navigateViewCourseStudent(CL)
+													}
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													<Eye className="h-4 w-4" />
+												</IconButton>
+												{isAdmin && (
+													<IconButton
+														variant="text"
+														color="green"
+														onClick={() => {
+															if (CL.status !== false) {
+																navigateCourseStudent(CL);
+															}
+														}}
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+													>
+														<Pencil className="h-4 w-4" />
+													</IconButton>
+												)}
 												{isAdmin && (
 													<IconButton
 														variant={

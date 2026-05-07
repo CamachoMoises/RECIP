@@ -4,6 +4,7 @@ import UsersTable from './dashboard/users/usersTable';
 import GeneralCourses from './dashboard/courses/generalCourses';
 import CourseDetail from './dashboard/config/courseDetail';
 import NewCourse from './dashboard/courses/newCourseStudentSchedule';
+import ViewCourseStudentSchedule from './dashboard/courses/viewCourseStudentSchedule';
 import TableStudents from './dashboard/students/tableStudents';
 import TableInstructors from './dashboard/instructors/tableInstructors';
 import GeneralAssessment from './dashboard/assessment/generalAssessment';
@@ -105,6 +106,10 @@ const Dashboard = () => {
 								<Route
 									path="new_course/:id/:course_id"
 									element={<NewCourse />}
+								/>
+								<Route
+									path="view_course/:id/:course_id"
+									element={<ViewCourseStudentSchedule />}
 								/>
 								<Route
 									path="course_assessment/:id/:course_id"
