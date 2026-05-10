@@ -166,8 +166,6 @@ const NavBar = () => {
 				toast.error('Error al intentar acceder al manual');
 			});
 	};
-	console.log(userLogged);
-
 	const is_superuser = userLogged
 		? userLogged.is_superuser
 			? true

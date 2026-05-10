@@ -25,6 +25,7 @@ import { AppDispatch } from '../../../../store';
 import { Plus, Save, X } from 'lucide-react';
 import LessonDetail from './lessonDetail';
 import { axiosPostDefault } from '../../../../services/axios';
+import { createPortal } from 'react-dom';
 type Inputs = {
 	name: string;
 	hours: number;
@@ -54,10 +55,10 @@ const ModalFormSubject = ({
 	const [lessonState, setLessonState] = useState<string>();
 	const dispatch = useDispatch<AppDispatch>();
 	const [isActive, setIsActive] = useState(
-		subjectSelected ? subjectSelected?.status : true
+		subjectSelected ? subjectSelected?.status : true,
 	);
 	const [isSchedulable, setSchedulable] = useState(
-		subjectSelected ? subjectSelected?.is_schedulable : true
+		subjectSelected ? subjectSelected?.is_schedulable : true,
 	);
 	const subject_lessons = subjectSelected?.subject_lessons
 		? subjectSelected.subject_lessons
@@ -66,18 +67,19 @@ const ModalFormSubject = ({
 	const {
 		register,
 		handleSubmit,
+		setValue,
 		formState: { errors },
 	} = useForm<Inputs>({
 		defaultValues: {
 			name: subjectSelected?.name,
-			hours: courseType === 2 ? 0 : subjectSelected?.hours,
+			hours: subjectSelected?.hours,
 		},
 	});
 	const handleChangeStatusDay = async (
 		event: React.ChangeEvent<HTMLInputElement>,
 		day: { id: number; name: string },
 		subject_lesson_id: number | undefined,
-		subject_lesson_days_id: number
+		subject_lesson_days_id: number,
 	) => {
 		const req = {
 			status_lesson: event.target.checked,
@@ -109,7 +111,7 @@ const ModalFormSubject = ({
 		id: number,
 		lesson: string,
 		order: number,
-		status: boolean
+		status: boolean,
 	) => {
 		if (subjectSelected && maxOrderLessonSelected) {
 			const editedLesson: subjectLesson = {
@@ -124,7 +126,7 @@ const ModalFormSubject = ({
 		}
 	};
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
-		const hours = courseType === 2 || !data.hours ? 0 : data.hours;
+		const hours = !data.hours ? 0 : data.hours;
 		const newSubject: subject = {
 			id: subjectSelected?.id ? subjectSelected.id : null,
 			name: data.name,
@@ -132,8 +134,8 @@ const ModalFormSubject = ({
 			order: subjectSelected?.order
 				? subjectSelected.order
 				: maxOrderSubject
-				? maxOrderSubject + 1
-				: 1,
+					? maxOrderSubject + 1
+					: 1,
 			course_id: parseInt(id ? id : '-1'),
 			status: isActive,
 			is_schedulable: isSchedulable,
@@ -141,14 +143,14 @@ const ModalFormSubject = ({
 		if (subjectSelected) {
 			await dispatch(updateSubject(newSubject));
 			await dispatch(
-				fetchSubject(newSubject.id ? newSubject.id : -1)
+				fetchSubject(newSubject.id ? newSubject.id : -1),
 			);
 		} else {
 			await dispatch(createSubject(newSubject));
 			handleOpen();
 		}
 	};
-	return (
+	return createPortal(
 		<Dialog
 			placeholder={undefined}
 			onPointerEnterCapture={undefined}
@@ -207,7 +209,7 @@ const ModalFormSubject = ({
 									type="text"
 									label="Horas"
 									pattern="^\d+(\.\d+)?$"
-									disabled={courseType === 2}
+									disabled={!isSchedulable}
 									placeholder="Horas"
 									maxLength={500}
 									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
@@ -220,13 +222,7 @@ const ModalFormSubject = ({
 												value: true,
 												message: 'la Hora es requerida',
 											},
-											// validate: async (value: string) => {
-											// 	const regex = /^\d+(\.\d+)?$/;
-											// 	if (!regex.test(value))
-											// 		return 'Debe ser nuemrico con decimales separados por puntos';
-											// 	return true;
-											// },
-										}
+										},
 									)}
 									aria-invalid={errors.name ? 'true' : 'false'}
 								/>
@@ -288,7 +284,11 @@ const ModalFormSubject = ({
 													subjectSelected ? isSchedulable : true
 												}
 												onChange={() => {
-													setSchedulable(!isSchedulable);
+													const newValue = !isSchedulable;
+													setSchedulable(newValue);
+													if (!newValue) {
+														setValue('hours', 0);
+													}
 												}}
 												crossOrigin={undefined}
 												onPointerEnterCapture={undefined}
@@ -370,7 +370,7 @@ const ModalFormSubject = ({
 											className="flex flex-row justify-center text-center"
 											onClick={() => {
 												setOpenNewSubjectLesson(
-													!openNewSubjectLesson
+													!openNewSubjectLesson,
 												);
 												setLessonState(undefined);
 											}}
@@ -467,7 +467,8 @@ const ModalFormSubject = ({
 					</div>
 				</DialogBody>
 			</form>
-		</Dialog>
+		</Dialog>,
+		document.getElementById('portal-root') || document.body,
 	);
 };
 

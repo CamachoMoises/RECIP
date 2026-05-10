@@ -56,7 +56,7 @@ const CourseDetail = () => {
 				course_id: parseInt(id ? id : '-1'),
 				status: false,
 				is_schedulable: false,
-			})
+			}),
 		);
 		dispatch(fetchCourse(parseInt(id ? id : '-1')));
 	}, [dispatch, id]);
@@ -67,7 +67,7 @@ const CourseDetail = () => {
 		}
 	}, [dispatch, subjectSelectedId]);
 	if (!id || !course.courseSelected) {
-		// navigate('/dashboard/config');
+		navigate('/dashboard/config');
 	} else {
 		const selectedCourse = course.courseSelected;
 		const subjectList = subject.subjectList;
@@ -76,7 +76,7 @@ const CourseDetail = () => {
 		const maxOrderSubject = subject.maxOrderSubject;
 		const maxOrderLessonSelected = subject.maxOrderLesson;
 		const handleOpenEdit = async (
-			subjectId: number | null = null
+			subjectId: number | null = null,
 		) => {
 			setSubjectSelectedId(subjectId);
 			if (openNewSubject) {
@@ -85,7 +85,7 @@ const CourseDetail = () => {
 						course_id: selectedCourse.id ? selectedCourse.id : -1,
 						status: false,
 						is_schedulable: false,
-					})
+					}),
 				);
 			}
 			setOpenNewSubject(!openNewSubject);
@@ -93,7 +93,7 @@ const CourseDetail = () => {
 		const handleSwitchSubject = async (
 			subjectEdit: subject,
 			index: number,
-			tpye: string
+			tpye: string,
 		) => {
 			let index_related = 0;
 			if (tpye === 'up') {
@@ -124,13 +124,13 @@ const CourseDetail = () => {
 					course_id: parseInt(id),
 					status: false,
 					is_schedulable: false,
-				})
+				}),
 			);
 		};
 		const handleChangeStatusDay = async (
 			event: React.ChangeEvent<HTMLInputElement>,
 			day: { id: number; name: string },
-			subject_id: number | null
+			subject_id: number | null,
 		) => {
 			if (subject_id && selectedCourse?.id) {
 				const req = {
@@ -161,7 +161,7 @@ const CourseDetail = () => {
 		if (selectedCourse) {
 			const days = Array.from(
 				{ length: selectedCourse.days },
-				(_, i) => ({ id: i, name: `Dia ${i + 1}` })
+				(_, i) => ({ id: i, name: `Dia ${i + 1}` }),
 			);
 
 			const hoursByDays = subject.subjectList.flatMap((sub) => {
@@ -241,47 +241,33 @@ const CourseDetail = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{course.courseSelected.course_type.id != 2 ? (
-												<>
-													{days.map((day, index) => {
-														let hours = 0;
-														console.log(day, index, 'OJO');
-														const hoursDay = hoursByDays.filter(
-															(HbD) => HbD.day === day.id + 1
-														);
-														hours = hoursDay.reduce(
-															(sum, SD) => sum + SD.hours,
-															0
-														);
+											{days.map((day, index) => {
+												let hours = 0;
+												const hoursDay = hoursByDays.filter(
+													(HbD) => HbD.day === day.id + 1,
+												);
 
-														return (
-															<div className="flex flex-col gap-2">
-																<span
-																	key={`dayDetails-${index}`}
-																	className={
-																		hours > 8 ? 'text-red-700' : ''
-																	}
-																>
-																	{day.name}: {hours} horas de
-																	instruccion
-																</span>
-															</div>
-														);
-													})}
-												</>
-											) : (
-												<>
-													{days.map((day, index) => {
-														return (
-															<div className="flex flex-col gap-2">
-																<span key={`dayDetails-${index}`}>
-																	{day.name}: 8 horas de instruccion
-																</span>
-															</div>
-														);
-													})}
-												</>
-											)}
+												hours = hoursDay.reduce(
+													(sum, SD) => sum + SD.hours,
+													0,
+												);
+
+												return (
+													<div
+														key={`day-${index}`}
+														className="flex flex-col gap-2"
+													>
+														<span
+															key={`dayDetails-${index}`}
+															className={
+																hours > 8 ? 'text-red-700' : ''
+															}
+														>
+															{day.name}: {hours} horas de instruccion
+														</span>
+													</div>
+												);
+											})}
 										</Typography>
 									</div>
 								</CardBody>
@@ -347,7 +333,7 @@ const CourseDetail = () => {
 																className={`flex justify-between ${
 																	subject.status ? '' : 'bg-gray-400'
 																}`}
-																key={subject.id}
+																key={subject.id ?? `subject-${index}`}
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
@@ -365,7 +351,10 @@ const CourseDetail = () => {
 																			className="truncate cursor-pointer"
 																		>
 																			{subject.name.length > 15
-																				? subject.name.substring(0, 15) + '...'
+																				? subject.name.substring(
+																						0,
+																						15,
+																					) + '...'
 																				: subject.name}
 																		</Typography>
 																		{subject.name.length > 15 && (
@@ -411,7 +400,7 @@ const CourseDetail = () => {
 																		check = subjectDays.some(
 																			(sd) =>
 																				sd.day === day.id + 1 &&
-																				sd.status
+																				sd.status,
 																		);
 																		const labelView =
 																			course.courseSelected
@@ -446,7 +435,7 @@ const CourseDetail = () => {
 																								handleChangeStatusDay(
 																									event,
 																									day,
-																									subject.id
+																									subject.id,
 																								);
 																							}}
 																							crossOrigin={undefined}
@@ -478,7 +467,7 @@ const CourseDetail = () => {
 																			handleSwitchSubject(
 																				subject,
 																				index,
-																				'up'
+																				'up',
 																			)
 																		}
 																	>
@@ -502,14 +491,14 @@ const CourseDetail = () => {
 																		disabled={
 																			maxOrderSubject
 																				? maxOrderSubject <=
-																				  subject.order
+																					subject.order
 																				: true
 																		}
 																		onClick={() =>
 																			handleSwitchSubject(
 																				subject,
 																				index,
-																				'down'
+																				'down',
 																			)
 																		}
 																	>
