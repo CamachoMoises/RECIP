@@ -52,7 +52,7 @@ const CSAD_form = ({
 		};
 	});
 	const [signatureUrls, setSignatureUrls] = useState<SignatureUrls>(
-		{}
+		{},
 	);
 
 	// Obtener las firmas cuando cambie el CSAD_id
@@ -69,36 +69,36 @@ const CSAD_form = ({
 				instructor: `${API_URL}/storage/firmas/${CSAD_id}/signature_2_${CSAD_id}.webp`,
 				fcaa: isLastStep
 					? `${API_URL}/storage/firmas/${CSAD_id}/signature_3_${CSAD_id}.webp`
-				: undefined,
-		});
+					: undefined,
+			});
+		};
+
+		fetchSignatures();
+	}, [assessment.courseStudentAssessmentDaySelected?.id, isLastStep]);
+
+	// Renderizar las firmas
+	const renderSignature = (type: keyof SignatureUrls) => {
+		if (!signatureUrls[type]) return null;
+
+		return (
+			<div className="signature-container">
+				<img
+					src={signatureUrls[type]}
+					className="signature-image"
+					alt={`Firma ${type}`}
+				/>
+			</div>
+		);
 	};
 
-	fetchSignatures();
-}, [assessment.courseStudentAssessmentDaySelected?.id, isLastStep]);
-
-// Renderizar las firmas
-const renderSignature = (type: keyof SignatureUrls) => {
-	if (!signatureUrls[type]) return null;
-
-	return (
-		<div className="signature-container">
-			<img
-				src={signatureUrls[type]}
-				className="signature-image"
-				alt={`Firma ${type}`}
-			/>
-		</div>
-	);
-};
-
-const sigCanvas1 = useRef<SignatureCanvas>(null);
-const sigCanvas2 = useRef<SignatureCanvas>(null);
-const sigCanvas3 = useRef<SignatureCanvas>(null);
-const dayStarted = assessment.courseStudentAssessmentDaySelected
-	?.airport
-	? true
-	: false;
-const dispatch = useDispatch<AppDispatch>();
+	const sigCanvas1 = useRef<SignatureCanvas>(null);
+	const sigCanvas2 = useRef<SignatureCanvas>(null);
+	const sigCanvas3 = useRef<SignatureCanvas>(null);
+	const dayStarted = assessment.courseStudentAssessmentDaySelected
+		?.airport
+		? true
+		: false;
+	const dispatch = useDispatch<AppDispatch>();
 	const clear = () => {
 		sigCanvas1.current?.clear();
 		sigCanvas2.current?.clear();
@@ -185,7 +185,7 @@ const dispatch = useDispatch<AppDispatch>();
 				: sigCanvas3.current.toDataURL();
 		}
 		const updateResult = await dispatch(
-			updateCourseStudentAssessmentDay(req)
+			updateCourseStudentAssessmentDay(req),
 		);
 
 		if (
@@ -196,7 +196,7 @@ const dispatch = useDispatch<AppDispatch>();
 				'Saving signatures if they exist...',
 				signature1Data,
 				signature2Data,
-				signature3Data
+				signature3Data,
 			);
 
 			// 2. Guardar firmas si existen
@@ -207,7 +207,7 @@ const dispatch = useDispatch<AppDispatch>();
 						signature1: signature1Data,
 						signature2: signature2Data,
 						signature3: signature3Data,
-					})
+					}),
 				);
 			}
 		}
