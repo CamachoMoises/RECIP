@@ -13,15 +13,12 @@ import {
 	SignatureUrls,
 	courseStudentAssessmentDay,
 } from '../../../../types/utilities';
-import { AdvancedImage } from '@cloudinary/react';
 import {
 	saveSignatures,
 	updateCourseStudentAssessmentDay,
 } from '../../../../features/assessmentSlice';
 import { useEffect, useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
-import { cld } from '../../../../lib/utils';
-import { thumbnail } from '@cloudinary/url-gen/actions/resize';
 
 type Inputs = {
 	airport: string;
@@ -65,67 +62,43 @@ const CSAD_form = ({
 
 			const CSAD_id =
 				assessment.courseStudentAssessmentDaySelected.id;
-
-			// Construye los public_ids según tu convención
-			const publicIds = {
-				student: `firmas/signature_1_${CSAD_id}`,
-				instructor: `firmas/signature_2_${CSAD_id}`,
-				fcaa: isLastStep
-					? `firmas/signature_3_${CSAD_id}`
-					: undefined,
-			};
+			const API_URL = import.meta.env.VITE_API_URL;
 
 			setSignatureUrls({
-				student: cld
-					.image(publicIds.student)
-					.resize(thumbnail().width(200))
-					.toURL(),
-				instructor: cld
-					.image(publicIds.instructor)
-					.resize(thumbnail().width(200))
-					.toURL(),
-				fcaa: publicIds.fcaa
-					? cld
-							.image(publicIds.fcaa)
-							.resize(thumbnail().width(200))
-							.toURL()
-					: undefined,
-			});
-		};
-
-		fetchSignatures();
-	}, [assessment.courseStudentAssessmentDaySelected?.id, isLastStep]);
-
-	// Renderizar las firmas
-	const renderSignature = (type: keyof SignatureUrls) => {
-		if (!signatureUrls[type]) return null;
-
-		return (
-			<div className="signature-container">
-				<AdvancedImage
-					cldImg={cld.image(
-						`firmas/firmas/signature_${
-							type === 'student'
-								? '1'
-								: type === 'instructor'
-								? '2'
-								: '3'
-						}_${assessment.courseStudentAssessmentDaySelected?.id}`
-					)}
-					className="signature-image"
-				/>
-			</div>
-		);
+				student: `${API_URL}/storage/firmas/${CSAD_id}/signature_1_${CSAD_id}.webp`,
+				instructor: `${API_URL}/storage/firmas/${CSAD_id}/signature_2_${CSAD_id}.webp`,
+				fcaa: isLastStep
+					? `${API_URL}/storage/firmas/${CSAD_id}/signature_3_${CSAD_id}.webp`
+				: undefined,
+		});
 	};
 
-	const sigCanvas1 = useRef<SignatureCanvas>(null);
-	const sigCanvas2 = useRef<SignatureCanvas>(null);
-	const sigCanvas3 = useRef<SignatureCanvas>(null);
-	const dayStarted = assessment.courseStudentAssessmentDaySelected
-		?.airport
-		? true
-		: false;
-	const dispatch = useDispatch<AppDispatch>();
+	fetchSignatures();
+}, [assessment.courseStudentAssessmentDaySelected?.id, isLastStep]);
+
+// Renderizar las firmas
+const renderSignature = (type: keyof SignatureUrls) => {
+	if (!signatureUrls[type]) return null;
+
+	return (
+		<div className="signature-container">
+			<img
+				src={signatureUrls[type]}
+				className="signature-image"
+				alt={`Firma ${type}`}
+			/>
+		</div>
+	);
+};
+
+const sigCanvas1 = useRef<SignatureCanvas>(null);
+const sigCanvas2 = useRef<SignatureCanvas>(null);
+const sigCanvas3 = useRef<SignatureCanvas>(null);
+const dayStarted = assessment.courseStudentAssessmentDaySelected
+	?.airport
+	? true
+	: false;
+const dispatch = useDispatch<AppDispatch>();
 	const clear = () => {
 		sigCanvas1.current?.clear();
 		sigCanvas2.current?.clear();
