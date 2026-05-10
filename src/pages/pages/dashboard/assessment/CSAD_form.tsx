@@ -54,6 +54,9 @@ const CSAD_form = ({
 	const [signatureUrls, setSignatureUrls] = useState<SignatureUrls>(
 		{},
 	);
+	const [missingSignature, setMissingSignature] = useState<
+		Partial<Record<keyof SignatureUrls, boolean>>
+	>({});
 
 	// Obtener las firmas cuando cambie el CSAD_id
 	useEffect(() => {
@@ -62,8 +65,11 @@ const CSAD_form = ({
 
 			const CSAD_id =
 				assessment.courseStudentAssessmentDaySelected.id;
-			const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
+			const API_URL =
+				import.meta.env.VITE_API_URL ||
+				import.meta.env.VITE_REACT_APP_API_URL;
 
+			setMissingSignature({});
 			setSignatureUrls({
 				student: `${API_URL}/storage/firmas/${CSAD_id}/signature_1_${CSAD_id}.webp`,
 				instructor: `${API_URL}/storage/firmas/${CSAD_id}/signature_2_${CSAD_id}.webp`,
@@ -79,6 +85,13 @@ const CSAD_form = ({
 	// Renderizar las firmas
 	const renderSignature = (type: keyof SignatureUrls) => {
 		if (!signatureUrls[type]) return null;
+		if (missingSignature[type]) {
+			return (
+				<div className="signature-container">
+					<div className="signature-missing">Sin imagen</div>
+				</div>
+			);
+		}
 
 		return (
 			<div className="signature-container">
@@ -86,6 +99,18 @@ const CSAD_form = ({
 					src={signatureUrls[type]}
 					className="signature-image"
 					alt={`Firma ${type}`}
+					onError={() =>
+						setMissingSignature((prev) => ({
+							...prev,
+							[type]: true,
+						}))
+					}
+					onLoad={() =>
+						setMissingSignature((prev) => ({
+							...prev,
+							[type]: false,
+						}))
+					}
 				/>
 			</div>
 		);
