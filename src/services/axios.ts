@@ -56,6 +56,7 @@ export async function axiosGetSlice(ruta: string, params = {}) {
             `${apiUrl}/${ruta}`,
             { params: params }
         );
+        console.log(res);
 
         return res.data
     } catch (error: any) {
@@ -140,7 +141,7 @@ export async function axiosPutSlice(ruta: string, data: any = {}) {
 }
 
 const handleError = (error: any) => {
-    console.log('Error GET Axios OJO!', error?.response?.status);
+    console.log('Error GET Axios OJO!', error?.response?.status,);
     if (error?.response?.status === 403) {
         store.dispatch(logout());
         // window.location.reload();
