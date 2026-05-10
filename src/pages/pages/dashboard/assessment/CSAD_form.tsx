@@ -62,7 +62,7 @@ const CSAD_form = ({
 
 			const CSAD_id =
 				assessment.courseStudentAssessmentDaySelected.id;
-			const API_URL = import.meta.env.VITE_API_URL;
+			const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 			setSignatureUrls({
 				student: `${API_URL}/storage/firmas/${CSAD_id}/signature_1_${CSAD_id}.webp`,
