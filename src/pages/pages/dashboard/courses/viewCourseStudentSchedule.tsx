@@ -431,10 +431,10 @@ const ViewCourseStudentSchedule = () => {
 														return (
 															<div
 																key={subjectItem.id}
-																className={`p-3 rounded-lg ${
-																	schedule
-																		? 'bg-green-50 border-l-4 border-green-500'
-																		: 'bg-gray-50 border-l-4 border-gray-300'
+className={`p-3 rounded-lg ${
+																		schedule
+																			? 'bg-green-50 border-2 border-green-500'
+																			: 'bg-gray-50 border-2 border-gray-300'
 																}`}
 															>
 																<div className="flex flex-col md:flex-row md:items-center justify-between gap-2">

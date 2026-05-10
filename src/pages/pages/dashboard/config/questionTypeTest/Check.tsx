@@ -52,7 +52,7 @@ const TestCheck = ({
 	const handleCheckboxChange = (
 		answer_id: number,
 		check: boolean,
-		index: number
+		index: number,
 	) => {
 		const newCheckboxes = [...checkboxes];
 		newCheckboxes[index] = {
@@ -77,12 +77,11 @@ const TestCheck = ({
 
 					await axiosPutDefault(
 						`api/test/answerQuestionTest/${question.id}`,
-						newAnswerData
+						newAnswerData,
 					);
 				}
 			}
 		}
-		console.log('Se guardaron las respuestas', resp);
 	};
 
 	useEffect(() => {
@@ -116,7 +115,7 @@ const TestCheck = ({
 									handleCheckboxChange(
 										answer.id,
 										e.target.checked,
-										index
+										index,
 									)
 								}
 								onPointerLeaveCapture={undefined}

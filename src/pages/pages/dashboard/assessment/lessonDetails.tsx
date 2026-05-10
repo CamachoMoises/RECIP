@@ -1,18 +1,19 @@
 import {
-	// useDispatch,
+	useDispatch,
 	useSelector,
 } from 'react-redux';
 import {
 	// AppDispatch,
 	RootState,
 } from '../../../../store';
+import { AppDispatch } from '../../../../store';
 import { List, ListItem, Typography } from '@material-tailwind/react';
 import { courseStudentAssessmentLessonDay } from '../../../../types/utilities';
-import { axiosPutDefault } from '../../../../services/axios';
+import { changeCourseStudentAssessmentLessonDay } from '../../../../features/assessmentSlice';
 import ScoreDetail from './scoreDetail';
 
 const LessonDetails = ({ day }: { day: number }) => {
-	// const dispatch = useDispatch<AppDispatch>();
+	const dispatch = useDispatch<AppDispatch>();
 
 	const { assessment } = useSelector((state: RootState) => {
 		return {
@@ -27,7 +28,7 @@ const LessonDetails = ({ day }: { day: number }) => {
 		subject_days_id: number,
 		subject_lesson_days_id: number,
 		value_2: number | undefined,
-		value_3: number | undefined
+		value_3: number | undefined,
 	) => {
 		const req: courseStudentAssessmentLessonDay = {
 			id: id,
@@ -64,13 +65,8 @@ const LessonDetails = ({ day }: { day: number }) => {
 			score_3: value_3,
 			day: assessment.courseStudentAssessmentDaySelected?.day,
 		};
-		console.log(req);
 
-		const resp = await axiosPutDefault(
-			`api/assessment/changeCourseStudentAssessmentLessonDay`,
-			req
-		);
-		console.log(resp);
+		await dispatch(changeCourseStudentAssessmentLessonDay(req));
 	};
 	// console.log(assessment.subjectList);
 

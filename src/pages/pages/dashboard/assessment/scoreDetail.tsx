@@ -21,7 +21,7 @@ const ScoreDetail = ({
 		subject_days_id: number,
 		subject_lesson_days_id: number,
 		value_2: number | undefined,
-		value_3: number | undefined
+		value_3: number | undefined,
 	) => Promise<void>;
 }) => {
 	const [score, setScore] = useState<number | undefined>(
@@ -33,7 +33,7 @@ const ScoreDetail = ({
 				.course_student_assessment_lesson_days[0]
 			? SLE.subject_lesson_days[0]
 					.course_student_assessment_lesson_days[0].score
-			: undefined
+			: undefined,
 	);
 	const [score_2, setScore_2] = useState<number | undefined>(
 		SLE.subject_lesson_days &&
@@ -44,7 +44,7 @@ const ScoreDetail = ({
 				.course_student_assessment_lesson_days[0]
 			? SLE.subject_lesson_days[0]
 					.course_student_assessment_lesson_days[0].score_2
-			: undefined
+			: undefined,
 	);
 	const [score_3, setScore_3] = useState<number | undefined>(
 		SLE.subject_lesson_days &&
@@ -55,7 +55,7 @@ const ScoreDetail = ({
 				.course_student_assessment_lesson_days[0]
 			? SLE.subject_lesson_days[0]
 					.course_student_assessment_lesson_days[0].score_3
-			: undefined
+			: undefined,
 	);
 	let SLED_id: number | undefined = undefined;
 	let CSALD_id: number | undefined = undefined;
@@ -74,6 +74,7 @@ const ScoreDetail = ({
 			SLE.subject_lesson_days[0]
 				.course_student_assessment_lesson_days[0].id;
 	}
+
 	return (
 		<>
 			<Typography
@@ -109,7 +110,7 @@ const ScoreDetail = ({
 									SLD_id,
 									SLED_id ? SLED_id : -1,
 									score_2,
-									score_3
+									score_3,
 								);
 								setScore(1);
 							}}
@@ -131,7 +132,7 @@ const ScoreDetail = ({
 									SLD_id,
 									SLED_id ? SLED_id : -1,
 									score_2,
-									score_3
+									score_3,
 								);
 								setScore(2);
 							}}
@@ -153,7 +154,7 @@ const ScoreDetail = ({
 									SLD_id,
 									SLED_id ? SLED_id : -1,
 									score_2,
-									score_3
+									score_3,
 								);
 								setScore(3);
 							}}
@@ -175,7 +176,7 @@ const ScoreDetail = ({
 									SLD_id,
 									SLED_id ? SLED_id : -1,
 									score_2,
-									score_3
+									score_3,
 								);
 								setScore(4);
 							}}
@@ -200,7 +201,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										1,
-										score_3
+										score_3,
 									);
 									setScore_2(1);
 								}}
@@ -222,7 +223,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										2,
-										score_3
+										score_3,
 									);
 									setScore_2(2);
 								}}
@@ -244,7 +245,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										3,
-										score_3
+										score_3,
 									);
 									setScore_2(3);
 								}}
@@ -266,7 +267,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										4,
-										score_3
+										score_3,
 									);
 									setScore_2(4);
 								}}
@@ -293,7 +294,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										score_2,
-										1
+										1,
 									);
 									setScore_3(1);
 								}}
@@ -315,7 +316,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										score_2,
-										2
+										2,
 									);
 									setScore_3(2);
 								}}
@@ -337,7 +338,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										score_2,
-										3
+										3,
 									);
 									setScore_3(3);
 								}}
@@ -359,7 +360,7 @@ const ScoreDetail = ({
 										SLD_id,
 										SLED_id ? SLED_id : -1,
 										score_2,
-										4
+										4,
 									);
 									setScore_3(4);
 								}}

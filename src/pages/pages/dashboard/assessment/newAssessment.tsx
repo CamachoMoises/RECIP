@@ -44,7 +44,7 @@ const NewAssessment = () => {
 				subject: state.subjects,
 				user: state.users,
 			};
-		}
+		},
 	);
 	const [studentSelect, setStudentSelect] = useState<user | null>();
 	const studentSelectRef = useRef<user | null>();
@@ -52,16 +52,16 @@ const NewAssessment = () => {
 	const typeTripRef = useRef<number>(
 		course.courseStudent?.type_trip
 			? course.courseStudent.type_trip
-			: 1
+			: 1,
 	);
 	const licenseRef = useRef<number>(
-		course.courseStudent?.license ? course.courseStudent.license : 1
+		course.courseStudent?.license ? course.courseStudent.license : 1,
 	);
 
 	const regulationRef = useRef<number>(
 		course.courseStudent?.regulation
 			? course.courseStudent.regulation
-			: 1
+			: 1,
 	);
 	// const handlePrint = useReactToPrint({
 	// 	contentRef: componentRef,
@@ -71,12 +71,12 @@ const NewAssessment = () => {
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
 				name: `Dia ${i + 1}`,
-		  }))
+			}))
 		: [];
 	useEffect(() => {
 		const setStudentFunc = (value: number) => {
 			const studentSelected = user.studentList.find(
-				(part) => part.student?.id == value
+				(part) => part.student?.id == value,
 			);
 			if (studentSelected) {
 				setStudentSelect(studentSelected);
@@ -92,7 +92,7 @@ const NewAssessment = () => {
 			regulationRef.current = course.courseStudent.regulation;
 		}
 	}, [course.courseStudent, user.studentList]);
-	console.log(subject.subjectList);
+	// console.log(subject.subjectList);
 
 	if (course.status === 'loading') {
 		return (
@@ -235,8 +235,8 @@ const NewAssessment = () => {
 										>
 											{course.courseStudent?.date
 												? moment(course.courseStudent.date).format(
-														'YYYY-MM-DD'
-												  )
+														'YYYY-MM-DD',
+													)
 												: ''}
 										</Typography>
 										<Typography
@@ -304,7 +304,7 @@ const NewAssessment = () => {
 													(sd) =>
 														sd.day === day.id + 1 &&
 														sd.status &&
-														SL.status
+														SL.status,
 												);
 												return (
 													<td

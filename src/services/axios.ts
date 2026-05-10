@@ -56,7 +56,6 @@ export async function axiosGetSlice(ruta: string, params = {}) {
             `${apiUrl}/${ruta}`,
             { params: params }
         );
-        console.log(res);
 
         return res.data
     } catch (error: any) {

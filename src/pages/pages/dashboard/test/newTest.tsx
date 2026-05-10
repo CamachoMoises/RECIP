@@ -76,24 +76,23 @@ const NewTest = () => {
 			`api/test/courseStudentTestEnd`,
 			{
 				course_student_test_id: course_student_test_id,
-			}
+			},
 		);
 		const userdata = await dispatch(
 			fetchUser(
 				course.courseStudent?.student?.user_id
 					? course.courseStudent.student.user_id
-					: -1
-			)
+					: -1,
+			),
 		).unwrap();
 		const testData = await dispatch(
 			fetchCourseStudentTest(
 				test.courseStudentTestSelected?.id
 					? test.courseStudentTestSelected.id
-					: -1
-			)
+					: -1,
+			),
 		).unwrap();
-		console.log(testData);
-		console.log(userdata);
+
 		setScore(resp.score);
 		setOpen(true);
 		setEnded(true);
@@ -122,7 +121,7 @@ const NewTest = () => {
 		handleEndTest(
 			test.courseStudentTestSelected?.id
 				? test.courseStudentTestSelected.id
-				: -1
+				: -1,
 		);
 	};
 
@@ -274,8 +273,8 @@ const NewTest = () => {
 		} else {
 			dateTest = course.courseStudent.schedules
 				? moment(
-						`${course.courseStudent.schedules[0].date}  ${course.courseStudent.schedules[0].hour}`
-				  )
+						`${course.courseStudent.schedules[0].date}  ${course.courseStudent.schedules[0].hour}`,
+					)
 				: null;
 		}
 
@@ -545,7 +544,7 @@ const NewTest = () => {
 															)}
 														</div>
 													);
-												}
+												},
 											)}
 
 											<Typography
@@ -562,7 +561,7 @@ const NewTest = () => {
 														handleEndTest(
 															test.courseStudentTestSelected?.id
 																? test.courseStudentTestSelected.id
-																: -1
+																: -1,
 														);
 													}}
 													placeholder={undefined}

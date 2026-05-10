@@ -105,13 +105,13 @@ const ModalFormUser = ({
 	password.current = watch('password', '');
 	const newForm = userSelect ? false : true;
 	const [isActive, setIsActive] = useState(
-		userSelect ? userSelect?.is_active : true
+		userSelect ? userSelect?.is_active : true,
 	);
 	const [isStaff, setIsStaff] = useState(
-		userSelect ? userSelect?.is_staff : false
+		userSelect ? userSelect?.is_staff : false,
 	);
 	const [isSuperuser, setIsSuperuser] = useState(
-		userSelect ? userSelect?.is_superuser : false
+		userSelect ? userSelect?.is_superuser : false,
 	);
 	const [passwordShown, setPasswordShown] = useState(false);
 	const togglePasswordVisiblity = () => {
@@ -130,7 +130,7 @@ const ModalFormUser = ({
 
 	const validateUserEmail = async (value: string) => {
 		const response = await axiosGetDefault(
-			`api/users/userEmailValidate/${value}`
+			`api/users/userEmailValidate/${value}`,
 		);
 		const respData: boolean = response?.resp.exist;
 		return respData;
@@ -308,8 +308,6 @@ const ModalFormUser = ({
 												borderRadius: '0.5rem',
 											}}
 											onChange={(value, countryData: CountryData) => {
-												console.log(countryData.countryCode);
-
 												field.onChange(value);
 
 												setValue('phone', value);

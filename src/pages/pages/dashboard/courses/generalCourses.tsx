@@ -80,7 +80,6 @@ const GeneralCourses = () => {
 
 	const toggleOpen = () => {
 		setOpen((cur) => {
-			console.log('Cambiando estado a:', !cur);
 			return !cur;
 		});
 	};

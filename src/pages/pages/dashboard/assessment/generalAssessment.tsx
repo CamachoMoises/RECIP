@@ -68,15 +68,14 @@ const GeneralAssessment = () => {
 						pageSize,
 						currentPage: index,
 						course_type_id: 1,
-					})
+					}),
 				);
 				setActive(index);
 			},
 			className: 'rounded-full',
-		} as any);
+		}) as any;
 	const next = async () => {
 		if (active === totalPages) return;
-		console.log('ojo');
 
 		setActive(active + 1);
 		await dispatch(
@@ -84,7 +83,7 @@ const GeneralAssessment = () => {
 				pageSize,
 				currentPage: active + 1,
 				course_type_id: 1,
-			})
+			}),
 		);
 	};
 
@@ -96,7 +95,7 @@ const GeneralAssessment = () => {
 				pageSize,
 				currentPage: active - 1,
 				course_type_id: 1,
-			})
+			}),
 		);
 	};
 	useEffect(() => {
@@ -105,15 +104,15 @@ const GeneralAssessment = () => {
 				pageSize: course.pageSize,
 				currentPage: course.currentPage,
 				course_type_id: 2,
-			})
+			}),
 		);
 	}, [dispatch, course.pageSize, course.currentPage]);
 	const navigateCourseStudentAssessment = async (
-		CS: courseStudent
+		CS: courseStudent,
 	) => {
 		if (CS.course_student_assessment?.id) {
 			await dispatch(
-				fetchCourseStudentAssessment(CS.course_student_assessment.id)
+				fetchCourseStudentAssessment(CS.course_student_assessment.id),
 			);
 		} else {
 			await dispatch(
@@ -121,7 +120,7 @@ const GeneralAssessment = () => {
 					course_student_id: CS.id ? CS.id : -1,
 					course_id: CS.course_id,
 					student_id: CS.student_id ? CS.student_id : -1,
-				})
+				}),
 			);
 		}
 
@@ -130,7 +129,7 @@ const GeneralAssessment = () => {
 				pageSize: course.pageSize,
 				currentPage: course.currentPage,
 				course_type_id: 2,
-			})
+			}),
 		);
 		navigate(`../course_assessment/${CS.id}/${CS.course_id}`);
 	};
@@ -155,7 +154,7 @@ const GeneralAssessment = () => {
 			? Array.from({ length: totalPages }, (_, i) => ({
 					id: i,
 					name: `Pagina ${i + 1}`,
-			  }))
+				}))
 			: [];
 	return (
 		<div className=" container">

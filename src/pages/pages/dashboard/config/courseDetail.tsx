@@ -172,7 +172,6 @@ const CourseDetail = () => {
 					hours: sub.hours,
 				}));
 			});
-			console.log(hoursByDays);
 			return (
 				<>
 					<PageTitle
