@@ -63,7 +63,7 @@ const LessonDetails = ({ day }: { day: number }) => {
 			score: value,
 			score_2: value_2,
 			score_3: value_3,
-			day: assessment.courseStudentAssessmentDaySelected?.day,
+			day: assessment.courseStudentAssessmentDaySelected?.day ?? undefined,
 		};
 
 		await dispatch(changeCourseStudentAssessmentLessonDay(req));
