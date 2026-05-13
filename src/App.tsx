@@ -10,7 +10,7 @@ import ContactPage from './pages/ContactPage';
 import NavBar from './components/NavBar';
 import Login from './pages/login';
 import './App.css';
-import Dashboard from './pages/pages/dashboard';
+import Dashboard from './pages/dashboard';
 import ScrollToTop from './components/scrollTop';
 import NotFound from './pages/notFound';
 
