@@ -63,53 +63,55 @@ export default function PageTitle({
 								{title}
 							</Typography>
 							<div className="flex flex-row gap-2">
-								<Button
-									onClick={handleBack}
-									variant="text"
-									title="Volver"
-									className="text-xs bg-blue-gray-50"
-									size="sm"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									<ChevronLeft size={13} />
-								</Button>
-								{pathName !== '/' && (
-									<Breadcrumbs
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										<a
-											onClick={() => navigate('/dashboard')}
-											className="opacity-60"
+								{pathName !== '/' && breadCrumbs.length > 0 && (
+									<>
+										<Button
+											onClick={handleBack}
+											variant="text"
+											title="Volver"
+											className="text-xs bg-blue-gray-50"
+											size="sm"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
 										>
-											<Home size={13} />
-										</a>
-										{breadCrumbs.map((item: breadCrumbsItems) => (
+											<ChevronLeft size={13} />
+										</Button>
+										<Breadcrumbs
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
 											<a
-												onClick={() =>
-													item.parametros
-														? startTransition(() =>
-																navigate(
-																	`${item.href}?${new URLSearchParams(
-																		item.parametros
-																	).toString()}`
-																)
-														  )
-														: startTransition(() =>
-																navigate(item.href)
-														  )
-												}
+												onClick={() => navigate('/dashboard')}
 												className="opacity-60"
-												key={item.name}
 											>
-												{item.name}
+												<Home size={13} />
 											</a>
-										))}
-										<span>{title ? title : 'Desconocido'}</span>
-									</Breadcrumbs>
+											{breadCrumbs.map((item: breadCrumbsItems) => (
+												<a
+													onClick={() =>
+														item.parametros
+															? startTransition(() =>
+																	navigate(
+																		`${item.href}?${new URLSearchParams(
+																			item.parametros,
+																		).toString()}`,
+																	),
+																)
+															: startTransition(() =>
+																	navigate(item.href),
+																)
+													}
+													className="opacity-60"
+													key={item.name}
+												>
+													{item.name}
+												</a>
+											))}
+											<span>{title ? title : 'Desconocido'}</span>
+										</Breadcrumbs>
+									</>
 								)}
 							</div>
 						</CardBody>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { test } from '../../../../types/utilities';
+import { test } from '../../../types/utilities';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
 	Button,
@@ -25,7 +25,7 @@ const TestParams = ({
 			duration: number;
 			min_score: number;
 			status: boolean;
-		}
+		},
 	) => Promise<void>;
 }) => {
 	const [edit, setEdit] = useState(false);

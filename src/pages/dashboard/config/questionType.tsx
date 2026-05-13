@@ -5,7 +5,7 @@ import {
 	Input,
 	Typography,
 } from '@material-tailwind/react';
-import { questionType } from '../../../../types/utilities';
+import { questionType } from '../../../types/utilities';
 import { Pencil, Save, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -16,7 +16,7 @@ const QuestionType = ({
 	QT: questionType;
 	updateQuestionTypeFunc: (
 		questionTypeId: number,
-		value: number
+		value: number,
 	) => Promise<void>;
 }) => {
 	const [value, setValue] = useState(QT.value);

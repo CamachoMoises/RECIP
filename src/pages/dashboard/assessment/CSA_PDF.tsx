@@ -7,18 +7,6 @@ import { Check, X } from 'lucide-react';
 
 const CSA_PDF = ({ day }: { day: number }) => {
 	moment.locale('es');
-	// const day_names = [
-	// 	'Manejo General',
-	// 	'Manejo General y Asimétrico',
-	// 	'Manejo de Vuelo Normal y Asimétrico',
-	// 	'Procedimientos Anormales',
-	// 	'Procedimientos Anormales y de Emergencia',
-	// 	'',
-	// 	'',
-	// 	'',
-	// 	'',
-	// 	'',
-	// ];
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const { assessment } = useSelector((state: RootState) => {

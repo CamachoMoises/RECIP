@@ -5,6 +5,7 @@ import {
 } from '../../../types/utilities';
 import { axiosPostDefault } from '../../../services/axios';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const QuestionTypeInput = ({
 	questionTest,
@@ -45,13 +46,13 @@ const QuestionTypeInput = ({
 		await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
 			courseStudentTestAnswer: CSTA,
 		});
-		console.log('Se guardaron las respuestas ');
+		toast.success('Respuestas guardadas', { id: 'save' });
 	};
 	useEffect(() => {
 		const interval = setInterval(() => {
 			if (hasChange) {
 				const nonNullValues = answers.filter(
-					(value) => value !== null && value !== ''
+					(value) => value !== null && value !== '',
 				);
 
 				if (nonNullValues.length > 0) {

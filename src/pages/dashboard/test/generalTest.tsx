@@ -48,6 +48,7 @@ import {
 import { fetchUser } from '../../../features/userSlice';
 import ResultsTestPdf from './resultsTestPdf';
 import { useReactToPrint } from 'react-to-print';
+import toast from 'react-hot-toast';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -60,6 +61,7 @@ const GeneralTest = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const componentRef = useRef<HTMLDivElement>(null);
+	const [isGeneratingTest, setIsGeneratingTest] = useState(false);
 	const { course, auth, user, test } = useSelector(
 		(state: RootState) => ({
 			course: state.courses,
@@ -89,23 +91,32 @@ const GeneralTest = () => {
 		CS: courseStudent,
 		date: string,
 	) => {
-		await dispatch(
-			fetchSubjects({
-				course_id: CS.course_id ? CS.course_id : -1,
-				status: true,
-				is_schedulable: true,
-			}),
-		);
-		await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
-		await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
-		const CST = await dispatch(
-			createCourseStudentTest({
-				course_student_id: CS.id ? CS.id : -1,
-				date: date,
-			}),
-		).unwrap();
-		await dispatch(fetchTest(CST.test_id));
-		navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
+		setIsGeneratingTest(true);
+		const loadingToast = toast.loading('Generando examen');
+		try {
+			await dispatch(
+				fetchSubjects({
+					course_id: CS.course_id ? CS.course_id : -1,
+					status: true,
+					is_schedulable: true,
+				}),
+			);
+			await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
+			await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
+			const CST = await dispatch(
+				createCourseStudentTest({
+					course_student_id: CS.id ? CS.id : -1,
+					date: date,
+				}),
+			).unwrap();
+			await dispatch(fetchTest(CST.test_id));
+			toast.dismiss(loadingToast);
+			navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
+		} catch (error) {
+			toast.dismiss(loadingToast);
+			toast.error('Error al generar el examen');
+			setIsGeneratingTest(false);
+		}
 	};
 
 	const navigateReviewTest = async (
@@ -433,7 +444,7 @@ const GeneralTest = () => {
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
-																disabled={!active}
+																disabled={!active || isGeneratingTest}
 																onClick={() => {
 																	navigateCourseStudentTest(
 																		CL,
@@ -518,7 +529,9 @@ const GeneralTest = () => {
 															>
 																<MenuItem
 																	className="flex items-center gap-2"
-																	disabled={!active}
+																	disabled={
+																		!active || isGeneratingTest
+																	}
 																	onClick={() => {
 																		navigateCourseStudentTest(
 																			CL,

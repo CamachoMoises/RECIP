@@ -143,18 +143,20 @@ const GeneralConfig = () => {
 	}
 
 	return (
-		<div className="container">
+		<div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8">
 			<PageTitle title="Configuracion" breadCrumbs={breadCrumbs} />
 
 			<Card
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
+				className="w-full overflow-hidden"
 			>
 				<CardBody
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
+					className="p-2 sm:p-4"
 				>
 					<Accordion
 						open={open === 1}
@@ -167,6 +169,7 @@ const GeneralConfig = () => {
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
+							className="text-base sm:text-lg px-2"
 						>
 							Cursos
 						</AccordionHeader>
@@ -177,6 +180,7 @@ const GeneralConfig = () => {
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
+									className="text-lg sm:text-xl"
 								>
 									Crear Curso
 								</Typography>
@@ -185,7 +189,7 @@ const GeneralConfig = () => {
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										className="flex flex-col text-center justify-center "
+										className="flex flex-col text-center justify-center w-max mx-auto"
 										onClick={() => {
 											handleOpenEdit();
 										}}
@@ -194,17 +198,18 @@ const GeneralConfig = () => {
 									</Button>
 								</div>
 							</div>
-							<br />
-							<br />
-							<Typography
-								variant="h5"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Lista de Cursos
-							</Typography>
-							<div className="grid grid-cols-2 gap-2">
+							<div className="flex flex-col w-full">
+								<Typography
+									variant="h5"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									className="text-lg sm:text-xl"
+								>
+									Lista de Cursos
+								</Typography>
+							</div>
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4">
 								{course.courseList.map((course) => {
 									return (
 										<div key={course.id}>
@@ -217,9 +222,9 @@ const GeneralConfig = () => {
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													className="flex flex-col justify-center"
+													className="flex flex-col justify-center p-2 sm:p-4"
 												>
-													<div className="relative group">
+													<div className="relative group text-center sm:text-left">
 														<Typography
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
@@ -260,7 +265,7 @@ const GeneralConfig = () => {
 													>
 														{course.course_type.name}
 													</Typography>
-													<div className="flex flex-row justify-center">
+													<div className="flex flex-row justify-center flex-wrap gap-1 sm:gap-0">
 														<ButtonGroup
 															size="sm"
 															placeholder={undefined}

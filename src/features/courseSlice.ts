@@ -323,8 +323,27 @@ const courseSlice = createSlice({
             })
 
             // Reducers para la acción updateCourseStudentStatus
-            .addCase(updateCourseStudentStatus.fulfilled, (state, action) => {
-                // Estado actualizado, la lista se vuelve a cargar desde el componente
+            .addCase(updateCourseStudentStatus.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateCourseStudentStatus.fulfilled, (state, action: PayloadAction<{ id: number; status: boolean }>) => {
+                state.status = 'succeeded';
+                const { id, status } = action.payload;
+
+                if (state.courseStudentList) {
+                    const index = state.courseStudentList.findIndex((courseStudent) => courseStudent.id === id);
+                    if (index !== -1) {
+                        state.courseStudentList[index].status = status;
+                    }
+                }
+
+                if (state.courseStudent?.id === id) {
+                    state.courseStudent.status = status;
+                }
+            })
+            .addCase(updateCourseStudentStatus.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
             })
 
             // Reducers para la acción createSchedule

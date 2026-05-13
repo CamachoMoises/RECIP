@@ -1,8 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import {
-	// AppDispatch,
-	RootState,
-} from '../../../store';
+import { RootState } from '../../../store';
 import { AppDispatch } from '../../../store';
 import { List, ListItem, Typography } from '@material-tailwind/react';
 import { courseStudentAssessmentLessonDay } from '../../../types/utilities';

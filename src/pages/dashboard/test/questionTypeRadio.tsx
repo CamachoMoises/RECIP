@@ -4,6 +4,7 @@ import {
 	courseStudentTestQuestion,
 } from '../../../types/utilities';
 import { axiosPostDefault } from '../../../services/axios';
+import toast from 'react-hot-toast';
 // import { useRef } from 'react';
 
 const QuestionTypeRadio = ({
@@ -31,7 +32,7 @@ const QuestionTypeRadio = ({
 		await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
 			courseStudentTestAnswer: CSTA,
 		});
-		console.log('Se guardaron las respuestas ');
+		toast.success('Respuesta guardada', { id: 'save' });
 	};
 	return (
 		<div
@@ -75,7 +76,7 @@ const QuestionTypeRadio = ({
 								parseInt(
 									questionTest.course_student_test_answer?.resp
 										? questionTest.course_student_test_answer.resp
-										: '-1'
+										: '-1',
 								) === answer.id
 							}
 							color="red"

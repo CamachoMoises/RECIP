@@ -8,7 +8,7 @@ import {
 import {
 	subjectLesson,
 	subjectLessonDays,
-} from '../../../../types/utilities';
+} from '../../../types/utilities';
 import {
 	// ArrowDown,
 	// ArrowUp,

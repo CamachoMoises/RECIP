@@ -28,18 +28,7 @@ import CSAD_form from './CSAD_form';
 import { useReactToPrint } from 'react-to-print';
 import CSA_PDF from './CSA_PDF';
 import { axiosPostDefault } from '../../../services/axios';
-// const day_names = [
-// 	'Manejo General',
-// 	'Manejo General y Asimétrico',
-// 	'Manejo de Vuelo Normal y Asimétrico',
-// 	'Procedimientos Anormales',
-// 	'Procedimientos de Emergencia',
-// 	'',
-// 	'',
-// 	'',
-// 	'',
-// 	'',
-// ];
+
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -93,8 +82,8 @@ const DetailAssessment = () => {
 				(_, i) => ({
 					id: i,
 					name: `Dia ${i + 1}`,
-				})
-		  )
+				}),
+			)
 		: [];
 	useEffect(() => {
 		if (assessment.courseStudentAssessmentSelected === null) {
@@ -109,7 +98,7 @@ const DetailAssessment = () => {
 				course_id,
 				student_id,
 				course_student_id: course_student_id,
-			})
+			}),
 		).unwrap();
 		CSAD.then((CSAD_Data) => {
 			dispatch(
@@ -122,7 +111,7 @@ const DetailAssessment = () => {
 					course_student_assessment_day_id: CSAD_Data.id
 						? CSAD_Data.id
 						: -1,
-				})
+				}),
 			);
 		});
 	}, [
@@ -138,8 +127,8 @@ const DetailAssessment = () => {
 			fetchAssessmentData(
 				assessment.courseStudentAssessmentSelected?.id
 					? assessment.courseStudentAssessmentSelected.id
-					: -1
-			)
+					: -1,
+			),
 		);
 		setIsDataLoaded(true);
 		handlePrint();
@@ -158,10 +147,10 @@ const DetailAssessment = () => {
 	const [isApproved, setIsApproved] = useState(
 		assessment.courseStudentAssessmentSelected?.approve
 			? assessment.courseStudentAssessmentSelected.approve
-			: false
+			: false,
 	);
 	const handleChangeStatus = async (
-		event: React.ChangeEvent<HTMLInputElement>
+		event: React.ChangeEvent<HTMLInputElement>,
 	) => {
 		setIsApproved(event.target.checked);
 		const req = {
@@ -171,7 +160,7 @@ const DetailAssessment = () => {
 		};
 		const res = await axiosPostDefault(
 			'api/assessment/courseStudentAssessmentApprove',
-			req
+			req,
 		);
 		console.log(res);
 	};
@@ -340,8 +329,8 @@ const DetailAssessment = () => {
 												?.course_student?.date
 												? moment(
 														assessment.courseStudentAssessmentSelected
-															?.course_student?.date
-												  ).format('YYYY-MM-DD')
+															?.course_student?.date,
+													).format('YYYY-MM-DD')
 												: ''}
 										</Typography>
 										<Typography
@@ -361,7 +350,7 @@ const DetailAssessment = () => {
 										>
 											{moment(
 												assessment.courseStudentAssessmentDaySelected
-													?.createdAt
+													?.createdAt,
 											).format('YYYY-MM-DD')}
 										</Typography>
 									</div>
@@ -446,7 +435,7 @@ const DetailAssessment = () => {
 								const dayActive =
 									assessment.courseStudentAssessmentSelected?.course_student_assessment_days?.find(
 										(CSAD_D) =>
-											CSAD_D.day === day.id + 1 && CSAD_D.airport
+											CSAD_D.day === day.id + 1 && CSAD_D.airport,
 									);
 								if (!missingDay && !dayActive) {
 									setMissingDay(true);

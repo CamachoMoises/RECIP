@@ -12,19 +12,25 @@ const Countdown = ({
 	setActive: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
 	const [timeLeft, setTimeLeft] = useState(0);
+	console.log(startTime, totalMinutes);
 
 	useEffect(() => {
-		const start = moment(startTime, 'HH:mm');
-		const end = start.clone().add(totalMinutes, 'minutes');
 		const now = moment();
+		let start = moment(now.format('YYYY-MM-DD') + ' ' + startTime, 'YYYY-MM-DD HH:mm');
+		
+		if (start.isBefore(now)) {
+			start = start.add(1, 'days');
+		}
+		
+		const end = start.clone().add(totalMinutes, 'minutes');
+		
 		const initialTimeLeft = Math.max(end.diff(now, 'seconds'), 0);
 		setTimeLeft(initialTimeLeft);
 
-		// Actualiza cada segundo
 		const interval = setInterval(() => {
 			const now_2 = moment();
 			const timeLeft = Math.max(end.diff(now_2, 'seconds'), 0);
-			if (timeLeft) {
+			if (timeLeft > 0) {
 				setActive(true);
 			} else {
 				setActive(false);
@@ -38,14 +44,22 @@ const Countdown = ({
 	}, [setActive, startTime, totalMinutes]);
 
 	const calculateTime = (seconds: number) => {
-		const minutes = Math.floor(seconds / 60);
+		let hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
 		const secs = seconds % 60;
-		return `${minutes.toString().padStart(2, '0')}:${secs
+		
+		if (hours >= 24) {
+			hours = hours - 24;
+		}
+		
+		return `${hours.toString().padStart(2, '0')}:${minutes
 			.toString()
-			.padStart(2, '0')}`;
+			.padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 	};
 
-	const progress = (timeLeft / (totalMinutes * 60)) * 100;
+	const adjustedTimeLeft = timeLeft > 86400 ? timeLeft - 86400 : timeLeft;
+	const adjustedTotal = totalMinutes * 60 > 86400 ? totalMinutes * 60 - 86400 : totalMinutes * 60;
+	const progress = (adjustedTimeLeft / adjustedTotal) * 100;
 
 	return (
 		<div className=" mx-auto p-6 bg-white shadow-lg rounded-lg">

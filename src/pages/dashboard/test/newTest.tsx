@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Countdown from '../../../components/countDown';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState, store } from '../../../store';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import { breadCrumbsItems } from '../../../types/utilities';
@@ -78,14 +78,14 @@ const NewTest = () => {
 				course_student_test_id: course_student_test_id,
 			},
 		);
-		const userdata = await dispatch(
+		await dispatch(
 			fetchUser(
 				course.courseStudent?.student?.user_id
 					? course.courseStudent.student.user_id
 					: -1,
 			),
 		).unwrap();
-		const testData = await dispatch(
+		await dispatch(
 			fetchCourseStudentTest(
 				test.courseStudentTestSelected?.id
 					? test.courseStudentTestSelected.id
@@ -98,6 +98,75 @@ const NewTest = () => {
 		setEnded(true);
 		setSeePDF(true);
 	};
+
+	useEffect(() => {
+		const apiUrl = import.meta.env.VITE_REACT_APP_API_URL;
+		const courseStudentTestId =
+			test.courseStudentTestSelected?.id !== undefined
+				? test.courseStudentTestSelected.id
+				: -1;
+
+		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+			if (!ended) {
+				event.preventDefault();
+				event.returnValue = '¿Desea finalizar el examen?';
+				return '¿Desea finalizar el examen?';
+			}
+		};
+
+		const handleUnload = () => {
+			if (!ended && courseStudentTestId !== -1) {
+				const token = store.getState().auth.token;
+				if (token) {
+					try {
+						const xhr = new XMLHttpRequest();
+						xhr.open(
+							'POST',
+							`${apiUrl}/api/test/courseStudentTestEnd`,
+							false,
+						);
+						xhr.setRequestHeader(
+							'Content-Type',
+							'application/json;charset=UTF-8',
+						);
+						xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+						xhr.send(
+							JSON.stringify({
+								course_student_test_id: courseStudentTestId,
+							}),
+						);
+					} catch (error) {
+						// Ignorar errores en unload
+					}
+				}
+			}
+		};
+
+		const handlePopState = () => {
+			if (!ended) {
+				const confirmLeave = window.confirm(
+					'¿Desea finalizar el examen? Al confirmar, su examen se finalizará.',
+				);
+				if (!confirmLeave) {
+					window.history.pushState(null, '', window.location.href);
+				} else {
+					setTestActive(false);
+				}
+			}
+		};
+
+		window.history.pushState(null, '', window.location.href);
+		window.addEventListener('beforeunload', handleBeforeUnload);
+		window.addEventListener('unload', handleUnload);
+		window.addEventListener('popstate', handlePopState);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+			window.removeEventListener('unload', handleUnload);
+			window.removeEventListener('popstate', handlePopState);
+		};
+	}, [ended, test.courseStudentTestSelected?.id]);
+
 	const seeResults = async () => {
 		handlePrint();
 	};
@@ -291,7 +360,7 @@ const NewTest = () => {
 		<div className="container">
 			<PageTitle
 				title={`Examen de  ${test.courseStudentTestSelected?.code} (${test.testSelected?.code})`}
-				breadCrumbs={breadCrumbs}
+				// breadCrumbs={breadCrumbs}
 			/>
 			{dateTest && (
 				<>

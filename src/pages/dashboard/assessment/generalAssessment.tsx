@@ -20,16 +20,8 @@ import {
 	ListItemSuffix,
 	Typography,
 } from '@material-tailwind/react';
-// import { fetchSubjectsLesson } from '../../../features/subjectSlice';
-import {
-	// fetchCourse,
-	fetchCoursesStudentsTests,
-	// fetchSchedule,
-} from '../../../features/courseSlice';
-// import {
-// 	fetchInstructors,
-// 	fetchStudents,
-// } from '../../../features/userSlice';
+import { fetchCoursesStudentsTests } from '../../../features/courseSlice';
+
 import { useEffect, useState } from 'react';
 import {
 	ChevronLeft,

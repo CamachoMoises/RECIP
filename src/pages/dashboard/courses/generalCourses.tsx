@@ -271,7 +271,7 @@ const GeneralCourses = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<div className="grid grid-cols-2 gap-2">
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
 									{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
 									{courseList.map((course) => {
 										return (
@@ -366,17 +366,19 @@ const GeneralCourses = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<Typography
+<Typography
 								variant="h5"
+								className="text-center lg:text-left text-sm sm:text-base md:text-lg"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Agenda de Programas de Instrucción para Pilotos
+								Agenda de Programas de Inversión para Pilotos
+								<br className="hidden lg:inline" />
 								Participantes en Curso
 							</Typography>
 							{canViewContent && (
-								<div className="flex justify-center gap-2 mb-4">
+								<div className="flex flex-wrap justify-center gap-2 mb-4">
 									<Button
 										size="sm"
 										variant={
@@ -446,21 +448,13 @@ const GeneralCourses = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 											onClick={() => navigateViewCourseStudent(CL)}
-											className={`flex justify-between ${CL.status === false ? 'opacity-50' : ''}`}
+											className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 ${CL.status === false ? 'opacity-50' : ''}`}
 										>
-											<div className="flex items-center gap-4">
-												<ListItemPrefix
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{CL.code}
-												</ListItemPrefix>
-											</div>
-											<div>
+											<div className="min-w-0">
 												<Typography
 													variant="h6"
 													color="blue-gray"
+													className="truncate max-w-[150px] sm:max-w-none"
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
@@ -472,19 +466,32 @@ const GeneralCourses = () => {
 												<Typography
 													variant="small"
 													color="gray"
+													className="font-normal truncate max-w-[200px] sm:max-w-none"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													{CL.course?.name}{' '}
+													<span className="text-xs">
+														({CL.course?.course_level.name}
+														-
+														{CL.course?.course_type.name})
+													</span>
+												</Typography>
+												<Typography
+													variant="small"
+													color="gray"
 													className="font-normal"
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													{CL.course?.name} (
-													{CL.course?.course_level.name}-
-													{CL.course?.course_type.name})
+													{CL.code}
 												</Typography>
 											</div>
 											<div
 												onClick={(e) => e.stopPropagation()}
-												className="flex items-center gap-2"
+												className="flex items-center gap-1 sm:gap-2 shrink-0"
 											>
 												<IconButton
 													variant="text"
@@ -551,10 +558,11 @@ const GeneralCourses = () => {
 									<div className="flex flex-col w-full text-center">
 										<small> Total:{totalItems}</small>
 									</div>
-									<div className="flex w-full justify-center gap-4">
+									<div className="flex w-full justify-center items-center gap-2 sm:gap-4 flex-wrap">
 										<Button
 											variant="text"
-											className="flex items-center gap-2 rounded-full"
+											size="sm"
+											className="flex items-center gap-1 sm:gap-2 rounded-full"
 											onClick={() => {
 												prev();
 											}}
@@ -565,15 +573,16 @@ const GeneralCourses = () => {
 										>
 											<ChevronLeft
 												strokeWidth={2}
-												className="h-4 w-4"
+												className="h-3 w-3 sm:h-4 sm:w-4"
 											/>
-											Prev
+											<span className="hidden sm:inline">Prev</span>
 										</Button>
-										<div className="flex items-center gap-2">
+										<div className="flex items-center gap-1 sm:gap-2">
 											{pages.map((page) => {
 												return (
 													<IconButton
 														key={page.name}
+														size="sm"
 														{...getItemProps(page.id + 1)}
 													>
 														{page.id + 1}
@@ -583,7 +592,8 @@ const GeneralCourses = () => {
 										</div>
 										<Button
 											variant="text"
-											className="flex items-center gap-2 rounded-full"
+											size="sm"
+											className="flex items-center gap-1 sm:gap-2 rounded-full"
 											onClick={() => {
 												next();
 											}}
@@ -592,10 +602,10 @@ const GeneralCourses = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Sig
+											<span className="hidden sm:inline">Sig</span>
 											<ChevronRight
 												strokeWidth={2}
-												className="h-4 w-4"
+												className="h-3 w-3 sm:h-4 sm:w-4"
 											/>
 										</Button>
 									</div>

@@ -116,7 +116,7 @@ const TestList = () => {
 				title={`Editar Evaluaciones del curso ${course.courseSelected?.name}`}
 				breadCrumbs={breadCrumbs}
 			/>
-			<div className="flex flex-col gap-3">
+			<div className="flex flex-col gap-3 p-2 sm:p-4">
 				<Card
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
@@ -127,17 +127,17 @@ const TestList = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<div className="flex flex-col gap-2">
+						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 							<Typography
-								variant="h4"
-								className="text-left"
+								variant="h5"
+								className="text-left text-sm sm:text-base"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
 								Cantidad de examenes {test.testList.length}
 							</Typography>
-							<div className="flex flex-col gap-2">
+							<div className="flex flex-wrap gap-2">
 								<Button
 									size="sm"
 									title="Agregar examen"
@@ -183,7 +183,8 @@ const TestList = () => {
 										onPointerLeaveCapture={undefined}
 									>
 										<Typography
-											variant="h4"
+											variant="h5"
+											className="text-sm sm:text-base md:text-lg"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
@@ -192,7 +193,7 @@ const TestList = () => {
 										</Typography>
 
 										<Typography
-											variant="h4"
+											variant="h6"
 											color={TL.status ? 'green' : 'red'}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
@@ -202,7 +203,8 @@ const TestList = () => {
 										</Typography>
 
 										<Typography
-											variant="lead"
+											variant="small"
+											className="text-xs sm:text-sm"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
@@ -211,10 +213,11 @@ const TestList = () => {
 											{TL.code}
 										</Typography>
 										<div className="flex flex-col ">
-											<div className="grid grid-cols-2 gap-2">
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
 												<div>
 													<Typography
-														variant="lead"
+														variant="h6"
+														className="text-sm sm:text-base"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
@@ -262,7 +265,8 @@ const TestList = () => {
 												</div>
 												<div>
 													<Typography
-														variant="lead"
+														variant="h6"
+														className="text-sm sm:text-base"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}

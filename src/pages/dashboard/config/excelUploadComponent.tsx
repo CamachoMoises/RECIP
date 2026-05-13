@@ -20,7 +20,7 @@ import {
 	Check,
 	AlertCircle,
 } from 'lucide-react';
-import { questionType, test } from '../../../../types/utilities';
+import { questionType, test } from '../../../types/utilities';
 import * as XLSX from 'xlsx';
 import toast from 'react-hot-toast';
 
@@ -56,7 +56,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const [parsedData, setParsedData] = useState<QuestionTypeUpload[]>(
-		[]
+		[],
 	);
 	const [collapseStates, setCollapseStates] = useState<{
 		[key: string]: boolean;
@@ -64,7 +64,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 	console.log(courseId);
 
 	const handleFileSelect = (
-		event: React.ChangeEvent<HTMLInputElement>
+		event: React.ChangeEvent<HTMLInputElement>,
 	) => {
 		const file = event.target.files?.[0];
 		if (file) {
@@ -77,7 +77,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 				parseExcelFile(file);
 			} else {
 				toast.error(
-					'Por favor selecciona un archivo Excel válido (.xlsx o .xls)'
+					'Por favor selecciona un archivo Excel válido (.xlsx o .xls)',
 				);
 			}
 		}
@@ -105,7 +105,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 							qt.name
 								.toLowerCase()
 								.includes(sheetName.toLowerCase()) ||
-							sheetName.toLowerCase().includes(qt.name.toLowerCase())
+							sheetName.toLowerCase().includes(qt.name.toLowerCase()),
 					);
 
 					if (matchingQuestionType && jsonData.length > 1) {
@@ -171,11 +171,11 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 
 				if (questionTypeData.length === 0) {
 					toast.error(
-						'No se encontraron tipos de pregunta válidos en el archivo Excel'
+						'No se encontraron tipos de pregunta válidos en el archivo Excel',
 					);
 				} else {
 					toast.success(
-						`Se encontraron ${questionTypeData.length} tipos de pregunta`
+						`Se encontraron ${questionTypeData.length} tipos de pregunta`,
 					);
 				}
 			} catch (error) {
@@ -195,14 +195,14 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 
 	const handleTestSelection = (
 		questionTypeName: string,
-		testId: number
+		testId: number,
 	) => {
 		setParsedData((prev) =>
 			prev.map((qtd) =>
 				qtd.questionType.name === questionTypeName
 					? { ...qtd, selectedTest: testId }
-					: qtd
-			)
+					: qtd,
+			),
 		);
 	};
 
@@ -214,11 +214,11 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 
 		// Validate all question types have selected tests
 		const invalidQuestionTypes = parsedData.filter(
-			(qtd) => qtd.selectedTest === null
+			(qtd) => qtd.selectedTest === null,
 		);
 		if (invalidQuestionTypes.length > 0) {
 			toast.error(
-				'Por favor selecciona un examen para todos los tipos de pregunta'
+				'Por favor selecciona un examen para todos los tipos de pregunta',
 			);
 			return;
 		}
@@ -427,7 +427,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 												onChange={(value) =>
 													handleTestSelection(
 														qtData.questionType.name,
-														parseInt(value!)
+														parseInt(value!),
 													)
 												}
 												placeholder={undefined}
@@ -507,7 +507,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 																				{aIndex + 1}. {answer}
 																			</Typography>
 																		</div>
-																	)
+																	),
 																)}
 															</div>
 														</CardBody>

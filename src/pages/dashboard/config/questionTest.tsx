@@ -3,7 +3,7 @@ import { List, Pencil, Save, X } from 'lucide-react';
 import {
 	questionType,
 	testQuestionType,
-} from '../../../../types/utilities';
+} from '../../../types/utilities';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ const QuestionTest = ({
 	updateTestQuestion: (
 		testQuestion: testQuestionType,
 		amount: number,
-		value: number
+		value: number,
 	) => Promise<void>;
 }) => {
 	const navigate = useNavigate();
@@ -28,13 +28,15 @@ const QuestionTest = ({
 	return (
 		<>
 			<Typography
+				variant="small"
+				className="text-xs sm:text-sm"
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
 				{QT.name}: <br />
 				{edit ? (
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
 						<Input
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -46,7 +48,7 @@ const QuestionTest = ({
 							label="Cantidad"
 							placeholder="Cantidad"
 							maxLength={2}
-							className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+							className="bg-slate-400 rounded-md p-2 w-full sm:w-24 mb-2 block text-slate-900"
 							crossOrigin={undefined}
 						/>
 						<Input
@@ -60,28 +62,27 @@ const QuestionTest = ({
 							label="Valor"
 							placeholder="Valor"
 							maxLength={2}
-							className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+							className="bg-slate-400 rounded-md p-2 w-full sm:w-24 mb-2 block text-slate-900"
 							crossOrigin={undefined}
 						/>
 					</div>
 				) : (
 					<>
 						{TQT ? (
-							<>
-								<span>
-									{TQT.amount} Pregunta{TQT.amount != 1 ? 's' : ''}{' '}
-									valor ({TQT.value} Punto{TQT.value != 1 ? 's' : ''})
-								</span>
-							</>
+							<span className="text-xs sm:text-sm">
+								{TQT.amount} Pregunta{TQT.amount != 1 ? 's' : ''}{' '}
+								valor ({TQT.value} Punto{TQT.value != 1 ? 's' : ''})
+							</span>
 						) : (
 							'Sin datos'
 						)}
 					</>
 				)}
 			</Typography>
-			<div className="flex flex-row gap-5 justify-end">
+			<div className="flex flex-wrap gap-1 sm:gap-2 justify-end">
 				<Button
 					size="sm"
+					className="text-xs"
 					title={edit ? 'Cancelar' : 'Cambiar cantidad preguntas'}
 					variant={edit ? 'outlined' : 'filled'}
 					placeholder={undefined}
@@ -94,40 +95,38 @@ const QuestionTest = ({
 					{edit ? <X size={12} /> : <Pencil size={12} />}
 				</Button>
 				{edit ? (
-					<>
-						<Button
-							title="Guardar"
-							size="sm"
-							disabled={!(amount >= 0)}
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-							onClick={() => {
-								updateTestQuestion(TQT, amount, value);
-								setEdit(false);
-							}}
-						>
-							<Save size={20} />
-						</Button>
-					</>
+					<Button
+						title="Guardar"
+						size="sm"
+						className="text-xs"
+						disabled={!(amount >= 0)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						onClick={() => {
+							updateTestQuestion(TQT, amount, value);
+							setEdit(false);
+						}}
+					>
+						<Save size={16} />
+					</Button>
 				) : (
-					<>
-						<Button
-							title={`Lista de preguntas de ${QT.name}`}
-							size="sm"
-							disabled={!(amount > 0)}
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-							onClick={() => {
-								navigate(
-									`../config/testQuestion/${TQT.course_id}/${TQT.test_id}/${QT.id}/${TQT.id}`
-								);
-							}}
-						>
-							<List size={20} />
-						</Button>
-					</>
+					<Button
+						title={`Lista de preguntas de ${QT.name}`}
+						size="sm"
+						className="text-xs"
+						disabled={!(amount > 0)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						onClick={() => {
+							navigate(
+								`../config/testQuestion/${TQT.course_id}/${TQT.test_id}/${QT.id}/${TQT.id}`,
+							);
+						}}
+					>
+						<List size={16} />
+					</Button>
 				)}
 			</div>
 		</>
