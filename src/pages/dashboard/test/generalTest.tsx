@@ -266,7 +266,7 @@ const GeneralTest = () => {
 										CL.course_student_tests?.length || 0;
 
 									if (exams_submitted > 0) {
-										// active = exams_submitted <= maxTries;
+										active = true;
 										lastTest = CL.course_student_tests?.slice(-1)[0];
 									}
 
