@@ -13,6 +13,7 @@ const initialState: testState = {
     courseStudentTestSelected: null,
     courseStudentTestQuestionList: [],
     courseStudentTestQuestionSelected: null,
+    studentTestList: [],
     lastCreatedId: null,
     error: null,
     currentPage: 1,
@@ -210,6 +211,21 @@ export const fetchCourseStudentTest = createAsyncThunk<courseStudentTest, number
     async (id, { rejectWithValue }) => {
         try {
             const response = await axiosGetSlice(`api/test/courseStudentTest/${id}`);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const fetchTestStudent = createAsyncThunk<courseStudentTest[], { student_id: number; course_student_id?: number }>(
+    'user/fetchTestStudent',
+    async ({ student_id, course_student_id }, { rejectWithValue }) => {
+        try {
+
+            const response = await axiosGetSlice(`api/test/student/${student_id}`, {
+                course_student_id
+            });
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -466,6 +482,19 @@ const testSlice = createSlice({
                 state.courseStudentTestSelected = newCourseStudentTest;
             })
             .addCase(updateCourseStudentTestScore.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción fetchTestStudent
+            .addCase(fetchTestStudent.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchTestStudent.fulfilled, (state, action: PayloadAction<courseStudentTest[]>) => {
+                state.status = 'succeeded';
+                state.studentTestList = action.payload;
+            })
+            .addCase(fetchTestStudent.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

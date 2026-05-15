@@ -471,6 +471,7 @@ export interface testState {
     courseStudentTestSelected: courseStudentTest | null;
     courseStudentTestQuestionList: courseStudentTestQuestion[];
     courseStudentTestQuestionSelected: courseStudentTestQuestion | null;
+    studentTestList: courseStudentTest[];
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     lastCreatedId: number | null;
     error: string | null;
