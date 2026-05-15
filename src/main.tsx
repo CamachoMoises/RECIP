@@ -15,10 +15,19 @@ createRoot(document.getElementById('root')!).render(
 			<Provider store={store}>
 				<PersistGate loading={null} persistor={persistor}>
 					<ThemeInitializer />
-					<Toaster />
+					<Toaster
+						toastOptions={{
+							style: {
+								zIndex: 99999,
+							},
+						}}
+						containerStyle={{
+							zIndex: 99999,
+						}}
+					/>
 					<App />
 				</PersistGate>
 			</Provider>
 		</ThemeProvider>
-	</StrictMode>
+	</StrictMode>,
 );

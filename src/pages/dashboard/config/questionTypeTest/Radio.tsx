@@ -61,9 +61,9 @@ const TestRadio = ({
 				editAnswer={editAnswer}
 				setEditHeader={setEditHeader}
 			/>
-			<div className="flex flex-row justify-center gap-3">
+			<div className="flex flex-wrap justify-center gap-2 sm:gap-3">
 				{question?.answers?.map((answer) => (
-					<div key={answer.id} className="basis-1/4 justify-center">
+					<div key={answer.id} className="flex flex-col items-center min-w-[80px] sm:basis-1/4">
 						<Radio
 							disabled={editHeader || editAnswer}
 							name={`radio-${question?.id}`}
@@ -78,7 +78,6 @@ const TestRadio = ({
 							onPointerLeaveCapture={undefined}
 							crossOrigin={undefined}
 						/>
-						<br />
 						<div className="flex flex-row justify-center">
 							<AnswerValue
 								answer={answer}
@@ -93,7 +92,7 @@ const TestRadio = ({
 				{add && (
 					<div className="flex flex-col justify-center align-middle">
 						<Button
-							size="lg"
+							size="sm"
 							title="Agregar respuesta"
 							variant="filled"
 							disabled={editHeader || editAnswer}

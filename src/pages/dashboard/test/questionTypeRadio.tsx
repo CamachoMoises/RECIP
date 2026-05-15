@@ -34,31 +34,33 @@ const QuestionTypeRadio = ({
 		});
 		toast.success('Respuesta guardada', { id: 'save' });
 	};
-	return (
+return (
 		<div
 			className={`${
 				questionTest.Answered ? 'bg-light-green-200' : ''
 			}`}
 		>
-			{' '}
 			<Typography
+				className="text-sm sm:text-base"
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
-				variant="h5"
+				variant="h6"
 			>
 				Pregunta Nº{countKey + 1}{' '}
 			</Typography>
 			<Typography
 				variant="small"
+				className="text-xs sm:text-sm"
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				{type === 1 && <>Seleccion Simple</>}
+				{type === 1 && <>Selección Simple</>}
 				{type === 3 && <>Verdadero o Falso</>}
 			</Typography>
 			<Typography
+				className="text-sm sm:text-base mt-2"
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
@@ -66,9 +68,9 @@ const QuestionTypeRadio = ({
 			>
 				{questionTest.question?.header}
 			</Typography>
-			<div className="flex flex-row justify-center">
+			<div className="flex flex-wrap justify-center gap-2 sm:gap-4 mt-4">
 				{questionTest.question?.answers?.map((answer) => (
-					<div key={answer.id} className="basis-1/4 justify-center">
+					<div key={answer.id} className="flex flex-col items-center min-w-[80px] sm:basis-1/4">
 						<Radio
 							name={`radio-${questionTest.question?.id}`}
 							id={`radio-${answer.id}`}
@@ -88,22 +90,19 @@ const QuestionTypeRadio = ({
 							onPointerLeaveCapture={undefined}
 							crossOrigin={undefined}
 						/>
-						<br />
-						<div className="flex flex-row justify-center">
-							<Typography
-								variant="small"
-								className="max-w-48 text-center"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								{answer.value}
-							</Typography>
-						</div>
+						<Typography
+							variant="small"
+							className="text-center text-xs sm:text-sm max-w-32 sm:max-w-48"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							{answer.value}
+						</Typography>
 					</div>
 				))}
 			</div>
-			<hr />
+			<hr className="mt-4" />
 		</div>
 	);
 };

@@ -90,6 +90,12 @@ const GeneralTest = () => {
 	const [active, setActive] = useState(currentPage);
 
 	useEffect(() => {
+		toast(
+			'Cuando inicie el examen espere que sea generado, recuerde que tiene intentos limitados!',
+			{
+				icon: '⚠️',
+			},
+		);
 		dispatch(
 			fetchCoursesStudentsTests({
 				pageSize: course.pageSize,
@@ -267,7 +273,6 @@ const GeneralTest = () => {
 					name: `Pagina ${i + 1}`,
 				}))
 			: [];
-	console.log('caka', course.courseStudentList);
 
 	return (
 		<div className="container mx-auto px-2 sm:px-4">
@@ -275,14 +280,17 @@ const GeneralTest = () => {
 
 			{isSuperAdmin && (
 				<div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-					<div>
+					<div className="flex flex-col gap-1">
+						<label htmlFor="Nombre" className="text-sx text-black">
+							Bypass intentos maximos
+						</label>
 						<Switch
 							className="h-full w-full checked:bg-[#134475]"
 							containerProps={{
 								className: 'w-11 h-6',
 							}}
 							circleProps={{
-								className: 'before:hidden left-0.5 border-none',
+								className: 'before:hidden left-6 border-none',
 							}}
 							checked={byPassMaxTries}
 							onChange={() => setByPassMaxTries((prev) => !prev)}
@@ -291,15 +299,6 @@ const GeneralTest = () => {
 							onPointerLeaveCapture={undefined}
 						/>
 					</div>
-					<Typography
-						variant="small"
-						className="font-medium text-gray-700"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						Bypass intentos maximos
-					</Typography>
 					<Typography
 						variant="small"
 						className="text-xs text-gray-500"
@@ -597,7 +596,8 @@ const GeneralTest = () => {
 
 															{CL.score &&
 																lastTest &&
-																CL.student?.user?.id && (
+																CL.student?.user?.id &&
+																auth.user?.is_superuser && (
 																	<Button
 																		title="Revisión"
 																		className="flex items-center gap-1 px-2 sm:px-3"
@@ -701,7 +701,7 @@ const GeneralTest = () => {
 																		}
 																		onClick={() => {
 																			openExamsList(
-																				CL.student?.user?.id || -1,
+																				CL.student?.id || -1,
 																				CL.id || -1,
 																			);
 																		}}
@@ -716,7 +716,8 @@ const GeneralTest = () => {
 
 																{CL.score &&
 																	lastTest &&
-																	CL.student?.user?.id && (
+																	CL.student?.user?.id &&
+																	auth.user?.is_superuser && (
 																		<MenuItem
 																			className="flex items-center gap-2"
 																			disabled={

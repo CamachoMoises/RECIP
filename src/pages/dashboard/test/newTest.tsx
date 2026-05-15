@@ -228,8 +228,11 @@ const NewTest = () => {
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
+					size="lg"
+					className="max-w-full sm:max-w-lg"
 				>
 					<DialogHeader
+						className="text-sm sm:text-base"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
@@ -245,7 +248,7 @@ const NewTest = () => {
 						<div className="flex flex-col justify-center">
 							<Typography
 								variant="lead"
-								className="text-center"
+								className="text-center text-sm sm:text-base"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -257,7 +260,7 @@ const NewTest = () => {
 							{score < min_score && (
 								<Typography
 									variant="lead"
-									className="text-center"
+									className="text-center text-sm sm:text-base"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -273,8 +276,9 @@ const NewTest = () => {
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<div className="flex flex-row gap-3">
+						<div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
 							<Button
+								size="sm"
 								variant="filled"
 								color="cyan"
 								onClick={() => {
@@ -288,6 +292,7 @@ const NewTest = () => {
 							</Button>
 							{score >= min_score ? (
 								<Button
+									size="sm"
 									variant="filled"
 									color="green"
 									onClick={() => {
@@ -300,20 +305,19 @@ const NewTest = () => {
 									<span>Ver detalles</span>
 								</Button>
 							) : (
-								<>
-									<Button
-										variant="filled"
-										color="red"
-										onClick={() => {
-											navigate('../test');
-										}}
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										<span>Repetir examen</span>
-									</Button>
-								</>
+								<Button
+									size="sm"
+									variant="filled"
+									color="red"
+									onClick={() => {
+										navigate('../test');
+									}}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<span>Repetir examen</span>
+								</Button>
 							)}
 						</div>
 					</DialogFooter>
@@ -357,44 +361,48 @@ const NewTest = () => {
 	}
 
 	return (
-		<div className="container">
+		<div className="container px-2 sm:px-4">
 			<PageTitle
 				title={`Examen de  ${test.courseStudentTestSelected?.code} (${test.testSelected?.code})`}
-				// breadCrumbs={breadCrumbs}
 			/>
 			{dateTest && (
 				<>
-					<div className="flex flex-row gap-4 justify-start">
-						<Countdown
-							startTime={dateTest.format('HH:mm')}
-							totalMinutes={testTime}
-							setActive={setTestActive}
-						/>
-						<div className="mx-auto p-6 bg-white shadow-lg rounded-lg">
-							<div className="flex flex-row gap-3 ">
+					<div className="flex flex-col lg:flex-row gap-4 justify-start">
+						<div className="w-full lg:w-auto">
+							<Countdown
+								startTime={dateTest.format('HH:mm')}
+								totalMinutes={testTime}
+								setActive={setTestActive}
+							/>
+						</div>
+						<div className="mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-lg w-full lg:w-auto">
+							<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 ">
 								<Typography
-									variant="h5"
+									variant="h6"
+									className="text-sm sm:text-base"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									Hora de inicio: {dateTest.format('hh:mm a')}
+									Inicio: {dateTest.format('hh:mm a')}
 								</Typography>
 								<Typography
-									variant="h5"
+									variant="h6"
+									className="text-sm sm:text-base"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									Hora de fin:{' '}
+									Fin:{' '}
 									{dateTest
 										.add(testTime, 'minutes')
 										.format('hh:mm a')}
 								</Typography>
 							</div>
-							<div className="flex flex-col justify-between">
+							<div className="flex flex-col justify-between mt-4">
 								<Typography
 									variant="h6"
+									className="text-sm sm:text-base mb-2"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -409,11 +417,10 @@ const NewTest = () => {
 									return (
 										<div
 											key={`tqt-${index}`}
-											className="flex flex-row justify-between gap-3"
+											className="flex flex-row justify-between gap-2 text-xs sm:text-sm"
 										>
 											<Typography
-												variant="lead"
-												className="text-sm"
+												variant="small"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
@@ -421,8 +428,7 @@ const NewTest = () => {
 												{amount} {tqt.question_type?.name}
 											</Typography>
 											<Typography
-												variant="lead"
-												className="text-sm"
+												variant="small"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
@@ -430,8 +436,7 @@ const NewTest = () => {
 												{value} Punto c/u
 											</Typography>
 											<Typography
-												variant="lead"
-												className="text-sm"
+												variant="small"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
@@ -442,10 +447,10 @@ const NewTest = () => {
 									);
 								})}
 
-								<hr />
+								<hr className="my-2" />
 								<Typography
 									className="text-sm text-end"
-									variant="lead"
+									variant="small"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -455,11 +460,12 @@ const NewTest = () => {
 							</div>
 						</div>
 					</div>
-					<br />
-					<div className="flex flex-row gap-4 justify-start">
-						<div className="mx-auto p-6 bg-white shadow-lg rounded-sm w-full">
+					<div className="my-4" />
+					<div className="flex flex-col lg:flex-row gap-4 justify-start">
+						<div className="mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-sm w-full">
 							<Typography
-								variant="h5"
+								variant="h6"
+								className="text-sm sm:text-base mb-2"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -472,6 +478,7 @@ const NewTest = () => {
 								onPointerLeaveCapture={undefined}
 							>
 								<ListItem
+									className="text-xs sm:text-sm"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -479,6 +486,16 @@ const NewTest = () => {
 									Lea cuidadosamente cada pregunta.
 								</ListItem>
 								<ListItem
+									className="text-xs sm:text-sm"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Las preguntas se guardan automaticamente, no hay de
+									que preocuparse si se cierra el navegador.
+								</ListItem>
+								<ListItem
+									className="text-xs sm:text-sm"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -487,6 +504,7 @@ const NewTest = () => {
 									presente.
 								</ListItem>
 								<ListItem
+									className="text-xs sm:text-sm"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -494,6 +512,7 @@ const NewTest = () => {
 									El examen se realizará a libro cerrado.
 								</ListItem>
 								<ListItem
+									className="text-xs sm:text-sm"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -502,6 +521,7 @@ const NewTest = () => {
 									precione finalizar.
 								</ListItem>
 								<ListItem
+									className="text-xs sm:text-sm"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -509,6 +529,7 @@ const NewTest = () => {
 									El examen tendrá una duración de {testTime} minutos.
 								</ListItem>
 								<ListItem
+									className="text-xs sm:text-sm"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -517,6 +538,7 @@ const NewTest = () => {
 									ser siempre nuestra virtud.
 								</ListItem>
 								<ListItem
+									className="text-xs sm:text-sm"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -527,7 +549,7 @@ const NewTest = () => {
 							</List>
 						</div>
 					</div>
-					<br />
+					<div className="my-4" />
 					<div>
 						{testActive && (
 							<>
@@ -537,6 +559,7 @@ const NewTest = () => {
 									onPointerLeaveCapture={undefined}
 								>
 									<CardBody
+										className="p-2 sm:p-4"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -587,7 +610,7 @@ const NewTest = () => {
 															)}
 															{questionTest.question?.question_type
 																?.id === 4 && (
-																<>
+																<div className="overflow-auto max-w-full max-h-[60vh] w-full">
 																	<QuestionTypeCompletion
 																		questionTest={questionTest}
 																		countKey={index}
@@ -596,7 +619,7 @@ const NewTest = () => {
 																				.question_type.id
 																		}
 																	/>
-																</>
+																</div>
 															)}
 															{questionTest.question?.question_type
 																?.id === 5 && (
@@ -617,14 +640,15 @@ const NewTest = () => {
 											)}
 
 											<Typography
-												variant="h5"
+												variant="h6"
+												className="text-sm sm:text-base mt-4"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
 												Finalizar
 											</Typography>
-											<div className="flex flex-col">
+											<div className="flex flex-col items-center mt-2">
 												<Button
 													onClick={() => {
 														handleEndTest(
@@ -636,7 +660,7 @@ const NewTest = () => {
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													className="flex flex-col text-center justify-center "
+													className="flex flex-col text-center justify-center px-6"
 												>
 													<SaveAll
 														size={15}

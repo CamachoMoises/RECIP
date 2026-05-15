@@ -216,6 +216,21 @@ const NavBar = () => {
 					</div>
 
 					<div className="flex items-center gap-3">
+						<IconButton
+							variant="text"
+							className="hidden md:block text-blue-200 hover:bg-white/10 rounded-xl transition-all duration-300"
+							ripple={false}
+							onClick={toggleTheme}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							{theme === 'dark' ? (
+								<Sun className="w-5 h-5" />
+							) : (
+								<Moon className="w-5 h-5" />
+							)}
+						</IconButton>
 						{auth.user && (
 							<>
 								<div className="hidden md:block">
@@ -366,7 +381,7 @@ const NavBar = () => {
 
 						<IconButton
 							variant="text"
-							className="text-blue-200 hover:bg-white/10 rounded-xl transition-all duration-300"
+							className="hidden md:block text-blue-200 hover:bg-white/10 rounded-xl transition-all duration-300"
 							ripple={false}
 							onClick={toggleTheme}
 							placeholder={undefined}

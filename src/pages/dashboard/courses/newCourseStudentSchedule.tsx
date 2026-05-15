@@ -163,7 +163,7 @@ const NewCourseStudentSchedule = () => {
 		return <ErrorPage error={course.error || 'Indefinido'} />;
 
 	return (
-		<div className="content-center">
+		<div className="content-center px-2 sm:px-4">
 			<PageTitle
 				title={`${course.courseSelected?.name} ${course.courseSelected?.course_level.name}`}
 				breadCrumbs={breadCrumbs}
@@ -175,14 +175,16 @@ const NewCourseStudentSchedule = () => {
 				onPointerLeaveCapture={undefined}
 			>
 				<CardBody
+					className="p-2 sm:p-4"
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
 					{/* Header Section */}
-					<div className="bg-blue-100 rounded-md p-4 mb-4">
+					<div className="bg-blue-100 rounded-md p-2 sm:p-4 mb-2 sm:mb-4">
 						<Typography
-							variant="h5"
+							variant="h6"
+							className="text-sm sm:text-base"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -191,7 +193,8 @@ const NewCourseStudentSchedule = () => {
 							{course.courseSelected?.course_level.name}
 						</Typography>
 						<Typography
-							variant="lead"
+							variant="small"
+							className="text-xs sm:text-sm"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -199,7 +202,8 @@ const NewCourseStudentSchedule = () => {
 							{course.courseSelected?.description}
 						</Typography>
 						<Typography
-							variant="lead"
+							variant="small"
+							className="text-xs sm:text-sm"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -211,7 +215,7 @@ const NewCourseStudentSchedule = () => {
 					<hr className="my-4" />
 
 					{/* Student and Course Details */}
-					<div className="grid grid-cols-1 lg:grid-cols-7 gap-4 py-2">
+					<div className="grid grid-cols-1 lg:grid-cols-7 gap-2 sm:gap-4 py-2">
 						<div className="lg:col-span-3">
 							<div className="mb-4">
 								<Select
@@ -284,13 +288,13 @@ const NewCourseStudentSchedule = () => {
 						</div>
 
 						{/* Course Options */}
-						<div className="lg:col-span-4 border border-gray-400 rounded-md p-4">
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="lg:col-span-4 border border-gray-400 rounded-md p-2 sm:p-4">
+							<div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
 								{/* Type Trip */}
 								<div>
 									<Typography
 										variant="h6"
-										className="mb-2"
+										className="mb-1 sm:mb-2 text-sm sm:text-base"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -381,7 +385,7 @@ const NewCourseStudentSchedule = () => {
 								<div>
 									<Typography
 										variant="h6"
-										className="mb-2"
+										className="mb-1 sm:mb-2 text-sm sm:text-base"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -464,7 +468,7 @@ const NewCourseStudentSchedule = () => {
 								<div>
 									<Typography
 										variant="h6"
-										className="mb-2"
+										className="mb-1 sm:mb-2 text-sm sm:text-base"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -516,11 +520,11 @@ const NewCourseStudentSchedule = () => {
 						</div>
 
 						{/* Action Buttons */}
-						<div className="flex gap-3 col-span-full justify-end">
+						<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 col-span-full justify-end">
 							{canViewContent && (
 								<Button
 									size="sm"
-									className="flex items-center gap-2"
+									className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
 									onClick={() => {
 										handlePrint();
 									}}
@@ -528,11 +532,12 @@ const NewCourseStudentSchedule = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									<Mail size={18} /> Enviar
+									<Mail size={14} /> <span className="hidden sm:inline">Enviar</span>
 								</Button>
 							)}
 							<Button
-								className="flex items-center gap-2"
+								size="sm"
+								className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
 								onClick={() => {
 									handlePrint();
 								}}
@@ -540,7 +545,7 @@ const NewCourseStudentSchedule = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<Printer size={18} /> Imprimir
+								<Printer size={14} /> <span className="hidden sm:inline">Imprimir</span>
 							</Button>
 						</div>
 					</div>
@@ -556,6 +561,7 @@ const NewCourseStudentSchedule = () => {
 					>
 						<AccordionHeader
 							onClick={() => handleOpen(1)}
+							className="text-sm sm:text-base"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -656,6 +662,7 @@ const NewCourseStudentSchedule = () => {
 					>
 						<AccordionHeader
 							onClick={() => handleOpen(2)}
+							className="text-sm sm:text-base"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
