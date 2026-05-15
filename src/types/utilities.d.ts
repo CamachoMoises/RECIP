@@ -260,6 +260,7 @@ export type courseStudent = {
     score?: number;
     approve?: boolean;
     code: string;
+    highest_score?: number;
     status?: boolean;
     createdAt: string;
     updatedAt: string;

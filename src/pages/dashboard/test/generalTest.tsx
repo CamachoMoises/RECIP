@@ -267,6 +267,7 @@ const GeneralTest = () => {
 					name: `Pagina ${i + 1}`,
 				}))
 			: [];
+	console.log('caka', course.courseStudentList);
 
 	return (
 		<div className="container mx-auto px-2 sm:px-4">
@@ -514,7 +515,9 @@ const GeneralTest = () => {
 															</Typography>
 														)}
 
-														{CL.score && selfUser && (
+														{(auth.user?.is_superuser ||
+															(CL.highest_score !== undefined &&
+																selfUser)) && (
 															<Typography
 																variant="small"
 																className="text-xs sm:text-sm font-semibold text-red-600 mt-1"
@@ -522,7 +525,8 @@ const GeneralTest = () => {
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
 															>
-																Calificación: {CL.score} Puntos
+																Calificación: {CL.highest_score}{' '}
+																Puntos
 															</Typography>
 														)}
 													</div>
