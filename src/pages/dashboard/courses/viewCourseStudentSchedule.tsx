@@ -157,7 +157,7 @@ const ViewCourseStudentSchedule = () => {
 		return <ErrorPage error={course.error || 'Indefinido'} />;
 
 	return (
-		<div className="content-center">
+		<div className="content-center px-2 sm:px-4">
 			<PageTitle
 				title={`${course.courseSelected?.name} ${course.courseSelected?.course_level.name}`}
 				breadCrumbs={breadCrumbs}
@@ -169,13 +169,15 @@ const ViewCourseStudentSchedule = () => {
 				onPointerLeaveCapture={undefined}
 			>
 				<CardBody
+					className="p-2 sm:p-4"
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					<div className="bg-blue-100 rounded-md p-4 mb-4">
+					<div className="bg-blue-100 rounded-md p-2 sm:p-4 mb-2 sm:mb-4">
 						<Typography
-							variant="h5"
+							variant="h6"
+							className="text-sm sm:text-base"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -184,7 +186,8 @@ const ViewCourseStudentSchedule = () => {
 							{course.courseSelected?.course_level.name}
 						</Typography>
 						<Typography
-							variant="lead"
+							variant="small"
+							className="text-xs sm:text-sm"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -192,7 +195,8 @@ const ViewCourseStudentSchedule = () => {
 							{course.courseSelected?.description}
 						</Typography>
 						<Typography
-							variant="lead"
+							variant="small"
+							className="text-xs sm:text-sm"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}

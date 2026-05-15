@@ -262,6 +262,7 @@ export type courseStudent = {
     code: string;
     highest_score?: number;
     status?: boolean;
+    max_attempts: number | null;
     createdAt: string;
     updatedAt: string;
 }

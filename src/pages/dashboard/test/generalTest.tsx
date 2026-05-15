@@ -343,7 +343,7 @@ const GeneralTest = () => {
 								onPointerLeaveCapture={undefined}
 							>
 								{course.courseStudentList?.map((CL) => {
-									const maxTries = 4;
+									const maxTries = CL.max_attempts || 5;
 									let instructor: instructor | undefined = undefined;
 									let lastTest: courseStudentTest | undefined =
 										undefined;

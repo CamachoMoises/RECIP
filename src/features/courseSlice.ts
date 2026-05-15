@@ -138,6 +138,21 @@ export const updateCourseStudentStatus = createAsyncThunk<{ id: number; status: 
         }
     }
 );
+// Acción para actualizar max_attempts de un curso estudiante
+export const updateCourseStudentMaxAttempts = createAsyncThunk<courseStudent, { course_student_id: number, max_attempts: number | null }>(
+    'course/updateCourseStudentMaxAttempts',
+    async ({ course_student_id, max_attempts }, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutSlice(`api/courses/courseStudentMaxAttempts`, {
+                course_student_id,
+                max_attempts
+            });
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 // Acción para crear una actividad
 export const createSchedule = createAsyncThunk<schedule, schedule>(
     'course/createSchedule',
@@ -342,6 +357,30 @@ const courseSlice = createSlice({
                 }
             })
             .addCase(updateCourseStudentStatus.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción updateCourseStudentMaxAttempts
+            .addCase(updateCourseStudentMaxAttempts.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateCourseStudentMaxAttempts.fulfilled, (state, action: PayloadAction<courseStudent>) => {
+                state.status = 'succeeded';
+                const updatedCourseStudent = action.payload;
+
+                if (state.courseStudentList) {
+                    const index = state.courseStudentList.findIndex((courseStudent) => courseStudent.id === updatedCourseStudent.id);
+                    if (index !== -1) {
+                        state.courseStudentList[index] = updatedCourseStudent;
+                    }
+                }
+
+                if (state.courseStudent?.id === updatedCourseStudent.id) {
+                    state.courseStudent = updatedCourseStudent;
+                }
+            })
+            .addCase(updateCourseStudentMaxAttempts.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
