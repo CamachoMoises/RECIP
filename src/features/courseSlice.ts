@@ -51,12 +51,12 @@ export const fetchCoursesStudents = createAsyncThunk<{ data: courseStudent[], to
     }
 );
 
-export const fetchCoursesStudentsTests = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number, course_type_id: number }>(
+export const fetchCoursesStudentsTests = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number, course_type_id: number, status?: boolean }>(
     'course/fetchCoursesStudentsTests',
-    async ({ currentPage, pageSize, course_type_id }, { rejectWithValue }) => {
+    async ({ currentPage, pageSize, course_type_id, status }, { rejectWithValue }) => {
         try {
             const response = await axiosGetSlice('api/courses/coursesStudents',
-                { currentPage, pageSize, course_type_id }
+                { currentPage, pageSize, course_type_id, status }
             );
             return response;
         } catch (error: any) {

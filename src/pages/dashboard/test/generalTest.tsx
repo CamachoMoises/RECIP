@@ -77,6 +77,7 @@ const GeneralTest = () => {
 				pageSize: course.pageSize,
 				currentPage: course.currentPage,
 				course_type_id: 1,
+				status: true,
 			}),
 		);
 	}, [dispatch, course.currentPage, course.pageSize]);
@@ -185,6 +186,7 @@ const GeneralTest = () => {
 						pageSize,
 						currentPage: index,
 						course_type_id: 1,
+						status: true,
 					}),
 				);
 				setActive(index);
@@ -200,6 +202,7 @@ const GeneralTest = () => {
 				pageSize,
 				currentPage: active + 1,
 				course_type_id: 1,
+				status: true,
 			}),
 		);
 	};
@@ -212,6 +215,7 @@ const GeneralTest = () => {
 				pageSize,
 				currentPage: active - 1,
 				course_type_id: 1,
+				status: true,
 			}),
 		);
 	};

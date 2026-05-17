@@ -70,7 +70,7 @@ const NavBar = () => {
 
 	// Scroll shrink
 	useEffect(() => {
-		const handleScroll = () => setScrolled(window.scrollY > 200);
+		const handleScroll = () => setScrolled(window.scrollY >= 250);
 		window.addEventListener('scroll', handleScroll, {
 			passive: true,
 		});

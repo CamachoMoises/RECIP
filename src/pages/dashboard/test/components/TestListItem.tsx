@@ -102,30 +102,6 @@ const TestListItem = ({
 		>
 			<div className="flex flex-col sm:flex-row w-full gap-3">
 				<div className="flex flex-col w-full">
-					<div className="flex items-center justify-between">
-						<Typography
-							variant="h6"
-							className="text-sm sm:text-base font-semibold text-blue-gray-800"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							{CL.code}
-						</Typography>
-
-						{((selfUser && exams_submitted > 0) || isSuperuser) && (
-							<Typography
-								variant="small"
-								className="text-xs sm:text-sm text-red-600 bg-red-50 px-2 py-1 rounded"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Intentos {exams_submitted} / {maxTries}
-							</Typography>
-						)}
-					</div>
-
 					<div className="mt-2">
 						<Typography
 							variant="small"
@@ -147,7 +123,15 @@ const TestListItem = ({
 								? `${CL.student.user.name} ${CL.student.user.last_name}`
 								: 'Sin Piloto'}
 						</Typography>
-
+						<Typography
+							variant="small"
+							className="text-xs sm:text-sm text-gray-700"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<span className="font-semibold">Cod:</span> {CL.code}
+						</Typography>
 						<div className="mt-1 flex flex-wrap gap-x-4">
 							<Typography
 								variant="small"
@@ -204,12 +188,23 @@ const TestListItem = ({
 							(CL.highest_score !== undefined && selfUser)) && (
 							<Typography
 								variant="small"
-								className="text-xs sm:text-sm font-semibold text-red-600 mt-1"
+								className="text-xs sm:text-sm font-semibold  mt-1"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
 								Calificación: {CL.highest_score} Puntos
+							</Typography>
+						)}
+						{((selfUser && exams_submitted > 0) || isSuperuser) && (
+							<Typography
+								variant="small"
+								className="text-xs sm:text-sm text-green-600  px-2 py-1 rounded"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Intentos {exams_submitted} / {maxTries}
 							</Typography>
 						)}
 					</div>

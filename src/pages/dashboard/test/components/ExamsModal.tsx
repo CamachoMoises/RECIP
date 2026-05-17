@@ -130,9 +130,7 @@ const ExamsModal = ({
 										<div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-3">
 											<span>
 												{cst.date
-													? moment(cst.date).format(
-															'DD/MM/YYYY HH:mm',
-														)
+													? moment(cst.date).format('DD/MM/YYYY')
 													: 'Sin fecha'}
 											</span>
 											<span>

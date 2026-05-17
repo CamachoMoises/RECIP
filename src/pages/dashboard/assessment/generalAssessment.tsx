@@ -60,6 +60,7 @@ const GeneralAssessment = () => {
 						pageSize,
 						currentPage: index,
 						course_type_id: 1,
+						status: true,
 					}),
 				);
 				setActive(index);
@@ -75,6 +76,7 @@ const GeneralAssessment = () => {
 				pageSize,
 				currentPage: active + 1,
 				course_type_id: 1,
+				status: true,
 			}),
 		);
 	};
@@ -87,6 +89,7 @@ const GeneralAssessment = () => {
 				pageSize,
 				currentPage: active - 1,
 				course_type_id: 1,
+				status: true,
 			}),
 		);
 	};
@@ -96,6 +99,7 @@ const GeneralAssessment = () => {
 				pageSize: course.pageSize,
 				currentPage: course.currentPage,
 				course_type_id: 2,
+				status: true,
 			}),
 		);
 	}, [dispatch, course.pageSize, course.currentPage]);
@@ -121,6 +125,7 @@ const GeneralAssessment = () => {
 				pageSize: course.pageSize,
 				currentPage: course.currentPage,
 				course_type_id: 2,
+				status: true,
 			}),
 		);
 		navigate(`../course_assessment/${CS.id}/${CS.course_id}`);
