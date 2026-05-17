@@ -12,18 +12,20 @@ const Countdown = ({
 	setActive: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
 	const [timeLeft, setTimeLeft] = useState(0);
-	console.log(startTime, totalMinutes);
 
 	useEffect(() => {
 		const now = moment();
-		let start = moment(now.format('YYYY-MM-DD') + ' ' + startTime, 'YYYY-MM-DD HH:mm');
-		
+		let start = moment(
+			now.format('YYYY-MM-DD') + ' ' + startTime,
+			'YYYY-MM-DD HH:mm',
+		);
+
 		if (start.isBefore(now)) {
 			start = start.add(1, 'days');
 		}
-		
+
 		const end = start.clone().add(totalMinutes, 'minutes');
-		
+
 		const initialTimeLeft = Math.max(end.diff(now, 'seconds'), 0);
 		setTimeLeft(initialTimeLeft);
 
@@ -47,18 +49,22 @@ const Countdown = ({
 		let hours = Math.floor(seconds / 3600);
 		const minutes = Math.floor((seconds % 3600) / 60);
 		const secs = seconds % 60;
-		
+
 		if (hours >= 24) {
 			hours = hours - 24;
 		}
-		
+
 		return `${hours.toString().padStart(2, '0')}:${minutes
 			.toString()
 			.padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 	};
 
-	const adjustedTimeLeft = timeLeft > 86400 ? timeLeft - 86400 : timeLeft;
-	const adjustedTotal = totalMinutes * 60 > 86400 ? totalMinutes * 60 - 86400 : totalMinutes * 60;
+	const adjustedTimeLeft =
+		timeLeft > 86400 ? timeLeft - 86400 : timeLeft;
+	const adjustedTotal =
+		totalMinutes * 60 > 86400
+			? totalMinutes * 60 - 86400
+			: totalMinutes * 60;
 	const progress = (adjustedTimeLeft / adjustedTotal) * 100;
 
 	return (

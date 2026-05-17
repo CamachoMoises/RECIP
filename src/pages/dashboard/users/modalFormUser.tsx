@@ -154,7 +154,6 @@ const ModalFormUser = ({
 				is_superuser: isSuperuser,
 				password: data.password,
 			};
-			console.log(req);
 
 			if (userSelect) {
 				await dispatch(updateUser(req));
