@@ -30,6 +30,7 @@ import { fetchCourseStudentTest } from '../../../features/testSlice';
 import ResultsTestPdf from './resultsTestPdf';
 import { useReactToPrint } from 'react-to-print';
 import { fetchUser } from '../../../features/userSlice';
+import toast from 'react-hot-toast';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -72,6 +73,11 @@ const NewTest = () => {
 		};
 	});
 	const handleEndTest = async (course_student_test_id: number) => {
+		toast('Finalizando examen...', {
+			icon: '⏳',
+		});
+		setEnded(true);
+		setTestActive(false);
 		const resp = await axiosPostDefault(
 			`api/test/courseStudentTestEnd`,
 			{
@@ -657,6 +663,7 @@ const NewTest = () => {
 																: -1,
 														);
 													}}
+													disabled={!testActive}
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}

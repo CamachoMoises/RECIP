@@ -23,7 +23,7 @@
 	--glass-border: rgba(255, 255, 255, 0.2);
 }
 
-[data-theme="light"] {
+[data-theme='light'] {
 	--aviation-navy: #1e3a8a;
 	--aviation-blue: #3b82f6;
 	--aviation-sky: #0ea5e9;
@@ -35,16 +35,31 @@
 }
 
 body {
-	background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+	background: linear-gradient(
+		135deg,
+		#0f172a 0%,
+		#1e3a5f 50%,
+		#0f172a 100%
+	);
 	background-attachment: fixed;
 	background-repeat: no-repeat;
 	background-size: cover;
 	min-height: 100vh;
-	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	font-family:
+		'Inter',
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		sans-serif;
 }
 
-[data-theme="light"] body {
-	background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+[data-theme='light'] body {
+	background: linear-gradient(
+		135deg,
+		#f0f9ff 0%,
+		#e0f2fe 50%,
+		#bae6fd 100%
+	);
 }
 
 @layer components {
@@ -53,7 +68,7 @@ body {
 		backdrop-filter: blur(12px);
 		border: 1px solid var(--glass-border);
 		border-radius: 16px;
-		box-shadow: 
+		box-shadow:
 			0 4px 30px rgba(0, 0, 0, 0.1),
 			0 1px 3px rgba(0, 0, 0, 0.08);
 	}
@@ -63,20 +78,25 @@ body {
 		backdrop-filter: blur(12px);
 		border: 1px solid rgba(49, 130, 206, 0.2);
 		border-radius: 16px;
-		box-shadow: 
+		box-shadow:
 			0 4px 30px rgba(0, 0, 0, 0.3),
 			0 0 40px rgba(49, 130, 206, 0.1);
 	}
 
-	[data-theme="light"] .glass-card-dark {
+	[data-theme='light'] .glass-card-dark {
 		background: rgba(255, 255, 255, 0.95);
-		box-shadow: 
+		box-shadow:
 			0 4px 30px rgba(0, 0, 0, 0.08),
 			0 0 40px rgba(59, 130, 246, 0.08);
 	}
 
 	.aviation-gradient {
-		background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #3182ce 100%);
+		background: linear-gradient(
+			135deg,
+			#1a365d 0%,
+			#2c5282 50%,
+			#3182ce 100%
+		);
 	}
 
 	.modern-button {
@@ -113,7 +133,15 @@ body {
 		background: white;
 	}
 }
+@layer utilities {
+	.nav-text {
+		color: var(--aviation-navy);
+	}
 
+	[data-theme='dark'] .nav-text {
+		color: #90cdf4; /* blue-200 */
+	}
+}
 @layer utilities {
 	.animate-fade-in {
 		animation: fadeIn 0.5s ease-out forwards;
@@ -129,27 +157,31 @@ body {
 }
 
 @keyframes fadeIn {
-	from { opacity: 0; }
-	to { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes slideUp {
-	from { 
+	from {
 		opacity: 0;
 		transform: translateY(20px);
 	}
-	to { 
+	to {
 		opacity: 1;
 		transform: translateY(0);
 	}
 }
 
 @keyframes scaleIn {
-	from { 
+	from {
 		opacity: 0;
 		transform: scale(0.95);
 	}
-	to { 
+	to {
 		opacity: 1;
 		transform: scale(1);
 	}
@@ -165,7 +197,7 @@ body {
 	border-radius: 4px;
 }
 
-[data-theme="light"] ::-webkit-scrollbar-track {
+[data-theme='light'] ::-webkit-scrollbar-track {
 	background: rgba(203, 213, 225, 0.3);
 }
 
@@ -174,7 +206,7 @@ body {
 	border-radius: 4px;
 }
 
-[data-theme="light"] ::-webkit-scrollbar-thumb {
+[data-theme='light'] ::-webkit-scrollbar-thumb {
 	background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
 	border: 2px solid #f0f9ff;
 }

@@ -30,7 +30,6 @@ function App() {
 								<Route path="/contact" element={<ContactPage />} />
 								<Route path="/login" element={<Login />} />
 								<Route path="/dashboard/*" element={<Dashboard />} />
-
 								<Route path="*" element={<NotFound />} />
 							</Routes>
 						</div>

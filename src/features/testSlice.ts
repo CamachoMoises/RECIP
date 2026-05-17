@@ -256,6 +256,10 @@ const testSlice = createSlice({
         setLastCreatedId: (state, action: PayloadAction<number | null>) => {
             state.lastCreatedId = action.payload;
         },
+        clearReviewTest: (state) => {
+            state.courseStudentTestSelected = null;
+            state.testSelected = null;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -501,6 +505,6 @@ const testSlice = createSlice({
 
     }
 })
-
+export const { setLastCreatedId, clearReviewTest } = testSlice.actions;
 export default testSlice.reducer;
 

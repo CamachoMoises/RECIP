@@ -153,19 +153,6 @@ const GeneralTest = () => {
 		CS_id: number,
 		user_id: number,
 	) => {
-		console.log(
-			'CST_id',
-			CST_id,
-			'test_id',
-			test_id,
-			'course_id',
-			course_id,
-			'CS_id',
-			CS_id,
-			'user_id',
-			user_id,
-		);
-
 		navigate(
 			`../review_test/${CST_id}/${test_id}/${course_id}/${CS_id}/${user_id}`,
 		);
