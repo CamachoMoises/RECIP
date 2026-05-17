@@ -7,8 +7,6 @@ import {
 	Button,
 	Input,
 	ListItem,
-	ListItemPrefix,
-	ListItemSuffix,
 } from '@material-tailwind/react';
 import { Save, X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
@@ -34,7 +32,7 @@ const ReviewItemList = ({
 	let multiResp: number = 0;
 	let findAnswer = null;
 	const correctAnswers = question.question?.answers?.filter(
-		(QA) => QA.is_correct
+		(QA) => QA.is_correct,
 	);
 	const type = question.question?.question_type_id;
 
@@ -46,8 +44,8 @@ const ReviewItemList = ({
 					parseInt(
 						question.course_student_test_answer?.resp
 							? question.course_student_test_answer.resp
-							: '-1'
-					)
+							: '-1',
+					),
 			);
 			if (findAnswer) {
 				respData.shift();
@@ -60,18 +58,18 @@ const ReviewItemList = ({
 			findAnswer = JSON.parse(
 				question.course_student_test_answer?.resp
 					? question.course_student_test_answer.resp
-					: '[]'
+					: '[]',
 			);
 			for (const answer of findAnswer) {
 				if (answer.check) {
 					findAnswerMulti = question.question?.answers?.find(
-						(ans) => ans.id === answer.id
+						(ans) => ans.id === answer.id,
 					);
 					if (findAnswerMulti) {
 						multiResp++;
 					}
 					respData.push(
-						findAnswerMulti?.value ? findAnswerMulti.value : ''
+						findAnswerMulti?.value ? findAnswerMulti.value : '',
 					);
 				}
 			}
@@ -87,8 +85,8 @@ const ReviewItemList = ({
 					parseInt(
 						question.course_student_test_answer?.resp
 							? question.course_student_test_answer.resp
-							: '-1'
-					)
+							: '-1',
+					),
 			);
 			if (findAnswer) {
 				respData.shift();
@@ -101,7 +99,7 @@ const ReviewItemList = ({
 			findAnswer = JSON.parse(
 				question.course_student_test_answer?.resp
 					? question.course_student_test_answer.resp
-					: '[]'
+					: '[]',
 			);
 
 			if (findAnswer.length > 0) {
@@ -115,7 +113,7 @@ const ReviewItemList = ({
 			findAnswer = JSON.parse(
 				question.course_student_test_answer?.resp
 					? question.course_student_test_answer.resp
-					: '[]'
+					: '[]',
 			);
 
 			if (findAnswer.length > 0) {
@@ -132,19 +130,19 @@ const ReviewItemList = ({
 	const [score, setScore] = useState(
 		question.course_student_test_answer?.score
 			? `${question.course_student_test_answer.score}`
-			: '0'
+			: '0',
 	);
 	const initialScore = question.course_student_test_answer?.score
 		? `${question.course_student_test_answer.score}`
 		: '0';
 	const [errorInput, setErrorInput] = useState(
-		parseFloat(score) >= 0 ? false : true
+		parseFloat(score) >= 0 ? false : true,
 	);
 	const maxScore = question.question?.question_type?.value
 		? question.question.question_type.value
 		: 0;
 	const handleChange = (
-		event: React.ChangeEvent<HTMLInputElement>
+		event: React.ChangeEvent<HTMLInputElement>,
 	) => {
 		setEditing(true);
 		setLocalEditing(true);
@@ -153,7 +151,7 @@ const ReviewItemList = ({
 			setErrorInput(
 				parseFloat(newValue) >= 0 && parseFloat(newValue) <= maxScore
 					? false
-					: true
+					: true,
 			);
 		} else {
 			setErrorInput(true);
@@ -170,7 +168,7 @@ const ReviewItemList = ({
 					? question.course_student_test_answer.id
 					: -1,
 				score: parseFloat(score),
-			})
+			}),
 		).unwrap();
 		if (resp) {
 			setEditing(false);
@@ -178,53 +176,45 @@ const ReviewItemList = ({
 		}
 	};
 	return (
-		<ListItem
+<ListItem
 			placeholder={undefined}
 			onPointerEnterCapture={undefined}
 			onPointerLeaveCapture={undefined}
 			disabled={editing && !localEditing}
+			className="flex flex-col items-start gap-2 py-3"
 		>
-			<ListItemPrefix
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				<div className="flex flex-col gap-2">
-					<div className="flex flex-row gap-1">
-						Pregunta #{index + 1} (
-						{question.question?.question_type?.name}):
-						{question.question?.header}
-					</div>
-					<div className="flex flex-row gap-2">
-						<div className="flex flex-col gap-1">
-							Correcta:
-							{correctAnswers?.map((CA, index) => (
-								<div key={`CA${question.id}-${CA.id}`}>
-									{index + 1}:{CA.value}
-									<br />
-								</div>
-							))}
+			<div className="w-full flex flex-col sm:flex-row gap-2 sm:gap-4">
+				<div className="flex-1 w-full">
+					<div className="flex flex-col gap-2">
+						<div className="text-xs sm:text-sm font-semibold">
+							Pregunta #{index + 1} ({question.question?.question_type?.name})
 						</div>
-						<div className="flex flex-col gap-1 text-red-900">
-							Respuesta:
-							{respData.map((RD, index) => (
-								<div key={`Res${question.id}-${index}`}>
-									{index + 1}:{RD}
-									<br />
-								</div>
-							))}
+						<div className="text-xs sm:text-sm text-gray-700">
+							{question.question?.header}
+						</div>
+						<div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+							<div className="flex flex-col gap-1 text-xs sm:text-sm">
+								<span className="font-semibold text-green-700">Correcta:</span>
+								{correctAnswers?.map((CA, idx) => (
+									<div key={`CA${question.id}-${CA.id}`} className="text-xs">
+										<strong>({idx + 1}):</strong> {CA.value}
+									</div>
+								))}
+							</div>
+							<div className="flex flex-col gap-1 text-xs sm:text-sm text-red-900">
+								<span className="font-semibold">Respuesta:</span>
+								{respData.map((RD, idx) => (
+									<div key={`Res${question.id}-${idx}`} className="text-xs">
+										<strong>({idx + 1}):</strong> {RD}
+									</div>
+								))}
+							</div>
 						</div>
 					</div>
 				</div>
-			</ListItemPrefix>
-			<ListItemSuffix
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-			>
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-2 w-full sm:w-auto min-w-[150px]">
 					<div
-						className={`flex flex-row gap-1 ${
+						className={`text-xs sm:text-sm font-semibold ${
 							parseFloat(score) < maxScore
 								? parseFloat(score) === 0
 									? 'text-red-700'
@@ -232,10 +222,9 @@ const ReviewItemList = ({
 								: 'text-green-500'
 						}`}
 					>
-						Puntaje:
-						{score}/{maxScore}
+						Puntaje: {score}/{maxScore}
 					</div>
-					<div className="flex flex-row gap-1">
+					<div className="flex flex-row sm:flex-col gap-2">
 						<Input
 							label="Puntaje"
 							error={errorInput}
@@ -244,39 +233,45 @@ const ReviewItemList = ({
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 							crossOrigin={undefined}
+							className="w-20 sm:w-full"
 						/>
-						{localEditing && (
+						<div className="flex gap-1">
+							{localEditing && (
+								<Button
+									title="Cancelar"
+									size="sm"
+									variant="outlined"
+									color="red"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									onClick={() => {
+										setScore(initialScore);
+										setLocalEditing(false);
+										setEditing(false);
+									}}
+								>
+									<X size={15} />
+								</Button>
+							)}
 							<Button
-								title="Cacelar"
+								title="Guardar"
 								size="sm"
+								color="green"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
+								disabled={errorInput || !localEditing || !answered}
 								onClick={() => {
-									setScore(initialScore);
-									setLocalEditing(false);
-									setEditing(false);
+									handleSave();
 								}}
 							>
-								<X size={15} />
+								<Save size={15} />
 							</Button>
-						)}
-						<Button
-							title="guardar"
-							size="sm"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-							disabled={errorInput || !localEditing || !answered}
-							onClick={() => {
-								handleSave();
-							}}
-						>
-							<Save size={15} />
-						</Button>
+						</div>
 					</div>
 				</div>
-			</ListItemSuffix>
+			</div>
 		</ListItem>
 	);
 };

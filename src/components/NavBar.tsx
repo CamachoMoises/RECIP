@@ -464,11 +464,11 @@ const NavBar = () => {
 					</div>
 				</div>
 
-				<Collapse
+<Collapse
 					open={openNav}
 					className="mt-3 rounded-xl bg-slate-800/80 backdrop-blur-lg border border-blue-500/20"
 				>
-					{auth.user && (
+					{auth.user ? (
 						<div className="flex flex-col p-4 gap-3">
 							<div className="flex items-center gap-3 p-3 bg-blue-900/30 rounded-xl border border-blue-500/20">
 								{userLogged?.name ? (
@@ -560,7 +560,19 @@ const NavBar = () => {
 										{item.label}
 									</Typography>
 								</div>
-							))}
+))}
+						</div>
+					) : (
+						<div className="flex flex-col p-4 gap-3">
+							<Typography
+								variant="small"
+								className="text-blue-300"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Inicie sesión para ver sus opciones
+							</Typography>
 						</div>
 					)}
 				</Collapse>

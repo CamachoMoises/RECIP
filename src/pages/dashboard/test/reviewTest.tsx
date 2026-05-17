@@ -69,7 +69,7 @@ const ReviewTest = () => {
 				title={`Revision del examen ${test.courseStudentTestSelected?.code} (${test.testSelected?.code})`}
 				breadCrumbs={breadCrumbs}
 			/>
-			<div className="flex flex-col gap-3">
+<div className="flex flex-col gap-3">
 				<div className="flex flex-col">
 					<Card
 						placeholder={undefined}
@@ -84,6 +84,7 @@ const ReviewTest = () => {
 							<div className="flex flex-col gap-2">
 								<Typography
 									variant="h5"
+									className="text-sm sm:text-base md:text-lg"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -91,20 +92,22 @@ const ReviewTest = () => {
 									Curso {course.courseSelected?.course_level.name}{' '}
 									{course.courseSelected?.name}
 								</Typography>
-								<div className="flex flex-row justify-between">
+								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
 									<Typography
-										variant="h6"
+										variant="small"
+										className="text-xs sm:text-sm"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										<strong>Nombre del participante:</strong>
+										<strong>Nombre:</strong>
 										<br />
 										{user.userSelected?.name}{' '}
 										{user.userSelected?.last_name}
 									</Typography>
 									<Typography
-										variant="h6"
+										variant="small"
+										className="text-xs sm:text-sm"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -114,7 +117,8 @@ const ReviewTest = () => {
 										{user.userSelected?.email}
 									</Typography>
 									<Typography
-										variant="h6"
+										variant="small"
+										className="text-xs sm:text-sm"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -129,7 +133,8 @@ const ReviewTest = () => {
 										}
 									</Typography>
 									<Typography
-										variant="h6"
+										variant="small"
+										className="text-xs sm:text-sm"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -144,7 +149,8 @@ const ReviewTest = () => {
 										}
 									</Typography>
 									<Typography
-										variant="h6"
+										variant="small"
+										className="text-xs sm:text-sm"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -159,9 +165,10 @@ const ReviewTest = () => {
 										}
 									</Typography>
 								</div>
-								<div className="flex flex-row justify-around">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
 									<Typography
-										variant="h6"
+										variant="small"
+										className="text-xs sm:text-sm"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -170,7 +177,8 @@ const ReviewTest = () => {
 										{user.userSelected?.phone}
 									</Typography>
 									<Typography
-										variant="h6"
+										variant="small"
+										className="text-xs sm:text-sm"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
