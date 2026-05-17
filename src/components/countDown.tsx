@@ -1,6 +1,5 @@
-import { Typography } from '@material-tailwind/react';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
+import moment from 'moment';
 
 const Countdown = ({
 	startTime,
@@ -19,79 +18,86 @@ const Countdown = ({
 			now.format('YYYY-MM-DD') + ' ' + startTime,
 			'YYYY-MM-DD HH:mm',
 		);
-
-		if (start.isBefore(now)) {
-			start = start.add(1, 'days');
-		}
-
+		if (start.isBefore(now)) start = start.add(1, 'days');
 		const end = start.clone().add(totalMinutes, 'minutes');
-
-		const initialTimeLeft = Math.max(end.diff(now, 'seconds'), 0);
-		setTimeLeft(initialTimeLeft);
+		setTimeLeft(Math.max(end.diff(now, 'seconds'), 0));
 
 		const interval = setInterval(() => {
-			const now_2 = moment();
-			const timeLeft = Math.max(end.diff(now_2, 'seconds'), 0);
-			if (timeLeft > 0) {
-				setActive(true);
-			} else {
+			const remaining = Math.max(end.diff(moment(), 'seconds'), 0);
+			setTimeLeft(remaining);
+			if (remaining <= 0) {
 				setActive(false);
 				clearInterval(interval);
+			} else {
+				setActive(true);
 			}
-
-			setTimeLeft(timeLeft > 0 ? timeLeft : 0);
 		}, 1000);
 
 		return () => clearInterval(interval);
 	}, [setActive, startTime, totalMinutes]);
 
-	const calculateTime = (seconds: number) => {
-		let hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-		const secs = seconds % 60;
-
-		if (hours >= 24) {
-			hours = hours - 24;
-		}
-
-		return `${hours.toString().padStart(2, '0')}:${minutes
-			.toString()
-			.padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+	const formatTime = (seconds: number) => {
+		const h = Math.floor(seconds / 3600) % 24;
+		const m = Math.floor((seconds % 3600) / 60);
+		const s = seconds % 60;
+		return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 	};
 
-	const adjustedTimeLeft =
-		timeLeft > 86400 ? timeLeft - 86400 : timeLeft;
+	const adjustedLeft = timeLeft > 86400 ? timeLeft - 86400 : timeLeft;
 	const adjustedTotal =
 		totalMinutes * 60 > 86400
 			? totalMinutes * 60 - 86400
 			: totalMinutes * 60;
-	const progress = (adjustedTimeLeft / adjustedTotal) * 100;
+	const progress = Math.min(
+		(adjustedLeft / adjustedTotal) * 100,
+		100,
+	);
+	const isWarning = progress < 25;
 
 	return (
-		<div className=" mx-auto p-6 bg-white shadow-lg rounded-lg">
-			<Typography
-				variant="h5"
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
+		<div
+			style={{
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'center',
+				gap: 6,
+			}}
+		>
+			<span
+				style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}
 			>
-				Tiempo disponible
-			</Typography>
-			<div className="flex items-center justify-center mb-4">
-				<div className="text-4xl font-bold text-blue-600">
-					{calculateTime(timeLeft)}
-				</div>
-			</div>
-			<div className="w-full bg-gray-200 rounded-full h-4">
+				Tiempo restante
+			</span>
+			<span
+				style={{
+					fontSize: 30,
+					fontWeight: 500,
+					fontVariantNumeric: 'tabular-nums',
+					color: isWarning ? '#A32D2D' : '#0C447C',
+					transition: 'color 0.3s',
+				}}
+			>
+				{formatTime(timeLeft)}
+			</span>
+			<div
+				style={{
+					width: 130,
+					height: 4,
+					background: 'var(--color-background-secondary)',
+					borderRadius: 999,
+					overflow: 'hidden',
+				}}
+			>
 				<div
-					className="bg-blue-500 h-4 rounded-full transition-all"
-					style={{ width: `${progress}%` }}
-				></div>
+					style={{
+						width: `${progress}%`,
+						height: '100%',
+						background: isWarning ? '#E24B4A' : '#378ADD',
+						borderRadius: 999,
+						transition: 'width 1s linear, background 0.3s',
+					}}
+				/>
 			</div>
-			<p className="text-center text-sm text-gray-600 mt-2">
-				Hora de inicio:{' '}
-				<span className="font-semibold">{startTime}</span>
-			</p>
 		</div>
 	);
 };

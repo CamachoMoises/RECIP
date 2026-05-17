@@ -22,7 +22,7 @@ import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import QuestionTypeRadio from './questionTypeRadio';
 import QuestionTypeCheck from './questionTypeCheck';
-import { SaveAll } from 'lucide-react';
+import { CheckCircle, SaveAll, XCircle } from 'lucide-react';
 import QuestionTypeInput from './questionTypeInput';
 import { axiosPostDefault } from '../../../services/axios';
 import QuestionTypeCompletion from './questionTypeCompletion';
@@ -31,6 +31,7 @@ import ResultsTestPdf from './resultsTestPdf';
 import { useReactToPrint } from 'react-to-print';
 import { fetchUser } from '../../../features/userSlice';
 import toast from 'react-hot-toast';
+import { useTheme } from '../../../hooks/useTheme';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -55,14 +56,13 @@ export type answer = {
 
 const NewTest = () => {
 	const componentRef = useRef<HTMLDivElement>(null);
-
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
 	const [seePDF, setSeePDF] = useState(false);
 	const [score, setScore] = useState(0);
-	const handleOpen = () => setOpen(!open);
 	const [ended, setEnded] = useState(false);
+	const { theme } = useTheme();
 	let dateTest: moment.Moment | null = null;
 	let horas = null;
 	const { course, test, user } = useSelector((state: RootState) => {
@@ -72,6 +72,13 @@ const NewTest = () => {
 			user: state.users,
 		};
 	});
+
+	useEffect(() => {
+		if (theme !== 'light') {
+			document.documentElement.setAttribute('data-theme', 'light');
+		}
+	}, []);
+
 	const handleEndTest = async (course_student_test_id: number) => {
 		toast('Finalizando examen...', {
 			icon: '⏳',
@@ -220,124 +227,260 @@ const NewTest = () => {
 			</>
 		);
 	}
+	// Dialog de resultados (estado ended)
 	if (ended) {
+		const approved = score >= min_score;
+		const scorePercent = Math.min((score / totalPoints) * 100, 100);
+
 		return (
 			<>
 				<PageTitle
-					title={`Examen de  ${test.courseStudentTestSelected?.code} (${test.testSelected?.code})`}
+					title={`Examen ${test.courseStudentTestSelected?.code} (${test.testSelected?.code})`}
 					breadCrumbs={breadCrumbs}
 				/>
 				<LoadingPage />
+
+				{/* Dialog resultado */}
 				<Dialog
 					open={open}
-					handler={handleOpen}
+					handler={() => {}}
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
-					size="lg"
-					className="max-w-full sm:max-w-lg"
+					size="sm"
 				>
 					<DialogHeader
-						className="text-sm sm:text-base"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
+						className="p-0"
 					>
-						Examen finalizado usted{' '}
-						{score >= min_score ? '(Aprobó)' : '(Reprobó)'}
+						{/* Banner aprobado/reprobado */}
+						<div
+							style={{
+								width: '100%',
+								padding: '28px 24px',
+								background: approved ? '#EAF3DE' : '#FCEBEB',
+								display: 'flex',
+								flexDirection: 'column',
+								alignItems: 'center',
+								gap: 8,
+								borderRadius: '12px 12px 0 0',
+							}}
+						>
+							{approved ? (
+								<CheckCircle size={52} color="#3B6D11" />
+							) : (
+								<XCircle size={52} color="#A32D2D" />
+							)}
+							<p
+								style={{
+									fontSize: 22,
+									fontWeight: 500,
+									margin: 0,
+									color: approved ? '#27500A' : '#791F1F',
+								}}
+							>
+								{approved ? '¡Aprobado!' : 'Reprobado'}
+							</p>
+							<p
+								style={{
+									fontSize: 13,
+									margin: 0,
+									color: approved ? '#3B6D11' : '#A32D2D',
+								}}
+							>
+								{approved
+									? 'Examen finalizado exitosamente'
+									: 'No alcanzaste el puntaje mínimo'}
+							</p>
+						</div>
 					</DialogHeader>
+
 					<DialogBody
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<div className="flex flex-col justify-center">
-							<Typography
-								variant="lead"
-								className="text-center text-sm sm:text-base"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
+						<div
+							style={{
+								display: 'flex',
+								flexDirection: 'column',
+								alignItems: 'center',
+								gap: 16,
+							}}
+						>
+							{/* Métricas */}
+							<div
+								style={{
+									display: 'flex',
+									gap: 28,
+									textAlign: 'center',
+								}}
 							>
-								El examen a finalizado su calificacion final es{' '}
-								{score}
-								/100
-							</Typography>
-							{score < min_score && (
-								<Typography
-									variant="lead"
-									className="text-center text-sm sm:text-base"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									La calificacion minima para aprobar era de{' '}
-									{min_score}
-								</Typography>
-							)}
+								<div>
+									<p
+										style={{
+											fontSize: 32,
+											fontWeight: 500,
+											margin: 0,
+											color: approved ? '#3B6D11' : '#A32D2D',
+										}}
+									>
+										{score}
+									</p>
+									<p
+										style={{
+											fontSize: 11,
+											color: 'var(--color-text-secondary)',
+											margin: 0,
+										}}
+									>
+										Puntaje
+									</p>
+								</div>
+								<div
+									style={{
+										width: '0.5px',
+										background: 'var(--color-border-tertiary)',
+									}}
+								/>
+								<div>
+									<p
+										style={{
+											fontSize: 32,
+											fontWeight: 500,
+											margin: 0,
+											color: 'var(--color-text-secondary)',
+										}}
+									>
+										{min_score}
+									</p>
+									<p
+										style={{
+											fontSize: 11,
+											color: 'var(--color-text-secondary)',
+											margin: 0,
+										}}
+									>
+										Mínimo
+									</p>
+								</div>
+								<div
+									style={{
+										width: '0.5px',
+										background: 'var(--color-border-tertiary)',
+									}}
+								/>
+								<div>
+									<p
+										style={{
+											fontSize: 32,
+											fontWeight: 500,
+											margin: 0,
+											color: 'var(--color-text-primary)',
+										}}
+									>
+										{totalPoints}
+									</p>
+									<p
+										style={{
+											fontSize: 11,
+											color: 'var(--color-text-secondary)',
+											margin: 0,
+										}}
+									>
+										Total
+									</p>
+								</div>
+							</div>
+
+							{/* Barra de progreso */}
+							<div
+								style={{
+									width: '100%',
+									background: 'var(--color-background-secondary)',
+									borderRadius: 999,
+									height: 6,
+									overflow: 'hidden',
+								}}
+							>
+								<div
+									style={{
+										width: `${scorePercent}%`,
+										height: '100%',
+										background: approved ? '#639922' : '#E24B4A',
+										borderRadius: 999,
+									}}
+								/>
+							</div>
 						</div>
 					</DialogBody>
+
 					<DialogFooter
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-							<Button
-								size="sm"
-								variant="filled"
-								color="cyan"
-								onClick={() => {
-									navigate('../../dashboard');
+						<div style={{ display: 'flex', gap: 8, width: '100%' }}>
+							<button
+								onClick={() => navigate('../../dashboard')}
+								style={{
+									flex: 1,
+									padding: '8px 0',
+									fontSize: 13,
+									cursor: 'pointer',
+									border: '0.5px solid var(--color-border-secondary)',
+									borderRadius: 'var(--border-radius-md)',
+									background: 'none',
+									color: 'var(--color-text-primary)',
 								}}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								Volver
-							</Button>
-							{score >= min_score ? (
+							</button>
+							{approved ? (
 								<Button
 									size="sm"
 									variant="filled"
-									color="green"
+									color="cyan"
 									onClick={() => {
-										seeResults();
+										navigate('../../dashboard');
 									}}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									<span>Ver detalles</span>
+									Volver
 								</Button>
 							) : (
-								<Button
-									size="sm"
-									variant="filled"
-									color="red"
-									onClick={() => {
-										navigate('../test');
+								<button
+									onClick={() => navigate('../test')}
+									style={{
+										flex: 1,
+										padding: '8px 0',
+										fontSize: 13,
+										cursor: 'pointer',
+										border: '0.5px solid #F7C1C1',
+										borderRadius: 'var(--border-radius-md)',
+										background: '#FCEBEB',
+										color: '#791F1F',
 									}}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
 								>
-									<span>Repetir examen</span>
-								</Button>
+									Repetir examen
+								</button>
 							)}
 						</div>
 					</DialogFooter>
 				</Dialog>
+
 				<div style={{ display: 'none' }}>
-					<div ref={componentRef} className="flex flex-col w-full">
+					<div ref={componentRef}>
 						{seePDF && (
-							<>
-								<ResultsTestPdf
-									course={course}
-									test={test}
-									user={user}
-								/>
-							</>
+							<ResultsTestPdf
+								course={course}
+								test={test}
+								user={user}
+							/>
 						)}
 					</div>
 				</div>
@@ -373,66 +516,67 @@ const NewTest = () => {
 			/>
 			{dateTest && (
 				<>
-					<div className="flex flex-col lg:flex-row gap-4 justify-start">
-						<div className="w-full lg:w-auto">
-							<Countdown
-								startTime={dateTest.format('HH:mm')}
-								totalMinutes={testTime}
-								setActive={setTestActive}
-							/>
+					<div className="w-full lg:w-auto glass-card-dark p-2 mb-2 rounded-lg">
+						<Countdown
+							startTime={dateTest.format('HH:mm')}
+							totalMinutes={testTime}
+							setActive={setTestActive}
+						/>
+					</div>
+					<div className="mx-auto p-4 sm:p-6 glass-card-dark shadow-lg rounded-lg w-full lg:w-auto">
+						<div className="flex flex-col justify-center sm:flex-row gap-2 sm:gap-3 ">
+							<Typography
+								variant="h6"
+								className="text-sm sm:text-base"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Inicio: {dateTest.format('hh:mm a')}
+							</Typography>
+							<Typography
+								variant="h6"
+								className="text-sm sm:text-base"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Fin:{' '}
+								{dateTest.add(testTime, 'minutes').format('hh:mm a')}
+							</Typography>
 						</div>
-						<div className="mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-lg w-full lg:w-auto">
-							<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 ">
-								<Typography
-									variant="h6"
-									className="text-sm sm:text-base"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Inicio: {dateTest.format('hh:mm a')}
-								</Typography>
-								<Typography
-									variant="h6"
-									className="text-sm sm:text-base"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Fin:{' '}
-									{dateTest
-										.add(testTime, 'minutes')
-										.format('hh:mm a')}
-								</Typography>
-							</div>
-							<div className="flex flex-col justify-between mt-4">
-								<Typography
-									variant="h6"
-									className="text-sm sm:text-base mb-2"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Contenido la prueba:
-								</Typography>
-								{TQT.map((tqt, index) => {
-									const amount = tqt.amount;
-									const value = tqt.value;
-									const totalPointsQuestion = amount * value;
-									totalPoints = totalPoints + totalPointsQuestion;
-									return (
+						<div className="flex flex-col justify-between mt-2">
+							<Typography
+								variant="h6"
+								className="text-sm sm:text-base mb-2"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Contenido la prueba:
+							</Typography>
+							{TQT.map((tqt, index) => {
+								const amount = tqt.amount;
+								const value = tqt.value;
+								const totalPointsQuestion = amount * value;
+								totalPoints = totalPoints + totalPointsQuestion;
+								return (
+									<div
+										className="flex flex-row justify-between  gap-2 text-xs sm:text-sm"
+										key={`tqt-${index}`}
+									>
+										<Typography
+											variant="small"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{amount} {tqt.question_type?.name}
+										</Typography>
 										<div
 											key={`tqt-${index}`}
-											className="flex flex-row justify-between gap-2 text-xs sm:text-sm"
+											className="flex flex-row justify-end gap-2 text-xs sm:text-sm"
 										>
-											<Typography
-												variant="small"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{amount} {tqt.question_type?.name}
-											</Typography>
 											<Typography
 												variant="small"
 												placeholder={undefined}
@@ -450,25 +594,25 @@ const NewTest = () => {
 												{totalPointsQuestion} Puntos.
 											</Typography>
 										</div>
-									);
-								})}
+									</div>
+								);
+							})}
 
-								<hr className="my-2" />
-								<Typography
-									className="text-sm text-end"
-									variant="small"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									{totalPoints} puntos.
-								</Typography>
-							</div>
+							<hr className="my-2" />
+							<Typography
+								className="text-sm text-end"
+								variant="small"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								{totalPoints} puntos.
+							</Typography>
 						</div>
 					</div>
 					<div className="my-4" />
 					<div className="flex flex-col lg:flex-row gap-4 justify-start">
-						<div className="mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-sm w-full">
+						<div className="mx-auto p-4 sm:p-6 glass-card-dark shadow-lg rounded-sm w-full">
 							<Typography
 								variant="h6"
 								className="text-sm sm:text-base mb-2"
@@ -645,36 +789,34 @@ const NewTest = () => {
 												},
 											)}
 
-											<Typography
-												variant="h6"
-												className="text-sm sm:text-base mt-4"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
+											<button
+												onClick={() =>
+													handleEndTest(
+														test.courseStudentTestSelected?.id ?? -1,
+													)
+												}
+												disabled={!testActive}
+												style={{
+													display: 'flex',
+													flexDirection: 'column',
+													alignItems: 'center',
+													gap: 4,
+													border: '0.5px solid #F7C1C1',
+													borderRadius: 'var(--border-radius-md)',
+													padding: '10px 18px',
+													background: 'none',
+													cursor: 'pointer',
+													color: '#A32D2D',
+													opacity: testActive ? 1 : 0.4,
+												}}
 											>
-												Finalizar
-											</Typography>
-											<div className="flex flex-col items-center mt-2">
-												<Button
-													onClick={() => {
-														handleEndTest(
-															test.courseStudentTestSelected?.id
-																? test.courseStudentTestSelected.id
-																: -1,
-														);
-													}}
-													disabled={!testActive}
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-													className="flex flex-col text-center justify-center px-6"
+												<SaveAll size={20} />
+												<span
+													style={{ fontSize: 11, fontWeight: 500 }}
 												>
-													<SaveAll
-														size={15}
-														className="mx-auto text-lg"
-													/>
-												</Button>
-											</div>
+													Finalizar
+												</span>
+											</button>
 										</div>
 									</CardBody>
 								</Card>
