@@ -54,7 +54,7 @@ const GeneralTest = () => {
 	const [openExamsModal, setOpenExamsModal] = useState(false);
 	const [byPassMaxTries, setByPassMaxTries] = useState(false);
 	const [now, setNow] = useState<Date>(new Date());
-const { course, auth, user, test } = useSelector(
+	const { course, auth, user, test } = useSelector(
 		(state: RootState) => ({
 			course: state.courses,
 			auth: state.auth,
@@ -233,7 +233,7 @@ const { course, auth, user, test } = useSelector(
 		handlePrint();
 	};
 
-const [selectedUserId, setSelectedUserId] = useState<number>(-1);
+	const [selectedUserId, setSelectedUserId] = useState<number>(-1);
 
 	const openExamsList = async (
 		studentId: number,
@@ -341,11 +341,12 @@ const [selectedUserId, setSelectedUserId] = useState<number>(-1);
 				</Card>
 			</div>
 
-<ExamsModal
+			<ExamsModal
 				open={openExamsModal}
 				onClose={() => setOpenExamsModal(false)}
 				studentTestList={test.studentTestList || []}
 				userId={selectedUserId}
+				isSuperuser={auth.user?.is_superuser || false}
 				onNavigateReviewTest={navigateReviewTest}
 				onHandleEndTest={handleEndTest}
 			/>

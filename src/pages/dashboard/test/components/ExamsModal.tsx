@@ -15,6 +15,7 @@ interface ExamsModalProps {
 	onClose: () => void;
 	studentTestList: courseStudentTest[];
 	userId: number;
+	isSuperuser?: boolean;
 	onNavigateReviewTest: (
 		CST_id: number,
 		test_id: number,
@@ -42,6 +43,7 @@ const ExamsModal = ({
 	open,
 	onClose,
 	studentTestList,
+	isSuperuser,
 	userId,
 	onNavigateReviewTest,
 	onHandleEndTest,
@@ -163,6 +165,7 @@ const ExamsModal = ({
 											size="sm"
 											variant="outlined"
 											color="blue-gray"
+											disabled={!isSuperuser}
 											className="text-xs flex items-center gap-1 py-1.5 px-3 normal-case"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
