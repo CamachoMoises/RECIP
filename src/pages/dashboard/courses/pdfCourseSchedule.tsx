@@ -265,27 +265,34 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 				</tr>
 			</thead>
 			<tbody>
-				{data.map((row, index) => (
-					<tr key={index} className="hover:bg-gray-50">
-						<td className="border border-gray-800 w-6 overflow-hidden bg-white text-xs text-center font-bold">
-							{index ? <>{index} </> : ' '}
-						</td>
-						<td className="border border-gray-800 w-40 overflow-hidden bg-white text-xs text-center font-bold">
-							{row.subject.name}
-						</td>
-						<td className="border border-gray-800 bg-white text-xs text-center">
-							{moment(row.date).format('DD-MM-YYYY')} /{' '}
-							{moment(row.hour, 'HH:mm:ss').format('HH:mm')}
-						</td>
-						<td className="border border-gray-800 bg-white text-xs text-center">
-							{row.classTime}
-						</td>
-						<td className="border border-gray-800 bg-white text-xs text-center">
-							{row.instructor.user.name}{' '}
-							{row.instructor.user.last_name}
-						</td>
-					</tr>
-				))}
+				{data.map((row, index) => {
+					const id = row.subject.name
+						.toLowerCase()
+						.includes('bienvenida')
+						? index
+						: index + 1;
+					return (
+						<tr key={index} className="hover:bg-gray-50">
+							<td className="border border-gray-800 w-6 overflow-hidden bg-white text-xs text-center font-bold">
+								{id ? <>{id}</> : ' '}
+							</td>
+							<td className="border border-gray-800 w-40 overflow-hidden bg-white text-xs text-center font-bold">
+								{row.subject.name}
+							</td>
+							<td className="border border-gray-800 bg-white text-xs text-center">
+								{moment(row.date).format('DD-MM-YYYY')} /{' '}
+								{moment(row.hour, 'HH:mm:ss').format('HH:mm')}
+							</td>
+							<td className="border border-gray-800 bg-white text-xs text-center">
+								{row.classTime}
+							</td>
+							<td className="border border-gray-800 bg-white text-xs text-center">
+								{row.instructor.user.name}{' '}
+								{row.instructor.user.last_name}
+							</td>
+						</tr>
+					);
+				})}
 				{add_files.map((row) => (
 					<tr key={row.id} className="hover:bg-gray-50">
 						<td className="border border-gray-800 w-6 h-6 bg-gray-600 text-xs text-center font-bold">
