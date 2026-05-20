@@ -251,6 +251,10 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 					name: `item ${i + 1}`,
 				}))
 			: [];
+	const startsWithBienvenida = data[0]?.subject.name
+		.toLowerCase()
+		.includes('bienvenida');
+
 	return (
 		<table className="table-auto border-collapse border border-gray-300">
 			<thead className="bg-gray-100">
@@ -270,10 +274,10 @@ const Table: React.FC<{ columns: string[]; data: any[] }> = ({
 			</thead>
 			<tbody>
 				{data.map((row, index) => {
-					const id = row.subject.name
-						.toLowerCase()
-						.includes('bienvenida')
-						? index
+					const id = startsWithBienvenida
+						? index === 0
+							? null
+							: index // primer row sin id, los demás desde 1
 						: index + 1;
 					return (
 						<tr key={index} className="hover:bg-gray-50">
