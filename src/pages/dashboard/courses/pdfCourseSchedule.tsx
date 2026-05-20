@@ -21,6 +21,10 @@ const PDFCourseSchedule = ({
 	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
+	const lastInstructor =
+		data.length > 0
+			? data[data.length - 1]?.instructor?.user
+			: undefined;
 	return (
 		<div className="printable">
 			<div className="flex flex-row justify-between">
@@ -207,11 +211,11 @@ const PDFCourseSchedule = ({
 											</td>
 										</tr>
 										<tr>
-											<td
-												colSpan={3}
-												className="border border-gray-800 px-4 py-2 text-left text-tahiti-600 text-xs"
-											>
-												Nombre del instructor:
+											<td colSpan={3} className="...">
+												Nombre del instructor:{' '}
+												{lastInstructor
+													? `${lastInstructor.name} ${lastInstructor.last_name}`
+													: 'Sin instructor'}
 											</td>
 										</tr>
 										<tr>
