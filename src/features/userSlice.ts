@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from '../services/axios';
-import { StatusParam, UserState, user } from '../types/utilities';
+import { StatusParam, UserState, user, suggestion } from '../types/utilities';
 
 
 
@@ -11,7 +11,9 @@ const initialState: UserState = {
 	usersList: [],
 	studentList: [],
 	instructorList: [],
-	error: null, // Inicializar como null
+	suggestionList: [],
+	suggestionSelected: null,
+	error: null,
 };
 
 // Acción asíncrona para obtener los usuarios
@@ -128,6 +130,66 @@ export const userInstructor = createAsyncThunk<user, number>(
 	async (userData, { rejectWithValue }) => {
 		try {
 			const response = await axiosPostSlice(`api/users/instructor`, { user_id: userData });
+			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const fetchSuggestions = createAsyncThunk<suggestion[]>(
+	'user/fetchSuggestions',
+	async (_, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetSlice('api/suggestions');
+			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const fetchSuggestion = createAsyncThunk<suggestion, number>(
+	'user/fetchSuggestion',
+	async (id, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetSlice(`api/suggestions/${id}`);
+			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const fetchSuggestionsByUser = createAsyncThunk<suggestion[], number>(
+	'user/fetchSuggestionsByUser',
+	async (user_id, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetSlice(`api/suggestions/user/${user_id}`);
+			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const createSuggestion = createAsyncThunk<suggestion, { user_id: number; title: string; description: string }>(
+	'user/createSuggestion',
+	async (suggestionData, { rejectWithValue }) => {
+		try {
+			const response = await axiosPostSlice('api/suggestions', suggestionData);
+			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const updateSuggestion = createAsyncThunk<suggestion, { id: number; user_id: number; title: string; description: string }>(
+	'user/updateSuggestion',
+	async (suggestionData, { rejectWithValue }) => {
+		try {
+			const response = await axiosPutSlice('api/suggestions', suggestionData);
 			return response;
 		} catch (error: any) {
 			return rejectWithValue(error.message);
@@ -258,7 +320,67 @@ const userSlice = createSlice({
 					state.usersList[index] = action.payload;
 				}
 			})
-			.addCase(userInstructor.rejected, (state, action) => {
+.addCase(userInstructor.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+
+			// Reducers para suggestions
+			.addCase(fetchSuggestions.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchSuggestions.fulfilled, (state, action: PayloadAction<suggestion[]>) => {
+				state.status = 'succeeded';
+				state.suggestionList = action.payload;
+			})
+			.addCase(fetchSuggestions.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+			.addCase(fetchSuggestion.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchSuggestion.fulfilled, (state, action: PayloadAction<suggestion>) => {
+				state.status = 'succeeded';
+				state.suggestionSelected = action.payload;
+			})
+			.addCase(fetchSuggestion.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+			.addCase(fetchSuggestionsByUser.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchSuggestionsByUser.fulfilled, (state, action: PayloadAction<suggestion[]>) => {
+				state.status = 'succeeded';
+				state.suggestionList = action.payload;
+			})
+			.addCase(fetchSuggestionsByUser.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+			.addCase(createSuggestion.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(createSuggestion.fulfilled, (state, action: PayloadAction<suggestion>) => {
+				state.status = 'succeeded';
+				state.suggestionList.push(action.payload);
+			})
+			.addCase(createSuggestion.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
+			.addCase(updateSuggestion.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(updateSuggestion.fulfilled, (state, action: PayloadAction<suggestion>) => {
+				state.status = 'succeeded';
+				const index = state.suggestionList.findIndex((s) => s.id === action.payload.id);
+				if (index !== -1) {
+					state.suggestionList[index] = action.payload;
+				}
+			})
+			.addCase(updateSuggestion.rejected, (state, action) => {
 				state.status = 'failed';
 				state.error = action.payload as string;
 			});

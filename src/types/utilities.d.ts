@@ -418,12 +418,24 @@ export interface credentials {
 }
 
 
+export type suggestion = {
+    id: number;
+    user_id: number;
+    title: string;
+    description: string;
+    user?: user;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export interface UserState {
     userLogged: user | null;
     userSelected: user | null;
     usersList: user[];
     studentList: user[];
     instructorList: user[];
+    suggestionList: suggestion[];
+    suggestionSelected: suggestion | null;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
 }

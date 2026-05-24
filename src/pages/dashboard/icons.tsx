@@ -2,6 +2,7 @@ import { Button } from '@material-tailwind/react';
 import {
 	BookOpenCheck,
 	Cog,
+	Mailbox,
 	Newspaper,
 	NotebookPen,
 	NotebookText,
@@ -10,7 +11,9 @@ import {
 	UserRound,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { PermissionsValidate } from '../../services/permissionsValidate';
+import SuggestionDialog from './suggestions/SuggestionDialog';
 import '../../styles/global.css';
 
 const iconItems: Array<{
@@ -36,6 +39,14 @@ const iconItems: Array<{
 		permission: ['staff', 'instructor', 'student'],
 		route: 'courses',
 		color: 'from-emerald-600 to-emerald-800',
+	},
+	{
+		id: 'suggestions',
+		title: 'Sugerencias',
+		icon: Mailbox,
+		permission: ['instructor', 'student', 'staff'],
+		route: 'suggestions',
+		color: 'from-violet-600 to-violet-800',
 	},
 	{
 		id: 'students',
@@ -89,63 +100,73 @@ const iconItems: Array<{
 
 const Icons = () => {
 	const navigate = useNavigate();
+	const [suggestionOpen, setSuggestionOpen] = useState(false);
 
 	return (
-		<div className="p-4">
-			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-				{iconItems.map((item) => {
-					const isDisabled = !PermissionsValidate(item.permission);
-					const IconComponent = item.icon;
+		<>
+			<div className="p-4">
+				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+					{iconItems.map((item) => {
+						const isDisabled = !PermissionsValidate(item.permission);
+						const IconComponent = item.icon;
 
-					return (
-						<div
-							key={item.id}
-							className="animate-fade-up"
-							style={{
-								animationDelay: `${iconItems.indexOf(item) * 0.1}s`,
-							}}
-						>
-							<Button
-								title={item.title}
-								className={`text-center h-36 w-full transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-									isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-								}`}
-								variant="gradient"
-								color="blue"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								disabled={isDisabled}
-								onPointerLeaveCapture={undefined}
-								onClick={() => item.route && navigate(item.route)}
+						return (
+							<div
+								key={item.id}
+								className="animate-fade-up"
+								style={{
+									animationDelay: `${iconItems.indexOf(item) * 0.1}s`,
+								}}
 							>
-								<div className="flex flex-col items-center gap-3">
-									<div
-										className={`p-3 rounded-xl bg-gradient-to-br ${item.color} shadow-lg`}
-									>
-										<IconComponent size={36} className="text-white" />
+								<Button
+									title={item.title}
+									className={`text-center h-36 w-full transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+										isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+									}`}
+									variant="gradient"
+									color="blue"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									disabled={isDisabled}
+									onPointerLeaveCapture={undefined}
+									onClick={() => {
+										if (item.id === 'suggestions') {
+											setSuggestionOpen(true);
+										} else if (item.route) {
+											navigate(item.route);
+										}
+									}}
+								>
+									<div className="flex flex-col items-center gap-3">
+										<div
+											className={`p-3 rounded-xl bg-gradient-to-br ${item.color} shadow-lg`}
+										>
+											<IconComponent size={36} className="text-white" />
+										</div>
+										<span className="text-sm font-semibold leading-tight">
+											{item.title}
+										</span>
 									</div>
-									<span className="text-sm font-semibold leading-tight">
-										{item.title}
-									</span>
-								</div>
-							</Button>
-						</div>
-					);
-				})}
-			</div>
+								</Button>
+							</div>
+						);
+					})}
+				</div>
 
-			<div
-				className="mt-8 text-center animate-fade-up"
-				style={{ animationDelay: '0.8s' }}
-			>
-				<div className="inline-flex items-center gap-2 glass-panel-dark px-6 py-3">
-					<Plane className="w-5 h-5 text-blue-400" />
-					<span className="text-blue-200 font-medium">
-						Sistema de instrucción y entrenamiento
-					</span>
+				<div
+					className="mt-8 text-center animate-fade-up"
+					style={{ animationDelay: '0.8s' }}
+				>
+					<div className="inline-flex items-center gap-2 glass-panel-dark px-6 py-3">
+						<Plane className="w-5 h-5 text-blue-400" />
+						<span className="text-blue-200 font-medium">
+							Sistema de instrucción y entrenamiento
+						</span>
+					</div>
 				</div>
 			</div>
-		</div>
+			<SuggestionDialog open={suggestionOpen} handler={() => setSuggestionOpen(!suggestionOpen)} />
+		</>
 	);
 };
 
