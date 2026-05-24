@@ -299,7 +299,7 @@ const NewCourseStudentSchedule = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Gerarquia
+										Jerarquia
 									</Typography>
 									<div className="flex flex-col gap-2">
 										<Radio
@@ -532,7 +532,8 @@ const NewCourseStudentSchedule = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									<Mail size={14} /> <span className="hidden sm:inline">Enviar</span>
+									<Mail size={14} />{' '}
+									<span className="hidden sm:inline">Enviar</span>
 								</Button>
 							)}
 							<Button
@@ -545,7 +546,8 @@ const NewCourseStudentSchedule = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<Printer size={14} /> <span className="hidden sm:inline">Imprimir</span>
+								<Printer size={14} />{' '}
+								<span className="hidden sm:inline">Imprimir</span>
 							</Button>
 						</div>
 					</div>

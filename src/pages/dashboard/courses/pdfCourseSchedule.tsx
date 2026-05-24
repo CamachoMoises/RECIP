@@ -69,7 +69,7 @@ const PDFCourseSchedule = ({
 									</td>
 									<td className="border border-green-800 px-2 col-span-2 text-xs">
 										<div className="flex flex-row gap-3">
-											<strong>Gerarquia:</strong>{' '}
+											<strong>Jerarquia:</strong>{' '}
 											<Check size={15} color="green" />
 											{
 												type_trip[

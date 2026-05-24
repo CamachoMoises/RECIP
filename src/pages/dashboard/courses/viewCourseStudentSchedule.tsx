@@ -340,7 +340,7 @@ const ViewCourseStudentSchedule = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Gerarquia
+										Jerarquia
 									</Typography>
 									<div className="flex flex-col gap-2">
 										<div className="p-2 rounded bg-gray-100">

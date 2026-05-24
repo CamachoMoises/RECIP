@@ -47,6 +47,8 @@ import {
 } from '../../../features/userSlice';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import toast from 'react-hot-toast';
+import SuggestionDialog from '../suggestions/SuggestionDialog';
+import SuggestionListDialog from '../suggestions/SuggestionListDialog';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -73,6 +75,7 @@ const GeneralCourses = () => {
 	);
 	const isAdmin = userLogged?.is_superuser === true;
 	const [open, setOpen] = useState(false);
+	const [suggestionListOpen, setSuggestionListOpen] = useState(false);
 	const [togglingId, setTogglingId] = useState<number | null>(null);
 	const [statusFilter, setStatusFilter] = useState<
 		boolean | undefined
@@ -366,7 +369,7 @@ const GeneralCourses = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-<Typography
+							<Typography
 								variant="h5"
 								className="text-center lg:text-left text-sm sm:text-base md:text-lg"
 								placeholder={undefined}
@@ -473,8 +476,7 @@ const GeneralCourses = () => {
 												>
 													{CL.course?.name}{' '}
 													<span className="text-xs">
-														({CL.course?.course_level.name}
-														-
+														({CL.course?.course_level.name}-
 														{CL.course?.course_type.name})
 													</span>
 												</Typography>
@@ -614,6 +616,24 @@ const GeneralCourses = () => {
 						</CardBody>
 					</Card>
 				</div>
+				{isAdmin && (
+					<div className="flex justify-center pt-4">
+						<Button
+							color="blue"
+							variant="outlined"
+							onClick={() => setSuggestionListOpen(true)}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Ver Sugerencias
+						</Button>
+					</div>
+				)}
+				<SuggestionListDialog
+					open={suggestionListOpen}
+					handler={() => setSuggestionListOpen(!suggestionListOpen)}
+				/>
 			</div>
 		</>
 	);

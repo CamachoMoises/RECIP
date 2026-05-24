@@ -90,7 +90,7 @@ const iconItems: Array<{
 	},
 	{
 		id: 'config',
-		title: 'Configuración Cursos',
+		title: 'Configuración',
 		icon: Cog,
 		permission: ['staff'],
 		route: 'config',
@@ -141,7 +141,10 @@ const Icons = () => {
 										<div
 											className={`p-3 rounded-xl bg-gradient-to-br ${item.color} shadow-lg`}
 										>
-											<IconComponent size={36} className="text-white" />
+											<IconComponent
+												size={36}
+												className="text-white"
+											/>
 										</div>
 										<span className="text-sm font-semibold leading-tight">
 											{item.title}
@@ -165,7 +168,10 @@ const Icons = () => {
 					</div>
 				</div>
 			</div>
-			<SuggestionDialog open={suggestionOpen} handler={() => setSuggestionOpen(!suggestionOpen)} />
+			<SuggestionDialog
+				open={suggestionOpen}
+				handler={() => setSuggestionOpen(!suggestionOpen)}
+			/>
 		</>
 	);
 };
