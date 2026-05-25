@@ -459,6 +459,8 @@ export interface CourseState {
     totalPages: number;
     pageSize: number;
     totalItems: number;
+    emailStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+    emailError: string | null;
 }
 
 export interface subjectState {

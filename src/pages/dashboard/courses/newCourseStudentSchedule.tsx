@@ -30,6 +30,12 @@ import { Mail, Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
 import PDFCourseSchedule from './pdfCourseSchedule';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
+import { sendCourseScheduleEmail } from '../../../features/courseSlice';
+import toast from 'react-hot-toast';
+
+import { pdf } from '@react-pdf/renderer';
+import { getLogoBase64 } from '../../../utils/logoBase64'; // ajusta el path
+import PDFCourseScheduleDocument from './PDFCourseScheduleDocument';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -62,6 +68,7 @@ const NewCourseStudentSchedule = () => {
 	const licenseRef = useRef<number>(
 		course.courseStudent?.license || 1,
 	);
+	const [mailsended, setMailsended] = useState(false);
 	const regulationRef = useRef<number>(
 		course.courseStudent?.regulation || 1,
 	);
@@ -78,6 +85,54 @@ const NewCourseStudentSchedule = () => {
 		contentRef: componentRef,
 		documentTitle: `Curso-${course.courseStudent?.code}`,
 	});
+	const handleSend = async () => {
+		toast('enviando documento...', { icon: '📧' });
+		setMailsended(true);
+
+		if (!studentSelect?.email) {
+			toast.error('Selecciona un piloto con email');
+			return;
+		}
+
+		try {
+			// 1. Obtener el logo en base64
+			const logoBase64 = await getLogoBase64();
+
+			// 2. Generar el blob del PDF directamente desde el componente
+			const pdfBlob = await pdf(
+				<PDFCourseScheduleDocument
+					course={course}
+					studentSelect={studentSelect}
+					logoBase64={logoBase64}
+				/>,
+			).toBlob();
+
+			// 3. Armar el FormData y enviar
+			const formData = new FormData();
+			formData.append(
+				'adjunto',
+				pdfBlob,
+				`Curso-${course.courseStudent?.code}.pdf`,
+			);
+			formData.append('to', studentSelect.email);
+			formData.append(
+				'subject',
+				`Horario del Curso - ${course.courseSelected?.name}`,
+			);
+			formData.append(
+				'body',
+				`Adjunto el horario del curso ${course.courseSelected?.name}`,
+			);
+
+			await dispatch(sendCourseScheduleEmail(formData)).unwrap();
+			toast.success('Correo enviado exitosamente');
+		} catch (e) {
+			console.error(e);
+			toast.error('Error al enviar el correo');
+		} finally {
+			setMailsended(false);
+		}
+	};
 
 	const handleOpen = (value: number) =>
 		setOpen(open === value ? 0 : value);
@@ -526,8 +581,9 @@ const NewCourseStudentSchedule = () => {
 									size="sm"
 									className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
 									onClick={() => {
-										handlePrint();
+										handleSend();
 									}}
+									disabled={!studentSelect || mailsended}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
@@ -815,7 +871,7 @@ const NewCourseStudentSchedule = () => {
 			</Card>
 
 			{/* Hidden PDF Section */}
-			<div className="hidden">
+			<div className="fixed -left-[9999px] top-0">
 				<div ref={componentRef} className="w-full">
 					<PDFCourseSchedule
 						course={course}

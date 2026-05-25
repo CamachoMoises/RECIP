@@ -17,7 +17,9 @@ const initialState: CourseState = {
     currentPage: 1,
     pageSize: 10,
     totalPages: 1,
-    totalItems: 0
+    totalItems: 0,
+    emailStatus: 'idle',
+    emailError: null,
 };
 export const fetchCourses = createAsyncThunk<course[]>(
     'course/fetchCourses',
@@ -102,6 +104,20 @@ export const fetchSchedule = createAsyncThunk<schedule[], number>(
 );
 
 
+export const sendCourseScheduleEmail = createAsyncThunk<
+    { ok: boolean; messageId: string },
+    FormData
+>(
+    'course/sendCourseScheduleEmail',
+    async (formData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostSlice('api/mail/send', formData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 // Acción para crear un curso
 export const createCourse = createAsyncThunk<course, course>(
     'course/createCourse',
@@ -449,6 +465,18 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // Reducers para sendCourseScheduleEmail
+            .addCase(sendCourseScheduleEmail.pending, (state) => {
+                state.emailStatus = 'loading';
+                state.emailError = null;
+            })
+            .addCase(sendCourseScheduleEmail.fulfilled, (state) => {
+                state.emailStatus = 'succeeded';
+            })
+            .addCase(sendCourseScheduleEmail.rejected, (state, action) => {
+                state.emailStatus = 'failed';
+                state.emailError = action.payload as string;
+            })
 
     },
 });
