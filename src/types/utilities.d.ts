@@ -546,6 +546,7 @@ export type attendance = {
     attendance_status_id: number;
     attendance_status?: attendanceStatus;
     comments?: string;
+    signature_url?: string;
     createdAt?: string;
     updatedAt?: string;
 }

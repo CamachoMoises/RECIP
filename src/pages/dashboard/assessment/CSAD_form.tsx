@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../../../store';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -9,6 +10,7 @@ import {
 } from '@material-tailwind/react';
 import { Eraser, Printer, Save } from 'lucide-react';
 import LessonDetails from './lessonDetails';
+import { Cloudinary } from '@cloudinary/url-gen';
 import {
 	SignatureUrls,
 	courseStudentAssessmentDay,
@@ -36,6 +38,7 @@ type Inputs = {
 	seat: string;
 	comments: string;
 };
+const cld = new Cloudinary({ cloud: { cloudName: 'moisesinc' } });
 const CSAD_form = ({
 	day,
 	printCSA,
@@ -54,67 +57,39 @@ const CSAD_form = ({
 	const [signatureUrls, setSignatureUrls] = useState<SignatureUrls>(
 		{},
 	);
+
 	const [missingSignature, setMissingSignature] = useState<
 		Partial<Record<keyof SignatureUrls, boolean>>
 	>({});
 
-	// Obtener las firmas cuando cambie el CSAD_id
 	useEffect(() => {
 		const fetchSignatures = async () => {
 			if (!assessment.courseStudentAssessmentDaySelected?.id) return;
 
 			const CSAD_id =
 				assessment.courseStudentAssessmentDaySelected.id;
-			const API_URL =
-				import.meta.env.VITE_API_URL ||
-				import.meta.env.VITE_REACT_APP_API_URL;
 
 			setMissingSignature({});
 			setSignatureUrls({
-				student: `${API_URL}/storage/firmas/${CSAD_id}/signature_1_${CSAD_id}.webp`,
-				instructor: `${API_URL}/storage/firmas/${CSAD_id}/signature_2_${CSAD_id}.webp`,
+				student: cld
+					.image(`firmas/firmas/signature_1_${CSAD_id}`)
+					.format('webp')
+					.toURL(),
+				instructor: cld
+					.image(`firmas/firmas/signature_2_${CSAD_id}`)
+					.format('webp')
+					.toURL(),
 				fcaa: isLastStep
-					? `${API_URL}/storage/firmas/${CSAD_id}/signature_3_${CSAD_id}.webp`
+					? cld
+							.image(`firmas/firmas/signature_3_${CSAD_id}`)
+							.format('webp')
+							.toURL()
 					: undefined,
 			});
 		};
 
 		fetchSignatures();
 	}, [assessment.courseStudentAssessmentDaySelected?.id, isLastStep]);
-
-	// Renderizar las firmas
-	const renderSignature = (type: keyof SignatureUrls) => {
-		if (!signatureUrls[type]) return null;
-		if (missingSignature[type]) {
-			return (
-				<div className="signature-container">
-					<div className="signature-missing">Sin imagen</div>
-				</div>
-			);
-		}
-
-		return (
-			<div className="signature-container">
-				<img
-					src={signatureUrls[type]}
-					className="signature-image"
-					alt={`Firma ${type}`}
-					onError={() =>
-						setMissingSignature((prev) => ({
-							...prev,
-							[type]: true,
-						}))
-					}
-					onLoad={() =>
-						setMissingSignature((prev) => ({
-							...prev,
-							[type]: false,
-						}))
-					}
-				/>
-			</div>
-		);
-	};
 
 	const sigCanvas1 = useRef<SignatureCanvas>(null);
 	const sigCanvas2 = useRef<SignatureCanvas>(null);
@@ -123,7 +98,15 @@ const CSAD_form = ({
 		?.airport
 		? true
 		: false;
+	const hasAnyCanvas =
+		!signatureUrls.student ||
+		missingSignature.student === true ||
+		!signatureUrls.instructor ||
+		missingSignature.instructor === true ||
+		(isLastStep &&
+			(!signatureUrls.fcaa || missingSignature.fcaa === true));
 	const dispatch = useDispatch<AppDispatch>();
+	const navigate = useNavigate();
 	const clear = () => {
 		sigCanvas1.current?.clear();
 		sigCanvas2.current?.clear();
@@ -226,7 +209,7 @@ const CSAD_form = ({
 
 			// 2. Guardar firmas si existen
 			if (signature1Data || signature2Data || signature3Data) {
-				await dispatch(
+				const saveResult = await dispatch(
 					saveSignatures({
 						CSAD_id: updatedCSAD.id ? updatedCSAD.id : -1,
 						signature1: signature1Data,
@@ -234,6 +217,40 @@ const CSAD_form = ({
 						signature3: signature3Data,
 					}),
 				);
+
+			if (saveSignatures.fulfilled.match(saveResult)) {
+					navigate('/dashboard');
+					const CSAD_id = updatedCSAD.id;
+					setSignatureUrls({
+						student: signature1Data
+							? cld
+									.image(`firmas/firmas/signature_1_${CSAD_id}`)
+									.format('webp')
+									.toURL()
+							: signatureUrls.student,
+						instructor: signature2Data
+							? cld
+									.image(`firmas/firmas/signature_2_${CSAD_id}`)
+									.format('webp')
+									.toURL()
+							: signatureUrls.instructor,
+						fcaa: signature3Data
+							? cld
+									.image(`firmas/firmas/signature_3_${CSAD_id}`)
+									.format('webp')
+									.toURL()
+							: signatureUrls.fcaa,
+					});
+					setMissingSignature({
+						student: signature1Data
+							? false
+							: missingSignature.student,
+						instructor: signature2Data
+							? false
+							: missingSignature.instructor,
+						fcaa: signature3Data ? false : missingSignature.fcaa,
+					});
+				}
 			}
 		}
 	};
@@ -592,7 +609,7 @@ const CSAD_form = ({
 								aria-invalid={errors.comments ? 'true' : 'false'}
 							/>
 							<div className="flex flex-row gap-2 justify-center mb-2">
-								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded-sm">
+								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded-sm basis-1/2">
 									<Typography
 										variant="h5"
 										placeholder={undefined}
@@ -601,18 +618,39 @@ const CSAD_form = ({
 									>
 										Firma del alumno
 									</Typography>
-									<SignatureCanvas
-										ref={sigCanvas1}
-										penColor="black"
-										canvasProps={{
-											width: 500,
-											height: 200,
-											className: 'signatureCanvas',
-										}}
-									/>
+									{signatureUrls.student &&
+									missingSignature.student !== true ? (
+										<img
+											src={signatureUrls.student}
+											className="signature-image"
+											alt="Firma alumno"
+											onError={() =>
+												setMissingSignature((prev) => ({
+													...prev,
+													student: true,
+												}))
+											}
+											onLoad={() =>
+												setMissingSignature((prev) => ({
+													...prev,
+													student: false,
+												}))
+											}
+										/>
+									) : (
+										<SignatureCanvas
+											ref={sigCanvas1}
+											penColor="black"
+											canvasProps={{
+												width: 500,
+												height: 200,
+												className: 'signatureCanvas',
+											}}
+										/>
+									)}
 									<hr />
 								</div>
-								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded-sm">
+								<div className="flex flex-col gap-3 border border-[#b0bec5] bg-white rounded-sm basis-1/2">
 									<Typography
 										variant="h5"
 										placeholder={undefined}
@@ -621,15 +659,36 @@ const CSAD_form = ({
 									>
 										Firma del Instructor
 									</Typography>
-									<SignatureCanvas
-										ref={sigCanvas2}
-										penColor="black"
-										canvasProps={{
-											width: 500,
-											height: 200,
-											className: 'signatureCanvas',
-										}}
-									/>
+									{signatureUrls.instructor &&
+									missingSignature.instructor !== true ? (
+										<img
+											src={signatureUrls.instructor}
+											className="signature-image"
+											alt="Firma instructor"
+											onError={() =>
+												setMissingSignature((prev) => ({
+													...prev,
+													instructor: true,
+												}))
+											}
+											onLoad={() =>
+												setMissingSignature((prev) => ({
+													...prev,
+													instructor: false,
+												}))
+											}
+										/>
+									) : (
+										<SignatureCanvas
+											ref={sigCanvas2}
+											penColor="black"
+											canvasProps={{
+												width: 500,
+												height: 200,
+												className: 'signatureCanvas',
+											}}
+										/>
+									)}
 									<hr />
 								</div>
 							</div>
@@ -644,53 +703,68 @@ const CSAD_form = ({
 										>
 											firma del FCAA
 										</Typography>
-										<SignatureCanvas
-											ref={sigCanvas3}
-											penColor="black"
-											canvasProps={{
-												width: 500,
-												height: 200,
-												className: 'signatureCanvas',
-											}}
-										/>
+										{signatureUrls.fcaa &&
+										missingSignature.fcaa !== true ? (
+											<img
+												src={signatureUrls.fcaa}
+												className="signature-image"
+												alt="Firma FCAA"
+												onError={() =>
+													setMissingSignature((prev) => ({
+														...prev,
+														fcaa: true,
+													}))
+												}
+												onLoad={() =>
+													setMissingSignature((prev) => ({
+														...prev,
+														fcaa: false,
+													}))
+												}
+											/>
+										) : (
+											<SignatureCanvas
+												ref={sigCanvas3}
+												penColor="black"
+												canvasProps={{
+													width: 500,
+													height: 200,
+													className: 'signatureCanvas',
+												}}
+											/>
+										)}
 										<hr />
 									</div>
 								</div>
 							)}
-							<div className="flex flex-row gap-2">
-								<Button
-									variant="gradient"
-									onClick={clear}
-									fullWidth
-									className="flex flex-row justify-center"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									<Eraser size={15} />
-								</Button>
-								<Button
-									variant="gradient"
-									color="green"
-									type="submit"
-									fullWidth
-									title="Guardar"
-									className="flex flex-row justify-center"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									<Save size={15} />
-								</Button>
-							</div>
-							<div className="signatures-preview">
-								<h4>Firmas Guardadas:</h4>
-								<div className="signature-grid">
-									{renderSignature('student')}
-									{renderSignature('instructor')}
-									{isLastStep && renderSignature('fcaa')}
+							{hasAnyCanvas && (
+								<div className="flex flex-row gap-2">
+									<Button
+										variant="gradient"
+										onClick={clear}
+										fullWidth
+										className="flex flex-row justify-center"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										<Eraser size={15} />
+									</Button>
+									<Button
+										variant="gradient"
+										color="green"
+										type="submit"
+										fullWidth
+										title="Guardar"
+										className="flex flex-row justify-center"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										<Save size={15} />
+									</Button>
 								</div>
-							</div>
+							)}
 						</div>
 					</>
 				)}

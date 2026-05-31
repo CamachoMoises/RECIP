@@ -176,6 +176,21 @@ export const deleteAttendanceStatus = createAsyncThunk<number, number>(
     }
 );
 
+export const saveAttendanceSignature = createAsyncThunk<
+    { data: { signatureUrl: string; attendance: attendance } },
+    { attendance_id: number; signature: string }
+>(
+    'attendance/saveAttendanceSignature',
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostSlice('api/attendance/signature', data);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 const attendanceSlice = createSlice({
     name: 'attendance',
     initialState,
@@ -360,6 +375,25 @@ const attendanceSlice = createSlice({
                 }
             })
             .addCase(deleteAttendanceStatus.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            .addCase(saveAttendanceSignature.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(saveAttendanceSignature.fulfilled, (state, action: PayloadAction<{ data: { signatureUrl: string; attendance: attendance } }>) => {
+                state.status = 'succeeded';
+                const { signatureUrl, attendance: updatedAttendance } = action.payload.data;
+                if (state.attendanceList) {
+                    const index = state.attendanceList.findIndex((a) => a.id === updatedAttendance.id);
+                    if (index !== -1) {
+                        state.attendanceList[index] = { ...state.attendanceList[index], signature_url: signatureUrl };
+                    }
+                }
+                state.attendanceSelected = updatedAttendance;
+            })
+            .addCase(saveAttendanceSignature.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });

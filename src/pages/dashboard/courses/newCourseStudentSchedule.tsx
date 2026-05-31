@@ -375,8 +375,8 @@ const NewCourseStudentSchedule = () => {
 									}
 									onChange={(e) => {
 										instructorCodeRef.current = e.target.value;
-										handleChange();
 									}}
+									onBlur={() => handleChange()}
 									crossOrigin={undefined}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}

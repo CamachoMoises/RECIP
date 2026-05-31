@@ -10,7 +10,7 @@ import {
 	Textarea,
 	Typography,
 } from '@material-tailwind/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
 	breadCrumbsItems,
 	attendance,
@@ -32,6 +32,7 @@ import {
 	fetchAttendanceStatuses,
 	createAttendance,
 	updateAttendance,
+	saveAttendanceSignature,
 } from '../../../features/attendanceSlice';
 import PageTitle from '../../../components/PageTitle';
 import LoadingPage from '../../../components/LoadingPage';
@@ -41,6 +42,7 @@ import toast from 'react-hot-toast';
 import moment from 'moment';
 import { Calendar, Clock, User, Edit2, Save, X } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import SignatureCanvas from 'react-signature-canvas';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -53,6 +55,76 @@ const breadCrumbs: breadCrumbsItems[] = [
 	},
 ];
 
+const AttendanceSignature = ({
+	attendanceId,
+	onSave,
+	isSaving,
+	disabled,
+}: {
+	attendanceId: number;
+	onSave: (id: number, canvas: SignatureCanvas) => void;
+	isSaving: boolean;
+	disabled?: boolean;
+}) => {
+	const canvasRef = useRef<SignatureCanvas>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [canvasWidth, setCanvasWidth] = useState(300);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const width = Math.floor(entry.contentRect.width);
+				if (width > 0) setCanvasWidth(width);
+			}
+		});
+
+		observer.observe(container);
+		return () => observer.disconnect();
+	}, []);
+
+	return (
+		<div className="flex flex-col gap-2">
+			<div
+				ref={containerRef}
+				className={`w-full overflow-hidden border border-gray-300 rounded ${disabled ? 'pointer-events-none opacity-50' : ''}`}
+			>
+				<SignatureCanvas
+					ref={canvasRef}
+					penColor="black"
+					canvasProps={{
+						width: canvasWidth,
+						height: 120,
+						style: {
+							width: '100%',
+							height: '120px',
+							display: 'block',
+						},
+					}}
+				/>
+			</div>
+			<Button
+				size="sm"
+				color="green"
+				onClick={() => {
+					if (canvasRef.current)
+						onSave(attendanceId, canvasRef.current);
+				}}
+				disabled={isSaving || disabled}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+				className="flex items-center gap-2 self-start"
+			>
+				<Save className="w-4 h-4" />
+				{isSaving ? 'Guardando...' : 'Guardar Firma'}
+			</Button>
+		</div>
+	);
+};
+
 const ViewCourseStudentSchedule = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const { id, course_id } = useParams<{
@@ -60,6 +132,7 @@ const ViewCourseStudentSchedule = () => {
 		course_id: string;
 	}>();
 	const canEditAttendance = PermissionsValidate(['staff']);
+	const canViewAttendance = canEditAttendance || true; // todos ven el accordion, pero solo staff edita
 	const [openAccordions, setOpenAccordions] = useState<number[]>([1]);
 	const [dataLoaded, setDataLoaded] = useState(false);
 	const [selectedAttendanceStatus, setSelectedAttendanceStatus] =
@@ -70,6 +143,9 @@ const ViewCourseStudentSchedule = () => {
 		number | null
 	>(null);
 	const [isSaving, setIsSaving] = useState(false);
+	const [savingSignatureId, setSavingSignatureId] = useState<
+		number | null
+	>(null);
 
 	useEffect(() => {
 		const loadData = async () => {
@@ -277,12 +353,47 @@ const ViewCourseStudentSchedule = () => {
 		setAttendanceComments('');
 	};
 
+	const handleSaveSignature = async (
+		attendanceId: number,
+		canvas: SignatureCanvas,
+	) => {
+		if (canvas.isEmpty()) {
+			toast.error('Dibuja una firma primero');
+			return;
+		}
+		setSavingSignatureId(attendanceId);
+		try {
+			await dispatch(
+				saveAttendanceSignature({
+					attendance_id: attendanceId,
+					signature: canvas.toDataURL(),
+				}),
+			).unwrap();
+			toast.success('Firma guardada correctamente');
+			canvas.clear();
+		} catch {
+			toast.error('Error al guardar la firma');
+		} finally {
+			setSavingSignatureId(null);
+		}
+	};
+
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
 				name: `Dia ${i + 1}`,
 			}))
 		: [];
+
+	// Agrupar schedules por fecha
+	const schedulesByDate = course.scheduleList.reduce<
+		Record<string, typeof course.scheduleList>
+	>((acc, schedule) => {
+		const dateKey = moment(schedule.date).format('YYYY-MM-DD');
+		if (!acc[dateKey]) acc[dateKey] = [];
+		acc[dateKey].push(schedule);
+		return acc;
+	}, {});
 
 	if (course.status === 'loading' || !dataLoaded)
 		return <LoadingPage />;
@@ -475,23 +586,20 @@ const ViewCourseStudentSchedule = () => {
 									>
 										Jerarquia
 									</Typography>
-									<div className="flex flex-col gap-2">
-										<div className="p-2 rounded bg-gray-100">
-											<Typography
-												variant="small"
-												className="font-bold"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{getTypeTripLabel(
-													course.courseStudent?.type_trip,
-												)}
-											</Typography>
-										</div>
+									<div className="p-2 rounded bg-gray-100">
+										<Typography
+											variant="small"
+											className="font-bold"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{getTypeTripLabel(
+												course.courseStudent?.type_trip,
+											)}
+										</Typography>
 									</div>
 								</div>
-
 								<div>
 									<Typography
 										variant="h6"
@@ -502,23 +610,18 @@ const ViewCourseStudentSchedule = () => {
 									>
 										Licencia
 									</Typography>
-									<div className="flex flex-col gap-2">
-										<div className="p-2 rounded bg-gray-100">
-											<Typography
-												variant="small"
-												className="font-bold"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{getLicenseLabel(
-													course.courseStudent?.license,
-												)}
-											</Typography>
-										</div>
+									<div className="p-2 rounded bg-gray-100">
+										<Typography
+											variant="small"
+											className="font-bold"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{getLicenseLabel(course.courseStudent?.license)}
+										</Typography>
 									</div>
 								</div>
-
 								<div>
 									<Typography
 										variant="h6"
@@ -529,20 +632,18 @@ const ViewCourseStudentSchedule = () => {
 									>
 										Normativa
 									</Typography>
-									<div className="flex flex-col gap-2">
-										<div className="p-2 rounded bg-gray-100">
-											<Typography
-												variant="small"
-												className="font-bold"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{getRegulationLabel(
-													course.courseStudent?.regulation,
-												)}
-											</Typography>
-										</div>
+									<div className="p-2 rounded bg-gray-100">
+										<Typography
+											variant="small"
+											className="font-bold"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{getRegulationLabel(
+												course.courseStudent?.regulation,
+											)}
+										</Typography>
 									</div>
 								</div>
 							</div>
@@ -551,6 +652,7 @@ const ViewCourseStudentSchedule = () => {
 
 					<hr className="my-4" />
 
+					{/* Secciones del Curso */}
 					<Accordion
 						open={isAccordionOpen(1)}
 						placeholder={undefined}
@@ -567,161 +669,116 @@ const ViewCourseStudentSchedule = () => {
 						</AccordionHeader>
 						<AccordionBody>
 							<div className="grid grid-cols-1 gap-4">
-								{days.map((day) => {
-									return (
-										<div
-											key={day.id}
-											className="border border-gray-300 rounded-lg p-4"
+								{days.map((day) => (
+									<div
+										key={day.id}
+										className="border border-gray-300 rounded-lg p-4"
+									>
+										<Typography
+											variant="h6"
+											className="mb-4 text-blue-700 bg-blue-50 p-2 rounded"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
 										>
-											<Typography
-												variant="h6"
-												className="mb-4 text-blue-700 bg-blue-50 p-2 rounded"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{day.name}
-											</Typography>
-											<div className="grid grid-cols-1 gap-3">
-												{subject.subjectList.map((subjectItem) => {
-													const SD = subjectItem.subject_days?.find(
-														(sd) =>
-															sd.day === day.id + 1 &&
-															sd.status &&
-															subjectItem.status,
-													);
-													const schedule = course.scheduleList?.find(
-														(s) =>
-															s.subject_id === subjectItem.id &&
-															s.subject_days_id === SD?.id,
-													);
+											{day.name}
+										</Typography>
+										<div className="grid grid-cols-1 gap-3">
+											{subject.subjectList.map((subjectItem) => {
+												const SD = subjectItem.subject_days?.find(
+													(sd) =>
+														sd.day === day.id + 1 &&
+														sd.status &&
+														subjectItem.status,
+												);
+												const schedule = course.scheduleList?.find(
+													(s) =>
+														s.subject_id === subjectItem.id &&
+														s.subject_days_id === SD?.id,
+												);
 
-													if (!schedule) return null;
+												if (!schedule) return null;
 
-													const startTime = schedule?.hour
-														? schedule.hour
-														: '';
-
-													return (
-														<div
-															key={subjectItem.id}
-															className={`p-3 rounded-lg ${
-																schedule
-																	? 'bg-green-50 border-2 border-green-500'
-																	: 'bg-gray-50 border-2 border-gray-300'
-															}`}
-														>
-															<div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-																<div className="flex-1">
+												return (
+													<div
+														key={subjectItem.id}
+														className="p-3 rounded-lg bg-green-50 border-2 border-green-500"
+													>
+														<div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+															<div className="flex-1">
+																<Typography
+																	variant="h6"
+																	className="text-gray-800"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	{subjectItem.name}
+																</Typography>
+																<Typography
+																	variant="small"
+																	className="text-gray-600"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	Horas: {schedule.classTime} /{' '}
+																	{subjectItem.hours}hrs
+																</Typography>
+															</div>
+															<div className="flex flex-col gap-2 min-w-[200px]">
+																<div className="flex items-center gap-2 text-sm">
+																	<Calendar className="w-4 h-4 text-blue-500" />
 																	<Typography
-																		variant="h6"
-																		className="text-gray-800"
+																		variant="small"
 																		placeholder={undefined}
 																		onPointerEnterCapture={undefined}
 																		onPointerLeaveCapture={undefined}
 																	>
-																		{subjectItem.name}
+																		{schedule.date
+																			? moment(schedule.date).format(
+																					'DD/MM/YYYY',
+																				)
+																			: '-'}
 																	</Typography>
-																	{schedule ? (
-																		<Typography
-																			variant="small"
-																			className="text-gray-600"
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			Horas: {schedule.classTime} /{' '}
-																			{subjectItem.hours}
-																			hrs
-																		</Typography>
-																	) : (
-																		<Typography
-																			variant="small"
-																			className="text-gray-400 italic"
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			Sin asignar
-																		</Typography>
-																	)}
 																</div>
-
-																{schedule && (
-																	<div className="flex flex-col gap-2 min-w-[200px]">
-																		<div className="flex items-center gap-2 text-sm">
-																			<Calendar className="w-4 h-4 text-blue-500" />
-																			<Typography
-																				variant="small"
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																			>
-																				{schedule.date
-																					? moment(
-																							schedule.date,
-																						).format('DD/MM/YYYY')
-																					: '-'}
-																			</Typography>
-																		</div>
-																		<div className="flex items-center gap-2 text-sm">
-																			<Clock className="w-4 h-4 text-orange-500" />
-																			<Typography
-																				variant="small"
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																			>
-																				{startTime}
-																			</Typography>
-																		</div>
-																		<div className="flex items-center gap-2 text-sm">
-																			<User className="w-4 h-4 text-purple-500" />
-																			<Typography
-																				variant="small"
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																			>
-																				{getInstructorName(
-																					schedule.instructor_id,
-																				)}
-																			</Typography>
-																		</div>
-																	</div>
-																)}
+																<div className="flex items-center gap-2 text-sm">
+																	<Clock className="w-4 h-4 text-orange-500" />
+																	<Typography
+																		variant="small"
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																	>
+																		{schedule.hour || ''}
+																	</Typography>
+																</div>
+																<div className="flex items-center gap-2 text-sm">
+																	<User className="w-4 h-4 text-purple-500" />
+																	<Typography
+																		variant="small"
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																	>
+																		{getInstructorName(
+																			schedule.instructor_id,
+																		)}
+																	</Typography>
+																</div>
 															</div>
 														</div>
-													);
-												})}
-											</div>
+													</div>
+												);
+											})}
 										</div>
-									);
-								})}
+									</div>
+								))}
 							</div>
 						</AccordionBody>
 					</Accordion>
 
+					{/* Resultados */}
 					{course.courseStudent?.score && (
 						<Accordion
 							open={isAccordionOpen(2)}
@@ -763,7 +820,6 @@ const ViewCourseStudentSchedule = () => {
 											{course.courseStudent.score} pts
 										</Typography>
 									</div>
-
 									<div className="bg-blue-50 p-4 rounded-lg">
 										<Typography
 											variant="small"
@@ -788,7 +844,6 @@ const ViewCourseStudentSchedule = () => {
 												: 'Reprobado'}
 										</Typography>
 									</div>
-
 									<div className="bg-blue-50 p-4 rounded-lg">
 										<Typography
 											variant="small"
@@ -808,7 +863,6 @@ const ViewCourseStudentSchedule = () => {
 											{course.courseSelected?.hours || 0} hrs
 										</Typography>
 									</div>
-
 									<div className="bg-blue-50 p-4 rounded-lg">
 										<Typography
 											variant="small"
@@ -833,7 +887,8 @@ const ViewCourseStudentSchedule = () => {
 						</Accordion>
 					)}
 
-					{canEditAttendance && (
+					{/* Control de Asistencia */}
+					{canViewAttendance && (
 						<Accordion
 							open={isAccordionOpen(3)}
 							placeholder={undefined}
@@ -853,6 +908,7 @@ const ViewCourseStudentSchedule = () => {
 							</AccordionHeader>
 							<AccordionBody>
 								<div className="space-y-4">
+									{/* Leyenda de estados */}
 									<div className="flex flex-wrap gap-3 mb-4">
 										{attendance.attendanceStatusList.map((status) => (
 											<div
@@ -864,137 +920,343 @@ const ViewCourseStudentSchedule = () => {
 										))}
 									</div>
 
-									{course.scheduleList.length > 0 ? (
-										course.scheduleList.map((schedule, index) => {
-											const existingAttendance = getAttendanceForDate(
-												schedule.date,
-											);
-											const isEditing =
-												editingAttendanceId ===
-												existingAttendance?.id;
-											const subjectName =
-												subject.subjectList.find(
-													(s) => s.id === schedule.subject_id,
-												)?.name || 'Sin materia';
+									{Object.keys(schedulesByDate).length > 0 ? (
+										Object.entries(schedulesByDate).map(
+											([dateKey, schedules]) => {
+												const firstSchedule = schedules[0];
+												const existingAttendance =
+													getAttendanceForDate(firstSchedule.date);
+												const isEditing =
+													editingAttendanceId ===
+													existingAttendance?.id;
 
-											return (
-												<Card
-													key={`${schedule.id}-${index}`}
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-													className={`${existingAttendance ? 'border-l-4 border-l-green-500' : ''}`}
-												>
-													<CardBody
+												return (
+													<Card
+														key={dateKey}
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
+														className={
+															existingAttendance
+																? 'border-l-4 border-l-green-500'
+																: ''
+														}
 													>
-														<div className="flex flex-col gap-3">
-															<div className="flex items-center justify-between flex-wrap gap-2">
-																<div className="flex items-center gap-3 flex-wrap">
-																	<Calendar className="w-5 h-5 text-blue-500" />
-																	<Typography
-																		variant="h6"
-																		className="text-sm"
-																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
-																	>
-																		{moment(schedule.date).format(
-																			'DD/MM/YYYY',
+														<CardBody
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															<div className="flex flex-col gap-3">
+																{/* Cabecera: fecha + estado */}
+																<div className="flex items-center justify-between flex-wrap gap-2">
+																	<div className="flex items-center gap-3 flex-wrap">
+																		<Calendar className="w-5 h-5 text-blue-500" />
+																		<Typography
+																			variant="h6"
+																			className="text-sm"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			{moment(
+																				firstSchedule.date,
+																			).format('DD/MM/YYYY')}
+																		</Typography>
+																		<Clock className="w-4 h-4 text-orange-500" />
+																		<Typography
+																			variant="small"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			{firstSchedule.hour || ''}
+																		</Typography>
+																	</div>
+																	{existingAttendance &&
+																		!isEditing && (
+																			<div
+																				className={`px-3 py-1 rounded-full text-sm font-medium ${getAttendanceStatusColor(existingAttendance.attendance_status_id)}`}
+																			>
+																				{getAttendanceStatusLabel(
+																					existingAttendance.attendance_status_id,
+																				)}
+																			</div>
 																		)}
-																	</Typography>
-																	<Clock className="w-4 h-4 text-orange-500" />
-																	<Typography
-																		variant="small"
-																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
-																	>
-																		{schedule.hour || ''}
-																	</Typography>
 																</div>
 
-																{existingAttendance && !isEditing && (
-																	<div
-																		className={`px-3 py-1 rounded-full text-sm font-medium ${getAttendanceStatusColor(existingAttendance.attendance_status_id)}`}
-																	>
-																		{getAttendanceStatusLabel(
-																			existingAttendance.attendance_status_id,
+																{/* Materias del día como chips */}
+																<div className="flex flex-wrap gap-2">
+																	{schedules.map((s) => {
+																		const name =
+																			subject.subjectList.find(
+																				(sub) =>
+																					sub.id === s.subject_id,
+																			)?.name;
+																		return name ? (
+																			<span
+																				key={s.id}
+																				className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
+																			>
+																				{name}
+																			</span>
+																		) : null;
+																	})}
+																</div>
+
+																{/* ── STAFF: puede crear/editar asistencia ── */}
+																{canEditAttendance && (
+																	<>
+																		{isEditing ||
+																		!existingAttendance ? (
+																			<div className="space-y-3 mt-2">
+																				<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+																					<div>
+																						<Typography
+																							variant="small"
+																							className="font-bold"
+																							placeholder={undefined}
+																							onPointerEnterCapture={
+																								undefined
+																							}
+																							onPointerLeaveCapture={
+																								undefined
+																							}
+																						>
+																							Estado
+																						</Typography>
+																						<Select
+																							value={selectedAttendanceStatus.toString()}
+																							onChange={(val) =>
+																								val &&
+																								setSelectedAttendanceStatus(
+																									parseInt(val),
+																								)
+																							}
+																							placeholder={undefined}
+																							onPointerEnterCapture={
+																								undefined
+																							}
+																							onPointerLeaveCapture={
+																								undefined
+																							}
+																							labelProps={{
+																								placeholder:
+																									undefined,
+																								onPointerEnterCapture:
+																									undefined,
+																								onPointerLeaveCapture:
+																									undefined,
+																							}}
+																						>
+																							{attendance.attendanceStatusList.map(
+																								(status) => (
+																									<Option
+																										key={status.id}
+																										value={status.id.toString()}
+																									>
+																										{status.name}
+																									</Option>
+																								),
+																							)}
+																						</Select>
+																					</div>
+																				</div>
+																				<div>
+																					<Typography
+																						variant="small"
+																						className="font-bold"
+																						placeholder={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																					>
+																						Comentarios
+																					</Typography>
+																					<Textarea
+																						value={attendanceComments}
+																						onChange={(e) =>
+																							setAttendanceComments(
+																								e.target.value,
+																							)
+																						}
+																						rows={2}
+																						placeholder={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																						labelProps={{
+																							placeholder: undefined,
+																							onPointerEnterCapture:
+																								undefined,
+																							onPointerLeaveCapture:
+																								undefined,
+																						}}
+																					/>
+																				</div>
+																				<div className="flex gap-2">
+																					<Button
+																						size="sm"
+																						color="green"
+																						onClick={() =>
+																							handleSaveAttendance(
+																								firstSchedule.date,
+																							)
+																						}
+																						disabled={isSaving}
+																						placeholder={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																						className="flex items-center gap-2"
+																					>
+																						<Save className="w-4 h-4" />
+																						{isSaving
+																							? 'Guardando...'
+																							: existingAttendance
+																								? 'Actualizar'
+																								: 'Guardar'}
+																					</Button>
+																					{isEditing && (
+																						<Button
+																							size="sm"
+																							color="gray"
+																							onClick={
+																								handleCancelEdit
+																							}
+																							placeholder={undefined}
+																							onPointerEnterCapture={
+																								undefined
+																							}
+																							onPointerLeaveCapture={
+																								undefined
+																							}
+																							className="flex items-center gap-2"
+																						>
+																							<X className="w-4 h-4" />{' '}
+																							Cancelar
+																						</Button>
+																					)}
+																				</div>
+																			</div>
+																		) : (
+																			<div className="mt-2 space-y-2">
+																				{existingAttendance.comments && (
+																					<Typography
+																						variant="small"
+																						className="italic text-gray-600"
+																						placeholder={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																					>
+																						<span className="font-semibold">
+																							Comentarios:
+																						</span>{' '}
+																						"
+																						{
+																							existingAttendance.comments
+																						}
+																						"
+																					</Typography>
+																				)}
+																				<Button
+																					size="sm"
+																					color="blue"
+																					variant="text"
+																					onClick={() =>
+																						handleEditAttendance(
+																							existingAttendance,
+																						)
+																					}
+																					placeholder={undefined}
+																					onPointerEnterCapture={
+																						undefined
+																					}
+																					onPointerLeaveCapture={
+																						undefined
+																					}
+																					className="flex items-center gap-2"
+																				>
+																					<Edit2 className="w-4 h-4" />{' '}
+																					Editar
+																				</Button>
+																			</div>
+																		)}
+																	</>
+																)}
+
+																{/* ── FIRMA: visible para todos si hay asistencia registrada ── */}
+																{existingAttendance && (
+																	<div className="mt-3 border-t pt-3">
+																		<Typography
+																			variant="small"
+																			className="font-semibold mb-2"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			Firma del estudiante
+																		</Typography>
+																		{existingAttendance.signature_url ? (
+																			<img
+																				src={
+																					existingAttendance.signature_url
+																				}
+																				alt="Firma de asistencia"
+																				className="max-w-xs h-auto border rounded"
+																			/>
+																		) : (
+																			<AttendanceSignature
+																				key={`canvas-${existingAttendance.id}`}
+																				attendanceId={
+																					existingAttendance.id
+																				}
+																				onSave={handleSaveSignature}
+																				isSaving={
+																					savingSignatureId ===
+																					existingAttendance.id
+																				}
+																				disabled={
+																					!moment(
+																						firstSchedule.date,
+																					).isSame(moment(), 'day')
+																				}
+																			/>
 																		)}
 																	</div>
 																)}
-															</div>
 
-															<Typography
-																variant="small"
-																className="text-gray-600"
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
-															>
-																{subjectName}
-															</Typography>
-
-															{isEditing || !existingAttendance ? (
-																<div className="space-y-3 mt-2">
-																	<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-																		<div>
-																			<Typography
-																				variant="small"
-																				className="font-bold"
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																			>
-																				Estado
-																			</Typography>
-																			<Select
-																				value={selectedAttendanceStatus.toString()}
-																				onChange={(val) =>
-																					val &&
-																					setSelectedAttendanceStatus(
-																						parseInt(val),
-																					)
-																				}
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																				labelProps={{
-																					placeholder: undefined,
-																					onPointerEnterCapture:
-																						undefined,
-																					onPointerLeaveCapture:
-																						undefined,
-																				}}
-																			>
-																				{attendance.attendanceStatusList.map(
-																					(status) => (
-																						<Option
-																							key={status.id}
-																							value={status.id.toString()}
-																						>
-																							{status.name}
-																						</Option>
-																					),
-																				)}
-																			</Select>
-																		</div>
-																	</div>
-
-																	<div>
+																{/* Estudiante: sin asistencia aún */}
+																{!canEditAttendance &&
+																	!existingAttendance && (
 																		<Typography
 																			variant="small"
-																			className="font-bold"
+																			className="italic text-gray-400 mt-2"
 																			placeholder={undefined}
 																			onPointerEnterCapture={
 																				undefined
@@ -1003,123 +1265,16 @@ const ViewCourseStudentSchedule = () => {
 																				undefined
 																			}
 																		>
-																			Comentarios
-																		</Typography>
-																		<Textarea
-																			value={attendanceComments}
-																			onChange={(e) =>
-																				setAttendanceComments(
-																					e.target.value,
-																				)
-																			}
-																			rows={2}
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																			labelProps={{
-																				placeholder: undefined,
-																				onPointerEnterCapture:
-																					undefined,
-																				onPointerLeaveCapture:
-																					undefined,
-																			}}
-																		/>
-																	</div>
-
-																	<div className="flex gap-2">
-																		<Button
-																			size="sm"
-																			color="green"
-																			onClick={() =>
-																				handleSaveAttendance(
-																					schedule.date,
-																				)
-																			}
-																			disabled={isSaving}
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																			className="flex items-center gap-2"
-																		>
-																			<Save className="w-4 h-4" />
-																			{isSaving
-																				? 'Guardando...'
-																				: existingAttendance
-																					? 'Actualizar'
-																					: 'Guardar'}
-																		</Button>
-																		{isEditing && (
-																			<Button
-																				size="sm"
-																				color="gray"
-																				onClick={handleCancelEdit}
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																				className="flex items-center gap-2"
-																			>
-																				<X className="w-4 h-4" />
-																				Cancelar
-																			</Button>
-																		)}
-																	</div>
-																</div>
-															) : (
-																<div className="mt-2 space-y-2">
-																	{existingAttendance.comments && (
-																		<Typography
-																			variant="small"
-																			className="italic text-gray-600"
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			<span className="font-semibold">
-																				Comentarios:
-																			</span>{' '}
-																			"{existingAttendance.comments}"
+																			Pendiente de registro por el
+																			instructor
 																		</Typography>
 																	)}
-																	<Button
-																		size="sm"
-																		color="blue"
-																		variant="text"
-																		onClick={() =>
-																			handleEditAttendance(
-																				existingAttendance,
-																			)
-																		}
-																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
-																		className="flex items-center gap-2"
-																	>
-																		<Edit2 className="w-4 h-4" />
-																		Editar
-																	</Button>
-																</div>
-															)}
-														</div>
-													</CardBody>
-												</Card>
-											);
-										})
+															</div>
+														</CardBody>
+													</Card>
+												);
+											},
+										)
 									) : (
 										<Typography
 											variant="paragraph"

@@ -51,7 +51,7 @@ const Reports = () => {
 				</Typography>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+			{/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 				<div className="glass-panel p-6 rounded-xl hover:shadow-xl transition-all duration-300">
 					<div className="flex items-center gap-4 mb-4">
 						<div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 shadow-lg">
@@ -129,7 +129,7 @@ const Reports = () => {
 						Seguimiento del progreso de estudiantes por curso y materia.
 					</Typography>
 				</div>
-			</div>
+			</div> */}
 
 			{isAdmin && (
 				<div className="mt-6">
