@@ -104,7 +104,7 @@ const ReviewItemList = ({
 	const isCorrect = answered && parsedScore >= maxScore;
 	const isPartial =
 		answered && parsedScore > 0 && parsedScore < maxScore;
-	const isWrong = !answered || parsedScore === 0;
+	const _isWrong = !answered || parsedScore === 0;
 
 	const scoreColor = isCorrect
 		? '#3B6D11'

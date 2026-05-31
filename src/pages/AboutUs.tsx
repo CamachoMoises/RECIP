@@ -3,10 +3,10 @@ import { axiosGetDefault, axiosPostDefault } from '../services/axios';
 
 const AboutUs = () => {
 	const callUser = async () => {
-		const req = await axiosGetDefault(
+		await axiosGetDefault(
 			`participant/3df50615-c33c-40c5-a435-6e99cc691f40`,
 		);
-		const req2 = await axiosPostDefault('participant', {
+		await axiosPostDefault('participant', {
 			firstName: 'moises',
 			lastName: 'stupid',
 			docNumber: 22035536,

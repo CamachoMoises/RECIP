@@ -1,86 +1,102 @@
-# CodeViz Research Context
+# RECIP Frontend
 
-> **Note**: This file contains research context from CodeViz. Most recent contexts are at the bottom.
+Aviation training management system (Registro de Evaluación, Capacitación e Instrucción del Piloto).
 
----
+## Tech Stack
 
-## Research Query
+- **Framework**: React 18 + TypeScript + Vite
+- **Routing**: React Router DOM v6 (nested routes in `src/App.tsx` and `src/pages/dashboard.tsx`)
+- **State**: Redux Toolkit + Redux Persist
+- **UI**: Material Tailwind v2 + Tailwind CSS v4 + Lucide icons
+- **Forms**: react-hook-form
+- **API**: Axios (services in `src/services/axios.ts`)
+- **PDF**: @react-pdf/renderer + react-to-print
+- **Other**: react-hot-toast, react-signature-canvas, xlsx, Cloudinary, pako
 
-What is the route scheme?
+## Project Structure
 
-*Session: 85bfcf943ad628f147e0abf300e5ecbe | Generated: 7/14/2025, 5:04:31 PM*
+```
+src/
+  components/       # Shared: NavBar, PageTitle, LoadingPage, ErrorPage, scrollTop, ThemeInitializer, countDown
+  features/         # Redux slices: authSlice, courseSlice, subjectSlice, testSlice, assessmentSlice, userSlice, themeSlice, counterSlice
+  hooks/            # Custom hooks: useTheme
+  lib/              # Utilities: utils.ts (cn helper)
+  pages/            # Route pages
+    login.tsx
+    dashboard.tsx   # Main dashboard layout with nested routes
+    HomePage.tsx, AboutUs.tsx, ContactPage.tsx, notFound.tsx
+    dashboard/
+      icons.tsx     # Dashboard home icon grid with permission-based visibility
+      register/     # User registration
+      users/        # Admin user management (usersTable, modalFormUser)
+      courses/      # Course scheduling (generalCourses, newCourseStudentSchedule, viewCourseStudentSchedule, PDF generation)
+      students/     # Pilot/participant management (tableStudents)
+      instructors/  # Instructor management (tableInstructors)
+      config/       # Course config, subjects, lessons, test questions management (generalConfig, courseDetail, questionType*, testList, etc.)
+      assessment/   # FSTD/ATD flight evaluations (generalAssessment, scoreDetail, CSAD_form, CSA_PDF, lessonDetails)
+      test/         # Exams/tests (generalTest, newTest, reviewTest, questionType*, resultsTestPdf)
+      reports/      # Reports & suggestions list
+      suggestions/  # SuggestionDialog, SuggestionListDialog
+  services/
+    axios.ts        # Axios instance with auth interceptor
+    permissionsValidate.ts  # Role-based permission check
+    utilities.ts    # formatUserName, etc.
+  types/
+    utilities.d.ts  # All TypeScript types/interfaces
+  store.tsx         # Redux store config
+  styles/
+    global.css      # Global styles + custom CSS classes
+```
 
-### Analysis Summary
+## Dashboard Routes (under /dashboard)
 
-# Route Scheme Analysis
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/` | Icons | Dashboard home with role-based navigation grid |
+| `users` | UsersTable | Admin user management (staff only) |
+| `register` | Register | User registration |
+| `courses` | GeneralCourses | Course scheduling & student course list |
+| `students` | TableStudents | Pilot/participant management (staff only) |
+| `instructors` | TableInstructors | Instructor management |
+| `config` | GeneralConfig | Course/subject/lesson/test config (staff only) |
+| `config/course/:id` | CourseDetail | Single course detail |
+| `config/test/:id` | TestList | Test params list for a course |
+| `config/testQuestion/:course_id/:test_id/:question_type_id/:test_question_type_id` | QuestionTestList | Questions for a test type |
+| `assessment` | GeneralAssessment | FSTD/ATD evaluations (instructor only) |
+| `course_assessment/:id/:course_id` | DetailAssessment | Single assessment detail |
+| `test` | GeneralTest | Exams for students/instructors |
+| `new_test/:id/:course_id/:test_id` | NewTest | Take an exam |
+| `review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id` | ReviewTest | Review exam results |
+| `new_course/:id/:course_id` | NewCourse | Create/edit course schedule |
+| `view_course/:id/:course_id` | ViewCourseStudentSchedule | View course schedule |
+| `reports` | Reports | System reports & suggestions |
 
-The application utilizes **React Router DOM** for its client-side routing, defining a hierarchical route scheme. The primary routing configuration is established within the main application component, [App.tsx](src/App.tsx), which then delegates to a nested routing structure within the [Dashboard](src/pages/pages/dashboard.tsx) component.
+## Key Patterns
 
-## High-Level Routing
+- **Permissions**: `PermissionsValidate(['staff', 'instructor', 'student', 'super_user'])` checks user roles before rendering UI
+- **Auth**: JWT token in Redux persist; redirect to `/login` if no token
+- **API calls**: Via `axiosGetSlice`, `axiosPostSlice`, `axiosPutSlice` in `services/axios.ts` — auto-inject Bearer token, handle 403 by dispatching logout
+- **Theme**: Dark/light mode via `useTheme` hook, CSS variables in `global.css`
+- **Breadcrumbs**: `<PageTitle>` component with breadcrumb array, used in most dashboard pages
+- **PDF**: Some pages use `@react-pdf/renderer` (`PDFCourseScheduleDocument.tsx`), others use `react-to-print`
 
-The top-level routing is managed by the [App](src/App.tsx) component. This component acts as the entry point for the application's routing, rendering different components based on the URL path.
+## Role System
 
-*   **Purpose:** Defines the main entry points and global routes for the application.
-*   **Internal Parts:** It likely contains a `<Routes>` component that encapsulates various `<Route>` definitions.
-*   **External Relationships:** It serves as the parent for all other routed components, including the [Dashboard](src/pages/pages/dashboard.tsx).
+- `super_user`: Full access (Admin label shown)
+- `staff`: Admin panel, user management, config (Staff label shown)
+- `instructor`: Course scheduling, assessments, exams
+- `student`: View courses, take exams
 
-## Mid-Level Routing: Dashboard
+## Scripts
 
-The [Dashboard](src/pages/pages/dashboard.tsx) component is a significant part of the application's routing scheme, handling a large set of nested routes related to various dashboard functionalities.
+- `npm run dev` — Vite dev server
+- `npm run build` — TypeScript check + Vite build
+- `npm run lint` — ESLint
+- `npm run preview` — Vite preview
 
-*   **Purpose:** Manages the routing for all features accessible within the authenticated dashboard area, such as assessments, configurations, courses, instructors, students, and tests.
-*   **Internal Parts:**
-    *   It uses `react-router-dom`'s `<Routes>` and `<Route>` components to define nested routes.
-    *   It imports and renders various components for each specific route, such as:
-        *   [CSA_PDF](src/pages/pages/dashboard/assessment/CSA_PDF.tsx)
-        *   [CSAD_form](src/pages/pages/dashboard/assessment/CSAD_form.tsx)
-        *   [detailAssessment](src/pages/pages/dashboard/assessment/detailAssessment.tsx)
-        *   [generalAssessment](src/pages/pages/dashboard/assessment/generalAssessment.tsx)
-        *   [lessonDetails](src/pages/pages/dashboard/assessment/lessonDetails.tsx)
-        *   [newAssessment](src/pages/pages/dashboard/assessment/newAssessment.tsx)
-        *   [scoreDetail](src/pages/pages/dashboard/assessment/scoreDetail.tsx)
-        *   [courseDetail](src/pages/pages/dashboard/config/courseDetail.tsx)
-        *   [generalConfig](src/pages/pages/dashboard/config/generalConfig.tsx)
-        *   [lessonDetail](src/pages/pages/dashboard/config/lessonDetail.tsx)
-        *   [modalFormCourse](src/pages/pages/dashboard/config/modalFormCourse.tsx)
-        *   [modalFormSubject](src/pages/pages/dashboard/config/modalFormSubject.tsx)
-        *   [newAnswerQuestionTest](src/pages/pages/dashboard/config/newAnswerQuestionTest.tsx)
-        *   [newQuestionTest](src/pages/pages/dashboard/config/newQuestionTest.tsx)
-        *   [newTestModal](src/pages/pages/dashboard/config/newTestModal.tsx)
-        *   [questionTest](src/pages/pages/dashboard/config/questionTest.tsx)
-        *   [questionTestList](src/pages/pages/dashboard/config/questionTestList.tsx)
-        *   [questionType](src/pages/pages/dashboard/config/questionType.tsx)
-        *   [testList](src/pages/pages/dashboard/config/testList.tsx)
-        *   [testParams](src/pages/pages/dashboard/config/testParams.tsx)
-        *   [Check](src/pages/pages/dashboard/config/questionTypeTest/Check.tsx)
-        *   [Completion](src/pages/pages/dashboard/config/questionTypeTest/Completion.tsx)
-        *   [Input](src/pages/pages/dashboard/config/questionTypeTest/Input.tsx)
-        *   [Radio](src/pages/pages/dashboard/config/questionTypeTest/Radio.tsx)
-        *   [generalCourses](src/pages/pages/dashboard/courses/generalCourses.tsx)
-        *   [newCourseStudentSchedule](src/pages/pages/dashboard/courses/newCourseStudentSchedule.tsx)
-        *   [newCourseStudentScheduleSubject](src/pages/pages/dashboard/courses/newCourseStudentScheduleSubject.tsx)
-        *   [pdfCourseSchedule](src/pages/pages/dashboard/courses/pdfCourseSchedule.tsx)
-        *   [tableInstructors](src/pages/pages/dashboard/instructors/tableInstructors.tsx)
-        *   [tableStudents](src/pages/pages/dashboard/students/tableStudents.tsx)
-        *   [generalTest](src/pages/pages/dashboard/test/generalTest.tsx)
-        *   [newTest](src/pages/pages/dashboard/test/newTest.tsx)
-        *   [questionTypeCheck](src/pages/pages/dashboard/test/questionTypeCheck.tsx)
-        *   [questionTypeCompletion](src/pages/pages/dashboard/test/questionTypeCompletion.tsx)
-        *   [questionTypeInput](src/pages/pages/dashboard/test/questionTypeInput.tsx)
-        *   [questionTypeRadio](src/pages/pages/dashboard/test/questionTypeRadio.tsx)
-        *   [resultsTestPdf](src/pages/pages/dashboard/test/resultsTestPdf.tsx)
-        *   [reviewItemList](src/pages/pages/dashboard/test/reviewItemList.tsx)
-        *   [reviewTest](src/pages/pages/dashboard/test/reviewTest.tsx)
-        *   [modalFormUser](src/pages/pages/dashboard/users/modalFormUser.tsx)
-        *   [usersTable](src/pages/pages/dashboard/users/usersTable.tsx)
-*   **External Relationships:** It is rendered by the main [App](src/App.tsx) component when the path matches the dashboard route. It uses `useNavigate` from `react-router-dom` for programmatic navigation.
+## Important Notes for AI Agents
 
-## Low-Level Routing Details
-
-Individual components within the application use `useNavigate` and `useParams` hooks from `react-router-dom` to handle navigation and extract route parameters.
-
-*   **`useNavigate`**: Used for imperative navigation, such as redirecting after a successful login ([login.tsx](src/pages/login.tsx:11), [HomePage.tsx](src/pages/HomePage.tsx:3)) or navigating between dashboard sections ([generalAssessment.tsx](src/pages/pages/dashboard/assessment/generalAssessment.tsx:7), [generalConfig.tsx](src/pages/pages/dashboard/config/generalConfig.tsx:10)).
-*   **`useParams`**: Used to extract dynamic segments from the URL, such as IDs for specific courses ([courseDetail.tsx](src/pages/pages/dashboard/config/courseDetail.tsx:18)) or tests ([testList.tsx](src/pages/pages/dashboard/config/testList.tsx:1)).
-
-The overall route scheme is defined by the combination of these components and their respective route definitions, creating a clear and navigable structure for the application.
-
+- Update this file whenever project structure, routes, or key patterns change significantly.
+- When adding new dashboard pages: create route in `src/pages/dashboard.tsx`, add icon in `src/pages/dashboard/icons.tsx`, register manual route in NavBar if applicable.
+- All component files use the `placeholder`, `onPointerEnterCapture`, `onPointerLeaveCapture` props set to `undefined` (Material Tailwind v2 requirement).
+- Follow existing patterns for imports, styling (Tailwind + glass-panel classes), and state management.

@@ -7,6 +7,7 @@ import courseSlice from './features/courseSlice';
 import subjectSlice from './features/subjectSlice';
 import testSlice from './features/testSlice';
 import themeReducer from './features/themeSlice';
+import attendanceSlice from './features/attendanceSlice';
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
@@ -27,6 +28,7 @@ const store = configureStore({
 		subjects: subjectSlice,
 		tests: testSlice,
 		theme: themeReducer,
+		attendance: attendanceSlice,
 	},
 });
 const persistor = persistStore(store);

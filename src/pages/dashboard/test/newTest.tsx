@@ -180,7 +180,7 @@ const NewTest = () => {
 		};
 	}, [ended, test.courseStudentTestSelected?.id]);
 
-	const seeResults = async () => {
+	const _seeResults = async () => {
 		handlePrint();
 	};
 	const testTime = test.testSelected?.duration

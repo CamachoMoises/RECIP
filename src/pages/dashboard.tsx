@@ -8,6 +8,7 @@ import ViewCourseStudentSchedule from './dashboard/courses/viewCourseStudentSche
 import TableStudents from './dashboard/students/tableStudents';
 import TableInstructors from './dashboard/instructors/tableInstructors';
 import GeneralAssessment from './dashboard/assessment/generalAssessment';
+import Reports from './dashboard/reports/Reports';
 import NewTest from './dashboard/test/newTest';
 import GeneralTest from './dashboard/test/generalTest';
 import GeneralConfig from './dashboard/config/generalConfig';
@@ -93,6 +94,7 @@ const Dashboard = () => {
 									path="assessment"
 									element={<GeneralAssessment />}
 								/>
+								<Route path="reports" element={<Reports />} />
 								<Route path="test" element={<GeneralTest />} />
 								<Route
 									path="config/course/:id"

@@ -6,7 +6,6 @@ import {
 	List,
 	IconButton,
 	ListItem,
-	ListItemPrefix,
 	Typography,
 	Collapse,
 } from '@material-tailwind/react';
@@ -47,8 +46,6 @@ import {
 } from '../../../features/userSlice';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import toast from 'react-hot-toast';
-import SuggestionDialog from '../suggestions/SuggestionDialog';
-import SuggestionListDialog from '../suggestions/SuggestionListDialog';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -75,7 +72,6 @@ const GeneralCourses = () => {
 	);
 	const isAdmin = userLogged?.is_superuser === true;
 	const [open, setOpen] = useState(false);
-	const [suggestionListOpen, setSuggestionListOpen] = useState(false);
 	const [togglingId, setTogglingId] = useState<number | null>(null);
 	const [statusFilter, setStatusFilter] = useState<
 		boolean | undefined
@@ -376,9 +372,9 @@ const GeneralCourses = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Agenda de Programas de Inversión para Pilotos
+								Cronogramas de Instrucion y Entrenamiento de
 								<br className="hidden lg:inline" />
-								Participantes en Curso
+								Participantes
 							</Typography>
 							{canViewContent && (
 								<div className="flex flex-wrap justify-center gap-2 mb-4">
@@ -490,6 +486,18 @@ const GeneralCourses = () => {
 												>
 													{CL.code}
 												</Typography>
+												{CL.instructor_code && (
+													<Typography
+														variant="small"
+														color="blue-gray"
+														className="font-normal mt-1"
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+													>
+														Código: {CL.instructor_code}
+													</Typography>
+												)}
 											</div>
 											<div
 												onClick={(e) => e.stopPropagation()}
@@ -616,24 +624,6 @@ const GeneralCourses = () => {
 						</CardBody>
 					</Card>
 				</div>
-				{isAdmin && (
-					<div className="flex justify-center pt-4">
-						<Button
-							color="blue"
-							variant="outlined"
-							onClick={() => setSuggestionListOpen(true)}
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Ver Sugerencias
-						</Button>
-					</div>
-				)}
-				<SuggestionListDialog
-					open={suggestionListOpen}
-					handler={() => setSuggestionListOpen(!suggestionListOpen)}
-				/>
 			</div>
 		</>
 	);

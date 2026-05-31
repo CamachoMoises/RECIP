@@ -20,6 +20,12 @@ export type participante = {
     tipo: number;
 };
 
+export type searchedStudentItem = {
+    student_id: number;
+    name: string;
+    email: string;
+};
+
 export type moduloTeoria = {
     id: number;
     name: string;
@@ -263,6 +269,7 @@ export type courseStudent = {
     highest_score?: number;
     status?: boolean;
     max_attempts: number | null;
+    instructor_code?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -434,6 +441,7 @@ export interface UserState {
     usersList: user[];
     studentList: user[];
     instructorList: user[];
+    searchedStudent: searchedStudentItem[];
     suggestionList: suggestion[];
     suggestionSelected: suggestion | null;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -520,5 +528,38 @@ export interface assessmentState {
     totalItems: number;
     signatureStatus?: 'idle' | 'saving' | 'saved' | 'failed';
 
+}
+
+export type attendanceStatus = {
+    id: number;
+    name: string;
+    description?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type attendance = {
+    id: number;
+    course_student_id: number;
+    course_student?: courseStudent;
+    date: string;
+    attendance_status_id: number;
+    attendance_status?: attendanceStatus;
+    comments?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface AttendanceState {
+    attendanceList: attendance[] | null;
+    attendanceSelected: attendance | null;
+    attendanceStatusList: attendanceStatus[];
+    attendanceStatusSelected: attendanceStatus | null;
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
 }
 

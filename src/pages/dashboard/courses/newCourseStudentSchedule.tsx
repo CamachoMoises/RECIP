@@ -36,6 +36,7 @@ import toast from 'react-hot-toast';
 import { pdf } from '@react-pdf/renderer';
 import { getLogoBase64 } from '../../../utils/logoBase64'; // ajusta el path
 import PDFCourseScheduleDocument from './PDFCourseScheduleDocument';
+import SearchableParticipantSelect from './SearchableParticipantSelect';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -73,6 +74,7 @@ const NewCourseStudentSchedule = () => {
 		course.courseStudent?.regulation || 1,
 	);
 	const studentSelectRef = useRef<user | null>(null);
+	const instructorCodeRef = useRef<string>('');
 
 	// State
 	const [open, setOpen] = useState(1);
@@ -159,6 +161,7 @@ const NewCourseStudentSchedule = () => {
 					typeTrip: typeTripRef.current,
 					license: licenseRef.current,
 					regulation: regulationRef.current,
+					instructorCode: instructorCodeRef.current,
 				}),
 			);
 		}
@@ -201,6 +204,8 @@ const NewCourseStudentSchedule = () => {
 			typeTripRef.current = course.courseStudent.type_trip;
 			licenseRef.current = course.courseStudent.license;
 			regulationRef.current = course.courseStudent.regulation;
+			instructorCodeRef.current =
+				course.courseStudent.instructor_code || '';
 		}
 	}, [course.courseStudent, user.studentList]);
 
@@ -273,26 +278,43 @@ const NewCourseStudentSchedule = () => {
 					<div className="grid grid-cols-1 lg:grid-cols-7 gap-2 sm:gap-4 py-2">
 						<div className="lg:col-span-3">
 							<div className="mb-4">
-								<Select
-									label="Seleccionar Piloto"
+								<SearchableParticipantSelect
 									disabled={
 										course.courseStudent?.approve || !canViewContent
 									}
-									value={`${studentSelect?.student?.id}`}
-									onChange={handlePilot}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									{user.studentList.map((pilot) => (
-										<Option
-											key={pilot.student?.id}
-											value={`${pilot.student?.id}`}
-										>
-											{pilot.name} {pilot.last_name}
-										</Option>
-									))}
-								</Select>
+									value={
+										studentSelect
+											? {
+													student_id: studentSelect.student?.id ?? -1,
+													name: `${studentSelect.name} ${studentSelect.last_name}`,
+													email: studentSelect.email ?? '',
+												}
+											: null
+									}
+									onChange={(searched) => {
+										// Buscar en studentList por student_id para mantener compatibilidad
+										const found = user.studentList.find(
+											(u) => u.student?.id === searched.student_id,
+										);
+										if (found) {
+											setStudentSelect(found);
+											studentSelectRef.current = found;
+										} else {
+											// Si no está en la lista local, construir un user mínimo
+											setStudentSelect({
+												student: { id: searched.student_id },
+												name: searched.name,
+												email: searched.email,
+											} as any);
+											studentSelectRef.current = {
+												student: { id: searched.student_id },
+												name: searched.name,
+												email: searched.email,
+											} as any;
+										}
+										handleChange();
+									}}
+								/>
 							</div>
 
 							{studentSelect && (
@@ -340,6 +362,27 @@ const NewCourseStudentSchedule = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							/>
+
+							<div className="mt-4">
+								<Input
+									label="Código"
+									maxLength={15}
+									disabled={
+										course.courseStudent?.approve || !canViewContent
+									}
+									defaultValue={
+										course.courseStudent?.instructor_code || ''
+									}
+									onChange={(e) => {
+										instructorCodeRef.current = e.target.value;
+										handleChange();
+									}}
+									crossOrigin={undefined}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								/>
+							</div>
 						</div>
 
 						{/* Course Options */}

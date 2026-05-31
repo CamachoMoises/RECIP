@@ -2,12 +2,19 @@ import {
 	Accordion,
 	AccordionBody,
 	AccordionHeader,
+	Button,
 	Card,
 	CardBody,
+	Option,
+	Select,
+	Textarea,
 	Typography,
 } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
-import { breadCrumbsItems } from '../../../types/utilities';
+import {
+	breadCrumbsItems,
+	attendance,
+} from '../../../types/utilities';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../../store';
 import {
@@ -20,11 +27,19 @@ import {
 	fetchInstructors,
 	fetchStudents,
 } from '../../../features/userSlice';
+import {
+	fetchAttendances,
+	fetchAttendanceStatuses,
+	createAttendance,
+	updateAttendance,
+} from '../../../features/attendanceSlice';
 import PageTitle from '../../../components/PageTitle';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
+import { PermissionsValidate } from '../../../services/permissionsValidate';
+import toast from 'react-hot-toast';
 import moment from 'moment';
-import { Calendar, Clock, User } from 'lucide-react';
+import { Calendar, Clock, User, Edit2, Save, X } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
 const breadCrumbs: breadCrumbsItems[] = [
@@ -44,8 +59,17 @@ const ViewCourseStudentSchedule = () => {
 		id: string;
 		course_id: string;
 	}>();
-	const [open, setOpen] = useState(1);
+	const canEditAttendance = PermissionsValidate(['staff']);
+	const [openAccordions, setOpenAccordions] = useState<number[]>([1]);
 	const [dataLoaded, setDataLoaded] = useState(false);
+	const [selectedAttendanceStatus, setSelectedAttendanceStatus] =
+		useState<number>(1);
+	const [attendanceComments, setAttendanceComments] =
+		useState<string>('');
+	const [editingAttendanceId, setEditingAttendanceId] = useState<
+		number | null
+	>(null);
+	const [isSaving, setIsSaving] = useState(false);
 
 	useEffect(() => {
 		const loadData = async () => {
@@ -66,6 +90,13 @@ const ViewCourseStudentSchedule = () => {
 					dispatch(fetchInstructors({ status: true })),
 					dispatch(fetchStudents({ status: true })),
 					dispatch(fetchSchedule(courseStudentId)),
+					dispatch(fetchAttendanceStatuses()),
+					dispatch(
+						fetchAttendances({
+							course_student_id: courseStudentId,
+							pageSize: 100,
+						}),
+					),
 				]);
 				setDataLoaded(true);
 			}
@@ -74,16 +105,25 @@ const ViewCourseStudentSchedule = () => {
 		loadData();
 	}, [dispatch, id, course_id]);
 
-	const { course, subject, user } = useSelector(
+	const { course, subject, user, attendance } = useSelector(
 		(state: RootState) => ({
 			course: state.courses,
 			subject: state.subjects,
 			user: state.users,
+			attendance: state.attendance,
 		}),
 	);
 
-	const handleOpen = (value: number) =>
-		setOpen(open === value ? 0 : value);
+	const handleToggleAccordion = (accordionId: number) => {
+		setOpenAccordions((prev) =>
+			prev.includes(accordionId)
+				? prev.filter((id) => id !== accordionId)
+				: [...prev, accordionId],
+		);
+	};
+
+	const isAccordionOpen = (accordionId: number) =>
+		openAccordions.includes(accordionId);
 
 	const studentFromCourse = course.courseStudent?.student;
 	const studentFromList = studentFromCourse?.id
@@ -142,6 +182,99 @@ const ViewCourseStudentSchedule = () => {
 		);
 		if (!instructor) return 'No asignado';
 		return `${instructor.name} ${instructor.last_name}`;
+	};
+
+	const getAttendanceForDate = (date: string) => {
+		const dateStr = moment(date).format('YYYY-MM-DD');
+		return attendance.attendanceList?.find(
+			(a) => moment(a.date).format('YYYY-MM-DD') === dateStr,
+		);
+	};
+
+	const getAttendanceStatusLabel = (statusId: number | undefined) => {
+		const status = attendance.attendanceStatusList.find(
+			(s) => s.id === statusId,
+		);
+		return status ? status.name : '-';
+	};
+
+	const getAttendanceStatusColor = (statusId: number | undefined) => {
+		const statusName = attendance.attendanceStatusList
+			.find((s) => s.id === statusId)
+			?.name.toLowerCase();
+		switch (statusName) {
+			case 'presente':
+				return 'text-green-700 bg-green-100';
+			case 'ausente':
+				return 'text-red-700 bg-red-100';
+			case 'tarde':
+				return 'text-orange-700 bg-orange-100';
+			case 'excusado':
+				return 'text-blue-700 bg-blue-100';
+			default:
+				return 'text-gray-700 bg-gray-100';
+		}
+	};
+
+	const handleSaveAttendance = async (scheduleDate: string) => {
+		if (!course.courseStudent?.id) return;
+
+		setIsSaving(true);
+		const existingAttendance = getAttendanceForDate(scheduleDate);
+
+		try {
+			if (existingAttendance) {
+				await dispatch(
+					updateAttendance({
+						id: existingAttendance.id,
+						course_student_id: course.courseStudent.id,
+						date: scheduleDate,
+						attendance_status_id: selectedAttendanceStatus,
+						comments: attendanceComments,
+					}),
+				).unwrap();
+				toast.success('Asistencia actualizada');
+			} else {
+				await dispatch(
+					createAttendance({
+						course_student_id: course.courseStudent.id,
+						date: scheduleDate,
+						attendance_status_id: selectedAttendanceStatus,
+						comments: attendanceComments,
+					}),
+				).unwrap();
+				toast.success('Asistencia guardada');
+			}
+
+			await dispatch(
+				fetchAttendances({
+					course_student_id: course.courseStudent.id,
+					pageSize: 100,
+				}),
+			);
+
+			setEditingAttendanceId(null);
+			setSelectedAttendanceStatus(1);
+			setAttendanceComments('');
+		} catch (error: any) {
+			toast.error(error?.message || 'Error al guardar asistencia');
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	const handleEditAttendance = (attendanceRecord: attendance) => {
+		setEditingAttendanceId(attendanceRecord.id);
+		setSelectedAttendanceStatus(
+			attendanceRecord.attendance_status_id,
+		);
+		setAttendanceComments(attendanceRecord.comments || '');
+	};
+
+	const handleCancelEdit = () => {
+		setEditingAttendanceId(null);
+		setSelectedAttendanceStatus(1);
+		setAttendanceComments('');
 	};
 
 	const days = course.courseSelected
@@ -419,13 +552,13 @@ const ViewCourseStudentSchedule = () => {
 					<hr className="my-4" />
 
 					<Accordion
-						open={open === 1}
+						open={isAccordionOpen(1)}
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
 						<AccordionHeader
-							onClick={() => handleOpen(1)}
+							onClick={() => handleToggleAccordion(1)}
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -591,13 +724,13 @@ const ViewCourseStudentSchedule = () => {
 
 					{course.courseStudent?.score && (
 						<Accordion
-							open={open === 2}
+							open={isAccordionOpen(2)}
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
 							<AccordionHeader
-								onClick={() => handleOpen(2)}
+								onClick={() => handleToggleAccordion(2)}
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -695,6 +828,309 @@ const ViewCourseStudentSchedule = () => {
 											{course.courseSelected?.days || 0} días
 										</Typography>
 									</div>
+								</div>
+							</AccordionBody>
+						</Accordion>
+					)}
+
+					{canEditAttendance && (
+						<Accordion
+							open={isAccordionOpen(3)}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<AccordionHeader
+								onClick={() => handleToggleAccordion(3)}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<div className="flex items-center gap-2">
+									<User className="w-5 h-5" />
+									Control de Asistencia
+								</div>
+							</AccordionHeader>
+							<AccordionBody>
+								<div className="space-y-4">
+									<div className="flex flex-wrap gap-3 mb-4">
+										{attendance.attendanceStatusList.map((status) => (
+											<div
+												key={status.id}
+												className={`px-3 py-1 rounded-full text-sm font-medium ${getAttendanceStatusColor(status.id)}`}
+											>
+												{status.name}
+											</div>
+										))}
+									</div>
+
+									{course.scheduleList.length > 0 ? (
+										course.scheduleList.map((schedule, index) => {
+											const existingAttendance = getAttendanceForDate(
+												schedule.date,
+											);
+											const isEditing =
+												editingAttendanceId ===
+												existingAttendance?.id;
+											const subjectName =
+												subject.subjectList.find(
+													(s) => s.id === schedule.subject_id,
+												)?.name || 'Sin materia';
+
+											return (
+												<Card
+													key={`${schedule.id}-${index}`}
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+													className={`${existingAttendance ? 'border-l-4 border-l-green-500' : ''}`}
+												>
+													<CardBody
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+													>
+														<div className="flex flex-col gap-3">
+															<div className="flex items-center justify-between flex-wrap gap-2">
+																<div className="flex items-center gap-3 flex-wrap">
+																	<Calendar className="w-5 h-5 text-blue-500" />
+																	<Typography
+																		variant="h6"
+																		className="text-sm"
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																	>
+																		{moment(schedule.date).format(
+																			'DD/MM/YYYY',
+																		)}
+																	</Typography>
+																	<Clock className="w-4 h-4 text-orange-500" />
+																	<Typography
+																		variant="small"
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																	>
+																		{schedule.hour || ''}
+																	</Typography>
+																</div>
+
+																{existingAttendance && !isEditing && (
+																	<div
+																		className={`px-3 py-1 rounded-full text-sm font-medium ${getAttendanceStatusColor(existingAttendance.attendance_status_id)}`}
+																	>
+																		{getAttendanceStatusLabel(
+																			existingAttendance.attendance_status_id,
+																		)}
+																	</div>
+																)}
+															</div>
+
+															<Typography
+																variant="small"
+																className="text-gray-600"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+															>
+																{subjectName}
+															</Typography>
+
+															{isEditing || !existingAttendance ? (
+																<div className="space-y-3 mt-2">
+																	<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+																		<div>
+																			<Typography
+																				variant="small"
+																				className="font-bold"
+																				placeholder={undefined}
+																				onPointerEnterCapture={
+																					undefined
+																				}
+																				onPointerLeaveCapture={
+																					undefined
+																				}
+																			>
+																				Estado
+																			</Typography>
+																			<Select
+																				value={selectedAttendanceStatus.toString()}
+																				onChange={(val) =>
+																					val &&
+																					setSelectedAttendanceStatus(
+																						parseInt(val),
+																					)
+																				}
+																				placeholder={undefined}
+																				onPointerEnterCapture={
+																					undefined
+																				}
+																				onPointerLeaveCapture={
+																					undefined
+																				}
+																				labelProps={{
+																					placeholder: undefined,
+																					onPointerEnterCapture:
+																						undefined,
+																					onPointerLeaveCapture:
+																						undefined,
+																				}}
+																			>
+																				{attendance.attendanceStatusList.map(
+																					(status) => (
+																						<Option
+																							key={status.id}
+																							value={status.id.toString()}
+																						>
+																							{status.name}
+																						</Option>
+																					),
+																				)}
+																			</Select>
+																		</div>
+																	</div>
+
+																	<div>
+																		<Typography
+																			variant="small"
+																			className="font-bold"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			Comentarios
+																		</Typography>
+																		<Textarea
+																			value={attendanceComments}
+																			onChange={(e) =>
+																				setAttendanceComments(
+																					e.target.value,
+																				)
+																			}
+																			rows={2}
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																			labelProps={{
+																				placeholder: undefined,
+																				onPointerEnterCapture:
+																					undefined,
+																				onPointerLeaveCapture:
+																					undefined,
+																			}}
+																		/>
+																	</div>
+
+																	<div className="flex gap-2">
+																		<Button
+																			size="sm"
+																			color="green"
+																			onClick={() =>
+																				handleSaveAttendance(
+																					schedule.date,
+																				)
+																			}
+																			disabled={isSaving}
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																			className="flex items-center gap-2"
+																		>
+																			<Save className="w-4 h-4" />
+																			{isSaving
+																				? 'Guardando...'
+																				: existingAttendance
+																					? 'Actualizar'
+																					: 'Guardar'}
+																		</Button>
+																		{isEditing && (
+																			<Button
+																				size="sm"
+																				color="gray"
+																				onClick={handleCancelEdit}
+																				placeholder={undefined}
+																				onPointerEnterCapture={
+																					undefined
+																				}
+																				onPointerLeaveCapture={
+																					undefined
+																				}
+																				className="flex items-center gap-2"
+																			>
+																				<X className="w-4 h-4" />
+																				Cancelar
+																			</Button>
+																		)}
+																	</div>
+																</div>
+															) : (
+																<div className="mt-2 space-y-2">
+																	{existingAttendance.comments && (
+																		<Typography
+																			variant="small"
+																			className="italic text-gray-600"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			<span className="font-semibold">
+																				Comentarios:
+																			</span>{' '}
+																			"{existingAttendance.comments}"
+																		</Typography>
+																	)}
+																	<Button
+																		size="sm"
+																		color="blue"
+																		variant="text"
+																		onClick={() =>
+																			handleEditAttendance(
+																				existingAttendance,
+																			)
+																		}
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		className="flex items-center gap-2"
+																	>
+																		<Edit2 className="w-4 h-4" />
+																		Editar
+																	</Button>
+																</div>
+															)}
+														</div>
+													</CardBody>
+												</Card>
+											);
+										})
+									) : (
+										<Typography
+											variant="paragraph"
+											className="text-center text-gray-500 italic py-8"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											No hay fechas programadas para este curso
+										</Typography>
+									)}
 								</div>
 							</AccordionBody>
 						</Accordion>

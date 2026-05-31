@@ -30,7 +30,7 @@ const iconItems: Array<{
 		icon: UserRound,
 		permission: ['staff'],
 		route: 'users',
-		color: 'from-blue-600 to-blue-800',
+		color: 'from-indigo-600 to-indigo-800',
 	},
 	{
 		id: 'courses',
@@ -46,7 +46,7 @@ const iconItems: Array<{
 		icon: Mailbox,
 		permission: ['instructor', 'student', 'staff'],
 		route: 'suggestions',
-		color: 'from-violet-600 to-violet-800',
+		color: 'from-pink-600 to-pink-800',
 	},
 	{
 		id: 'students',
@@ -62,14 +62,14 @@ const iconItems: Array<{
 		icon: Presentation,
 		permission: ['instructor', 'staff'],
 		route: 'instructors',
-		color: 'from-violet-600 to-violet-800',
+		color: 'from-teal-600 to-teal-800',
 	},
 	{
 		id: 'records',
-		title: 'Registros',
+		title: 'Reportes',
 		icon: NotebookText,
 		permission: ['super_user'],
-		route: null,
+		route: 'reports',
 		color: 'from-amber-600 to-amber-800',
 	},
 	{

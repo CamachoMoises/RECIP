@@ -36,6 +36,7 @@ const manualRoutes = {
 		courses: 'manual_courses',
 		new_course: 'manual_new_course',
 		config: 'manual_config',
+		reports: 'manual_reports',
 		test: 'manual_test',
 		assessment: 'manual_assessment',
 		_: 'manual_dashboard',
@@ -70,7 +71,7 @@ const NavBar = () => {
 
 	// Scroll shrink
 	useEffect(() => {
-		const handleScroll = () => setScrolled(window.scrollY >= 250);
+		const handleScroll = () => setScrolled(window.scrollY >= 80);
 		window.addEventListener('scroll', handleScroll, {
 			passive: true,
 		});
@@ -137,31 +138,15 @@ const NavBar = () => {
 
 	return (
 		<>
-			<div
-				className={`fixed top-2 z-50 left-[1%] w-[98%] glass-card-dark transition-all duration-300 ${
-					scrolled ? 'top-1' : 'top-2'
-				}`}
-			>
-				<div
-					className={`
-                        w-full
-                        bg-[var(--color-background-primary)]
-                        shadow-sm
-                        transition-all duration-300 ease-in-out
-                        ${scrolled ? 'rounded-xl px-4 py-2' : 'rounded-2xl px-5 py-3'}
-                    `}
-				>
+			<div className="navbar">
+				<div className="navbar-content">
 					<div className="flex items-center justify-between gap-4">
 						{/* Logo */}
 						<a
 							href="/dashboard"
 							className="flex items-center gap-2 shrink-0"
 						>
-							<div
-								className={`bg-[var(--color-background-secondary)] border  rounded-xl flex items-center justify-center transition-all duration-300 ${
-									scrolled ? 'w-8 h-8' : 'w-12 h-12'
-								}`}
-							>
+							<div className="navbar-logo">
 								<img
 									src="/images/logo.png"
 									alt="Logo RECIP"
@@ -194,7 +179,7 @@ const NavBar = () => {
 								{/* Theme toggle */}
 								<button
 									onClick={toggleTheme}
-									className={`border border-[var(--glass-border)] rounded-lg flex items-center justify-center text-blue-200 hover:bg-white/10 transition-colors ${scrolled ? 'p-1.5' : 'p-2'}`}
+									className="navbar-button"
 									aria-label="Cambiar tema"
 								>
 									{theme === 'dark' ? (
@@ -208,7 +193,7 @@ const NavBar = () => {
 								<Popover placement="bottom-end">
 									<PopoverHandler>
 										<button
-											className={`border border-[var(--glass-border)] rounded-lg flex items-center justify-center text-blue-200 hover:bg-white/10 transition-colors ${scrolled ? 'p-1.5' : 'p-2'}`}
+											className="navbar-button"
 											aria-label="Ayuda"
 										>
 											<HelpCircle size={scrolled ? 14 : 16} />
@@ -264,17 +249,11 @@ const NavBar = () => {
 								{/* User menu */}
 								<Menu>
 									<MenuHandler>
-										<button
-											className={`flex items-center gap-2 rounded-lg hover:bg-[var(--color-background-secondary)] transition-colors ${scrolled ? 'px-2 py-1' : 'px-3 py-1.5'}`}
-										>
-											<div
-												className={`rounded-full bg-blue-500/30 flex items-center justify-center font-medium text-blue-200 shrink-0 ${scrolled ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'}`}
-											>
+										<button className="navbar-user-menu">
+											<div className="navbar-user-avatar">
 												{userInitials}
 											</div>
-											<span
-												className={`font-medium nav-text ${scrolled ? 'text-xs' : 'text-sm'}`}
-											>
+											<span className="navbar-user-name">
 												{userName}
 											</span>
 											<ChevronDown
@@ -304,7 +283,7 @@ const NavBar = () => {
 								{/* Logout */}
 								<button
 									onClick={handleLogout}
-									className={`border border-[#F7C1C1] rounded-lg flex items-center justify-center text-[#A32D2D] hover:bg-[#FCEBEB] transition-colors ${scrolled ? 'p-1.5' : 'p-2'}`}
+									className="navbar-button"
 									aria-label="Cerrar sesión"
 								>
 									<DoorOpen size={scrolled ? 14 : 16} />
@@ -330,9 +309,7 @@ const NavBar = () => {
 							<div className="flex flex-col gap-2 pt-3 mt-3 ">
 								{/* User info */}
 								<div className="flex items-center gap-3 p-3 bg-[var(--color-background-secondary)] rounded-xl">
-									<div
-										className={`rounded-full bg-blue-500/30 flex items-center justify-center font-medium text-blue-200 shrink-0 ${scrolled ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'}`}
-									>
+									<div className="navbar-user-avatar">
 										{userInitials}
 									</div>
 									<div>
@@ -359,9 +336,7 @@ const NavBar = () => {
 									onClick={toggleTheme}
 									className="flex items-center justify-between p-3 rounded-xl hover:bg-[var(--color-background-secondary)] transition-colors"
 								>
-									<div
-										className={`border border-[var(--glass-border)] rounded-lg flex items-center justify-center text-blue-200 hover:bg-white/10 transition-colors ${scrolled ? 'p-1.5' : 'p-2'}`}
-									>
+									<div className="border border-[var(--glass-border)] rounded-lg flex items-center justify-center text-blue-200 hover:bg-white/10 transition-colors p-2">
 										{theme === 'dark' ? (
 											<Sun size={16} />
 										) : (
@@ -369,7 +344,7 @@ const NavBar = () => {
 										)}
 										{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
 									</div>
-									<div className="w-9 h-5 bg-blue-500 rounded-full relative">
+									<div className="w-5 h-9 bg-blue-500 rounded-full relative">
 										<div
 											className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${theme === 'dark' ? 'left-0.5' : 'left-4'}`}
 										/>
@@ -379,7 +354,7 @@ const NavBar = () => {
 								{/* Manual */}
 								<button
 									onClick={() => downloadManual('page')}
-									className={`border border-[var(--glass-border)] rounded-lg flex items-center justify-center text-blue-200 hover:bg-white/10 transition-colors ${scrolled ? 'p-1.5' : 'p-2'}`}
+									className="border border-[var(--glass-border)] rounded-lg flex items-center justify-center text-blue-200 hover:bg-white/10 transition-colors p-2"
 								>
 									<HelpCircle
 										size={16}
@@ -406,9 +381,7 @@ const NavBar = () => {
 				</div>
 			</div>
 
-			<div
-				className={`transition-all duration-300 ${scrolled ? 'h-10' : 'h-16'}`}
-			/>
+			<div className="navbar-spacer" />
 		</>
 	);
 };

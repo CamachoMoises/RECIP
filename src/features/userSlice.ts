@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from '../services/axios';
-import { StatusParam, UserState, user, suggestion } from '../types/utilities';
+import { StatusParam, UserState, user, suggestion, searchedStudentItem } from '../types/utilities';
 
 
 
@@ -11,6 +11,7 @@ const initialState: UserState = {
 	usersList: [],
 	studentList: [],
 	instructorList: [],
+	searchedStudent: [],
 	suggestionList: [],
 	suggestionSelected: null,
 	error: null,
@@ -70,6 +71,18 @@ export const fetchInstructors = createAsyncThunk<user[], StatusParam | undefined
 		try {
 			const response = await axiosGetSlice(`api/users/instructor`, params);
 			return response;
+		} catch (error: any) {
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const fetchSearchedStudent = createAsyncThunk<searchedStudentItem[], string>(
+	'user/fetchSearchedStudent',
+	async (search, { rejectWithValue }) => {
+		try {
+			const response = await axiosGetSlice('api/users/student/search', { search: search, limit: 20 });
+			return response.data;
 		} catch (error: any) {
 			return rejectWithValue(error.message);
 		}
@@ -264,6 +277,18 @@ const userSlice = createSlice({
 				state.status = 'failed';
 				state.error = action.payload as string;
 			})
+			// Reducers para la acción fetchSearchedStudent
+			.addCase(fetchSearchedStudent.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(fetchSearchedStudent.fulfilled, (state, action: PayloadAction<searchedStudentItem[]>) => {
+				state.status = 'succeeded';
+				state.searchedStudent = action.payload;
+			})
+			.addCase(fetchSearchedStudent.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload as string;
+			})
 			// Reducers para la acción createUser
 			.addCase(createUser.pending, (state) => {
 				state.status = 'loading';
@@ -320,7 +345,7 @@ const userSlice = createSlice({
 					state.usersList[index] = action.payload;
 				}
 			})
-.addCase(userInstructor.rejected, (state, action) => {
+			.addCase(userInstructor.rejected, (state, action) => {
 				state.status = 'failed';
 				state.error = action.payload as string;
 			})
