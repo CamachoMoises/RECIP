@@ -181,12 +181,13 @@ const ViewCourseStudentSchedule = () => {
 		loadData();
 	}, [dispatch, id, course_id]);
 
-	const { course, subject, user, attendance } = useSelector(
+	const { course, subject, user, attendance, auth } = useSelector(
 		(state: RootState) => ({
 			course: state.courses,
 			subject: state.subjects,
 			user: state.users,
 			attendance: state.attendance,
+			auth: state.auth,
 		}),
 	);
 
@@ -1244,7 +1245,12 @@ const ViewCourseStudentSchedule = () => {
 																				disabled={
 																					!moment(
 																						firstSchedule.date,
-																					).isSame(moment(), 'day')
+																					).isSame(moment(), 'day') ||
+																					auth.user?.id !==
+																						course
+																							.courseStudent
+																							?.student
+																							?.user_id
 																				}
 																			/>
 																		)}
