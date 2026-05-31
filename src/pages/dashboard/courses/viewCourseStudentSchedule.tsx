@@ -1243,14 +1243,12 @@ const ViewCourseStudentSchedule = () => {
 																					existingAttendance.id
 																				}
 																				disabled={
-																					!moment(
-																						firstSchedule.date,
-																					).isSame(moment(), 'day') ||
+																					// !moment(
+																					// 	firstSchedule.date,
+																					// ).isSame(moment(), 'day') &&
 																					auth.user?.id !==
-																						course
-																							.courseStudent
-																							?.student
-																							?.user_id
+																					course.courseStudent
+																						?.student?.user_id
 																				}
 																			/>
 																		)}
