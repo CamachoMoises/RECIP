@@ -15,7 +15,7 @@ import {
 	breadCrumbsItems,
 	attendance,
 } from '../../../types/utilities';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { RootState, AppDispatch } from '../../../store';
 import {
 	fetchCourse,
@@ -189,6 +189,7 @@ const ViewCourseStudentSchedule = () => {
 			attendance: state.attendance,
 			auth: state.auth,
 		}),
+		shallowEqual,
 	);
 
 	const handleToggleAccordion = (accordionId: number) => {

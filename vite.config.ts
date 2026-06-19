@@ -6,6 +6,10 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@react-pdf/renderer'],
   },
+  define: {
+    // Suppress MT v2 DOM prop warnings in development
+    __SUPPRESS_MT_WARNINGS__: true,
+  },
   build: {
     commonjsOptions: {
       include: [/node_modules/],

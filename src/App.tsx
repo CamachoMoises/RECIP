@@ -17,7 +17,7 @@ import NotFound from './pages/notFound';
 function App() {
 	return (
 		<div>
-			<Router>
+			<Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
 				<NavBar />
 				<div className="flex flex-col  gap-3">
 					<div className="content">

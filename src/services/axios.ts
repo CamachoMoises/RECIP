@@ -139,6 +139,25 @@ export async function axiosPutSlice(ruta: string, data: any = {}) {
     }
 }
 
+export async function axiosDeleteSlice(ruta: string) {
+    const token = store.getState().auth.token;
+    const axiosInstance = axios.create({
+        timeout: 50000,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    try {
+        const res = await axiosInstance.delete(
+            `${apiUrl}/${ruta}`
+        );
+        return res.data
+    } catch (error: any) {
+        handleError(error)
+    }
+}
+
 const handleError = (error: any) => {
     console.log('Error GET Axios OJO!', error?.response?.status,);
     if (error?.response?.status === 403) {

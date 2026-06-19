@@ -250,6 +250,20 @@ export interface user {
     updatedAt?: string;
 }
 
+export type courseGroup = {
+    id: number;
+    title: string;
+    code: string;
+    user_code?: string | null;
+    date?: string | null;
+    signature_url?: string | null;
+    course_id?: number | null;
+    course?: course | null;
+    course_students?: courseStudent[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export type courseStudent = {
     id: number;
     course_id: number;
@@ -270,6 +284,8 @@ export type courseStudent = {
     status?: boolean;
     max_attempts: number | null;
     instructor_code?: string;
+    courseGroupId?: number | null;
+    courseGroup?: courseGroup | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -452,6 +468,14 @@ export interface SignatureUrls {
     instructor?: string;
     fcaa?: string;
 }
+export interface CourseGroupState {
+    courseGroupList: courseGroup[];
+    courseGroupSelected: courseGroup | null;
+    courseGroupStudents: courseStudent[];
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+}
+
 export interface CourseState {
     courseList: course[];
     day: number;

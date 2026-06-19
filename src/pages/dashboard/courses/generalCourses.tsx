@@ -46,6 +46,7 @@ import {
 } from '../../../features/userSlice';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import toast from 'react-hot-toast';
+import CourseGroupsSection from './courseGroupsSection';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -203,7 +204,7 @@ const GeneralCourses = () => {
 		}
 	};
 
-	if (status === 'loading') {
+	if (status === 'loading' && !courseStudentList) {
 		return (
 			<>
 				<LoadingPage />
@@ -351,8 +352,10 @@ const GeneralCourses = () => {
 								</div>
 							</CardBody>
 						</Card>
-					</Collapse>
+				</Collapse>
 				)}
+
+				<CourseGroupsSection />
 
 				<div className="flex flex-col pt-4">
 					<Card
@@ -422,7 +425,7 @@ const GeneralCourses = () => {
 								</div>
 							)}
 
-							{courseStudentList?.length === 0 ? (
+							{!courseStudentList || courseStudentList.length === 0 ? (
 								<>
 									<Typography
 										variant="h2"
@@ -440,7 +443,7 @@ const GeneralCourses = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									{courseStudentList?.map((CL) => (
+									{courseStudentList.map((CL) => (
 										<ListItem
 											key={`${CL.id}.courseList`}
 											placeholder={undefined}

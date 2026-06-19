@@ -19,7 +19,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { breadCrumbsItems, user } from '../../../types/utilities';
 import { AppDispatch, RootState } from '../../../store';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import { updateCourseStudent } from '../../../features/courseSlice';
 import PageTitle from '../../../components/PageTitle';
 import LoadingPage from '../../../components/LoadingPage';
@@ -59,6 +59,7 @@ const NewCourseStudentSchedule = () => {
 			subject: state.subjects,
 			user: state.users,
 		}),
+		shallowEqual,
 	);
 
 	// Refs
@@ -771,7 +772,7 @@ const NewCourseStudentSchedule = () => {
 							Resultados
 						</AccordionHeader>
 						<AccordionBody>
-							{course.courseStudent?.score && (
+							{course.courseStudent?.score ? (
 								<div className="space-y-4">
 									{course.courseStudent.approve && (
 										<Typography
@@ -907,6 +908,16 @@ const NewCourseStudentSchedule = () => {
 										</div>
 									</div>
 								</div>
+							) : (
+								<Typography
+									variant="small"
+									color="gray"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									No hay resultados disponibles
+								</Typography>
 							)}
 						</AccordionBody>
 					</Accordion>
