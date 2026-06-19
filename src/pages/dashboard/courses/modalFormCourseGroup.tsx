@@ -26,6 +26,7 @@ type Inputs = {
 	date: string;
 	user_code: string;
 	course_id: string;
+	status: boolean;
 };
 
 const ModalFormCourseGroup = ({
@@ -58,6 +59,7 @@ const ModalFormCourseGroup = ({
 			date: '',
 			user_code: '',
 			course_id: '',
+			status: true,
 		},
 		mode: 'onChange',
 	});
@@ -75,6 +77,7 @@ const ModalFormCourseGroup = ({
 					course_id: courseGroupSelected.course_id
 						? courseGroupSelected.course_id.toString()
 						: '',
+					status: courseGroupSelected.status ?? true,
 				});
 			} else {
 				reset({
@@ -82,6 +85,7 @@ const ModalFormCourseGroup = ({
 					date: '',
 					user_code: '',
 					course_id: '',
+					status: true,
 				});
 			}
 		}
@@ -109,10 +113,12 @@ const ModalFormCourseGroup = ({
 				date?: string;
 				user_code?: string;
 				course_id?: number;
+				status?: boolean;
 			} = {
 				title: data.title,
 				date: data.date || undefined,
 				user_code: data.user_code || undefined,
+				status: data.status,
 			};
 			if (!courseGroupSelected && data.course_id) {
 				payload.course_id = parseInt(data.course_id);
@@ -236,7 +242,7 @@ const ModalFormCourseGroup = ({
 										key={course.id}
 										value={course.id!.toString()}
 									>
-										{course.name}
+										{course.name}-{course.code}
 									</Option>
 								))}
 							</Select>
@@ -270,6 +276,30 @@ const ModalFormCourseGroup = ({
 								{...register('date')}
 							/>
 						</div>
+						<div className="flex items-center gap-2">
+							<input
+								type="checkbox"
+								id="status"
+								{...register('status')}
+								className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+							/>
+							<label
+								htmlFor="status"
+								className="text-sm font-medium text-gray-700"
+							>
+								Grupo activo
+							</label>
+						</div>
+						<Typography
+							variant="small"
+							color="gray"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Desmarcar para deshabilitar el grupo (no se mostrará en
+							listas por defecto)
+						</Typography>
 					</div>
 				</DialogBody>
 				<DialogFooter

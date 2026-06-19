@@ -18,7 +18,7 @@ Aviation training management system (Registro de Evaluación, Capacitación e In
 ```
 src/
   components/       # Shared: NavBar, PageTitle, LoadingPage, ErrorPage, scrollTop, ThemeInitializer, countDown
-  features/         # Redux slices: authSlice, courseSlice, subjectSlice, testSlice, assessmentSlice, userSlice, themeSlice, counterSlice
+  features/         # Redux slices: authSlice, courseSlice, subjectSlice, testSlice, assessmentSlice, userSlice, themeSlice, counterSlice, courseGroupSlice
   hooks/            # Custom hooks: useTheme
   lib/              # Utilities: utils.ts (cn helper)
   pages/            # Route pages
@@ -29,7 +29,7 @@ src/
       icons.tsx     # Dashboard home icon grid with permission-based visibility
       register/     # User registration
       users/        # Admin user management (usersTable, modalFormUser)
-      courses/      # Course scheduling (generalCourses, newCourseStudentSchedule, viewCourseStudentSchedule, PDF generation)
+      courses/      # Course scheduling (generalCourses, newCourseStudentSchedule, viewCourseStudentSchedule, PDF generation, courseGroupsSection, modalFormCourseGroup, modalAssignStudents)
       students/     # Pilot/participant management (tableStudents)
       instructors/  # Instructor management (tableInstructors)
       config/       # Course config, subjects, lessons, test questions management (generalConfig, courseDetail, questionType*, testList, etc.)
@@ -55,7 +55,7 @@ src/
 | `/` | Icons | Dashboard home with role-based navigation grid |
 | `users` | UsersTable | Admin user management (staff only) |
 | `register` | Register | User registration |
-| `courses` | GeneralCourses | Course scheduling & student course list |
+| `courses` | GeneralCourses | Course scheduling & student course list (includes CourseGroupsSection) |
 | `students` | TableStudents | Pilot/participant management (staff only) |
 | `instructors` | TableInstructors | Instructor management |
 | `config` | GeneralConfig | Course/subject/lesson/test config (staff only) |
@@ -79,13 +79,50 @@ src/
 - **Theme**: Dark/light mode via `useTheme` hook, CSS variables in `global.css`
 - **Breadcrumbs**: `<PageTitle>` component with breadcrumb array, used in most dashboard pages
 - **PDF**: Some pages use `@react-pdf/renderer` (`PDFCourseScheduleDocument.tsx`), others use `react-to-print`
+- **Course Groups**: Groups organize pilots by course (one course per group). Created via `modalFormCourseGroup` (course required, immutable after creation). Students assigned via `modalAssignStudents` (filtered by course, validated backend). API: `POST /api/course-groups`, `PUT /api/courses/:course_id/students` (assign student to group)
 
 ## Role System
 
 - `super_user`: Full access (Admin label shown)
-- `staff`: Admin panel, user management, config (Staff label shown)
-- `instructor`: Course scheduling, assessments, exams
+- `staff`: Admin panel, user management, config, course groups (Staff label shown)
+- `instructor`: Course scheduling, assessments, exams, course groups
 - `student`: View courses, take exams
+
+## Course Groups Feature
+
+**Purpose**: Organize pilots into groups for batch management (e.g., group assignments, reports).
+
+**Components**:
+- `courseGroupsSection.tsx` - Main UI (accordion list of groups)
+- `modalFormCourseGroup.tsx` - Create/edit group form
+- `modalAssignStudents.tsx` - Assign students to group
+
+**Redux**: `courseGroupSlice.ts` - Manages group state and API calls
+
+**Rules**:
+1. Each group belongs to **one course only** (course_id required on creation)
+2. Course **cannot be changed** after group creation (field disabled in edit mode)
+3. Only students enrolled in the **same course** can be assigned to the group
+4. Backend validates course match before assignment
+
+**API Endpoints**:
+- `POST /api/course-groups` - Create group (requires course_id, optional status: boolean)
+- `PUT /api/course-groups` - Update group (course_id excluded from payload, can update status)
+- `GET /api/course-groups` - List groups (optional course_id filter, optional status filter: `?status=false` shows inactive)
+- `PUT /api/courses/:course_id/students` - Assign student to group (body: { course_student_id, courseGroupId })
+- `DELETE /api/course-groups/:groupId/students?course_student_ids=:id` - Remove student from group
+
+**Status Feature**:
+- Groups have `status` field (boolean, default: true)
+- Inactive groups hidden by default (filter: `status=true`)
+- Toggle button (Power icon) to quickly enable/disable groups
+- Filter button to show/hide inactive groups
+- Visual indicators: gray background + "Inactivo" badge for inactive groups
+- Status can be changed in edit modal or via shortcut button
+
+**Validation**:
+- Frontend: Filters students by course_id in modal
+- Backend: Returns error "Student course does not match the group course" if mismatch
 
 ## Scripts
 

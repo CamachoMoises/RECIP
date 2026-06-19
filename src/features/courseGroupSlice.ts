@@ -10,11 +10,13 @@ const initialState: CourseGroupState = {
     error: null,
 };
 
-export const fetchCourseGroups = createAsyncThunk<courseGroup[], { course_id?: number }>(
+export const fetchCourseGroups = createAsyncThunk<courseGroup[], { course_id?: number; status?: boolean }>(
     'courseGroup/fetchCourseGroups',
-    async ({ course_id }, { rejectWithValue }) => {
+    async ({ course_id, status }, { rejectWithValue }) => {
         try {
-            const params = course_id ? { course_id } : {};
+            const params: { course_id?: number; status?: boolean } = {};
+            if (course_id !== undefined) params.course_id = course_id;
+            if (status !== undefined) params.status = status;
             const response = await axiosGetSlice('api/course-groups', params);
             return response.data || [];
         } catch (error: any) {
@@ -35,7 +37,7 @@ export const fetchCourseGroup = createAsyncThunk<courseGroup, number>(
     }
 );
 
-export const createCourseGroup = createAsyncThunk<courseGroup, { title: string; date?: string; user_code?: string; course_id?: number }>(
+export const createCourseGroup = createAsyncThunk<courseGroup, { title: string; date?: string; user_code?: string; course_id?: number; status?: boolean }>(
     'courseGroup/createCourseGroup',
     async (data, { rejectWithValue }) => {
         try {
@@ -47,11 +49,23 @@ export const createCourseGroup = createAsyncThunk<courseGroup, { title: string; 
     }
 );
 
-export const updateCourseGroup = createAsyncThunk<courseGroup, { id: number; title: string; date?: string; user_code?: string }>(
+export const updateCourseGroup = createAsyncThunk<courseGroup, { id: number; title?: string; date?: string; user_code?: string; status?: boolean }>(
     'courseGroup/updateCourseGroup',
     async (data, { rejectWithValue }) => {
         try {
             const response = await axiosPutSlice('api/course-groups', data);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const toggleCourseGroupStatus = createAsyncThunk<courseGroup, { id: number; status: boolean }>(
+    'courseGroup/toggleCourseGroupStatus',
+    async ({ id, status }, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutSlice('api/course-groups', { id, status });
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -178,6 +192,25 @@ const courseGroupSlice = createSlice({
                 }
             })
             .addCase(updateCourseGroup.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            .addCase(toggleCourseGroupStatus.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(toggleCourseGroupStatus.fulfilled, (state, action: PayloadAction<courseGroup>) => {
+                state.status = 'succeeded';
+                if (!Array.isArray(state.courseGroupList)) state.courseGroupList = [];
+                const index = state.courseGroupList.findIndex(g => g.id === action.payload.id);
+                if (index !== -1) {
+                    state.courseGroupList[index] = action.payload;
+                }
+                if (state.courseGroupSelected?.id === action.payload.id) {
+                    state.courseGroupSelected = action.payload;
+                }
+            })
+            .addCase(toggleCourseGroupStatus.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

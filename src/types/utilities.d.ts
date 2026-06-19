@@ -260,12 +260,14 @@ export type courseGroup = {
     course_id?: number | null;
     course?: course | null;
     course_students?: courseStudent[];
+    status?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }
 
 export type courseStudent = {
     id: number;
+    course_group_id?: number | null;
     course_id: number;
     course?: course
     student_id: number | null;

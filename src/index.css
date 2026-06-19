@@ -263,6 +263,7 @@ body {
 
 	.navbar-user-name {
 		font-weight: 500;
+		color: #90cdf4;
 		transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 		font-size: 0.875rem;
 	}

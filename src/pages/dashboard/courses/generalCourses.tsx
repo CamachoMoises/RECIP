@@ -3,9 +3,6 @@ import {
 	ButtonGroup,
 	Card,
 	CardBody,
-	List,
-	IconButton,
-	ListItem,
 	Typography,
 	Collapse,
 } from '@material-tailwind/react';
@@ -29,15 +26,7 @@ import {
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 
-import {
-	CalendarCheck,
-	ChevronLeft,
-	ChevronRight,
-	Trash2,
-	Check,
-	Eye,
-	Pencil,
-} from 'lucide-react';
+import { CalendarCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchSubjects } from '../../../features/subjectSlice';
 import {
@@ -47,6 +36,7 @@ import {
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import toast from 'react-hot-toast';
 import CourseGroupsSection from './courseGroupsSection';
+import CourseStudentsSection from './CourseStudentsSection';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -68,6 +58,8 @@ const GeneralCourses = () => {
 	} = useSelector((state: RootState) => {
 		return state.courses;
 	});
+	console.log(courseStudentList, 'datos');
+
 	const { userLogged } = useSelector(
 		(state: RootState) => state.users,
 	);
@@ -253,7 +245,7 @@ const GeneralCourses = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Agendar Nuevo Curso
+								Agendar piloto a un curso
 							</Button>
 						</CardBody>
 					</Card>
@@ -352,281 +344,52 @@ const GeneralCourses = () => {
 								</div>
 							</CardBody>
 						</Card>
-				</Collapse>
+					</Collapse>
 				)}
-
-				<CourseGroupsSection />
-
-				<div className="flex flex-col pt-4">
-					<Card
+				<Card
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+					className="mt-4"
+				>
+					<CardBody
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<CardBody
+						<Typography
+							variant="h5"
+							className="text-center lg:text-left text-sm sm:text-base md:text-lg"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<Typography
-								variant="h5"
-								className="text-center lg:text-left text-sm sm:text-base md:text-lg"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Cronogramas de Instrucion y Entrenamiento de
-								<br className="hidden lg:inline" />
-								Participantes
-							</Typography>
-							{canViewContent && (
-								<div className="flex flex-wrap justify-center gap-2 mb-4">
-									<Button
-										size="sm"
-										variant={
-											statusFilter === undefined
-												? 'filled'
-												: 'outlined'
-										}
-										color="blue"
-										onClick={() => setStatusFilter(undefined)}
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Todos
-									</Button>
-									<Button
-										size="sm"
-										variant={
-											statusFilter === true ? 'filled' : 'outlined'
-										}
-										color="green"
-										onClick={() => setStatusFilter(true)}
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Activos
-									</Button>
-									<Button
-										size="sm"
-										variant={
-											statusFilter === false ? 'filled' : 'outlined'
-										}
-										color="red"
-										onClick={() => setStatusFilter(false)}
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Inactivos
-									</Button>
-								</div>
-							)}
+							Cronogramas de Instrucion y Entrenamiento de
+							<br className="hidden lg:inline" />
+							Participantes
+						</Typography>
+					</CardBody>
+				</Card>
 
-							{!courseStudentList || courseStudentList.length === 0 ? (
-								<>
-									<Typography
-										variant="h2"
-										color="blue-gray"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Sin cursos agendados
-									</Typography>
-								</>
-							) : (
-								<List
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									{courseStudentList.map((CL) => (
-										<ListItem
-											key={`${CL.id}.courseList`}
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-											onClick={() => navigateViewCourseStudent(CL)}
-											className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 ${CL.status === false ? 'opacity-50' : ''}`}
-										>
-											<div className="min-w-0">
-												<Typography
-													variant="h6"
-													color="blue-gray"
-													className="truncate max-w-[150px] sm:max-w-none"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{CL.student?.user?.name
-														? `${CL.student.user.name} ${CL.student.user.last_name}`
-														: 'Sin Piloto'}
-												</Typography>
-												<Typography
-													variant="small"
-													color="gray"
-													className="font-normal truncate max-w-[200px] sm:max-w-none"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{CL.course?.name}{' '}
-													<span className="text-xs">
-														({CL.course?.course_level.name}-
-														{CL.course?.course_type.name})
-													</span>
-												</Typography>
-												<Typography
-													variant="small"
-													color="gray"
-													className="font-normal"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{CL.code}
-												</Typography>
-												{CL.instructor_code && (
-													<Typography
-														variant="small"
-														color="blue-gray"
-														className="font-normal mt-1"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														Código: {CL.instructor_code}
-													</Typography>
-												)}
-											</div>
-											<div
-												onClick={(e) => e.stopPropagation()}
-												className="flex items-center gap-1 sm:gap-2 shrink-0"
-											>
-												<IconButton
-													variant="text"
-													color="blue"
-													onClick={() =>
-														navigateViewCourseStudent(CL)
-													}
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													<Eye className="h-4 w-4" />
-												</IconButton>
-												{isAdmin && (
-													<IconButton
-														variant="text"
-														color="green"
-														onClick={() => {
-															if (CL.status !== false) {
-																navigateCourseStudent(CL);
-															}
-														}}
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														<Pencil className="h-4 w-4" />
-													</IconButton>
-												)}
-												{isAdmin && (
-													<IconButton
-														variant={
-															CL.status === false ? 'filled' : 'text'
-														}
-														color={
-															CL.status === false ? 'green' : 'red'
-														}
-														onClick={() =>
-															handleToggleStatus(
-																CL.id,
-																CL.status !== false,
-															)
-														}
-														disabled={togglingId === CL.id}
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														{CL.status === false ? (
-															<Check className="h-4 w-4" />
-														) : (
-															<Trash2 className="h-4 w-4" />
-														)}
-													</IconButton>
-												)}
-											</div>
-										</ListItem>
-									))}
-								</List>
-							)}
-
-							{totalPages > 1 && (
-								<>
-									<div className="flex flex-col w-full text-center">
-										<small> Total:{totalItems}</small>
-									</div>
-									<div className="flex w-full justify-center items-center gap-2 sm:gap-4 flex-wrap">
-										<Button
-											variant="text"
-											size="sm"
-											className="flex items-center gap-1 sm:gap-2 rounded-full"
-											onClick={() => {
-												prev();
-											}}
-											disabled={active === 1}
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											<ChevronLeft
-												strokeWidth={2}
-												className="h-3 w-3 sm:h-4 sm:w-4"
-											/>
-											<span className="hidden sm:inline">Prev</span>
-										</Button>
-										<div className="flex items-center gap-1 sm:gap-2">
-											{pages.map((page) => {
-												return (
-													<IconButton
-														key={page.name}
-														size="sm"
-														{...getItemProps(page.id + 1)}
-													>
-														{page.id + 1}
-													</IconButton>
-												);
-											})}
-										</div>
-										<Button
-											variant="text"
-											size="sm"
-											className="flex items-center gap-1 sm:gap-2 rounded-full"
-											onClick={() => {
-												next();
-											}}
-											disabled={active === totalPages}
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											<span className="hidden sm:inline">Sig</span>
-											<ChevronRight
-												strokeWidth={2}
-												className="h-3 w-3 sm:h-4 sm:w-4"
-											/>
-										</Button>
-									</div>
-								</>
-							)}
-						</CardBody>
-					</Card>
-				</div>
+				<CourseStudentsSection
+					courseStudentList={courseStudentList}
+					canViewContent={canViewContent}
+					navigateViewCourseStudent={navigateViewCourseStudent}
+					navigateCourseStudent={navigateCourseStudent}
+					handleToggleStatus={handleToggleStatus}
+					togglingId={togglingId}
+					isAdmin={isAdmin}
+					totalPages={totalPages}
+					totalItems={totalItems}
+					pages={pages}
+					active={active}
+					prev={prev}
+					next={next}
+					statusFilter={statusFilter}
+					setStatusFilter={setStatusFilter}
+					getItemProps={getItemProps}
+				/>
+				<CourseGroupsSection />
 			</div>
 		</>
 	);

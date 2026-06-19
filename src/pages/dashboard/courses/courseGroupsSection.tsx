@@ -18,6 +18,7 @@ import {
 	fetchCourseGroupStudents,
 	fetchCourseGroups,
 	removeStudentFromGroup,
+	toggleCourseGroupStatus,
 } from '../../../features/courseGroupSlice';
 import { courseGroup } from '../../../types/utilities';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
@@ -33,6 +34,8 @@ import {
 	UserMinus,
 	ChevronDown,
 	Code,
+	Power,
+	Filter,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -54,12 +57,18 @@ const CourseGroupsSection = () => {
 	);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [removingId, setRemovingId] = useState<number | null>(null);
+	const [togglingId, setTogglingId] = useState<number | null>(null);
+	const [showInactive, setShowInactive] = useState(false);
 
 	useEffect(() => {
 		if (canManage) {
-			dispatch(fetchCourseGroups({})).catch(() => {});
+			dispatch(
+				fetchCourseGroups({
+					status: showInactive ? undefined : true,
+				}),
+			).catch(() => {});
 		}
-	}, [dispatch, canManage]);
+	}, [dispatch, canManage, showInactive]);
 
 	useEffect(() => {
 		if (error) {
@@ -125,11 +134,40 @@ const CourseGroupsSection = () => {
 	};
 
 	const handleSuccess = () => {
-		dispatch(fetchCourseGroups({}));
+		dispatch(
+			fetchCourseGroups({ status: showInactive ? undefined : true }),
+		);
 		if (openAccordion) {
 			dispatch(fetchCourseGroupStudents(openAccordion));
 		}
 	};
+
+	const handleToggleStatus = async (group: courseGroup) => {
+		const newStatus = !group.status;
+		setTogglingId(group.id);
+		try {
+			await dispatch(
+				toggleCourseGroupStatus({ id: group.id, status: newStatus }),
+			).unwrap();
+			toast.success(
+				newStatus ? 'Grupo activado' : 'Grupo desactivado',
+			);
+			dispatch(
+				fetchCourseGroups({
+					status: showInactive ? undefined : true,
+				}),
+			);
+		} catch (error: any) {
+			toast.error(error?.message || 'Error al cambiar estado');
+		} finally {
+			setTogglingId(null);
+		}
+	};
+
+	const handleToggleShowInactive = () => {
+		setShowInactive((prev) => !prev);
+	};
+
 	if (!canManage) return null;
 
 	return (
@@ -146,26 +184,42 @@ const CourseGroupsSection = () => {
 					onPointerLeaveCapture={undefined}
 				>
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-						<Typography
-							variant="h5"
-							color="blue-gray"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Grupos de Cursos
-						</Typography>
-						<Button
-							size="sm"
-							color="blue"
-							onClick={() => handleOpenModal()}
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<Plus size={16} className="mr-1" />
-							Crear Grupo
-						</Button>
+						<div className="flex gap-3">
+							<Typography
+								variant="h5"
+								className="text-center lg:text-left text-sm sm:text-base md:text-lg"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Grupos de Pilotos por curso
+							</Typography>
+						</div>
+						<div className="flex gap-2">
+							<Button
+								size="sm"
+								variant="outlined"
+								color={showInactive ? 'blue' : 'gray'}
+								onClick={handleToggleShowInactive}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<Filter size={14} className="mr-1" />
+								{showInactive ? 'Ver activos' : 'Ver inactivos'}
+							</Button>
+							<Button
+								size="sm"
+								color="blue"
+								onClick={() => handleOpenModal()}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<Plus size={16} className="mr-1" />
+								Crear Grupo
+							</Button>
+						</div>
 					</div>
 
 					{!Array.isArray(courseGroupList) ||
@@ -178,7 +232,8 @@ const CourseGroupsSection = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							No hay grupos creados. Crea uno para organizar pilotos.
+							No hay grupos activos, crea uno para organizar los
+							pilotos.
 						</Typography>
 					) : (
 						<div className="flex flex-col gap-2">
@@ -188,6 +243,7 @@ const CourseGroupsSection = () => {
 									? courseGroupStudents.length
 									: (group.course_students?.length ?? 0);
 								const isDeleting = deletingId === group.id;
+								const isInactive = group.status === false;
 
 								return (
 									<Card
@@ -195,7 +251,7 @@ const CourseGroupsSection = () => {
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										className={`border border-gray-200 ${isDeleting ? 'opacity-50' : ''}`}
+										className={`border border-gray-200 ${isDeleting ? 'opacity-50' : ''} ${isInactive ? 'bg-gray-50' : ''}`}
 									>
 										<Accordion
 											open={isOpen}
@@ -220,16 +276,23 @@ const CourseGroupsSection = () => {
 															className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
 														/>
 														<div className="min-w-0">
-															<Typography
-																variant="small"
-																color="blue-gray"
-																className="font-semibold truncate"
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
-															>
-																{group.title}
-															</Typography>
+															<div className="flex items-center gap-2">
+																<Typography
+																	variant="small"
+																	color="blue-gray"
+																	className="font-semibold truncate"
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																>
+																	{group.title}
+																</Typography>
+																{isInactive && (
+																	<span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded-full">
+																		Inactivo
+																	</span>
+																)}
+															</div>
 															<div className="flex items-center gap-3 text-xs text-gray-500">
 																<span className="flex items-center gap-1">
 																	<Code size={12} />
@@ -258,6 +321,27 @@ const CourseGroupsSection = () => {
 														className="flex items-center gap-1 shrink-0"
 														onClick={(e) => e.stopPropagation()}
 													>
+														<IconButton
+															size="sm"
+															variant="text"
+															color={
+																group.status ? 'orange' : 'green'
+															}
+															onClick={() =>
+																handleToggleStatus(group)
+															}
+															disabled={togglingId === group.id}
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															<Power
+																size={16}
+																className={
+																	group.status ? '' : 'opacity-50'
+																}
+															/>
+														</IconButton>
 														<IconButton
 															size="sm"
 															variant="text"
