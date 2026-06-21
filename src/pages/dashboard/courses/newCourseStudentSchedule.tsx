@@ -25,16 +25,14 @@ import PageTitle from '../../../components/PageTitle';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import moment from 'moment';
-import { useReactToPrint } from 'react-to-print';
 import { Mail, Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
-import PDFCourseSchedule from './pdfCourseSchedule';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import { sendCourseScheduleEmail } from '../../../features/courseSlice';
 import toast from 'react-hot-toast';
 
 import { pdf } from '@react-pdf/renderer';
-import { getLogoBase64 } from '../../../utils/logoBase64'; // ajusta el path
+import { getLogoBase64 } from '../../../utils/logoBase64';
 import PDFCourseScheduleDocument from './PDFCourseScheduleDocument';
 import SearchableParticipantSelect from './SearchableParticipantSelect';
 
@@ -51,7 +49,6 @@ const breadCrumbs: breadCrumbsItems[] = [
 
 const NewCourseStudentSchedule = () => {
 	const canViewContent = PermissionsValidate(['staff', 'instructor']);
-	const componentRef = useRef<HTMLDivElement>(null);
 	const dispatch = useDispatch<AppDispatch>();
 	const { course, subject, user } = useSelector(
 		(state: RootState) => ({
@@ -78,16 +75,28 @@ const NewCourseStudentSchedule = () => {
 	const instructorCodeRef = useRef<string>('');
 
 	// State
-	const [open, setOpen] = useState(1);
 	const [studentSelect, setStudentSelect] = useState<user | null>(
 		null,
 	);
 
 	// Handlers
-	const handlePrint = useReactToPrint({
-		contentRef: componentRef,
-		documentTitle: `Curso-${course.courseStudent?.code}`,
-	});
+	const handlePrint = async () => {
+		try {
+			const logoBase64 = await getLogoBase64();
+			const blob = await pdf(
+				<PDFCourseScheduleDocument
+					course={course}
+					studentSelect={studentSelect}
+					logoBase64={logoBase64}
+				/>,
+			).toBlob();
+			const url = URL.createObjectURL(blob);
+			window.open(url, '_blank');
+		} catch (e) {
+			console.error('Error generating PDF:', e);
+			toast.error('Error al generar el PDF');
+		}
+	};
 	const handleSend = async () => {
 		toast('enviando documento...', { icon: '📧' });
 		setMailsended(true);
@@ -923,18 +932,6 @@ const NewCourseStudentSchedule = () => {
 					</Accordion>
 				</CardBody>
 			</Card>
-
-			{/* Hidden PDF Section */}
-			<div className="fixed -left-[9999px] top-0">
-				<div ref={componentRef} className="w-full">
-					<PDFCourseSchedule
-						course={course}
-						subjectList={subject.subjectList}
-						studentSelect={studentSelect}
-						days={days}
-					/>
-				</div>
-			</div>
 		</div>
 	);
 };
