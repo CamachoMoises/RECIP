@@ -2,6 +2,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import Icons from './dashboard/icons';
 import UsersTable from './dashboard/users/usersTable';
 import GeneralCourses from './dashboard/courses/generalCourses';
+import StudentCourses from './dashboard/courses/StudentCourses';
 import CourseDetail from './dashboard/config/courseDetail';
 import NewCourse from './dashboard/courses/newCourseStudentSchedule';
 import ViewCourseStudentSchedule from './dashboard/courses/viewCourseStudentSchedule';
@@ -84,6 +85,7 @@ const Dashboard = () => {
 								<Route path="/" element={<Icons />} />
 								<Route path="users" element={<UsersTable />} />
 								<Route path="courses" element={<GeneralCourses />} />
+								<Route path="my-courses" element={<StudentCourses />} />
 								<Route path="students" element={<TableStudents />} />
 								<Route path="config" element={<GeneralConfig />} />
 								<Route

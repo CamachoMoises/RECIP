@@ -51,7 +51,8 @@ src/
 | `/` | Icons | all |
 | `users` | UsersTable | staff |
 | `register` | Register | any |
-| `courses` | GeneralCourses | staff, instructor, student |
+| `courses` | GeneralCourses | staff, instructor |
+| `my-courses` | StudentCourses | student |
 | `students` | TableStudents | staff |
 | `instructors` | TableInstructors | instructor, staff |
 | `config` | GeneralConfig | staff |

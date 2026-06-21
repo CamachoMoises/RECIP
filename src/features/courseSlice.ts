@@ -67,6 +67,31 @@ export const fetchCoursesStudentsTests = createAsyncThunk<{ data: courseStudent[
     }
 );
 
+export const fetchMyCoursesStudents = createAsyncThunk<
+    { data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number },
+    { currentPage: number, pageSize: number, student_id: number, status?: boolean }
+>(
+    'course/fetchMyCoursesStudents',
+    async ({ currentPage, pageSize, student_id, status }, { rejectWithValue }) => {
+        try {
+            const params: { currentPage: number; pageSize: number; student_id: number; status?: boolean } = {
+                currentPage,
+                pageSize,
+                student_id,
+            };
+            if (status !== undefined) {
+                params.status = status;
+            }
+
+            const response = await axiosGetSlice('api/courses/coursesStudents', params);
+            return response;
+
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const fetchCourse = createAsyncThunk<course, number>(
     'course/fetchCourse',
     async (id, { rejectWithValue }) => {
@@ -266,6 +291,22 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            //Reducers para la acción fetchMyCoursesStudents
+            .addCase(fetchMyCoursesStudents.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchMyCoursesStudents.fulfilled, (state, action: PayloadAction<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }>) => {
+                state.status = 'succeeded';
+                state.courseStudentList = action.payload.data;
+                state.currentPage = action.payload.currentPage;
+                state.totalPages = action.payload.totalPages;
+                state.pageSize = action.payload.pageSize;
+                state.totalItems = action.payload.totalItems;
+            })
+            .addCase(fetchMyCoursesStudents.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
 
             //Reducers para la acción fetchCoursesStudentsTests
             .addCase(fetchCoursesStudentsTests.pending, (state) => {

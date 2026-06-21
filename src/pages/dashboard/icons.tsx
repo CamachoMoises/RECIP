@@ -9,6 +9,7 @@ import {
 	Plane,
 	Presentation,
 	UserRound,
+	GraduationCap,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -34,11 +35,19 @@ const iconItems: Array<{
 	},
 	{
 		id: 'courses',
-		title: 'Cursos',
+		title: 'Gestion Cursos',
 		icon: Newspaper,
-		permission: ['staff', 'instructor', 'student'],
+		permission: ['staff', 'instructor'],
 		route: 'courses',
 		color: 'from-emerald-600 to-emerald-800',
+	},
+	{
+		id: 'my-courses',
+		title: 'Mis Cursos',
+		icon: GraduationCap,
+		permission: ['student'],
+		route: 'my-courses',
+		color: 'from-violet-600 to-violet-800',
 	},
 	{
 		id: 'suggestions',

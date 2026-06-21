@@ -55,7 +55,8 @@ src/
 | `/` | Icons | Dashboard home with role-based navigation grid |
 | `users` | UsersTable | Admin user management (staff only) |
 | `register` | Register | User registration |
-| `courses` | GeneralCourses | Course scheduling & student course list (includes CourseGroupsSection) |
+| `courses` | GeneralCourses | Course scheduling & student course list (staff/instructor only, includes CourseGroupsSection) |
+| `my-courses` | StudentCourses | Student's own enrolled courses (student only, read-only view) |
 | `students` | TableStudents | Pilot/participant management (staff only) |
 | `instructors` | TableInstructors | Instructor management |
 | `config` | GeneralConfig | Course/subject/lesson/test config (staff only) |
@@ -84,9 +85,9 @@ src/
 ## Role System
 
 - `super_user`: Full access (Admin label shown)
-- `staff`: Admin panel, user management, config, course groups (Staff label shown)
-- `instructor`: Course scheduling, assessments, exams, course groups
-- `student`: View courses, take exams
+- `staff`: Admin panel, user management, config, course groups, all courses (Staff label shown)
+- `instructor`: Course scheduling, assessments, exams, course groups, all courses
+- `student`: View own enrolled courses (my-courses), take exams, review results
 
 ## Course Groups Feature
 
