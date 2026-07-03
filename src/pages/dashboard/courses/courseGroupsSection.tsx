@@ -10,7 +10,7 @@ import {
 	ListItem,
 	Typography,
 } from '@material-tailwind/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import {
@@ -18,10 +18,12 @@ import {
 	fetchCourseGroupStudents,
 	fetchCourseGroups,
 	removeStudentFromGroup,
+	saveCourseGroupSignature,
 	toggleCourseGroupStatus,
 } from '../../../features/courseGroupSlice';
 import { courseGroup } from '../../../types/utilities';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
+import SignatureCanvas from 'react-signature-canvas';
 import ModalFormCourseGroup from './modalFormCourseGroup';
 import ModalAssignStudents from './modalAssignStudents';
 import {
@@ -36,6 +38,7 @@ import {
 	Code,
 	Power,
 	Filter,
+	Save,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -59,6 +62,8 @@ const CourseGroupsSection = () => {
 	const [removingId, setRemovingId] = useState<number | null>(null);
 	const [togglingId, setTogglingId] = useState<number | null>(null);
 	const [showInactive, setShowInactive] = useState(false);
+	const [savingSignatureId, setSavingSignatureId] = useState<number | null>(null);
+	const sigCanvasRefs = useRef<Map<number, SignatureCanvas>>(new Map());
 
 	useEffect(() => {
 		if (canManage) {
@@ -161,6 +166,31 @@ const CourseGroupsSection = () => {
 			toast.error(error?.message || 'Error al cambiar estado');
 		} finally {
 			setTogglingId(null);
+		}
+	};
+
+	const handleSaveSignature = async (
+		groupId: number,
+		canvas: SignatureCanvas,
+	) => {
+		if (canvas.isEmpty()) {
+			toast.error('Dibuja una firma primero');
+			return;
+		}
+		setSavingSignatureId(groupId);
+		try {
+			await dispatch(
+				saveCourseGroupSignature({
+					course_group_id: groupId,
+					signature: canvas.toDataURL(),
+				}),
+			).unwrap();
+			toast.success('Firma guardada correctamente');
+			canvas.clear();
+		} catch (error: any) {
+			toast.error(error?.message || 'Error al guardar la firma');
+		} finally {
+			setSavingSignatureId(null);
 		}
 	};
 
@@ -525,6 +555,87 @@ const CourseGroupsSection = () => {
 														</ListItem>
 													</List>
 												)}
+												{/* Instructor Signature */}
+												<div className="border-t pt-3 mt-4 flex flex-col items-center">
+													<Typography
+														variant="small"
+														className="font-semibold mb-2"
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+													>
+														Firma del instructor
+													</Typography>
+													{group.signature_url ? (
+														<img
+															src={group.signature_url}
+															alt="Firma del instructor"
+															className="max-w-xs h-auto border rounded"
+														/>
+													) : (
+														<div className="flex flex-col items-center gap-2 w-full max-w-md">
+															<div className={`w-full overflow-hidden border border-gray-300 rounded ${savingSignatureId === group.id ? 'pointer-events-none opacity-50' : ''}`}>
+																<SignatureCanvas
+																	ref={(el) => {
+																		if (el) sigCanvasRefs.current.set(group.id, el);
+																		else sigCanvasRefs.current.delete(group.id);
+																	}}
+																	penColor="black"
+																	canvasProps={{
+																		width: 500,
+																		height: 120,
+																		style: {
+																			width: '100%',
+																			height: '120px',
+																			display: 'block',
+																		},
+																	}}
+																/>
+															</div>
+															<div className="flex items-center gap-2">
+																<Button
+																	size="sm"
+																	color="green"
+																	onClick={() => {
+																		const canvas = sigCanvasRefs.current.get(group.id);
+																		if (canvas)
+																			handleSaveSignature(group.id, canvas);
+																	}}
+																	disabled={
+																		savingSignatureId === group.id
+																	}
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	className="flex items-center gap-2"
+																>
+																	<Save className="w-4 h-4" />
+																	{savingSignatureId === group.id
+																		? 'Guardando...'
+																		: 'Guardar Firma'}
+																</Button>
+																<Button
+																	size="sm"
+																	color="red"
+																	variant="outlined"
+																	onClick={() => {
+																		const canvas = sigCanvasRefs.current.get(group.id);
+																		if (canvas) canvas.clear();
+																	}}
+																	disabled={
+																		savingSignatureId === group.id
+																	}
+																	placeholder={undefined}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	className="flex items-center gap-2"
+																>
+																	Borrar
+																</Button>
+															</div>
+														</div>
+													)}
+												</div>
 											</AccordionBody>
 										</Accordion>
 									</Card>

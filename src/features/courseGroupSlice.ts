@@ -115,6 +115,18 @@ export const assignStudentsToGroup = createAsyncThunk<courseStudent[], { groupId
     }
 );
 
+export const saveCourseGroupSignature = createAsyncThunk<courseGroup, { course_group_id: number; signature: string }>(
+    'courseGroup/saveCourseGroupSignature',
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostSlice('api/course-groups/signature', data);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const removeStudentFromGroup = createAsyncThunk<number, { groupId: number; courseStudentId: number }>(
     'courseGroup/removeStudentFromGroup',
     async ({ groupId, courseStudentId }, { rejectWithValue }) => {
@@ -260,6 +272,25 @@ const courseGroupSlice = createSlice({
                 });
             })
             .addCase(assignStudentsToGroup.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            .addCase(saveCourseGroupSignature.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(saveCourseGroupSignature.fulfilled, (state, action: PayloadAction<courseGroup>) => {
+                state.status = 'succeeded';
+                if (!Array.isArray(state.courseGroupList)) state.courseGroupList = [];
+                const index = state.courseGroupList.findIndex(g => g.id === action.payload.id);
+                if (index !== -1) {
+                    state.courseGroupList[index] = action.payload;
+                }
+                if (state.courseGroupSelected?.id === action.payload.id) {
+                    state.courseGroupSelected = action.payload;
+                }
+            })
+            .addCase(saveCourseGroupSignature.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
