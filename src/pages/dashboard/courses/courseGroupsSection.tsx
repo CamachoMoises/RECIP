@@ -508,8 +508,9 @@ const CourseGroupsSection = () => {
 																					}
 																				>
 																					Id:{' '}
-																					{cs.student?.id || 'N/A'} /{' '}
-																					{cs.code}
+																					{cs.student?.user_id ||
+																						'N/A'}{' '}
+																					/ {cs.code}
 																				</Typography>
 																			</div>
 																			<IconButton

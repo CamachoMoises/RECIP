@@ -142,15 +142,17 @@ const NewCourseStudentSchedule = () => {
 			await dispatch(sendCourseScheduleEmail(formData)).unwrap();
 			toast.success('Correo enviado exitosamente');
 
-			dispatch(createEmailHistory({
-				user_id: authUser?.id ?? undefined,
-				email: studentSelect.email,
-				nombre_archivo: `Curso-${course.courseStudent?.code}.pdf`,
-				fecha: new Date().toISOString(),
-				tipo: 'correo',
-				descripcion: `Horario del curso ${course.courseSelected?.name} enviado a ${studentSelect.email}`,
-				modulo: 'CourseSchedule',
-			}));
+			dispatch(
+				createEmailHistory({
+					user_id: authUser?.id ?? undefined,
+					email: studentSelect.email,
+					nombre_archivo: `Curso-${course.courseStudent?.code}.pdf`,
+					fecha: new Date().toISOString(),
+					tipo: 'correo',
+					descripcion: `Horario del curso ${course.courseSelected?.name} (${course.courseSelected?.course_level.name} - ${course.courseSelected?.course_type.name}) enviado a ${studentSelect.email}`,
+					modulo: 'CourseSchedule',
+				}),
+			);
 		} catch (e) {
 			console.error(e);
 			toast.error('Error al enviar el correo');
