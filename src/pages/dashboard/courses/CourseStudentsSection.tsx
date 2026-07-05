@@ -80,7 +80,7 @@ const CourseStudentsSection = ({
 		setOpenDialog(false);
 		setSelectedStudent(null);
 	};
-
+	console.log('courseStudentList', courseStudentList); // Debugging line --- IGNORE ---
 	const toggleOpen = () => setOpen((cur) => !cur);
 	return (
 		<div className="flex flex-col pt-4">
@@ -229,7 +229,7 @@ const CourseStudentsSection = ({
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												{CL.code}
+												Id:{CL.student?.user_id} / {CL.code}
 											</Typography>
 											{CL.course_group_id ? (
 												<Typography

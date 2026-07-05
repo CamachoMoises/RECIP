@@ -80,7 +80,7 @@ src/
 - **Theme**: Dark/light mode via `useTheme` hook, CSS variables in `global.css`
 - **Breadcrumbs**: `<PageTitle>` component with breadcrumb array, used in most dashboard pages
 - **PDF**: Some pages use `@react-pdf/renderer` (`PDFCourseScheduleDocument.tsx`), others use `react-to-print`
-- **Course Groups**: Groups organize pilots by course (one course per group). Created via `modalFormCourseGroup` (course required, immutable after creation). Students assigned via `modalAssignStudents` (filtered by course, validated backend). API: `POST /api/course-groups`, `PUT /api/courses/:course_id/students` (assign student to group)
+- **Course Groups**: Groups organize pilots by course (one course per group). Created via `modalFormCourseGroup` (course required, immutable after creation). Students assigned via `modalAssignStudents` (filtered by course, validated backend). API: `POST /api/course_groups`, `PUT /api/courses/:course_id/students` (assign student to group)
 
 ## Role System
 
@@ -107,11 +107,11 @@ src/
 4. Backend validates course match before assignment
 
 **API Endpoints**:
-- `POST /api/course-groups` - Create group (requires course_id, optional status: boolean)
-- `PUT /api/course-groups` - Update group (course_id excluded from payload, can update status)
-- `GET /api/course-groups` - List groups (optional course_id filter, optional status filter: `?status=false` shows inactive)
+- `POST /api/course_groups` - Create group (requires course_id, optional status: boolean)
+- `PUT /api/course_groups` - Update group (course_id excluded from payload, can update status)
+- `GET /api/course_groups` - List groups (optional course_id filter, optional status filter: `?status=false` shows inactive)
 - `PUT /api/courses/:course_id/students` - Assign student to group (body: { course_student_id, courseGroupId })
-- `DELETE /api/course-groups/:groupId/students?course_student_ids=:id` - Remove student from group
+- `DELETE /api/course_groups/:groupId/students?course_student_ids=:id` - Remove student from group
 
 **Status Feature**:
 - Groups have `status` field (boolean, default: true)

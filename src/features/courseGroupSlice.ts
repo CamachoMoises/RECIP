@@ -17,7 +17,7 @@ export const fetchCourseGroups = createAsyncThunk<courseGroup[], { course_id?: n
             const params: { course_id?: number; status?: boolean } = {};
             if (course_id !== undefined) params.course_id = course_id;
             if (status !== undefined) params.status = status;
-            const response = await axiosGetSlice('api/course-groups', params);
+            const response = await axiosGetSlice('api/course_groups', params);
             return response.data || [];
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -29,7 +29,7 @@ export const fetchCourseGroup = createAsyncThunk<courseGroup, number>(
     'courseGroup/fetchCourseGroup',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetSlice(`api/course-groups/${id}`);
+            const response = await axiosGetSlice(`api/course_groups/${id}`);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -41,7 +41,7 @@ export const createCourseGroup = createAsyncThunk<courseGroup, { title: string; 
     'courseGroup/createCourseGroup',
     async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosPostSlice('api/course-groups', data);
+            const response = await axiosPostSlice('api/course_groups', data);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -53,7 +53,7 @@ export const updateCourseGroup = createAsyncThunk<courseGroup, { id: number; tit
     'courseGroup/updateCourseGroup',
     async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosPutSlice('api/course-groups', data);
+            const response = await axiosPutSlice('api/course_groups', data);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -65,7 +65,7 @@ export const toggleCourseGroupStatus = createAsyncThunk<courseGroup, { id: numbe
     'courseGroup/toggleCourseGroupStatus',
     async ({ id, status }, { rejectWithValue }) => {
         try {
-            const response = await axiosPutSlice('api/course-groups', { id, status });
+            const response = await axiosPutSlice('api/course_groups', { id, status });
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -77,7 +77,7 @@ export const deleteCourseGroup = createAsyncThunk<number, number>(
     'courseGroup/deleteCourseGroup',
     async (id, { rejectWithValue }) => {
         try {
-            await axiosDeleteSlice(`api/course-groups/${id}`);
+            await axiosDeleteSlice(`api/course_groups/${id}`);
             return id;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -89,7 +89,7 @@ export const fetchCourseGroupStudents = createAsyncThunk<courseStudent[], number
     'courseGroup/fetchCourseGroupStudents',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axiosGetSlice(`api/course-groups/${id}/students`);
+            const response = await axiosGetSlice(`api/course_groups/${id}/students`);
             return response.data || [];
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -119,7 +119,7 @@ export const saveCourseGroupSignature = createAsyncThunk<courseGroup, { course_g
     'courseGroup/saveCourseGroupSignature',
     async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosPostSlice('api/course-groups/signature', data);
+            const response = await axiosPostSlice('api/course_groups/signature', data);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -131,7 +131,7 @@ export const removeStudentFromGroup = createAsyncThunk<number, { groupId: number
     'courseGroup/removeStudentFromGroup',
     async ({ groupId, courseStudentId }, { rejectWithValue }) => {
         try {
-            await axiosDeleteSlice(`api/course-groups/${groupId}/students?course_student_ids=${courseStudentId}`);
+            await axiosDeleteSlice(`api/course_groups/${groupId}/students?course_student_ids=${courseStudentId}`);
             return courseStudentId;
         } catch (error: any) {
             return rejectWithValue(error.message);

@@ -590,3 +590,22 @@ export interface AttendanceState {
     totalItems: number;
 }
 
+export type emailHistory = {
+    id: number;
+    user_id: number;
+    user?: user;
+    nombre_archivo: string;
+    fecha: string;
+    tipo: string;
+    descripcion: string;
+    modulo: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface EmailHistoryState {
+    emailList: emailHistory[];
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+}
+

@@ -29,7 +29,6 @@ import ModalAssignStudents from './modalAssignStudents';
 import {
 	Calendar,
 	Plus,
-	Users,
 	Pencil,
 	Trash2,
 	UserPlus,
@@ -62,8 +61,12 @@ const CourseGroupsSection = () => {
 	const [removingId, setRemovingId] = useState<number | null>(null);
 	const [togglingId, setTogglingId] = useState<number | null>(null);
 	const [showInactive, setShowInactive] = useState(false);
-	const [savingSignatureId, setSavingSignatureId] = useState<number | null>(null);
-	const sigCanvasRefs = useRef<Map<number, SignatureCanvas>>(new Map());
+	const [savingSignatureId, setSavingSignatureId] = useState<
+		number | null
+	>(null);
+	const sigCanvasRefs = useRef<Map<number, SignatureCanvas>>(
+		new Map(),
+	);
 
 	useEffect(() => {
 		if (canManage) {
@@ -269,12 +272,11 @@ const CourseGroupsSection = () => {
 						<div className="flex flex-col gap-2">
 							{courseGroupList.map((group) => {
 								const isOpen = openAccordion === group.id;
-								const studentCount = isOpen
-									? courseGroupStudents.length
-									: (group.course_students?.length ?? 0);
 								const isDeleting = deletingId === group.id;
 								const isInactive = group.status === false;
-
+								const groupDate = group.date
+									? new Date(group.date)
+									: null;
 								return (
 									<Card
 										key={group.id}
@@ -315,7 +317,7 @@ const CourseGroupsSection = () => {
 																	onPointerEnterCapture={undefined}
 																	onPointerLeaveCapture={undefined}
 																>
-																	{group.title}
+																	{group.title} - ({group.user_code})
 																</Typography>
 																{isInactive && (
 																	<span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded-full">
@@ -324,26 +326,25 @@ const CourseGroupsSection = () => {
 																)}
 															</div>
 															<div className="flex items-center gap-3 text-xs text-gray-500">
-																<span className="flex items-center gap-1">
-																	<Code size={12} />
-																	{group.code}
-																</span>
 																{group.course && (
 																	<span className="flex items-center gap-1">
 																		<Calendar size={12} />
-																		{group.course.name}
+																		{group.course.name} (
+																		{group.course.course_level.name})
+																		({group.course.course_type.name})
 																	</span>
 																)}
-																{group.date && (
+																{groupDate && (
 																	<span className="flex items-center gap-1">
 																		<Calendar size={12} />
-																		{group.date.split('T')[0]}
+																		{groupDate.toLocaleDateString(
+																			'es-ES',
+																		)}
 																	</span>
 																)}
-																<span className="flex items-center gap-1">
-																	<Users size={12} />
-																	{studentCount} piloto(s)
-																</span>
+																<small className="flex items-center gap-1">
+																	{group.code}
+																</small>
 															</div>
 														</div>
 													</div>
@@ -456,86 +457,86 @@ const CourseGroupsSection = () => {
 														</Button>
 													</div>
 												) : (
-													<List
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														className="p-0"
-													>
-														{courseGroupStudents.map((cs) => {
-															const studentName = cs.student?.user
-																? `${cs.student.user.name} ${cs.student.user.last_name}`
-																: 'Sin Piloto';
-															const isRemoving = removingId === cs.id;
-															return (
-																<ListItem
-																	key={cs.id}
-																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																	className={`py-2 px-3 ${isRemoving ? 'opacity-50' : ''}`}
-																>
-																	<div className="flex items-center justify-between w-full">
-																		<div className="min-w-0 flex-1">
-																			<Typography
-																				variant="small"
-																				color="blue-gray"
-																				className="font-medium truncate"
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																			>
-																				{studentName}
-																			</Typography>
-																			<Typography
-																				variant="small"
-																				color="gray"
-																				className="text-xs truncate"
-																				placeholder={undefined}
-																				onPointerEnterCapture={
-																					undefined
-																				}
-																				onPointerLeaveCapture={
-																					undefined
-																				}
-																			>
-																				{cs.code} — {cs.course?.name}
-																			</Typography>
-																		</div>
-																		<IconButton
-																			size="sm"
-																			variant="text"
-																			color="red"
-																			onClick={() =>
-																				handleRemoveStudent(cs.id)
-																			}
-																			disabled={isRemoving}
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			<UserMinus size={14} />
-																		</IconButton>
-																	</div>
-																</ListItem>
-															);
-														})}
-														<ListItem
+													<>
+														<List
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
-															className="py-2 px-3"
+															className="p-0"
 														>
+															{courseGroupStudents.map((cs) => {
+																const studentName = cs.student?.user
+																	? `${cs.student.user.name} ${cs.student.user.last_name}`
+																	: 'Sin Piloto';
+																const isRemoving =
+																	removingId === cs.id;
+																console.log('Student info:', cs); // Debugging line
+																return (
+																	<ListItem
+																		key={cs.id}
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		className={`py-2 px-3 ${isRemoving ? 'opacity-50' : ''}`}
+																	>
+																		<div className="flex items-center justify-between w-full">
+																			<div className="min-w-0 flex-1">
+																				<Typography
+																					variant="small"
+																					color="blue-gray"
+																					className="font-medium truncate"
+																					placeholder={undefined}
+																					onPointerEnterCapture={
+																						undefined
+																					}
+																					onPointerLeaveCapture={
+																						undefined
+																					}
+																				>
+																					{studentName}{' '}
+																				</Typography>
+																				<Typography
+																					variant="small"
+																					color="gray"
+																					className="text-xs truncate"
+																					placeholder={undefined}
+																					onPointerEnterCapture={
+																						undefined
+																					}
+																					onPointerLeaveCapture={
+																						undefined
+																					}
+																				>
+																					Id:{' '}
+																					{cs.student?.id || 'N/A'} /{' '}
+																					{cs.code}
+																				</Typography>
+																			</div>
+																			<IconButton
+																				size="sm"
+																				variant="text"
+																				color="red"
+																				onClick={() =>
+																					handleRemoveStudent(cs.id)
+																				}
+																				disabled={isRemoving}
+																				placeholder={undefined}
+																				onPointerEnterCapture={
+																					undefined
+																				}
+																				onPointerLeaveCapture={
+																					undefined
+																				}
+																			>
+																				<UserMinus size={14} />
+																			</IconButton>
+																		</div>
+																	</ListItem>
+																);
+															})}
+														</List>
+														<div className="flex justify-center items-center mt-3">
 															<Button
-																fullWidth
 																size="sm"
 																variant="outlined"
 																color="blue"
@@ -545,15 +546,12 @@ const CourseGroupsSection = () => {
 																placeholder={undefined}
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
+																className="w-auto"
 															>
-																<UserPlus
-																	size={14}
-																	className="mr-1"
-																/>
 																Agregar más pilotos
 															</Button>
-														</ListItem>
-													</List>
+														</div>
+													</>
 												)}
 												{/* Instructor Signature */}
 												<div className="border-t pt-3 mt-4 flex flex-col items-center">
@@ -574,11 +572,20 @@ const CourseGroupsSection = () => {
 														/>
 													) : (
 														<div className="flex flex-col items-center gap-2 w-full max-w-md">
-															<div className={`w-full overflow-hidden border border-gray-300 rounded ${savingSignatureId === group.id ? 'pointer-events-none opacity-50' : ''}`}>
+															<div
+																className={`w-full overflow-hidden border border-gray-300 rounded ${savingSignatureId === group.id ? 'pointer-events-none opacity-50' : ''}`}
+															>
 																<SignatureCanvas
 																	ref={(el) => {
-																		if (el) sigCanvasRefs.current.set(group.id, el);
-																		else sigCanvasRefs.current.delete(group.id);
+																		if (el)
+																			sigCanvasRefs.current.set(
+																				group.id,
+																				el,
+																			);
+																		else
+																			sigCanvasRefs.current.delete(
+																				group.id,
+																			);
 																	}}
 																	penColor="black"
 																	canvasProps={{
@@ -597,9 +604,15 @@ const CourseGroupsSection = () => {
 																	size="sm"
 																	color="green"
 																	onClick={() => {
-																		const canvas = sigCanvasRefs.current.get(group.id);
+																		const canvas =
+																			sigCanvasRefs.current.get(
+																				group.id,
+																			);
 																		if (canvas)
-																			handleSaveSignature(group.id, canvas);
+																			handleSaveSignature(
+																				group.id,
+																				canvas,
+																			);
 																	}}
 																	disabled={
 																		savingSignatureId === group.id
@@ -619,7 +632,10 @@ const CourseGroupsSection = () => {
 																	color="red"
 																	variant="outlined"
 																	onClick={() => {
-																		const canvas = sigCanvasRefs.current.get(group.id);
+																		const canvas =
+																			sigCanvasRefs.current.get(
+																				group.id,
+																			);
 																		if (canvas) canvas.clear();
 																	}}
 																	disabled={

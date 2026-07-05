@@ -29,6 +29,7 @@ import { Mail, Printer } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import { sendCourseScheduleEmail } from '../../../features/courseSlice';
+import { createEmailHistory } from '../../../features/emailSlice';
 import toast from 'react-hot-toast';
 
 import { pdf } from '@react-pdf/renderer';
@@ -50,11 +51,12 @@ const breadCrumbs: breadCrumbsItems[] = [
 const NewCourseStudentSchedule = () => {
 	const canViewContent = PermissionsValidate(['staff', 'instructor']);
 	const dispatch = useDispatch<AppDispatch>();
-	const { course, subject, user } = useSelector(
+	const { course, subject, user, authUser } = useSelector(
 		(state: RootState) => ({
 			course: state.courses,
 			subject: state.subjects,
 			user: state.users,
+			authUser: state.auth.user,
 		}),
 		shallowEqual,
 	);
@@ -78,6 +80,7 @@ const NewCourseStudentSchedule = () => {
 	const [studentSelect, setStudentSelect] = useState<user | null>(
 		null,
 	);
+	const [open, setOpen] = useState<number>(0);
 
 	// Handlers
 	const handlePrint = async () => {
@@ -138,6 +141,15 @@ const NewCourseStudentSchedule = () => {
 
 			await dispatch(sendCourseScheduleEmail(formData)).unwrap();
 			toast.success('Correo enviado exitosamente');
+
+			dispatch(createEmailHistory({
+				user_id: authUser?.id ?? undefined,
+				nombre_archivo: `Curso-${course.courseStudent?.code}.pdf`,
+				fecha: new Date().toISOString(),
+				tipo: 'correo',
+				descripcion: `Horario del curso ${course.courseSelected?.name} enviado a ${studentSelect.email}`,
+				modulo: 'CourseSchedule',
+			}));
 		} catch (e) {
 			console.error(e);
 			toast.error('Error al enviar el correo');
