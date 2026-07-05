@@ -401,7 +401,7 @@ const CourseStudentsSection = ({
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Código:
+											Código del piloto:
 										</Typography>
 										<Typography
 											variant="paragraph"
@@ -429,7 +429,7 @@ const CourseStudentsSection = ({
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Código Instructor:
+												Código del curso:
 											</Typography>
 											<Typography
 												variant="paragraph"
