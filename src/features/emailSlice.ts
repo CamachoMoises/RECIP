@@ -24,6 +24,7 @@ export const fetchEmailHistory = createAsyncThunk<emailHistory[], { user_id?: nu
 
 export const createEmailHistory = createAsyncThunk<emailHistory, {
     user_id?: number;
+    email: string;
     nombre_archivo: string;
     fecha: string;
     tipo?: string;

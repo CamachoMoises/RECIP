@@ -144,6 +144,7 @@ const NewCourseStudentSchedule = () => {
 
 			dispatch(createEmailHistory({
 				user_id: authUser?.id ?? undefined,
+				email: studentSelect.email,
 				nombre_archivo: `Curso-${course.courseStudent?.code}.pdf`,
 				fecha: new Date().toISOString(),
 				tipo: 'correo',

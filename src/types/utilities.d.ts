@@ -594,6 +594,7 @@ export type emailHistory = {
     id: number;
     user_id: number;
     user?: user;
+    email: string;
     nombre_archivo: string;
     fecha: string;
     tipo: string;

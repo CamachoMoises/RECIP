@@ -29,7 +29,9 @@ const EmailHistoryPanel = () => {
 	const { emailList, status } = useSelector(
 		(state: RootState) => state.emailHistory,
 	);
-	const { userLogged } = useSelector((state: RootState) => state.users);
+	const { userLogged } = useSelector(
+		(state: RootState) => state.users,
+	);
 	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
@@ -157,13 +159,30 @@ const EmailHistoryPanel = () => {
 										<tr
 											className={`border-b ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}
 										>
-											<th className="text-left py-2 px-2 font-medium">Archivo</th>
-											<th className="text-left py-2 px-2 font-medium">Fecha</th>
-											<th className="text-left py-2 px-2 font-medium">Tipo</th>
-											<th className="text-left py-2 px-2 font-medium">Módulo</th>
-											<th className="text-left py-2 px-2 font-medium">Descripción</th>
-											<th className="text-left py-2 px-2 font-medium">Usuario</th>
-											<th className="text-center py-2 px-2 font-medium">Acción</th>
+											<th className="text-left py-2 px-2 font-medium">
+												Archivo
+											</th>
+											<th className="text-left py-2 px-2 font-medium">
+												Email
+											</th>
+											<th className="text-left py-2 px-2 font-medium">
+												Fecha
+											</th>
+											<th className="text-left py-2 px-2 font-medium">
+												Tipo
+											</th>
+											<th className="text-left py-2 px-2 font-medium">
+												Módulo
+											</th>
+											<th className="text-left py-2 px-2 font-medium">
+												Descripción
+											</th>
+											<th className="text-left py-2 px-2 font-medium">
+												Usuario
+											</th>
+											<th className="text-center py-2 px-2 font-medium">
+												Acción
+											</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -172,15 +191,23 @@ const EmailHistoryPanel = () => {
 												key={email.id}
 												className={`border-b ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-200 hover:bg-gray-50'}`}
 											>
-												<td className="py-2 px-2">{email.nombre_archivo}</td>
+												<td className="py-2 px-2">
+													{email.nombre_archivo}
+												</td>
+												<td className="py-2 px-2">{email.email}</td>
 												<td className="py-2 px-2">
 													{email.fecha
-														? new Date(email.fecha).toLocaleDateString()
+														? new Date(
+																email.fecha,
+															).toLocaleDateString()
 														: '-'}
 												</td>
 												<td className="py-2 px-2">{email.tipo}</td>
 												<td className="py-2 px-2">{email.modulo}</td>
-												<td className="py-2 px-2 max-w-xs truncate">
+												<td
+													className="py-2 px-2 max-w-xs truncate"
+													title={email.descripcion}
+												>
 													{email.descripcion}
 												</td>
 												<td className="py-2 px-2">
