@@ -231,7 +231,7 @@ const CourseGroupsSection = ({
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Grupos de Pilotos por curso
+								Gestion de Grupos de Pilotos
 							</Typography>
 						</div>
 						<div className="flex gap-2">
@@ -358,19 +358,23 @@ const CourseGroupsSection = ({
 														className="flex items-center gap-1 shrink-0"
 														onClick={(e) => e.stopPropagation()}
 													>
-														<IconButton
-															size="sm"
-															variant="text"
-															color={
-																group.status ? 'orange' : 'green'
-															}
-															onClick={() =>
-																handleToggleStatus(group)
-															}
-															disabled={togglingId === group.id}
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+														<span
+															role="button"
+															tabIndex={0}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleToggleStatus(group);
+															}}
+															onKeyDown={(e) => {
+																if (
+																	e.key === 'Enter' ||
+																	e.key === ' '
+																) {
+																	e.stopPropagation();
+																	handleToggleStatus(group);
+																}
+															}}
+															className={`p-1.5 rounded-lg cursor-pointer transition-colors focus:outline-none focus:ring-2 ${togglingId === group.id ? 'opacity-50 pointer-events-none' : ''} ${group.status ? 'hover:bg-orange-50 text-orange-500 focus:ring-orange-200' : 'hover:bg-green-50 text-green-500 focus:ring-green-200'}`}
 														>
 															<Power
 																size={16}
@@ -378,43 +382,67 @@ const CourseGroupsSection = ({
 																	group.status ? '' : 'opacity-50'
 																}
 															/>
-														</IconButton>
-														<IconButton
-															size="sm"
-															variant="text"
-															color="blue"
-															onClick={() =>
-																handleOpenAssignModal(group)
-															}
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+														</span>
+														<span
+															role="button"
+															tabIndex={0}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleOpenAssignModal(group);
+															}}
+															onKeyDown={(e) => {
+																if (
+																	e.key === 'Enter' ||
+																	e.key === ' '
+																) {
+																	e.stopPropagation();
+																	handleOpenAssignModal(group);
+																}
+															}}
+															className="p-1.5 rounded-lg cursor-pointer transition-colors hover:bg-blue-50 text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 														>
 															<UserPlus size={16} />
-														</IconButton>
-														<IconButton
-															size="sm"
-															variant="text"
-															color="green"
-															onClick={() => handleOpenModal(group)}
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+														</span>
+														<span
+															role="button"
+															tabIndex={0}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleOpenModal(group);
+															}}
+															onKeyDown={(e) => {
+																if (
+																	e.key === 'Enter' ||
+																	e.key === ' '
+																) {
+																	e.stopPropagation();
+																	handleOpenModal(group);
+																}
+															}}
+															className="p-1.5 rounded-lg cursor-pointer transition-colors hover:bg-green-50 text-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
 														>
 															<Pencil size={16} />
-														</IconButton>
-														<IconButton
-															size="sm"
-															variant="text"
-															color="red"
-															onClick={() => handleDelete(group.id)}
-															disabled={isDeleting}
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+														</span>
+														<span
+															role="button"
+															tabIndex={0}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleDelete(group.id);
+															}}
+															onKeyDown={(e) => {
+																if (
+																	e.key === 'Enter' ||
+																	e.key === ' '
+																) {
+																	e.stopPropagation();
+																	handleDelete(group.id);
+																}
+															}}
+															className={`p-1.5 rounded-lg cursor-pointer transition-colors hover:bg-red-50 text-red-500 focus:outline-none focus:ring-2 focus:ring-red-200 ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
 														>
 															<Trash2 size={16} />
-														</IconButton>
+														</span>
 													</div>
 												</div>
 											</AccordionHeader>
@@ -483,7 +511,9 @@ const CourseGroupsSection = ({
 																		placeholder={undefined}
 																		onPointerEnterCapture={undefined}
 																		onPointerLeaveCapture={undefined}
-																		onClick={() => navigateViewCourseStudent(cs)}
+																		onClick={() =>
+																			navigateViewCourseStudent(cs)
+																		}
 																		className={`py-2 px-3 ${isRemoving ? 'opacity-50' : ''}`}
 																	>
 																		<div className="flex items-center justify-between w-full">
@@ -514,10 +544,9 @@ const CourseGroupsSection = ({
 																						undefined
 																					}
 																				>
-																					Id:{' '}
+																					PC:{' '}
 																					{cs.student?.user_id ||
 																						'N/A'}{' '}
-																					/ {cs.code}
 																				</Typography>
 																			</div>
 																			<IconButton

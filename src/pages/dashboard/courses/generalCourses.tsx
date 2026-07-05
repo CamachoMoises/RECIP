@@ -58,7 +58,6 @@ const GeneralCourses = () => {
 	} = useSelector((state: RootState) => {
 		return state.courses;
 	});
-	console.log(courseStudentList, 'datos');
 
 	const { userLogged } = useSelector(
 		(state: RootState) => state.users,
@@ -346,30 +345,6 @@ const GeneralCourses = () => {
 						</Card>
 					</Collapse>
 				)}
-				<Card
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
-					className="mt-4"
-				>
-					<CardBody
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<Typography
-							variant="h5"
-							className="text-center lg:text-left text-sm sm:text-base md:text-lg"
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							Cronogramas de Instrucion y Entrenamiento de
-							<br className="hidden lg:inline" />
-							Participantes
-						</Typography>
-					</CardBody>
-				</Card>
 
 				<CourseStudentsSection
 					courseStudentList={courseStudentList}

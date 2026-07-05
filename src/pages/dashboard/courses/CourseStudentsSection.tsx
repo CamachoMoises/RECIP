@@ -80,8 +80,6 @@ const CourseStudentsSection = ({
 		setOpenDialog(false);
 		setSelectedStudent(null);
 	};
-	console.log('courseStudentList', courseStudentList); // Debugging line --- IGNORE ---
-	const toggleOpen = () => setOpen((cur) => !cur);
 	return (
 		<div className="flex flex-col pt-4">
 			<Card
@@ -101,7 +99,7 @@ const CourseStudentsSection = ({
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						Pilotos agendados por curso
+						Gestion de Cronogramas por Piloto
 					</Typography>
 					{canViewContent && (
 						<div className="flex flex-wrap justify-center gap-2 mb-4">
@@ -144,233 +142,210 @@ const CourseStudentsSection = ({
 							>
 								Inactivos
 							</Button>
-							<Button
-								size="sm"
-								variant="outlined"
-								color="gray"
-								onClick={toggleOpen}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								{open ? (
-									<span className="flex items-center gap-2">
-										Ocultar lista <ChevronUp className="h-4 w-4" />
-									</span>
-								) : (
-									<span className="flex items-center gap-2">
-										Mostrar lista <ChevronDown className="h-4 w-4" />
-									</span>
-								)}
-							</Button>
 						</div>
 					)}
 
-					<Collapse open={open}>
-						{!courseStudentList || courseStudentList.length === 0 ? (
-							<>
-								<Typography
-									variant="h2"
-									color="blue-gray"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									Sin pilotos agendados
-								</Typography>
-							</>
-						) : (
-							<List
+					{!courseStudentList || courseStudentList.length === 0 ? (
+						<>
+							<Typography
+								variant="h2"
+								color="blue-gray"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								{courseStudentList.map((CL) => (
-									<ListItem
-										key={`${CL.id}.courseList`}
+								Sin pilotos agendados
+							</Typography>
+						</>
+					) : (
+						<List
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							{courseStudentList.map((CL) => (
+								<ListItem
+									key={`${CL.id}.courseList`}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									onClick={() => handleOpenDialog(CL)}
+									className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 ${CL.status === false ? 'opacity-50' : ''}`}
+								>
+									<div className="min-w-0">
+										<Typography
+											variant="h6"
+											color="blue-gray"
+											className="truncate max-w-[150px] sm:max-w-none"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{CL.student?.user?.name
+												? `${CL.student.user.name} ${CL.student.user.last_name}`
+												: 'Sin Piloto'}
+										</Typography>
+										<Typography
+											variant="small"
+											color="gray"
+											className="font-normal truncate max-w-[200px] sm:max-w-none"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{CL.course?.name}{' '}
+											<span className="text-xs">
+												({CL.course?.course_level.name}-
+												{CL.course?.course_type.name})
+											</span>
+										</Typography>
+										<Typography
+											variant="small"
+											color="gray"
+											className="font-normal"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											PC:{CL.student?.user_id}
+										</Typography>
+										{CL.course_group_id ? (
+											<Typography
+												variant="small"
+												color="green"
+												className="font-normal mt-1"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Con grupo
+											</Typography>
+										) : (
+											<Typography
+												variant="small"
+												color="red"
+												className="font-normal mt-1"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Sin grupo asignado
+											</Typography>
+										)}
+										{CL.instructor_code && (
+											<Typography
+												variant="small"
+												color="blue-gray"
+												className="font-normal mt-1"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Código: {CL.instructor_code}
+											</Typography>
+										)}
+									</div>
+									<div
+										onClick={(e) => e.stopPropagation()}
+										className="flex items-center gap-1 sm:gap-2 shrink-0"
+									>
+										<IconButton
+											variant="text"
+											color="blue"
+											onClick={() => handleOpenDialog(CL)}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<Eye className="h-4 w-4" />
+										</IconButton>
+										{isAdmin && (
+											<IconButton
+												variant="text"
+												color="green"
+												onClick={() => {
+													if (CL.status !== false) {
+														navigateCourseStudent(CL);
+													}
+												}}
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												<Pencil className="h-4 w-4" />
+											</IconButton>
+										)}
+										{isAdmin && (
+											<IconButton
+												variant={
+													CL.status === false ? 'filled' : 'text'
+												}
+												color={CL.status === false ? 'green' : 'red'}
+												onClick={() =>
+													handleToggleStatus(
+														CL.id,
+														CL.status !== false,
+													)
+												}
+												disabled={togglingId === CL.id}
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{CL.status === false ? (
+													<Check className="h-4 w-4" />
+												) : (
+													<Trash2 className="h-4 w-4" />
+												)}
+											</IconButton>
+										)}
+									</div>
+								</ListItem>
+							))}
+						</List>
+					)}
+
+					{selectedStudent && (
+						<Dialog
+							open={openDialog}
+							handler={handleCloseDialog}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<DialogHeader
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								<div className="flex justify-between items-center w-full">
+									<Typography
+										variant="h5"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										onClick={() => handleOpenDialog(CL)}
-										className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 ${CL.status === false ? 'opacity-50' : ''}`}
 									>
-										<div className="min-w-0">
-											<Typography
-												variant="h6"
-												color="blue-gray"
-												className="truncate max-w-[150px] sm:max-w-none"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{CL.student?.user?.name
-													? `${CL.student.user.name} ${CL.student.user.last_name}`
-													: 'Sin Piloto'}
-											</Typography>
-											<Typography
-												variant="small"
-												color="gray"
-												className="font-normal truncate max-w-[200px] sm:max-w-none"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{CL.course?.name}{' '}
-												<span className="text-xs">
-													({CL.course?.course_level.name}-
-													{CL.course?.course_type.name})
-												</span>
-											</Typography>
-											<Typography
-												variant="small"
-												color="gray"
-												className="font-normal"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Id:{CL.student?.user_id} / {CL.code}
-											</Typography>
-											{CL.course_group_id ? (
-												<Typography
-													variant="small"
-													color="green"
-													className="font-normal mt-1"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													Con grupo
-												</Typography>
-											) : (
-												<Typography
-													variant="small"
-													color="red"
-													className="font-normal mt-1"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													Sin grupo asignado
-												</Typography>
-											)}
-											{CL.instructor_code && (
-												<Typography
-													variant="small"
-													color="blue-gray"
-													className="font-normal mt-1"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													Código: {CL.instructor_code}
-												</Typography>
-											)}
-										</div>
-										<div
-											onClick={(e) => e.stopPropagation()}
-											className="flex items-center gap-1 sm:gap-2 shrink-0"
-										>
-											<IconButton
-												variant="text"
-												color="blue"
-												onClick={() => handleOpenDialog(CL)}
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												<Eye className="h-4 w-4" />
-											</IconButton>
-											{isAdmin && (
-												<IconButton
-													variant="text"
-													color="green"
-													onClick={() => {
-														if (CL.status !== false) {
-															navigateCourseStudent(CL);
-														}
-													}}
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													<Pencil className="h-4 w-4" />
-												</IconButton>
-											)}
-											{isAdmin && (
-												<IconButton
-													variant={
-														CL.status === false ? 'filled' : 'text'
-													}
-													color={
-														CL.status === false ? 'green' : 'red'
-													}
-													onClick={() =>
-														handleToggleStatus(
-															CL.id,
-															CL.status !== false,
-														)
-													}
-													disabled={togglingId === CL.id}
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{CL.status === false ? (
-														<Check className="h-4 w-4" />
-													) : (
-														<Trash2 className="h-4 w-4" />
-													)}
-												</IconButton>
-											)}
-										</div>
-									</ListItem>
-								))}
-							</List>
-						)}
-					</Collapse>
-
-					<Dialog
-						open={openDialog}
-						handler={handleCloseDialog}
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						<DialogHeader
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<div className="flex justify-between items-center w-full">
-								<Typography
-									variant="h5"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									{selectedStudent?.student?.user?.name
-										? `${selectedStudent.student.user.name} ${selectedStudent.student.user.last_name}`
-										: 'Detalle del Piloto'}
-								</Typography>
-								<IconButton
-									variant="text"
-									color="red"
-									onClick={handleCloseDialog}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									<X className="h-4 w-4" />
-								</IconButton>
-							</div>
-						</DialogHeader>
-						<DialogBody
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							{selectedStudent && (
+										{selectedStudent?.student?.user?.name
+											? `${selectedStudent.student.user.name} ${selectedStudent.student.user.last_name}`
+											: 'Detalle del Piloto'}
+									</Typography>
+									<IconButton
+										variant="text"
+										color="red"
+										onClick={handleCloseDialog}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										<X className="h-4 w-4" />
+									</IconButton>
+								</div>
+							</DialogHeader>
+							<DialogBody
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
 								<div className="space-y-3">
 									<div>
 										<Typography
@@ -488,58 +463,58 @@ const CourseStudentsSection = ({
 										</Typography>
 									</div>
 								</div>
-							)}
-						</DialogBody>
-						<DialogFooter
-							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						>
-							<Button
-								variant="outlined"
-								color="gray"
-								onClick={handleCloseDialog}
-								className="mr-2"
+							</DialogBody>
+							<DialogFooter
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Cerrar
-							</Button>
-							{selectedStudent && (
-								<>
-									<Button
-										variant="text"
-										color="blue"
-										onClick={() => {
-											handleCloseDialog();
-											navigateViewCourseStudent(selectedStudent);
-										}}
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Ver detalles
-									</Button>
-									{isAdmin && selectedStudent.status !== false && (
+								<Button
+									variant="outlined"
+									color="gray"
+									onClick={handleCloseDialog}
+									className="mr-2"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Cerrar
+								</Button>
+								{selectedStudent && (
+									<>
 										<Button
-											variant="filled"
-											color="green"
+											variant="text"
+											color="blue"
 											onClick={() => {
 												handleCloseDialog();
-												navigateCourseStudent(selectedStudent);
+												navigateViewCourseStudent(selectedStudent);
 											}}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Editar
+											Ver detalles
 										</Button>
-									)}
-								</>
-							)}
-						</DialogFooter>
-					</Dialog>
+										{isAdmin && selectedStudent.status !== false && (
+											<Button
+												variant="filled"
+												color="green"
+												onClick={() => {
+													handleCloseDialog();
+													navigateCourseStudent(selectedStudent);
+												}}
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Editar
+											</Button>
+										)}
+									</>
+								)}
+							</DialogFooter>
+						</Dialog>
+					)}
 
 					{totalPages > 1 && (
 						<>
