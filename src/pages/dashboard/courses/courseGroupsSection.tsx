@@ -21,9 +21,13 @@ import {
 	saveCourseGroupSignature,
 	toggleCourseGroupStatus,
 } from '../../../features/courseGroupSlice';
-import { courseGroup } from '../../../types/utilities';
+import { courseGroup, courseStudent } from '../../../types/utilities';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import SignatureCanvas from 'react-signature-canvas';
+
+type Props = {
+	navigateViewCourseStudent: (CS: courseStudent) => Promise<void>;
+};
 import ModalFormCourseGroup from './modalFormCourseGroup';
 import ModalAssignStudents from './modalAssignStudents';
 import {
@@ -41,7 +45,9 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const CourseGroupsSection = () => {
+const CourseGroupsSection = ({
+	navigateViewCourseStudent,
+}: Props) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const { courseGroupList, courseGroupStudents, status, error } =
 		useSelector((state: RootState) => state.courseGroups);
@@ -477,6 +483,7 @@ const CourseGroupsSection = () => {
 																		placeholder={undefined}
 																		onPointerEnterCapture={undefined}
 																		onPointerLeaveCapture={undefined}
+																		onClick={() => navigateViewCourseStudent(cs)}
 																		className={`py-2 px-3 ${isRemoving ? 'opacity-50' : ''}`}
 																	>
 																		<div className="flex items-center justify-between w-full">

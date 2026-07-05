@@ -66,7 +66,7 @@ const CourseStudentsSection = ({
 	setStatusFilter,
 	getItemProps,
 }: Props) => {
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(true);
 	const [selectedStudent, setSelectedStudent] =
 		useState<courseStudent | null>(null);
 	const [openDialog, setOpenDialog] = useState(false);
@@ -405,6 +405,14 @@ const CourseStudentsSection = ({
 										</Typography>
 										<Typography
 											variant="paragraph"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Id:{selectedStudent.student?.user_id}
+										</Typography>
+										<Typography
+											variant="small"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}

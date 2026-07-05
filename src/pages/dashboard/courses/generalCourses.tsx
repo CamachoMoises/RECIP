@@ -389,7 +389,9 @@ const GeneralCourses = () => {
 					setStatusFilter={setStatusFilter}
 					getItemProps={getItemProps}
 				/>
-				<CourseGroupsSection />
+				<CourseGroupsSection
+					navigateViewCourseStudent={navigateViewCourseStudent}
+				/>
 			</div>
 		</>
 	);
