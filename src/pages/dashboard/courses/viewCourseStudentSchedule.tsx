@@ -132,7 +132,6 @@ const ViewCourseStudentSchedule = () => {
 		course_id: string;
 	}>();
 	const canEditAttendance = PermissionsValidate(['staff']);
-	const canViewAttendance = canEditAttendance || true; // todos ven el accordion, pero solo staff edita
 	const [openAccordions, setOpenAccordions] = useState<number[]>([1]);
 	const [dataLoaded, setDataLoaded] = useState(false);
 	const [selectedAttendanceStatus, setSelectedAttendanceStatus] =
@@ -191,6 +190,10 @@ const ViewCourseStudentSchedule = () => {
 		}),
 		shallowEqual,
 	);
+	console.log(course.courseSelected?.course_type?.id);
+	const canViewAttendance =
+		(canEditAttendance || true) &&
+		course.courseSelected?.course_type?.id !== 2;
 
 	const handleToggleAccordion = (accordionId: number) => {
 		setOpenAccordions((prev) =>
