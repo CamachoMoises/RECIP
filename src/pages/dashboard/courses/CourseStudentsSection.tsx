@@ -6,23 +6,23 @@ import {
 	IconButton,
 	ListItem,
 	Typography,
-	Collapse,
 	Dialog,
 	DialogHeader,
 	DialogBody,
 	DialogFooter,
 } from '@material-tailwind/react';
-import { courseStudent } from '../../../types/utilities';
+import { course, courseStudent } from '../../../types/utilities';
 import {
 	Eye,
 	Pencil,
+	Power,
 	Trash2,
-	Check,
 	ChevronLeft,
 	ChevronRight,
-	ChevronDown,
-	ChevronUp,
 	X,
+	Filter,
+	CheckCircle,
+	XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -45,6 +45,10 @@ type Props = {
 	next: () => Promise<void> | void;
 	statusFilter: boolean | undefined;
 	setStatusFilter: (v: boolean | undefined) => void;
+	courseFilter: string | undefined;
+	setCourseFilter: (v: string | undefined) => void;
+	courseList: course[];
+	onClearFilters: () => void;
 	getItemProps: (index: number) => any;
 };
 
@@ -64,6 +68,10 @@ const CourseStudentsSection = ({
 	next,
 	statusFilter,
 	setStatusFilter,
+	courseFilter,
+	setCourseFilter,
+	courseList,
+	onClearFilters,
 	getItemProps,
 }: Props) => {
 	const [open, setOpen] = useState(true);
@@ -102,46 +110,85 @@ const CourseStudentsSection = ({
 						Gestion de Cronogramas por Piloto
 					</Typography>
 					{canViewContent && (
-						<div className="flex flex-wrap justify-center gap-2 mb-4">
-							<Button
-								size="sm"
-								variant={
-									statusFilter === undefined ? 'filled' : 'outlined'
+						<div className="flex flex-wrap items-center gap-2 mb-4">
+							<div className="flex flex-wrap gap-1">
+								<Button
+									size="sm"
+									variant={
+										statusFilter === undefined ? 'filled' : 'outlined'
+									}
+									color="blue"
+									title="Todos"
+									onClick={() => setStatusFilter(undefined)}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									className="flex items-center gap-1"
+								>
+									<Filter size={14} />
+								</Button>
+								<Button
+									size="sm"
+									variant={
+										statusFilter === true ? 'filled' : 'outlined'
+									}
+									color="green"
+									title="Activos"
+									onClick={() => setStatusFilter(true)}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									className="flex items-center gap-1"
+								>
+									<CheckCircle size={14} />
+								</Button>
+								<Button
+									size="sm"
+									variant={
+										statusFilter === false ? 'filled' : 'outlined'
+									}
+									color="red"
+									title="Inactivos"
+									onClick={() => setStatusFilter(false)}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									className="flex items-center gap-1"
+								>
+									<XCircle size={14} />
+								</Button>
+							</div>
+							<select
+								value={courseFilter ?? ''}
+								onChange={(e) =>
+									setCourseFilter(e.target.value || undefined)
 								}
-								color="blue"
-								onClick={() => setStatusFilter(undefined)}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
+								className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white w-48"
 							>
-								Todos
-							</Button>
-							<Button
-								size="sm"
-								variant={
-									statusFilter === true ? 'filled' : 'outlined'
-								}
-								color="green"
-								onClick={() => setStatusFilter(true)}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Activos
-							</Button>
-							<Button
-								size="sm"
-								variant={
-									statusFilter === false ? 'filled' : 'outlined'
-								}
-								color="red"
-								onClick={() => setStatusFilter(false)}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Inactivos
-							</Button>
+								<option value="">Todos los cursos</option>
+								{courseList.map((c: course) => (
+									<option key={c.id} value={c.id!.toString()}>
+										{c.name} ({c.course_level?.name} /{' '}
+										{c.course_type?.name})
+									</option>
+								))}
+							</select>
+							{(statusFilter !== true ||
+								courseFilter !== undefined) && (
+								<Button
+									size="sm"
+									variant="text"
+									color="gray"
+									title="Limpiar filtros"
+									onClick={onClearFilters}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									className="p-2"
+								>
+									<Trash2 size={16} />
+								</Button>
+							)}
 						</div>
 					)}
 
@@ -195,8 +242,8 @@ const CourseStudentsSection = ({
 										>
 											{CL.course?.name}{' '}
 											<span className="text-xs">
-												({CL.course?.course_level.name}-
-												{CL.course?.course_type.name})
+												({CL.course?.course_level?.name}-
+												{CL.course?.course_type?.name})
 											</span>
 										</Typography>
 										<Typography
@@ -293,9 +340,9 @@ const CourseStudentsSection = ({
 												onPointerLeaveCapture={undefined}
 											>
 												{CL.status === false ? (
-													<Check className="h-4 w-4" />
+													<Power className="h-4 w-4" />
 												) : (
-													<Trash2 className="h-4 w-4" />
+													<Power className="h-4 w-4" />
 												)}
 											</IconButton>
 										)}
@@ -364,8 +411,8 @@ const CourseStudentsSection = ({
 											onPointerLeaveCapture={undefined}
 										>
 											{selectedStudent.course?.name} (
-											{selectedStudent.course?.course_level.name}-
-											{selectedStudent.course?.course_type.name})
+											{selectedStudent.course?.course_level?.name}-
+											{selectedStudent.course?.course_type?.name})
 										</Typography>
 									</div>
 									<div>
@@ -384,15 +431,7 @@ const CourseStudentsSection = ({
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Id:{selectedStudent.student?.user_id}
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{selectedStudent.code}
+											PC:{selectedStudent.student?.user_id}
 										</Typography>
 									</div>
 									{selectedStudent.instructor_code && (

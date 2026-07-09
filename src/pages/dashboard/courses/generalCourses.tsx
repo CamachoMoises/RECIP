@@ -68,6 +68,14 @@ const GeneralCourses = () => {
 	const [statusFilter, setStatusFilter] = useState<
 		boolean | undefined
 	>(true);
+	const [courseFilter, setCourseFilter] = useState<
+		string | undefined
+	>(undefined);
+
+	const clearFilters = () => {
+		setStatusFilter(true);
+		setCourseFilter(undefined);
+	};
 
 	const toggleOpen = () => {
 		setOpen((cur) => {
@@ -82,6 +90,7 @@ const GeneralCourses = () => {
 				currentPage: page,
 				pageSize: fixedPageSize,
 				status: statusFilter,
+				course_id: courseFilter ? parseInt(courseFilter) : undefined,
 			}),
 		);
 	};
@@ -89,7 +98,7 @@ const GeneralCourses = () => {
 	useEffect(() => {
 		dispatch(fetchCourses());
 		fetchWithFilter(1);
-	}, [dispatch, statusFilter]);
+	}, [dispatch, statusFilter, courseFilter]);
 	const [active, setActive] = useState(1);
 
 	useEffect(() => {
@@ -362,6 +371,10 @@ const GeneralCourses = () => {
 					next={next}
 					statusFilter={statusFilter}
 					setStatusFilter={setStatusFilter}
+					courseFilter={courseFilter}
+					setCourseFilter={setCourseFilter}
+					courseList={courseList}
+					onClearFilters={clearFilters}
 					getItemProps={getItemProps}
 				/>
 				<CourseGroupsSection

@@ -38,7 +38,6 @@ import {
 	UserPlus,
 	UserMinus,
 	ChevronDown,
-	Code,
 	Power,
 	Filter,
 	Save,
@@ -245,7 +244,7 @@ const CourseGroupsSection = ({
 								onPointerLeaveCapture={undefined}
 							>
 								<Filter size={14} className="mr-1" />
-								{showInactive ? 'Ver activos' : 'Ver inactivos'}
+								{showInactive ? 'Activos' : 'Inactivos'}
 							</Button>
 							<Button
 								size="sm"
@@ -336,8 +335,8 @@ const CourseGroupsSection = ({
 																	<span className="flex items-center gap-1">
 																		<Calendar size={12} />
 																		{group.course.name} (
-																		{group.course.course_level.name})
-																		({group.course.course_type.name})
+																		{group.course.course_level?.name})
+																		({group.course.course_type?.name})
 																	</span>
 																)}
 																{groupDate && (

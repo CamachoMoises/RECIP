@@ -440,6 +440,7 @@ const ViewCourseStudentSchedule = () => {
 						>
 							{course.courseSelected?.description}
 						</Typography>
+
 						<Typography
 							variant="small"
 							className="text-xs sm:text-sm"
@@ -447,7 +448,7 @@ const ViewCourseStudentSchedule = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							{course.courseStudent?.code}
+							PC: {course.courseStudent?.student?.user_id}
 						</Typography>
 					</div>
 

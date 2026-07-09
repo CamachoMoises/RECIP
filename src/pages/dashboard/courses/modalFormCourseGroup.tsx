@@ -242,8 +242,8 @@ const ModalFormCourseGroup = ({
 										key={course.id}
 										value={course.id!.toString()}
 									>
-										{course.name}- ({course.course_level.name} -{' '}
-										{course.course_type.name})
+										{course.name}- ({course.course_level?.name} -{' '}
+										{course.course_type?.name})
 									</Option>
 								))}
 							</Select>

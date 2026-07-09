@@ -33,16 +33,19 @@ export const fetchCourses = createAsyncThunk<course[]>(
     }
 );
 
-export const fetchCoursesStudents = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number, status?: boolean }>(
+export const fetchCoursesStudents = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number, status?: boolean, course_id?: number }>(
     'course/fetchCoursesStudents',
-    async ({ currentPage, pageSize, status }, { rejectWithValue }) => {
+    async ({ currentPage, pageSize, status, course_id }, { rejectWithValue }) => {
         try {
-            const params: { currentPage: number; pageSize: number; status?: boolean } = {
+            const params: { currentPage: number; pageSize: number; status?: boolean; course_id?: number } = {
                 currentPage,
                 pageSize,
             };
             if (status !== undefined) {
                 params.status = status;
+            }
+            if (course_id !== undefined) {
+                params.course_id = course_id;
             }
             const response = await axiosGetSlice('api/courses/coursesStudents', params);
 
