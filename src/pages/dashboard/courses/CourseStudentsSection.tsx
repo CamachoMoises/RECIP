@@ -109,9 +109,17 @@ const CourseStudentsSection = ({
 					>
 						Gestion de Cronogramas por Piloto
 					</Typography>
+					<Typography
+						placeholder={undefined}
+						variant="h6"
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						Filtros
+					</Typography>
 					{canViewContent && (
-						<div className="flex flex-wrap items-center gap-2 mb-4">
-							<div className="flex flex-wrap gap-1">
+						<>
+							<div className="flex flex-wrap justify-center gap-1">
 								<Button
 									size="sm"
 									variant={
@@ -157,40 +165,42 @@ const CourseStudentsSection = ({
 								>
 									<XCircle size={14} />
 								</Button>
-							</div>
-							<select
-								value={courseFilter ?? ''}
-								onChange={(e) =>
-									setCourseFilter(e.target.value || undefined)
-								}
-								className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white w-48"
-							>
-								<option value="">Todos los cursos</option>
-								{courseList.map((c: course) => (
-									<option key={c.id} value={c.id!.toString()}>
-										{c.name} ({c.course_level?.name} /{' '}
-										{c.course_type?.name})
-									</option>
-								))}
-							</select>
-							{(statusFilter !== true ||
-								courseFilter !== undefined) && (
-								<Button
-									size="sm"
-									variant="text"
-									color="gray"
-									title="Limpiar filtros"
-									onClick={onClearFilters}
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									className="p-2"
+								<select
+									value={courseFilter ?? ''}
+									onChange={(e) =>
+										setCourseFilter(e.target.value || undefined)
+									}
+									className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white w-48"
 								>
-									<Trash2 size={16} />
-								</Button>
-							)}
-						</div>
+									<option value="">Todos los cursos</option>
+									{courseList.map((c: course) => (
+										<option key={c.id} value={c.id!.toString()}>
+											{c.name} ({c.course_level?.name} /{' '}
+											{c.course_type?.name})
+										</option>
+									))}
+								</select>
+								{(statusFilter !== true ||
+									courseFilter !== undefined) && (
+									<Button
+										size="sm"
+										variant="text"
+										color="gray"
+										title="Limpiar filtros"
+										onClick={onClearFilters}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										className="p-2"
+									>
+										<Trash2 size={16} />
+									</Button>
+								)}
+							</div>
+						</>
 					)}
+					<br />
+					<hr />
 
 					{!courseStudentList || courseStudentList.length === 0 ? (
 						<>

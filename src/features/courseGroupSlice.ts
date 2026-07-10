@@ -1,11 +1,12 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseGroupState, courseGroup, courseStudent } from '../types/utilities';
+import { CourseGroupState, courseGroup, courseGroupSignature, courseStudent } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 const initialState: CourseGroupState = {
     courseGroupList: [],
     courseGroupSelected: null,
     courseGroupStudents: [],
+    courseGroupSignatures: [],
     status: 'idle',
     error: null,
 };
@@ -115,12 +116,25 @@ export const assignStudentsToGroup = createAsyncThunk<courseStudent[], { groupId
     }
 );
 
-export const saveCourseGroupSignature = createAsyncThunk<courseGroup, { course_group_id: number; signature: string }>(
+export const saveCourseGroupSignature = createAsyncThunk<courseGroupSignature, { course_group_id: number; day_number: number; signature: string }>(
     'courseGroup/saveCourseGroupSignature',
     async (data, { rejectWithValue }) => {
         try {
             const response = await axiosPostSlice('api/course_groups/signature', data);
             return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const fetchCourseGroupSignatures = createAsyncThunk<courseGroupSignature[], number>(
+    'courseGroup/fetchCourseGroupSignatures',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetSlice(`api/course_groups/${id}/signatures`);
+            return Array.isArray(response) ? response : response?.data || [];
+
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -279,18 +293,30 @@ const courseGroupSlice = createSlice({
             .addCase(saveCourseGroupSignature.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(saveCourseGroupSignature.fulfilled, (state, action: PayloadAction<courseGroup>) => {
+            .addCase(saveCourseGroupSignature.fulfilled, (state, action: PayloadAction<courseGroupSignature>) => {
                 state.status = 'succeeded';
-                if (!Array.isArray(state.courseGroupList)) state.courseGroupList = [];
-                const index = state.courseGroupList.findIndex(g => g.id === action.payload.id);
+                const sig = action.payload;
+                if (!Array.isArray(state.courseGroupSignatures)) state.courseGroupSignatures = [];
+                const index = state.courseGroupSignatures.findIndex(s => s.day_number === sig.day_number && s.course_group_id === sig.course_group_id);
                 if (index !== -1) {
-                    state.courseGroupList[index] = action.payload;
-                }
-                if (state.courseGroupSelected?.id === action.payload.id) {
-                    state.courseGroupSelected = action.payload;
+                    state.courseGroupSignatures[index] = sig;
+                } else {
+                    state.courseGroupSignatures.push(sig);
                 }
             })
             .addCase(saveCourseGroupSignature.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            .addCase(fetchCourseGroupSignatures.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCourseGroupSignatures.fulfilled, (state, action: PayloadAction<courseGroupSignature[]>) => {
+                state.status = 'succeeded';
+                state.courseGroupSignatures = Array.isArray(action.payload) ? action.payload : [];
+            })
+            .addCase(fetchCourseGroupSignatures.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
