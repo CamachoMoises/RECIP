@@ -89,3 +89,11 @@ src/
 - All suggestions functionality was moved from `generalCourses.tsx` to `reports/Reports.tsx` (expandable card, admin only)
 - Redux slices use `createAsyncThunk` with automatic 403 handling
 - Database IDs are numbers, route params are strings
+
+## Course Group Signatures
+
+- Signatures are per-day (one signature per `course.days`) stored in `course_group_signatures` table
+- Type: `courseGroupSignature` with `id`, `course_group_id`, `day_number`, `signature_url`
+- State: `courseGroupSignatures: courseGroupSignature[]` in `courseGroupSlice`
+- API: `POST /api/course_groups/signature` (`{ course_group_id, day_number, signature }`), `GET /api/course_groups/:id/signatures`
+- UI: Collapsible day dropdowns in accordion body; `savedDays` local Set tracks saved state independently of backend

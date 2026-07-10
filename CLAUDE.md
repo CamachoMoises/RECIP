@@ -121,6 +121,14 @@ src/
 - Visual indicators: gray background + "Inactivo" badge for inactive groups
 - Status can be changed in edit modal or via shortcut button
 
+**Signatures (per day)**:
+- Signatures stored in `course_group_signatures` table (separate from `course_group`)
+- Type: `courseGroupSignature` with `id`, `course_group_id`, `day_number`, `signature_url`
+- Redux state: `courseGroupSignatures: courseGroupSignature[]` in `CourseGroupState`
+- Endpoints: `POST /api/course_groups/signature` (upsert by day), `GET /api/course_groups/:id/signatures`
+- UI: Collapsible day dropdowns per group; `savedDays: Set<string>` local state tracks saved days independently of backend
+- On save success: day added to `savedDays`, canvas disabled + green header + "✓ firmado" badge shown immediately
+
 **Validation**:
 - Frontend: Filters students by course_id in modal
 - Backend: Returns error "Student course does not match the group course" if mismatch
