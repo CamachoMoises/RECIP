@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx';
 import './index.css';
 import './styles/global.css';
@@ -11,6 +12,7 @@ import { Toaster } from 'react-hot-toast';
 import ThemeInitializer from './components/ThemeInitializer';
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
+		<HelmetProvider>
 		<ThemeProvider>
 			<Provider store={store}>
 				<PersistGate loading={null} persistor={persistor}>
@@ -28,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
 					<App />
 				</PersistGate>
 			</Provider>
-		</ThemeProvider>
+			</ThemeProvider>
+		</HelmetProvider>
 	</StrictMode>,
 );

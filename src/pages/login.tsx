@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { EyeIcon, EyeOff, Plane } from 'lucide-react';
 import '../styles/global.css';
 import { useTheme } from '../hooks/useTheme';
+import SEO from '../components/SEO';
 
 type Inputs = {
 	email: string;
@@ -57,7 +58,9 @@ const Login = () => {
 	const [passwordShown, setPasswordShown] = useState(false);
 
 	return (
-		<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen p-4 relative overflow-hidden">
+		<>
+			<SEO title="Iniciar Sesión" description="Accede al sistema R.E.C.I.P. para gestión de evaluación, capacitación e instrucción de pilotos." url="/login" />
+			<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen p-4 relative overflow-hidden">
 			<div className="absolute inset-0 aviation-gradient opacity-20" />
 			<div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full blur-3xl opacity-10 animate-float" />
 			<div
@@ -228,7 +231,7 @@ const Login = () => {
 				</Card>
 			</div>
 		</div>
-	);
+		</>);
 };
 
 export default Login;

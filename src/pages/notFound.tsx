@@ -1,9 +1,12 @@
-import { Link } from 'react-router-dom'; // O usa `next/link` si es Next.js
+import { Link } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const NotFound = () => {
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-center px-4">
+		<>
+			<SEO title="404 - Página no encontrada" description="La página que buscas no existe o ha sido movida." noindex />
+			<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-center px-4">
 			<AlertTriangle size={64} className="text-red-500 mb-4" />
 			<h1 className="text-4xl font-bold mb-2">
 				404 - Página no encontrada
@@ -18,6 +21,7 @@ const NotFound = () => {
 				Volver al inicio
 			</Link>
 		</div>
+		</>
 	);
 };
 

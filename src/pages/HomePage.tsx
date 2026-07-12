@@ -1,6 +1,6 @@
 import { Button } from '@material-tailwind/react';
-
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const HomePage = () => {
 	const navigate = useNavigate();
@@ -9,7 +9,9 @@ const HomePage = () => {
 		navigate('/dashboard');
 	};
 	return (
-		<div className="py-14">
+		<>
+			<SEO title="Inicio" url="/" />
+			<div className="py-14">
 			<Button
 				onClick={handleContactClick}
 				placeholder={undefined}
@@ -19,7 +21,7 @@ const HomePage = () => {
 				Ir a Dashboard
 			</Button>
 		</div>
-	);
+		</>);
 };
 
 export default HomePage;

@@ -1,5 +1,6 @@
 import { Button } from '@material-tailwind/react';
 import { axiosGetDefault, axiosPostDefault } from '../services/axios';
+import SEO from '../components/SEO';
 
 const AboutUs = () => {
 	const callUser = async () => {
@@ -18,6 +19,7 @@ const AboutUs = () => {
 
 	return (
 		<>
+			<SEO title="Acerca de" description="Conoce más sobre R.E.C.I.P., el sistema de registro de evaluación, capacitación e instrucción del piloto." url="/about" />
 			<Button
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}

@@ -12,7 +12,7 @@ npm run lint     # ESLint
 
 ## Tech Stack
 
-React 18 + TypeScript + Vite | React Router v6 | Redux Toolkit | Material Tailwind v2 + Tailwind v4 | Lucide icons | react-hook-form | Axios
+React 18 + TypeScript + Vite | React Router v6 | Redux Toolkit | Material Tailwind v2 + Tailwind v4 | Lucide icons | react-hook-form | Axios | react-helmet-async
 
 ## Project Structure
 
@@ -75,6 +75,10 @@ src/
 - **Permissions**: `PermissionsValidate(['staff', 'instructor'])` returns boolean
 - **Breadcrumbs**: `<PageTitle title="..." breadCrumbs={[{name, href}]} />` component
 - **Theme**: `useTheme()` hook returns `{ theme, toggle }` with CSS variables
+- **SEO**: `<SEO title="..." description="..." url="..." />` component in `src/components/SEO.tsx` — use on every public page for meta tags, Open Graph, Twitter Cards, JSON-LD structured data, and canonical URLs
+- **HelmetProvider**: Wraps the app in `src/main.tsx` (required for `<SEO>` to work)
+- **Sitemap**: `public/sitemap.xml` (update when adding public routes)
+- **robots.txt**: `public/robots.txt`
 
 ## Adding a New Dashboard Page
 

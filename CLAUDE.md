@@ -11,6 +11,7 @@ Aviation training management system (Registro de Evaluación, Capacitación e In
 - **Forms**: react-hook-form
 - **API**: Axios (services in `src/services/axios.ts`)
 - **PDF**: @react-pdf/renderer + react-to-print
+- **SEO**: react-helmet-async (HelmetProvider in `src/main.tsx`, `<SEO>` component in `src/components/SEO.tsx`)
 - **Other**: react-hot-toast, react-signature-canvas, xlsx, Cloudinary, pako
 
 ## Project Structure
