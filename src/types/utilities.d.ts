@@ -254,6 +254,7 @@ export type courseGroupSignature = {
     id: number;
     course_group_id: number;
     day_number: number;
+    signature_number: number;
     signature_url: string;
     createdAt?: string;
     updatedAt?: string;

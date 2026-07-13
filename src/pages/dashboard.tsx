@@ -1,4 +1,4 @@
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Icons from './dashboard/icons';
 import UsersTable from './dashboard/users/usersTable';
 import GeneralCourses from './dashboard/courses/generalCourses';
@@ -16,17 +16,11 @@ import GeneralConfig from './dashboard/config/generalConfig';
 import TestList from './dashboard/config/testList';
 import QuestionTestList from './dashboard/config/questionTestList';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
 import DetailAssessment from './dashboard/assessment/detailAssessment';
 import ReviewTest from './dashboard/test/reviewTest';
+import RouteGuard from '../components/RouteGuard';
 
 const Dashboard = () => {
-	const navigate = useNavigate();
-
-	const auth = useSelector((state: RootState) => {
-		return state.auth;
-	});
 	const [isVisible, setIsVisible] = useState(true);
 
 	useEffect(() => {
@@ -44,11 +38,6 @@ const Dashboard = () => {
 			window.removeEventListener('scroll', handleScroll);
 		};
 	}, []);
-	useEffect(() => {
-		if (!auth.token) {
-			navigate('/login');
-		}
-	}, [auth.token, navigate]);
 
 	return (
 		<div className="min-h-screen bg-transparent p-4">
@@ -82,53 +71,53 @@ const Dashboard = () => {
 					<div className="w-full my-6">
 						<div className="glass-panel p-6 animate-fade-up">
 							<Routes>
-								<Route path="/" element={<Icons />} />
-								<Route path="users" element={<UsersTable />} />
-								<Route path="courses" element={<GeneralCourses />} />
-								<Route path="my-courses" element={<StudentCourses />} />
-								<Route path="students" element={<TableStudents />} />
-								<Route path="config" element={<GeneralConfig />} />
+								<Route path="/" element={<RouteGuard><Icons /></RouteGuard>} />
+								<Route path="users" element={<RouteGuard roles={['staff']}><UsersTable /></RouteGuard>} />
+								<Route path="courses" element={<RouteGuard roles={['staff', 'instructor']}><GeneralCourses /></RouteGuard>} />
+								<Route path="my-courses" element={<RouteGuard roles={['student']}><StudentCourses /></RouteGuard>} />
+								<Route path="students" element={<RouteGuard roles={['staff']}><TableStudents /></RouteGuard>} />
+								<Route path="config" element={<RouteGuard roles={['staff']}><GeneralConfig /></RouteGuard>} />
 								<Route
 									path="instructors"
-									element={<TableInstructors />}
+									element={<RouteGuard roles={['instructor', 'staff']}><TableInstructors /></RouteGuard>}
 								/>
 								<Route
 									path="assessment"
-									element={<GeneralAssessment />}
+									element={<RouteGuard roles={['instructor']}><GeneralAssessment /></RouteGuard>}
 								/>
-								<Route path="reports" element={<Reports />} />
-								<Route path="test" element={<GeneralTest />} />
+								<Route path="reports" element={<RouteGuard roles={['super_user']}><Reports /></RouteGuard>} />
+								<Route path="test" element={<RouteGuard roles={['student', 'instructor']}><GeneralTest /></RouteGuard>} />
 								<Route
 									path="config/course/:id"
-									element={<CourseDetail />}
+									element={<RouteGuard roles={['staff']}><CourseDetail /></RouteGuard>}
 								/>
 								<Route
 									path="config/test/:id"
-									element={<TestList />}
+									element={<RouteGuard roles={['staff']}><TestList /></RouteGuard>}
 								/>
 								<Route
 									path="config/testQuestion/:course_id/:test_id/:question_type_id/:test_question_type_id"
-									element={<QuestionTestList />}
+									element={<RouteGuard roles={['staff']}><QuestionTestList /></RouteGuard>}
 								/>
 								<Route
 									path="new_course/:id/:course_id"
-									element={<NewCourse />}
+									element={<RouteGuard roles={['staff', 'instructor']}><NewCourse /></RouteGuard>}
 								/>
 								<Route
 									path="view_course/:id/:course_id"
-									element={<ViewCourseStudentSchedule />}
+									element={<RouteGuard roles={['staff', 'instructor', 'student']}><ViewCourseStudentSchedule /></RouteGuard>}
 								/>
 								<Route
 									path="course_assessment/:id/:course_id"
-									element={<DetailAssessment />}
+									element={<RouteGuard roles={['instructor']}><DetailAssessment /></RouteGuard>}
 								/>
 								<Route
 									path="new_test/:id/:course_id/:test_id"
-									element={<NewTest />}
+									element={<RouteGuard roles={['student', 'instructor']}><NewTest /></RouteGuard>}
 								/>
 								<Route
 									path="review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id"
-									element={<ReviewTest />}
+									element={<RouteGuard roles={['student', 'instructor']}><ReviewTest /></RouteGuard>}
 								/>
 							</Routes>
 						</div>

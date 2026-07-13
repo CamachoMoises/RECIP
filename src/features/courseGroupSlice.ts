@@ -141,6 +141,18 @@ export const fetchCourseGroupSignatures = createAsyncThunk<courseGroupSignature[
     }
 );
 
+export const deleteCourseGroupSignature = createAsyncThunk<number, { groupId: number; signatureId: number }>(
+    'courseGroup/deleteCourseGroupSignature',
+    async ({ groupId, signatureId }, { rejectWithValue }) => {
+        try {
+            await axiosDeleteSlice(`api/course_groups/${groupId}/signatures/${signatureId}`);
+            return signatureId;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const removeStudentFromGroup = createAsyncThunk<number, { groupId: number; courseStudentId: number }>(
     'courseGroup/removeStudentFromGroup',
     async ({ groupId, courseStudentId }, { rejectWithValue }) => {
@@ -297,7 +309,7 @@ const courseGroupSlice = createSlice({
                 state.status = 'succeeded';
                 const sig = action.payload;
                 if (!Array.isArray(state.courseGroupSignatures)) state.courseGroupSignatures = [];
-                const index = state.courseGroupSignatures.findIndex(s => s.day_number === sig.day_number && s.course_group_id === sig.course_group_id);
+                const index = state.courseGroupSignatures.findIndex(s => s.day_number === sig.day_number && s.course_group_id === sig.course_group_id && s.signature_number === sig.signature_number);
                 if (index !== -1) {
                     state.courseGroupSignatures[index] = sig;
                 } else {
@@ -317,6 +329,18 @@ const courseGroupSlice = createSlice({
                 state.courseGroupSignatures = Array.isArray(action.payload) ? action.payload : [];
             })
             .addCase(fetchCourseGroupSignatures.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            .addCase(deleteCourseGroupSignature.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteCourseGroupSignature.fulfilled, (state, action: PayloadAction<number>) => {
+                state.status = 'succeeded';
+                state.courseGroupSignatures = state.courseGroupSignatures.filter(s => s.id !== action.payload);
+            })
+            .addCase(deleteCourseGroupSignature.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

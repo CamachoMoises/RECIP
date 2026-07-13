@@ -183,9 +183,8 @@ const CourseStudentsSection = ({
 								{(statusFilter !== true ||
 									courseFilter !== undefined) && (
 									<Button
-										size="sm"
-										variant="text"
 										color="gray"
+										variant="outlined"
 										title="Limpiar filtros"
 										onClick={onClearFilters}
 										placeholder={undefined}
@@ -309,6 +308,7 @@ const CourseStudentsSection = ({
 										<IconButton
 											variant="text"
 											color="blue"
+											title="Detalles"
 											onClick={() => handleOpenDialog(CL)}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
@@ -320,6 +320,7 @@ const CourseStudentsSection = ({
 											<IconButton
 												variant="text"
 												color="green"
+												title="Editar cornograma"
 												onClick={() => {
 													if (CL.status !== false) {
 														navigateCourseStudent(CL);
@@ -334,10 +335,17 @@ const CourseStudentsSection = ({
 										)}
 										{isAdmin && (
 											<IconButton
+												title={
+													CL.status === false
+														? 'Activar'
+														: 'Desactivar'
+												}
 												variant={
 													CL.status === false ? 'filled' : 'text'
 												}
-												color={CL.status === false ? 'green' : 'red'}
+												color={
+													CL.status === false ? 'green' : 'orange'
+												}
 												onClick={() =>
 													handleToggleStatus(
 														CL.id,

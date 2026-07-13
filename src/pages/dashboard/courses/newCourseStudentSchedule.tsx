@@ -177,11 +177,13 @@ const NewCourseStudentSchedule = () => {
 
 	const handleChange = async () => {
 		if (course.courseSelected?.id && course.courseStudent?.id) {
+			const rawDate = dateInputRef.current?.value;
+			const validDate = rawDate && moment(rawDate).isValid() ? rawDate : undefined;
 			dispatch(
 				updateCourseStudent({
 					course_id: course.courseSelected.id,
 					course_student_id: course.courseStudent.id,
-					date: dateInputRef.current?.value,
+					date: validDate,
 					student_id: studentSelectRef.current?.student?.id,
 					typeTrip: typeTripRef.current,
 					license: licenseRef.current,
@@ -373,7 +375,7 @@ const NewCourseStudentSchedule = () => {
 									course.courseStudent?.approve || !canViewContent
 								}
 								value={
-									course.courseStudent?.date
+									course.courseStudent?.date && moment(course.courseStudent.date).isValid()
 										? moment(course.courseStudent.date).format(
 												'YYYY-MM-DD',
 											)
