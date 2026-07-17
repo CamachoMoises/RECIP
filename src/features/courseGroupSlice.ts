@@ -116,7 +116,10 @@ export const assignStudentsToGroup = createAsyncThunk<courseStudent[], { groupId
     }
 );
 
-export const saveCourseGroupSignature = createAsyncThunk<courseGroupSignature, { course_group_id: number; day_number: number; signature: string }>(
+export const saveCourseGroupSignature = createAsyncThunk<
+    { success: boolean; data: { signatureUrl: string; signature_number: number } },
+    { course_group_id: number; day_number: number; signature: string }
+>(
     'courseGroup/saveCourseGroupSignature',
     async (data, { rejectWithValue }) => {
         try {
@@ -305,16 +308,8 @@ const courseGroupSlice = createSlice({
             .addCase(saveCourseGroupSignature.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(saveCourseGroupSignature.fulfilled, (state, action: PayloadAction<courseGroupSignature>) => {
+            .addCase(saveCourseGroupSignature.fulfilled, (state) => {
                 state.status = 'succeeded';
-                const sig = action.payload;
-                if (!Array.isArray(state.courseGroupSignatures)) state.courseGroupSignatures = [];
-                const index = state.courseGroupSignatures.findIndex(s => s.day_number === sig.day_number && s.course_group_id === sig.course_group_id && s.signature_number === sig.signature_number);
-                if (index !== -1) {
-                    state.courseGroupSignatures[index] = sig;
-                } else {
-                    state.courseGroupSignatures.push(sig);
-                }
             })
             .addCase(saveCourseGroupSignature.rejected, (state, action) => {
                 state.status = 'failed';

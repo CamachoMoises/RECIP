@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { AttendanceState, attendance, attendanceStatus } from '../types/utilities';
-import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
+import { AttendanceState, attendance, attendanceSignatureRecord, attendanceStatus } from '../types/utilities';
+import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 
 const initialState: AttendanceState = {
@@ -61,6 +61,7 @@ export const fetchAttendanceByCourseStudent = createAsyncThunk<attendance[], num
     async (course_student_id, { rejectWithValue }) => {
         try {
             const response = await axiosGetSlice('api/attendance/by-course-student', { course_student_id });
+            console.log('fetchAttendanceByCourseStudent response', response);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -177,7 +178,7 @@ export const deleteAttendanceStatus = createAsyncThunk<number, number>(
 );
 
 export const saveAttendanceSignature = createAsyncThunk<
-    { data: { signatureUrl: string; attendance: attendance } },
+    { success: boolean; data: { signatureUrl: string; record: attendanceSignatureRecord } },
     { attendance_id: number; signature: string }
 >(
     'attendance/saveAttendanceSignature',
@@ -185,6 +186,18 @@ export const saveAttendanceSignature = createAsyncThunk<
         try {
             const response = await axiosPostSlice('api/attendance/signature', data);
             return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const deleteAttendanceSignature = createAsyncThunk<number, number>(
+    'attendance/deleteAttendanceSignature',
+    async (attendanceId, { rejectWithValue }) => {
+        try {
+            await axiosDeleteSlice(`api/attendance/${attendanceId}/signature`);
+            return attendanceId;
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -382,18 +395,57 @@ const attendanceSlice = createSlice({
             .addCase(saveAttendanceSignature.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(saveAttendanceSignature.fulfilled, (state, action: PayloadAction<{ data: { signatureUrl: string; attendance: attendance } }>) => {
+            .addCase(saveAttendanceSignature.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                const { signatureUrl, attendance: updatedAttendance } = action.payload.data;
+                const { signatureUrl, record } = action.payload.data;
                 if (state.attendanceList) {
-                    const index = state.attendanceList.findIndex((a) => a.id === updatedAttendance.id);
+                    const index = state.attendanceList.findIndex((a) => a.id === record.attendance_id);
                     if (index !== -1) {
-                        state.attendanceList[index] = { ...state.attendanceList[index], signature_url: signatureUrl };
+                        state.attendanceList[index] = {
+                            ...state.attendanceList[index],
+                            signature_url: signatureUrl,
+                            attendance_signature: record,
+                        };
                     }
                 }
-                state.attendanceSelected = updatedAttendance;
+                if (state.attendanceSelected?.id === record.attendance_id) {
+                    state.attendanceSelected = {
+                        ...state.attendanceSelected,
+                        signature_url: signatureUrl,
+                        attendance_signature: record,
+                    };
+                }
             })
             .addCase(saveAttendanceSignature.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            .addCase(deleteAttendanceSignature.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteAttendanceSignature.fulfilled, (state, action: PayloadAction<number>) => {
+                state.status = 'succeeded';
+                const attendanceId = action.payload;
+                if (state.attendanceList) {
+                    const index = state.attendanceList.findIndex((a) => a.id === attendanceId);
+                    if (index !== -1) {
+                        state.attendanceList[index] = {
+                            ...state.attendanceList[index],
+                            signature_url: undefined,
+                            attendance_signature: undefined,
+                        };
+                    }
+                }
+                if (state.attendanceSelected?.id === attendanceId) {
+                    state.attendanceSelected = {
+                        ...state.attendanceSelected,
+                        signature_url: undefined,
+                        attendance_signature: undefined,
+                    };
+                }
+            })
+            .addCase(deleteAttendanceSignature.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });

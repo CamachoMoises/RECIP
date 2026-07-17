@@ -28,11 +28,12 @@ import {
 	fetchStudents,
 } from '../../../features/userSlice';
 import {
-	fetchAttendances,
+	fetchAttendanceByCourseStudent,
 	fetchAttendanceStatuses,
 	createAttendance,
 	updateAttendance,
 	saveAttendanceSignature,
+	deleteAttendanceSignature,
 } from '../../../features/attendanceSlice';
 import PageTitle from '../../../components/PageTitle';
 import LoadingPage from '../../../components/LoadingPage';
@@ -40,7 +41,15 @@ import ErrorPage from '../../../components/ErrorPage';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import toast from 'react-hot-toast';
 import moment from 'moment';
-import { Calendar, Clock, User, Edit2, Save, X } from 'lucide-react';
+import {
+	Calendar,
+	Clock,
+	Trash2,
+	User,
+	Edit2,
+	Save,
+	X,
+} from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
 
@@ -166,12 +175,7 @@ const ViewCourseStudentSchedule = () => {
 					dispatch(fetchStudents({ status: true })),
 					dispatch(fetchSchedule(courseStudentId)),
 					dispatch(fetchAttendanceStatuses()),
-					dispatch(
-						fetchAttendances({
-							course_student_id: courseStudentId,
-							pageSize: 100,
-						}),
-					),
+					dispatch(fetchAttendanceByCourseStudent(courseStudentId)),
 				]);
 				setDataLoaded(true);
 			}
@@ -190,7 +194,6 @@ const ViewCourseStudentSchedule = () => {
 		}),
 		shallowEqual,
 	);
-	console.log(course.courseSelected?.course_type?.id);
 	const canViewAttendance =
 		(canEditAttendance || true) &&
 		course.courseSelected?.course_type?.id !== 2;
@@ -267,9 +270,10 @@ const ViewCourseStudentSchedule = () => {
 
 	const getAttendanceForDate = (date: string) => {
 		const dateStr = moment(date).format('YYYY-MM-DD');
-		return attendance.attendanceList?.find(
+		const attendanceRecord = attendance.attendanceList?.find(
 			(a) => moment(a.date).format('YYYY-MM-DD') === dateStr,
 		);
+		return attendanceRecord;
 	};
 
 	const getAttendanceStatusLabel = (statusId: number | undefined) => {
@@ -327,12 +331,11 @@ const ViewCourseStudentSchedule = () => {
 				toast.success('Asistencia guardada');
 			}
 
-			await dispatch(
-				fetchAttendances({
-					course_student_id: course.courseStudent.id,
-					pageSize: 100,
-				}),
-			);
+			if (course.courseStudent?.id) {
+				await dispatch(
+					fetchAttendanceByCourseStudent(course.courseStudent.id),
+				);
+			}
 
 			setEditingAttendanceId(null);
 			setSelectedAttendanceStatus(1);
@@ -376,10 +379,32 @@ const ViewCourseStudentSchedule = () => {
 			).unwrap();
 			toast.success('Firma guardada correctamente');
 			canvas.clear();
+			if (course.courseStudent?.id) {
+				await dispatch(
+					fetchAttendanceByCourseStudent(course.courseStudent.id),
+				);
+			}
 		} catch {
 			toast.error('Error al guardar la firma');
 		} finally {
 			setSavingSignatureId(null);
+		}
+	};
+
+	const handleDeleteSignature = async (attendanceId: number) => {
+		if (!confirm('¿Eliminar esta firma?')) return;
+		try {
+			await dispatch(
+				deleteAttendanceSignature(attendanceId),
+			).unwrap();
+			toast.success('Firma eliminada');
+			if (course.courseStudent?.id) {
+				await dispatch(
+					fetchAttendanceByCourseStudent(course.courseStudent.id),
+				);
+			}
+		} catch (error: any) {
+			toast.error(error?.message || 'Error al eliminar firma');
 		}
 	};
 
@@ -399,7 +424,7 @@ const ViewCourseStudentSchedule = () => {
 		acc[dateKey].push(schedule);
 		return acc;
 	}, {});
-
+	console.log('data', schedulesByDate, attendance);
 	if (course.status === 'loading' || !dataLoaded)
 		return <LoadingPage />;
 	if (course.status === 'failed')
@@ -935,7 +960,10 @@ const ViewCourseStudentSchedule = () => {
 												const isEditing =
 													editingAttendanceId ===
 													existingAttendance?.id;
-
+												console.log(
+													'FINAL',
+													JSON.stringify(existingAttendance),
+												);
 												return (
 													<Card
 														key={dateKey}
@@ -1163,7 +1191,7 @@ const ViewCourseStudentSchedule = () => {
 																				</div>
 																			</div>
 																		) : (
-																			<div className="mt-2 space-y-2">
+																			<div className="mt-2 justify-between flex items-center gap-2">
 																				{existingAttendance.comments && (
 																					<Typography
 																						variant="small"
@@ -1190,6 +1218,7 @@ const ViewCourseStudentSchedule = () => {
 																					size="sm"
 																					color="blue"
 																					variant="text"
+																					title="Editar Comentario"
 																					onClick={() =>
 																						handleEditAttendance(
 																							existingAttendance,
@@ -1205,7 +1234,6 @@ const ViewCourseStudentSchedule = () => {
 																					className="flex items-center gap-2"
 																				>
 																					<Edit2 className="w-4 h-4" />{' '}
-																					Editar
 																				</Button>
 																			</div>
 																		)}
@@ -1228,14 +1256,45 @@ const ViewCourseStudentSchedule = () => {
 																		>
 																			Firma del estudiante
 																		</Typography>
-																		{existingAttendance.signature_url ? (
-																			<img
-																				src={
-																					existingAttendance.signature_url
-																				}
-																				alt="Firma de asistencia"
-																				className="max-w-xs h-auto border rounded"
-																			/>
+																		{(existingAttendance
+																			.attendance_signature
+																			?.signature_url ??
+																		existingAttendance.signature_url) ? (
+																			<div className="flex items-start gap-3">
+																				<img
+																					src={
+																						existingAttendance
+																							.attendance_signature
+																							?.signature_url ??
+																						existingAttendance.signature_url
+																					}
+																					alt="Firma de asistencia"
+																					className="max-w-xs h-auto border rounded"
+																				/>
+																				{canEditAttendance && (
+																					<Button
+																						size="sm"
+																						color="red"
+																						title="Eliminar firma"
+																						variant="outlined"
+																						onClick={() =>
+																							handleDeleteSignature(
+																								existingAttendance.id,
+																							)
+																						}
+																						placeholder={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																						className="flex items-center gap-1"
+																					>
+																						<Trash2 className="w-4 h-4" />
+																					</Button>
+																				)}
+																			</div>
 																		) : (
 																			<AttendanceSignature
 																				key={`canvas-${existingAttendance.id}`}

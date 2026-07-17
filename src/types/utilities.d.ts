@@ -575,6 +575,14 @@ export type attendanceStatus = {
     updatedAt?: string;
 }
 
+export type attendanceSignatureRecord = {
+    id: number;
+    attendance_id: number;
+    signature_url: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export type attendance = {
     id: number;
     course_student_id: number;
@@ -584,6 +592,8 @@ export type attendance = {
     attendance_status?: attendanceStatus;
     comments?: string;
     signature_url?: string;
+    AttendanceSignature?: attendanceSignatureRecord;
+    attendance_signature?: attendanceSignatureRecord;
     createdAt?: string;
     updatedAt?: string;
 }

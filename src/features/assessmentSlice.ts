@@ -1,4 +1,4 @@
-import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
+import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 import { assessmentState, courseStudentAssessment, courseStudentAssessmentDay, courseStudentAssessmentLessonDay, subject } from '../types/utilities';
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
@@ -123,6 +123,17 @@ export const saveSignatures = createAsyncThunk<void, { CSAD_id: number; signatur
         }
     );
 
+export const deleteAssessmentSignature = createAsyncThunk<void, { CSAD_id: number; type: number }>(
+    'assessment/deleteAssessmentSignature',
+    async ({ CSAD_id, type }, { rejectWithValue }) => {
+        try {
+            await axiosDeleteSlice(`api/assessment/signature?CSAD_id=${CSAD_id}&type=${type}`);
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const assessmentSlice = createSlice({
     name: 'assessment',
     initialState,
@@ -240,8 +251,18 @@ export const assessmentSlice = createSlice({
             .addCase(saveSignatures.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
-            });
+            })
 
+            .addCase(deleteAssessmentSignature.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteAssessmentSignature.fulfilled, (state) => {
+                state.status = 'succeeded';
+            })
+            .addCase(deleteAssessmentSignature.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            });
     },
 });
 
