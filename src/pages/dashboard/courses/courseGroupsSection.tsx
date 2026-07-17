@@ -27,7 +27,12 @@ import {
 	saveCourseGroupSignature,
 	toggleCourseGroupStatus,
 } from '../../../features/courseGroupSlice';
-import { courseGroup, courseStudent } from '../../../types/utilities';
+import {
+	courseGroup,
+	courseStudent,
+	attendance,
+	courseGroupSignature,
+} from '../../../types/utilities';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import SignatureCanvas from 'react-signature-canvas';
 
@@ -47,8 +52,14 @@ import {
 	Power,
 	Filter,
 	Save,
+	FileText,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { pdf } from '@react-pdf/renderer';
+import { getLogoBase64 } from '../../../utils/logoBase64';
+import { axiosGetSlice } from '../../../services/axios';
+import { fetchAttendanceStatuses } from '../../../features/attendanceSlice';
+import AttendanceListPDF from './AttendanceListPDF';
 
 const CourseGroupsSection = ({
 	navigateViewCourseStudent,
@@ -61,6 +72,9 @@ const CourseGroupsSection = ({
 		status,
 		error,
 	} = useSelector((state: RootState) => state.courseGroups);
+	const { attendanceStatusList } = useSelector(
+		(state: RootState) => state.attendance,
+	);
 	const canManage = PermissionsValidate(['staff', 'instructor']);
 	const canDeleteSignature = PermissionsValidate(['staff']);
 
@@ -258,6 +272,188 @@ const CourseGroupsSection = ({
 	const handleToggleShowInactive = () => {
 		setShowInactive((prev) => !prev);
 	};
+
+	const blobToDataURL = (blob: Blob): Promise<string> => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onloadend = () => resolve(reader.result as string);
+			reader.onerror = reject;
+			reader.readAsDataURL(blob);
+		});
+	};
+
+	const webpToPng = (dataUrl: string): Promise<string> => {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.onload = () => {
+				const canvas = document.createElement('canvas');
+				canvas.width = img.width;
+				canvas.height = img.height;
+				const ctx = canvas.getContext('2d');
+				ctx!.drawImage(img, 0, 0);
+				resolve(canvas.toDataURL('image/png'));
+			};
+			img.onerror = reject;
+			img.src = dataUrl;
+		});
+	};
+
+	const toBase64 = async (url: string): Promise<string> => {
+		if (!url || url.startsWith('data:')) return url;
+		try {
+			const resp = await fetch(url);
+			if (!resp.ok) return url;
+			const blob = await resp.blob();
+			const dataUrl = await blobToDataURL(blob);
+			if (blob.type === 'image/webp') {
+				return await webpToPng(dataUrl);
+			}
+			return dataUrl;
+		} catch {
+			return url;
+		}
+	};
+
+	const resolveImageUrl = (
+		url?: string | null,
+	): string => {
+		if (!url) return '';
+		if (
+			url.startsWith('http://') ||
+			url.startsWith('https://') ||
+			url.startsWith('data:')
+		)
+			return url;
+		return `${window.location.origin}${url.startsWith('/') ? '' : '/'}${url}`;
+	};
+
+	const processSigUrl = async (
+		url?: string | null,
+	): Promise<string | undefined> => {
+		if (!url) return undefined;
+		const resolved = resolveImageUrl(url);
+		return toBase64(resolved);
+	};
+
+	const handleExportAttendancePDF = async (
+		group: courseGroup,
+	) => {
+		try {
+			const students = courseGroupStudents;
+			if (!students || students.length === 0) {
+				toast.error('No hay estudiantes en este grupo');
+				return;
+			}
+
+			const processingToast = toast.loading(
+				'Generando PDF de asistencia...',
+			);
+
+			const attendancePromises = students.map((cs) =>
+				axiosGetSlice('api/attendance/by-course-student', {
+					course_student_id: cs.id,
+				}).then(async (data: attendance[]) => {
+					const resolved = await Promise.all(
+						data.map(async (att) => {
+							const [sigUrl, attSigUrl, attSigUrl2] =
+								await Promise.all([
+									processSigUrl(
+										att.signature_url,
+									),
+									processSigUrl(
+										att.attendance_signature
+											?.signature_url,
+									),
+									processSigUrl(
+										att.AttendanceSignature
+											?.signature_url,
+									),
+								]);
+							return {
+								...att,
+								signature_url: sigUrl,
+								attendance_signature:
+									att.attendance_signature
+										? {
+												...att
+													.attendance_signature,
+												signature_url:
+													attSigUrl ||
+													'',
+											}
+										: att.attendance_signature,
+								AttendanceSignature:
+									att.AttendanceSignature
+										? {
+												...att
+													.AttendanceSignature,
+												signature_url:
+													attSigUrl2 ||
+													'',
+											}
+										: att.AttendanceSignature,
+							};
+						}),
+					);
+					return { csId: cs.id, data: resolved };
+				}),
+			);
+			const results = await Promise.all(attendancePromises);
+
+			const attendancesByStudent: Record<
+				number,
+				attendance[]
+			> = {};
+			results.forEach(({ csId, data }) => {
+				attendancesByStudent[csId] = data;
+			});
+
+			const instructorSignatures: courseGroupSignature[] =
+				await Promise.all(
+					courseGroupSignatures.map(async (sig) => ({
+						...sig,
+						signature_url:
+							(await processSigUrl(
+								sig.signature_url,
+							)) || '',
+					})),
+				);
+
+			let statuses = attendanceStatusList;
+			if (statuses.length === 0) {
+				statuses =
+					(await dispatch(
+						fetchAttendanceStatuses(),
+					).unwrap()) || [];
+			}
+
+			const logoBase64 = await getLogoBase64();
+
+			const blob = await pdf(
+				<AttendanceListPDF
+					group={group}
+					students={students}
+					attendancesByStudent={attendancesByStudent}
+					instructorSignatures={instructorSignatures}
+					logoBase64={logoBase64}
+					attendanceStatuses={statuses}
+				/>,
+			).toBlob();
+
+			toast.dismiss(processingToast);
+			const url = URL.createObjectURL(blob);
+			window.open(url, '_blank');
+		} catch (e) {
+			console.error(
+				'Error generating attendance PDF:',
+				e,
+			);
+			toast.error(
+				'Error al generar el PDF de asistencia',
+			);
+		}
+	};
+
 	if (!canManage) return null;
 
 	return (
@@ -842,6 +1038,30 @@ const CourseGroupsSection = ({
 															);
 														})}
 													</div>
+												</div>
+												<div className="flex justify-center mt-4 pt-3 border-t">
+													<Button
+														size="sm"
+														color="blue"
+														title="Exportar PDF de Asistencia"
+														onClick={() =>
+															handleExportAttendancePDF(
+																group,
+															)
+														}
+														placeholder={undefined}
+														onPointerEnterCapture={
+															undefined
+														}
+														onPointerLeaveCapture={
+															undefined
+														}
+														className="flex items-center gap-2"
+													>
+														<FileText size={16} />
+														Exportar PDF de
+														Asistencia
+													</Button>
 												</div>
 											</AccordionBody>
 										</Accordion>

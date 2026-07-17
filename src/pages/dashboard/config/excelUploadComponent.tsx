@@ -61,7 +61,6 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 	const [collapseStates, setCollapseStates] = useState<{
 		[key: string]: boolean;
 	}>({});
-	console.log(courseId);
 
 	const handleFileSelect = (
 		event: React.ChangeEvent<HTMLInputElement>,
