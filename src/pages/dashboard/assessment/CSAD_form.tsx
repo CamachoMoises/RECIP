@@ -4,6 +4,7 @@ import { AppDispatch, RootState } from '../../../store';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
 	Button,
+	Checkbox,
 	Input,
 	Textarea,
 	Typography,
@@ -37,6 +38,7 @@ type Inputs = {
 	landing: number;
 	seat: string;
 	comments: string;
+	consent: boolean;
 };
 const cld = new Cloudinary({ cloud: { cloudName: 'moisesinc' } });
 const CSAD_form = ({
@@ -58,6 +60,7 @@ const CSAD_form = ({
 		{},
 	);
 
+	const [consentChecked, setConsentChecked] = useState(false);
 	const [missingSignature, setMissingSignature] = useState<
 		Partial<Record<keyof SignatureUrls, boolean>>
 	>({});
@@ -139,6 +142,7 @@ const CSAD_form = ({
 			landing: assessment.courseStudentAssessmentDaySelected?.landing,
 			comments:
 				assessment.courseStudentAssessmentDaySelected?.comments,
+			consent: false,
 		},
 	});
 
@@ -539,6 +543,7 @@ const CSAD_form = ({
 							title="Guardar datos"
 							className="flex flex-row justify-center"
 							fullWidth
+							disabled={!consentChecked}
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -750,13 +755,14 @@ const CSAD_form = ({
 									>
 										<Eraser size={15} />
 									</Button>
-									<Button
+								<Button
 										variant="gradient"
 										color="green"
 										type="submit"
 										fullWidth
 										title="Guardar"
 										className="flex flex-row justify-center"
+										disabled={!consentChecked}
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -768,6 +774,42 @@ const CSAD_form = ({
 						</div>
 					</>
 				)}
+				<div className="mt-6 p-4 border border-[#b0bec5] rounded-md bg-gray-50">
+					<div className="flex items-start gap-3">
+						<Checkbox
+							checked={consentChecked}
+							onChange={(e) => setConsentChecked(e.target.checked)}
+							className="mt-1"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						/>
+						<Typography
+							variant="small"
+							className="text-slate-700 leading-relaxed"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							Por medio del presente, autorizo a CEA 360 ATC, de
+							forma expresa el registro en audio y video de la
+							sesión de entrenamiento con el único fin de recibir
+							instrucción, evaluación técnica y retroalimentación
+							operativa. Esta captura de imagen y voz se gestionará
+							bajo estricta confidencialidad, garantizando que el
+							material no será difundido públicamente ni utilizado
+							con fines comerciales. Asimismo, se reconoce el
+							derecho a revocar este consentimiento y a solicitar
+							el borrado seguro del contenido audiovisual según la
+							normativa vigente de protección de datos.
+						</Typography>
+					</div>
+					{!consentChecked && (
+						<span className="text-red-500 text-sm ml-10">
+							Debe aceptar el consentimiento para guardar
+						</span>
+					)}
+				</div>
 			</form>
 		</div>
 	);

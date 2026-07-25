@@ -330,7 +330,7 @@ const DetailAssessment = () => {
 												? moment(
 														assessment.courseStudentAssessmentSelected
 															?.course_student?.date,
-													).format('YYYY-MM-DD')
+													).format('DD-MM-YYYY')
 												: ''}
 										</Typography>
 										<Typography
@@ -351,7 +351,7 @@ const DetailAssessment = () => {
 											{moment(
 												assessment.courseStudentAssessmentDaySelected
 													?.createdAt,
-											).format('YYYY-MM-DD')}
+											).format('DD-MM-YYYY')}
 										</Typography>
 									</div>
 								</div>

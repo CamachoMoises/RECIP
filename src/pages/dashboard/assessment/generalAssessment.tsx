@@ -197,7 +197,7 @@ const GeneralAssessment = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{CS.code}
+											PC:{CS.student?.user_id}
 											<br />
 											{CS.course_student_assessment && (
 												<>Evaluacion Iniciada</>

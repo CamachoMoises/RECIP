@@ -247,7 +247,7 @@ const NewAssessment = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{moment().format('YYYY-MM-DD')}
+											{moment().format('DD-MM-YYYY')}
 										</Typography>
 									</div>
 								</div>

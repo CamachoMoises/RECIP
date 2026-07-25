@@ -465,6 +465,18 @@ const CSA_PDF = ({ day }: { day: number }) => {
 						</table>
 					</div>
 				</div>
+				<div className="my-4 border border-blue-gray-800 p-3 text-xs leading-relaxed">
+					Por medio del presente, autorizo a CEA 360 ATC, de forma
+					expresa el registro en audio y video de la sesión de
+					entrenamiento con el único fin de recibir instrucción,
+					evaluación técnica y retroalimentación operativa. Esta captura
+					de imagen y voz se gestionará bajo estricta confidencialidad,
+					garantizando que el material no será difundido públicamente ni
+					utilizado con fines comerciales. Asimismo, se reconoce el
+					derecho a revocar este consentimiento y a solicitar el borrado
+					seguro del contenido audiovisual según la normativa vigente de
+					protección de datos.
+				</div>
 			</div>
 		</div>
 	);
