@@ -151,7 +151,7 @@ const NewAssessment = () => {
 							onPointerLeaveCapture={undefined}
 							variant="lead"
 						>
-							{course.courseStudent?.code}
+							{course.courseStudent?.instructor_code || course.courseStudent?.code}
 						</Typography>
 					</div>
 					<hr />
@@ -167,7 +167,7 @@ const NewAssessment = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Cliente: {studentSelect.name}{' '}
+											Participante: {studentSelect.name}{' '}
 											{studentSelect.last_name}
 										</Typography>
 									</div>

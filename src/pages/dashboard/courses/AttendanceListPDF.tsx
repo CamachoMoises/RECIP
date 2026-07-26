@@ -332,7 +332,7 @@ const AttendanceListPDF = ({
 								</Text>
 								<Text style={styles.headerSubtitle}>
 									{group.course?.name || ''} - {group.title} (
-									{group.code})
+									{group.user_code || group.code})
 								</Text>
 								{groupDate && (
 									<Text style={styles.headerSubtitle}>
