@@ -159,22 +159,22 @@ const EmailHistoryPanel = () => {
 										<tr
 											className={`border-b ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}
 										>
-											<th className="text-left py-2 px-2 font-medium">
+											<th className="text-center py-2 px-2 font-medium">
 												Email
 											</th>
-											<th className="text-left py-2 px-2 font-medium">
+											<th className="text-center py-2 px-2 font-medium">
 												Fecha
 											</th>
-											<th className="text-left py-2 px-2 font-medium">
+											<th className="text-center py-2 px-2 font-medium">
 												Tipo
 											</th>
-											<th className="text-left py-2 px-2 font-medium">
-												Módulo
+											<th className="text-center py-2 px-2 font-medium">
+												Titulo
 											</th>
-											<th className="text-left py-2 px-2 font-medium">
+											<th className="text-center py-2 px-2 font-medium">
 												Descripción
 											</th>
-											<th className="text-left py-2 px-2 font-medium">
+											<th className="text-center py-2 px-2 font-medium">
 												Usuario
 											</th>
 											<th className="text-center py-2 px-2 font-medium">
@@ -196,7 +196,7 @@ const EmailHistoryPanel = () => {
 															).toLocaleDateString()
 														: '-'}
 												</td>
-												<td className="py-2 px-2">{email.tipo}</td>
+												<td className="py-2 px-2">Corporativo</td>
 												<td className="py-2 px-2">{email.modulo}</td>
 												<td
 													className="py-2 px-2 max-w-xs truncate"

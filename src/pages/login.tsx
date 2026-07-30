@@ -60,11 +60,11 @@ const Login = () => {
 	return (
 		<>
 			<SEO title="Iniciar Sesión" description="Accede al sistema R.E.C.I.P. para gestión de evaluación, capacitación e instrucción de pilotos." url="/login" />
-			<div className="flex h-screen w-screen overflow-hidden">
+			<div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: '#09121d' }}>
 
-			<div className="relative w-1/2 h-full">
+			<div className="relative w-2/3 h-full flex items-center justify-center" style={{ backgroundColor: '#09121d' }}>
 				<video
-					className="absolute inset-0 w-full h-full object-contain bg-black"
+					className="max-w-full max-h-full object-contain rounded-2xl border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
 					loop
 					autoPlay
 					muted
@@ -76,10 +76,9 @@ const Login = () => {
 					/>
 					Tu navegador no soporta el elemento de video.
 				</video>
-				<div className="absolute inset-0 aviation-gradient opacity-30" />
 			</div>
 
-			<div className="w-1/2 h-full flex items-center justify-center p-8">
+			<div className="w-1/3 h-full flex items-center justify-center p-8" style={{ backgroundColor: '#09121d' }}>
 				<div className="animate-fade-up w-full max-w-md" style={{ animationDelay: '0.2s' }}>
 				<Card
 					className="border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
