@@ -60,35 +60,26 @@ const Login = () => {
 	return (
 		<>
 			<SEO title="Iniciar Sesión" description="Accede al sistema R.E.C.I.P. para gestión de evaluación, capacitación e instrucción de pilotos." url="/login" />
-			<div className="flex flex-col sm:flex-row items-center justify-center gap-8 min-h-screen p-4 relative overflow-hidden">
-			<div className="absolute inset-0 aviation-gradient opacity-20" />
-			<div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full blur-3xl opacity-10 animate-float" />
-			<div
-				className="absolute bottom-20 right-20 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-10 animate-float"
-				style={{ animationDelay: '-2s' }}
-			/>
+			<div className="relative h-screen w-screen overflow-hidden">
 
-			<div className="order-2 sm:order-1 w-full sm:w-auto flex justify-center animate-scale-in">
-				<div className="relative">
-					<video
-						className="rounded-2xl shadow-2xl shadow-blue-500/20 w-full max-w-md border-2 border-blue-500/30"
-						loop
-						autoPlay
-						muted
-					>
-						<source
-							src="https://res.cloudinary.com/moisesinc/video/upload/v1751816208/recip_resource/avion2_drrbld.mp4"
-							type="video/mp4"
-						/>
-						Tu navegador no soporta el elemento de video.
-					</video>
-				</div>
-			</div>
-
-			<div
-				className="order-1 sm:order-2 w-full max-w-sm animate-fade-up"
-				style={{ animationDelay: '0.2s' }}
+			<video
+				className="absolute inset-0 w-full h-full object-cover"
+				loop
+				autoPlay
+				muted
+				playsInline
 			>
+				<source
+					src="https://res.cloudinary.com/moisesinc/video/upload/v1751816208/recip_resource/avion2_drrbld.mp4"
+					type="video/mp4"
+				/>
+				Tu navegador no soporta el elemento de video.
+			</video>
+
+			<div className="absolute inset-0 aviation-gradient opacity-30" />
+
+			<div className="absolute inset-0 flex items-center justify-center p-4">
+				<div className="animate-fade-up" style={{ animationDelay: '0.2s' }}>
 				<Card
 					className="glass-panel border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
 					style={{
@@ -229,6 +220,7 @@ const Login = () => {
 						</div>
 					</CardBody>
 				</Card>
+			</div>
 			</div>
 		</div>
 		</>);

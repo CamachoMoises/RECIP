@@ -22,7 +22,9 @@ const SearchableParticipantSelect = ({
 
 	const [query, setQuery] = useState('');
 	const [open, setOpen] = useState(false);
-	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+		null,
+	);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -83,7 +85,7 @@ const SearchableParticipantSelect = ({
 				<label
 					className={`absolute left-3 transition-all pointer-events-none ${labelUp ? 'top-1 text-xs text-gray-900' : 'top-1/2 -translate-y-1/2 text-sm text-blue-gray-400'}`}
 				>
-					Seleccionar participante
+					Participante
 				</label>
 				{isLoading && (
 					<div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -95,10 +97,14 @@ const SearchableParticipantSelect = ({
 			{open && !disabled && (
 				<ul className="absolute z-50 w-full mt-1 max-h-60 overflow-auto bg-white border border-blue-gray-100 rounded-md shadow-lg text-sm text-blue-gray-700">
 					{isLoading && (
-						<li className="px-3 py-2 text-blue-gray-400">Buscando...</li>
+						<li className="px-3 py-2 text-blue-gray-400">
+							Buscando...
+						</li>
 					)}
 					{!isLoading && searchedStudent.length === 0 && (
-						<li className="px-3 py-2 text-blue-gray-400">Sin resultados</li>
+						<li className="px-3 py-2 text-blue-gray-400">
+							Sin resultados
+						</li>
 					)}
 					{!isLoading &&
 						searchedStudent.map((student) => (

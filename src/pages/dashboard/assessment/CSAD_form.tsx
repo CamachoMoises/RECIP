@@ -222,7 +222,7 @@ const CSAD_form = ({
 					}),
 				);
 
-			if (saveSignatures.fulfilled.match(saveResult)) {
+				if (saveSignatures.fulfilled.match(saveResult)) {
 					navigate('/dashboard');
 					const CSAD_id = updatedCSAD.id;
 					setSignatureUrls({
@@ -755,7 +755,7 @@ const CSAD_form = ({
 									>
 										<Eraser size={15} />
 									</Button>
-								<Button
+									<Button
 										variant="gradient"
 										color="green"
 										type="submit"
@@ -783,6 +783,7 @@ const CSAD_form = ({
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
+							crossOrigin={undefined}
 						/>
 						<Typography
 							variant="small"
@@ -791,17 +792,17 @@ const CSAD_form = ({
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							Por medio del presente, autorizo a CEA 360 ATC, de
-							forma expresa el registro en audio y video de la
-							sesión de entrenamiento con el único fin de recibir
-							instrucción, evaluación técnica y retroalimentación
-							operativa. Esta captura de imagen y voz se gestionará
-							bajo estricta confidencialidad, garantizando que el
-							material no será difundido públicamente ni utilizado
-							con fines comerciales. Asimismo, se reconoce el
-							derecho a revocar este consentimiento y a solicitar
-							el borrado seguro del contenido audiovisual según la
-							normativa vigente de protección de datos.
+							Por medio del presente, autorizo a CEA 360 ATC, de forma
+							expresa el registro en audio y video de la sesión de
+							entrenamiento con el único fin de recibir instrucción,
+							evaluación técnica y retroalimentación operativa. Esta
+							captura de imagen y voz se gestionará bajo estricta
+							confidencialidad, garantizando que el material no será
+							difundido públicamente ni utilizado con fines
+							comerciales. Asimismo, se reconoce el derecho a revocar
+							este consentimiento y a solicitar el borrado seguro del
+							contenido audiovisual según la normativa vigente de
+							protección de datos.
 						</Typography>
 					</div>
 					{!consentChecked && (

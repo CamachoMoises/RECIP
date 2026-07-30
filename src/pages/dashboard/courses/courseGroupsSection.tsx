@@ -314,9 +314,7 @@ const CourseGroupsSection = ({
 		}
 	};
 
-	const resolveImageUrl = (
-		url?: string | null,
-	): string => {
+	const resolveImageUrl = (url?: string | null): string => {
 		if (!url) return '';
 		if (
 			url.startsWith('http://') ||
@@ -335,9 +333,7 @@ const CourseGroupsSection = ({
 		return toBase64(resolved);
 	};
 
-	const handleExportAttendancePDF = async (
-		group: courseGroup,
-	) => {
+	const handleExportAttendancePDF = async (group: courseGroup) => {
 		try {
 			const students = courseGroupStudents;
 			if (!students || students.length === 0) {
@@ -357,41 +353,29 @@ const CourseGroupsSection = ({
 						data.map(async (att) => {
 							const [sigUrl, attSigUrl, attSigUrl2] =
 								await Promise.all([
+									processSigUrl(att.signature_url),
 									processSigUrl(
-										att.signature_url,
+										att.attendance_signature?.signature_url,
 									),
 									processSigUrl(
-										att.attendance_signature
-											?.signature_url,
-									),
-									processSigUrl(
-										att.AttendanceSignature
-											?.signature_url,
+										att.AttendanceSignature?.signature_url,
 									),
 								]);
 							return {
 								...att,
 								signature_url: sigUrl,
-								attendance_signature:
-									att.attendance_signature
-										? {
-												...att
-													.attendance_signature,
-												signature_url:
-													attSigUrl ||
-													'',
-											}
-										: att.attendance_signature,
-								AttendanceSignature:
-									att.AttendanceSignature
-										? {
-												...att
-													.AttendanceSignature,
-												signature_url:
-													attSigUrl2 ||
-													'',
-											}
-										: att.AttendanceSignature,
+								attendance_signature: att.attendance_signature
+									? {
+											...att.attendance_signature,
+											signature_url: attSigUrl || '',
+										}
+									: att.attendance_signature,
+								AttendanceSignature: att.AttendanceSignature
+									? {
+											...att.AttendanceSignature,
+											signature_url: attSigUrl2 || '',
+										}
+									: att.AttendanceSignature,
 							};
 						}),
 					);
@@ -400,10 +384,7 @@ const CourseGroupsSection = ({
 			);
 			const results = await Promise.all(attendancePromises);
 
-			const attendancesByStudent: Record<
-				number,
-				attendance[]
-			> = {};
+			const attendancesByStudent: Record<number, attendance[]> = {};
 			results.forEach(({ csId, data }) => {
 				attendancesByStudent[csId] = data;
 			});
@@ -413,18 +394,14 @@ const CourseGroupsSection = ({
 					courseGroupSignatures.map(async (sig) => ({
 						...sig,
 						signature_url:
-							(await processSigUrl(
-								sig.signature_url,
-							)) || '',
+							(await processSigUrl(sig.signature_url)) || '',
 					})),
 				);
 
 			let statuses = attendanceStatusList;
 			if (statuses.length === 0) {
 				statuses =
-					(await dispatch(
-						fetchAttendanceStatuses(),
-					).unwrap()) || [];
+					(await dispatch(fetchAttendanceStatuses()).unwrap()) || [];
 			}
 
 			const logoBase64 = await getLogoBase64();
@@ -444,13 +421,8 @@ const CourseGroupsSection = ({
 			const url = URL.createObjectURL(blob);
 			window.open(url, '_blank');
 		} catch (e) {
-			console.error(
-				'Error generating attendance PDF:',
-				e,
-			);
-			toast.error(
-				'Error al generar el PDF de asistencia',
-			);
+			console.error('Error generating attendance PDF:', e);
+			toast.error('Error al generar el PDF de asistencia');
 		}
 	};
 
@@ -601,7 +573,7 @@ const CourseGroupsSection = ({
 																	</span>
 																)}
 																<small className="flex items-center gap-1">
-																	{group.code}
+																	{group.user_code}
 																</small>
 															</div>
 														</div>
@@ -1045,22 +1017,15 @@ const CourseGroupsSection = ({
 														color="blue"
 														title="Exportar PDF de Asistencia"
 														onClick={() =>
-															handleExportAttendancePDF(
-																group,
-															)
+															handleExportAttendancePDF(group)
 														}
 														placeholder={undefined}
-														onPointerEnterCapture={
-															undefined
-														}
-														onPointerLeaveCapture={
-															undefined
-														}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
 														className="flex items-center gap-2"
 													>
 														<FileText size={16} />
-														Exportar PDF de
-														Asistencia
+														Exportar PDF de Asistencia
 													</Button>
 												</div>
 											</AccordionBody>

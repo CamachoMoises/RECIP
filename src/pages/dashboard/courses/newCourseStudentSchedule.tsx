@@ -178,7 +178,8 @@ const NewCourseStudentSchedule = () => {
 	const handleChange = async () => {
 		if (course.courseSelected?.id && course.courseStudent?.id) {
 			const rawDate = dateInputRef.current?.value;
-			const validDate = rawDate && moment(rawDate).isValid() ? rawDate : undefined;
+			const validDate =
+				rawDate && moment(rawDate).isValid() ? rawDate : undefined;
 			dispatch(
 				updateCourseStudent({
 					course_id: course.courseSelected.id,
@@ -286,7 +287,7 @@ const NewCourseStudentSchedule = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							{course.courseSelected?.description} ---
+							{course.courseSelected?.description}
 						</Typography>
 						<Typography
 							variant="small"
@@ -375,7 +376,8 @@ const NewCourseStudentSchedule = () => {
 									course.courseStudent?.approve || !canViewContent
 								}
 								value={
-									course.courseStudent?.date && moment(course.courseStudent.date).isValid()
+									course.courseStudent?.date &&
+									moment(course.courseStudent.date).isValid()
 										? moment(course.courseStudent.date).format(
 												'YYYY-MM-DD',
 											)

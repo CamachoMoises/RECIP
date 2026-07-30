@@ -234,7 +234,10 @@ const DetailAssessment = () => {
 								onPointerLeaveCapture={undefined}
 								variant="lead"
 							>
-								{assessment.courseStudentAssessmentSelected?.code}
+								{
+									assessment.courseStudentAssessmentSelected
+										?.course_student?.instructor_code
+								}
 							</Typography>
 						</div>
 						<hr />
