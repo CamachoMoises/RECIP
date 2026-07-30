@@ -83,7 +83,7 @@ const SearchableParticipantSelect = ({
 					className={`peer w-full h-10 px-3 pt-3 pb-1 text-sm border rounded-[7px] outline-none transition-all border-blue-gray-200 focus:border-2 focus:border-gray-900 disabled:bg-blue-gray-50 disabled:border-0 disabled:cursor-not-allowed bg-transparent text-blue-gray-700`}
 				/>
 				<label
-					className={`absolute left-3 transition-all pointer-events-none ${labelUp ? 'top-1 text-xs text-gray-900' : 'top-1/2 -translate-y-1/2 text-sm text-blue-gray-400'}`}
+					className={`absolute left-3 transition-all pointer-events-none bg-white z-10 px-1 ${labelUp ? '-top-2 text-xs text-gray-900' : 'top-1/2 -translate-y-1/2 text-sm text-blue-gray-400'}`}
 				>
 					Participante
 				</label>

@@ -60,28 +60,29 @@ const Login = () => {
 	return (
 		<>
 			<SEO title="Iniciar Sesión" description="Accede al sistema R.E.C.I.P. para gestión de evaluación, capacitación e instrucción de pilotos." url="/login" />
-			<div className="relative h-screen w-screen overflow-hidden">
+			<div className="flex h-screen w-screen overflow-hidden">
 
-			<video
-				className="absolute inset-0 w-full h-full object-cover"
-				loop
-				autoPlay
-				muted
-				playsInline
-			>
-				<source
-					src="https://res.cloudinary.com/moisesinc/video/upload/v1751816208/recip_resource/avion2_drrbld.mp4"
-					type="video/mp4"
-				/>
-				Tu navegador no soporta el elemento de video.
-			</video>
+			<div className="relative w-1/2 h-full">
+				<video
+					className="absolute inset-0 w-full h-full object-contain bg-black"
+					loop
+					autoPlay
+					muted
+					playsInline
+				>
+					<source
+						src="https://res.cloudinary.com/moisesinc/video/upload/v1751816208/recip_resource/avion2_drrbld.mp4"
+						type="video/mp4"
+					/>
+					Tu navegador no soporta el elemento de video.
+				</video>
+				<div className="absolute inset-0 aviation-gradient opacity-30" />
+			</div>
 
-			<div className="absolute inset-0 aviation-gradient opacity-30" />
-
-			<div className="absolute inset-0 flex items-center justify-center p-4">
-				<div className="animate-fade-up" style={{ animationDelay: '0.2s' }}>
+			<div className="w-1/2 h-full flex items-center justify-center p-8">
+				<div className="animate-fade-up w-full max-w-md" style={{ animationDelay: '0.2s' }}>
 				<Card
-					className="glass-panel border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
+					className="border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
 					style={{
 						background:
 							theme === 'dark'

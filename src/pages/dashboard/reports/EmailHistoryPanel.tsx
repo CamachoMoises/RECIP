@@ -160,9 +160,6 @@ const EmailHistoryPanel = () => {
 											className={`border-b ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}
 										>
 											<th className="text-left py-2 px-2 font-medium">
-												Archivo
-											</th>
-											<th className="text-left py-2 px-2 font-medium">
 												Email
 											</th>
 											<th className="text-left py-2 px-2 font-medium">
@@ -191,9 +188,6 @@ const EmailHistoryPanel = () => {
 												key={email.id}
 												className={`border-b ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-200 hover:bg-gray-50'}`}
 											>
-												<td className="py-2 px-2">
-													{email.nombre_archivo}
-												</td>
 												<td className="py-2 px-2">{email.email}</td>
 												<td className="py-2 px-2">
 													{email.fecha
