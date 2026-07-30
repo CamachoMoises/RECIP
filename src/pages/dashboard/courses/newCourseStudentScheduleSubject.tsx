@@ -275,6 +275,7 @@ const NewCourseSubject = ({
 										disabled={approve || !canViewContent}
 										{...field}
 										placeholder={undefined}
+										className="z-50"
 									>
 										{user.instructorList.map((instructor) => (
 											<Option
