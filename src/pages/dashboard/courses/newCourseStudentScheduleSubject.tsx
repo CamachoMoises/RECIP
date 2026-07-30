@@ -268,24 +268,21 @@ const NewCourseSubject = ({
 								control={control}
 								rules={{ required: 'El instructor es requerido' }}
 								render={({ field }) => (
-									<Select
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										label="Seleccionar Instructor"
+									<select
 										disabled={approve || !canViewContent}
 										{...field}
-										placeholder={undefined}
-										className="z-50"
+										className="w-full appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-10 bg-white text-sm text-gray-700 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
 									>
+										<option value="">Seleccionar Instructor</option>
 										{user.instructorList.map((instructor) => (
-											<Option
+											<option
 												key={`instr-${instructor.id}`}
 												value={`${instructor.instructor?.id}`}
 											>
 												{instructor.name} {instructor.last_name}
-											</Option>
+											</option>
 										))}
-									</Select>
+									</select>
 								)}
 							/>
 							{errors.instructor_id && (
