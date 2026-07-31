@@ -343,7 +343,7 @@ const DetailAssessment = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Fecha de revision
+											Fecha de evaluación
 										</Typography>
 										<Typography
 											variant="small"
