@@ -20,6 +20,7 @@ import { AppDispatch, RootState } from '../../../store';
 import {
 	deleteCourseGroup,
 	deleteCourseGroupSignature,
+	fetchCourseGroupAttendanceReport,
 	fetchCourseGroupSignatures,
 	fetchCourseGroupStudents,
 	fetchCourseGroups,
@@ -30,8 +31,8 @@ import {
 import {
 	courseGroup,
 	courseStudent,
-	attendance,
 	courseGroupSignature,
+	courseGroupReportCourseStudent,
 } from '../../../types/utilities';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import SignatureCanvas from 'react-signature-canvas';
@@ -57,8 +58,6 @@ import {
 import toast from 'react-hot-toast';
 import { pdf } from '@react-pdf/renderer';
 import { getLogoBase64 } from '../../../utils/logoBase64';
-import { axiosGetSlice } from '../../../services/axios';
-import { fetchAttendanceStatuses } from '../../../features/attendanceSlice';
 import AttendanceListPDF from './AttendanceListPDF';
 
 const CourseGroupsSection = ({
@@ -72,9 +71,6 @@ const CourseGroupsSection = ({
 		status,
 		error,
 	} = useSelector((state: RootState) => state.courseGroups);
-	const { attendanceStatusList } = useSelector(
-		(state: RootState) => state.attendance,
-	);
 	const canManage = PermissionsValidate(['staff', 'instructor']);
 	const canDeleteSignature = PermissionsValidate(['staff']);
 
@@ -335,85 +331,77 @@ const CourseGroupsSection = ({
 
 	const handleExportAttendancePDF = async (group: courseGroup) => {
 		try {
-			const students = courseGroupStudents;
-			if (!students || students.length === 0) {
-				toast.error('No hay estudiantes en este grupo');
-				return;
-			}
-
 			const processingToast = toast.loading(
 				'Generando PDF de asistencia...',
 			);
 
-			const attendancePromises = students.map((cs) =>
-				axiosGetSlice('api/attendance/by-course-student', {
-					course_student_id: cs.id,
-				}).then(async (data: attendance[]) => {
-					const resolved = await Promise.all(
-						data.map(async (att) => {
-							const [sigUrl, attSigUrl, attSigUrl2] =
-								await Promise.all([
-									processSigUrl(att.signature_url),
-									processSigUrl(
-										att.attendance_signature?.signature_url,
-									),
-									processSigUrl(
-										att.AttendanceSignature?.signature_url,
-									),
-								]);
-							return {
-								...att,
-								signature_url: sigUrl,
-								attendance_signature: att.attendance_signature
-									? {
-											...att.attendance_signature,
-											signature_url: attSigUrl || '',
-										}
-									: att.attendance_signature,
-								AttendanceSignature: att.AttendanceSignature
-									? {
-											...att.AttendanceSignature,
-											signature_url: attSigUrl2 || '',
-										}
-									: att.AttendanceSignature,
-							};
-						}),
-					);
-					return { csId: cs.id, data: resolved };
+			const report = await dispatch(
+				fetchCourseGroupAttendanceReport({
+					course_group_id: group.id,
+					currentPage: 1,
+					pageSize: 10,
 				}),
-			);
-			const results = await Promise.all(attendancePromises);
+			).unwrap();
 
-			const attendancesByStudent: Record<number, attendance[]> = {};
-			results.forEach(({ csId, data }) => {
-				attendancesByStudent[csId] = data;
-			});
+			const reportGroup = report?.data?.[0];
+			if (!reportGroup) {
+				toast.dismiss(processingToast);
+				toast.error(
+					'No se encontraron datos de asistencia para este grupo',
+				);
+				return;
+			}
+
+			const students: courseGroupReportCourseStudent[] =
+				reportGroup.course_students || [];
+			if (students.length === 0) {
+				toast.dismiss(processingToast);
+				toast.error('No hay estudiantes en este grupo');
+				return;
+			}
 
 			const instructorSignatures: courseGroupSignature[] =
 				await Promise.all(
-					courseGroupSignatures.map(async (sig) => ({
-						...sig,
-						signature_url:
-							(await processSigUrl(sig.signature_url)) || '',
-					})),
+					(reportGroup.course_group_signatures || []).map(
+						async (sig) => ({
+							...sig,
+							signature_url:
+								(await processSigUrl(sig.signature_url)) ||
+								'',
+						}),
+					),
 				);
 
-			let statuses = attendanceStatusList;
-			if (statuses.length === 0) {
-				statuses =
-					(await dispatch(fetchAttendanceStatuses()).unwrap()) || [];
-			}
+			const resolvedStudents: courseGroupReportCourseStudent[] =
+				await Promise.all(
+					students.map(async (cs) => ({
+						...cs,
+						attendances: await Promise.all(
+							(cs.attendances || []).map(async (att) => ({
+								...att,
+								attendance_signature: att.attendance_signature
+									? {
+											...att.attendance_signature,
+											signature_url:
+												(await processSigUrl(
+													att.attendance_signature
+														.signature_url,
+												)) || '',
+										}
+									: att.attendance_signature,
+							})),
+						),
+					})),
+				);
 
 			const logoBase64 = await getLogoBase64();
 
 			const blob = await pdf(
 				<AttendanceListPDF
-					group={group}
-					students={students}
-					attendancesByStudent={attendancesByStudent}
+					group={reportGroup}
+					students={resolvedStudents}
 					instructorSignatures={instructorSignatures}
 					logoBase64={logoBase64}
-					attendanceStatuses={statuses}
 				/>,
 			).toBlob();
 

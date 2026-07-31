@@ -7,123 +7,143 @@ import {
 	Image,
 } from '@react-pdf/renderer';
 import {
-	courseGroup,
-	courseStudent,
+	courseGroupReportAttendance,
+	courseGroupReportCourseStudent,
+	courseGroupReportItem,
 	courseGroupSignature,
-	attendance,
-	attendanceStatus,
 } from '../../../types/utilities';
 
 const styles = StyleSheet.create({
 	page: {
-		padding: 15,
-		fontSize: 8,
+		padding: 30,
+		fontSize: 9,
 		fontFamily: 'Helvetica',
 	},
 	header: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'space-between',
+		justifyContent: 'center',
 		marginBottom: 10,
-		borderBottomWidth: 1,
-		borderBottomColor: '#374151',
-		paddingBottom: 6,
 	},
 	logo: {
-		width: 60,
+		width: 140,
 	},
-	headerInfo: {
-		flexDirection: 'column',
-		alignItems: 'center',
+	title: {
+		fontSize: 13,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		textDecoration: 'underline',
+		marginBottom: 14,
+	},
+	// Tabla superior: datos del curso
+	infoTable: {
+		width: '100%',
+		borderWidth: 1,
+		borderColor: '#000000',
+		marginBottom: 10,
+	},
+	infoRow: {
+		flexDirection: 'row',
+	},
+	infoHeaderCell: {
 		flex: 1,
-	},
-	headerTitle: {
-		fontSize: 10,
+		borderWidth: 1,
+		borderColor: '#000000',
+		backgroundColor: '#dbe5f1',
+		padding: 4,
+		fontSize: 8,
 		fontWeight: 'bold',
 		textAlign: 'center',
 	},
-	headerSubtitle: {
-		fontSize: 7,
+	infoValueCell: {
+		flex: 1,
+		borderWidth: 1,
+		borderColor: '#000000',
+		padding: 6,
+		fontSize: 8,
 		textAlign: 'center',
-		color: '#4b5563',
-		marginTop: 2,
+		minHeight: 20,
 	},
 	dayHeader: {
 		fontSize: 9,
 		fontWeight: 'bold',
-		marginVertical: 6,
-		textAlign: 'center',
-		padding: 4,
-		backgroundColor: '#f3f4f6',
-		borderWidth: 1,
-		borderColor: '#d1d5db',
+		marginBottom: 6,
+		textAlign: 'left',
 	},
+	// Tabla principal: asistencia
 	table: {
 		width: '100%',
-		marginBottom: 8,
 		borderWidth: 1,
-		borderColor: '#d1d5db',
+		borderColor: '#000000',
+		marginBottom: 12,
 	},
 	tableHeader: {
 		flexDirection: 'row',
-		backgroundColor: '#e5e7eb',
 	},
 	tableHeaderCell: {
 		fontWeight: 'bold',
 		padding: 4,
-		fontSize: 7,
+		fontSize: 8,
 		textAlign: 'center',
 		borderWidth: 1,
-		borderColor: '#d1d5db',
+		borderColor: '#000000',
+		backgroundColor: '#dbe5f1',
 	},
 	tableRow: {
 		flexDirection: 'row',
 	},
-	cellName: {
-		width: '25%',
+	cellNum: {
+		width: '6%',
 		borderWidth: 1,
-		borderColor: '#d1d5db',
-		padding: 3,
-		fontSize: 7,
-	},
-	cellPC: {
-		width: '12%',
-		borderWidth: 1,
-		borderColor: '#d1d5db',
-		padding: 3,
-		fontSize: 7,
+		borderColor: '#000000',
+		padding: 4,
+		fontSize: 8,
 		textAlign: 'center',
+		backgroundColor: '#dbe5f1',
+	},
+	cellName: {
+		width: '32%',
+		borderWidth: 1,
+		borderColor: '#000000',
+		padding: 4,
+		fontSize: 8,
 	},
 	cellDoc: {
-		width: '12%',
+		width: '18%',
 		borderWidth: 1,
-		borderColor: '#d1d5db',
-		padding: 3,
-		fontSize: 7,
+		borderColor: '#000000',
+		padding: 4,
+		fontSize: 8,
 		textAlign: 'center',
 	},
-	cellStatus: {
-		width: '16%',
+	cellEmail: {
+		width: '20%',
 		borderWidth: 1,
-		borderColor: '#d1d5db',
-		padding: 3,
-		fontSize: 7,
+		borderColor: '#000000',
+		padding: 4,
+		fontSize: 7.5,
 		textAlign: 'center',
 	},
 	cellSignature: {
-		width: '35%',
+		width: '14%',
 		borderWidth: 1,
-		borderColor: '#d1d5db',
+		borderColor: '#000000',
 		padding: 2,
-		fontSize: 7,
-		textAlign: 'center',
 		alignItems: 'center',
 		justifyContent: 'center',
 		overflow: 'hidden',
 	},
+	cellDate: {
+		width: '10%',
+		borderWidth: 1,
+		borderColor: '#000000',
+		padding: 4,
+		fontSize: 8,
+		textAlign: 'center',
+	},
 	sigImage: {
 		width: '100%',
-		height: 60,
+		height: 30,
 		objectFit: 'contain',
 	},
 	noSignature: {
@@ -131,56 +151,38 @@ const styles = StyleSheet.create({
 		fontSize: 6,
 		fontStyle: 'italic',
 	},
-	instructorSection: {
-		marginTop: 8,
-		borderTopWidth: 1,
-		borderTopColor: '#374151',
-		paddingTop: 5,
-	},
-	instructorTitle: {
-		fontSize: 8,
-		fontWeight: 'bold',
-		textAlign: 'center',
-		marginBottom: 4,
-	},
-	instructorRow: {
+	instructorFooter: {
+		marginTop: 30,
 		flexDirection: 'row',
+		alignItems: 'flex-end',
 		justifyContent: 'space-evenly',
 	},
 	instructorSigBlock: {
 		alignItems: 'center',
-		width: '30%',
+		minWidth: 150,
 	},
-	instructorLabel: {
-		fontSize: 6,
-		color: '#4b5563',
+	instructorSigLabel: {
+		fontSize: 9,
+		fontWeight: 'bold',
 		marginBottom: 2,
 	},
+	instructorLine: {
+		width: 140,
+		borderBottomWidth: 1,
+		borderBottomColor: '#000000',
+		marginTop: 16,
+	},
 	instructorSigImage: {
-		width: 120,
-		height: 32,
+		width: 100,
+		height: 28,
 		objectFit: 'contain',
-		borderWidth: 1,
-		borderColor: '#d1d5db',
-	},
-	instructorEmpty: {
-		width: 120,
-		height: 32,
-		borderWidth: 1,
-		borderColor: '#d1d5db',
-		borderStyle: 'dashed',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	instructorEmptyText: {
-		fontSize: 5,
-		color: '#9ca3af',
+		marginLeft: 6,
 	},
 	footer: {
 		position: 'absolute',
 		bottom: 10,
-		left: 15,
-		right: 15,
+		left: 30,
+		right: 30,
 		textAlign: 'center',
 		fontSize: 6,
 		color: '#9ca3af',
@@ -211,90 +213,58 @@ const addDays = (
 };
 
 type Props = {
-	group: courseGroup;
-	students: courseStudent[];
-	attendancesByStudent: Record<number, attendance[]>;
+	group: courseGroupReportItem;
+	students: courseGroupReportCourseStudent[];
 	instructorSignatures: courseGroupSignature[];
 	logoBase64: string;
-	attendanceStatuses: attendanceStatus[];
 };
 
 const AttendanceListPDF = ({
 	group,
 	students,
-	attendancesByStudent,
 	instructorSignatures,
 	logoBase64,
-	attendanceStatuses,
 }: Props) => {
-	const totalDays = group.course?.days || 1;
+	const course = group.course || null;
+	const totalDays = course?.days || 1;
 	const groupDate = group.date || students[0]?.date || null;
 
-	console.log('[AttendanceListPDF] group:', group.id, group.title, { totalDays, groupDate });
-	console.log('[AttendanceListPDF] students:', students.map(s => ({ id: s.id, name: s.student?.user?.name, uid: s.student?.user_id })));
-	console.log('[AttendanceListPDF] attendancesByStudent keys:', Object.keys(attendancesByStudent));
-	Object.entries(attendancesByStudent).forEach(([csId, atts]) => {
-		console.log(`[AttendanceListPDF] atts for CS#${csId}:`, atts.map(a => ({ id: a.id, date: a.date, status: a.attendance_status_id })));
-	});
-
-	const getStatusName = (statusId: number): string => {
-		const found = attendanceStatuses.find((s) => s.id === statusId);
-		return found?.name || String(statusId);
-	};
-
 	const getAttendanceForDay = (
-		csId: number,
-		dayDate: string,
-	): attendance | undefined => {
-		const records = attendancesByStudent[csId];
-		if (!records) {
-			console.log(`[AttendanceListPDF] No records for CS#${csId}, day ${dayDate}`);
-			return undefined;
-		}
-		console.log(`[AttendanceListPDF] Looking for CS#${csId} day=${dayDate}, available dates:`, records.map(a => ({ id: a.id, date: a.date, dateSplit: typeof a.date === 'string' ? a.date.split('T')[0] : String(a.date).split('T')[0] })));
-		const record = records.find((a) => {
-			const attDate =
-				typeof a.date === 'string'
-					? a.date.split('T')[0]
-					: String(a.date).split('T')[0];
-			const match = attDate === dayDate;
-			console.log(`[AttendanceListPDF]   comparing attDate=${attDate} === dayDate=${dayDate} => ${match}`);
-			return match;
-		});
-		return record;
+		cs: courseGroupReportCourseStudent,
+		day: number,
+	): courseGroupReportAttendance | undefined => {
+		return (cs.attendances || []).find((a) => a.day === day);
 	};
 
-	const getStudentName = (cs: courseStudent): string => {
+	const getStudentName = (
+		cs: courseGroupReportCourseStudent,
+	): string => {
 		if (cs.student?.user) {
-			return `${cs.student.user.name} ${cs.student.user.last_name}`;
+			return `${cs.student.user.name} ${cs.student.user.last_name}`.trim();
 		}
 		return `PC: ${cs.student?.user_id || cs.code || 'N/A'}`;
 	};
 
-	const getStudentDoc = (cs: courseStudent): string => {
+	const getStudentDoc = (
+		cs: courseGroupReportCourseStudent,
+	): string => {
 		return cs.student?.user?.doc_number
 			? String(cs.student.user.doc_number)
 			: '';
 	};
 
-	const getStudentPC = (cs: courseStudent): string => {
-		return String(cs.student?.user_id || cs.code || '');
+	const getStudentEmail = (
+		cs: courseGroupReportCourseStudent,
+	): string => {
+		return cs.student?.user?.email
+			? String(cs.student.user.email)
+			: '';
 	};
 
 	const getSignatureUrl = (
-		att: attendance | undefined,
+		att: courseGroupReportAttendance | undefined,
 	): string | null => {
-		if (!att) return null;
-		if (att.attendance_signature?.signature_url) {
-			return att.attendance_signature.signature_url;
-		}
-		if (att.AttendanceSignature?.signature_url) {
-			return att.AttendanceSignature.signature_url;
-		}
-		if (att.signature_url) {
-			return att.signature_url;
-		}
-		return null;
+		return att?.attendance_signature?.signature_url || null;
 	};
 
 	const getDayInstructorSignatures = (
@@ -309,15 +279,26 @@ const AttendanceListPDF = ({
 			.sort((a, b) => a.signature_number - b.signature_number);
 	};
 
+	const getDayDate = (day: number): string | null => {
+		for (const cs of students) {
+			const att = (cs.attendances || []).find((a) => a.day === day);
+			if (att?.date) return att.date;
+		}
+		for (const cs of students) {
+			const sch = (cs.schedules || []).find(
+				(s) => s.subject_day?.day === day,
+			);
+			if (sch?.date) return sch.date;
+		}
+		return groupDate ? addDays(groupDate, day - 1) : null;
+	};
+
 	const days = Array.from({ length: totalDays }, (_, i) => i + 1);
 
 	return (
 		<Document>
 			{days.map((day) => {
-				const dayDate = groupDate
-					? addDays(groupDate, day - 1)
-					: null;
-
+				const dayDate = getDayDate(day);
 				const daySigs = getDayInstructorSignatures(day);
 
 				return (
@@ -326,44 +307,82 @@ const AttendanceListPDF = ({
 							{logoBase64 && (
 								<Image style={styles.logo} src={logoBase64} />
 							)}
-							<View style={styles.headerInfo}>
-								<Text style={styles.headerTitle}>
-									Registro de Asistencia
+						</View>
+
+						<Text style={styles.title}>Listado de Asistencia</Text>
+
+						{/* Tabla de información del curso, al estilo del Word */}
+						<View style={styles.infoTable}>
+							<View style={styles.infoRow}>
+								<Text style={styles.infoHeaderCell}>
+									Nombre del Curso
 								</Text>
-								<Text style={styles.headerSubtitle}>
-									{group.course?.name || ''} - {group.title} (
-									{group.user_code || group.code})
+								<Text style={styles.infoHeaderCell}>
+									Número del Módulo
 								</Text>
-								{groupDate && (
-									<Text style={styles.headerSubtitle}>
-										Fecha: {formatDate(groupDate)}
-									</Text>
-								)}
+								<Text style={styles.infoHeaderCell}>
+									Horas Académicas
+								</Text>
+
+								<Text style={styles.infoHeaderCell}>Inicio</Text>
+								<Text style={styles.infoHeaderCell}>
+									Finalización
+								</Text>
+							</View>
+							<View style={styles.infoRow}>
+								<Text style={styles.infoValueCell}>
+									{course?.name || ''}
+								</Text>
+								<Text style={styles.infoValueCell}>
+									{course?.code || ''}
+								</Text>
+								<Text style={styles.infoValueCell}>
+									{typeof course?.hours === 'number'
+										? course.hours
+										: ''}
+									d
+								</Text>
+
+								<Text style={styles.infoValueCell}>
+									{formatDate(dayDate)}
+								</Text>
+								<Text style={styles.infoValueCell}>
+									{formatDate(
+										getDayDate(totalDays) ||
+											addDays(groupDate, totalDays - 1),
+									)}
+								</Text>
 							</View>
 						</View>
 
-						<View style={styles.dayHeader}>
-							<Text>Día {day}</Text>
-							<Text>{formatDate(dayDate)}</Text>
-						</View>
+						{totalDays > 1 && (
+							<Text style={styles.dayHeader}>
+								Día {day} - {formatDate(dayDate)}
+							</Text>
+						)}
 
+						{/* Tabla principal de asistencia */}
 						<View style={styles.table}>
 							<View style={styles.tableHeader}>
 								<Text
-									style={[styles.tableHeaderCell, styles.cellName]}
+									style={[styles.tableHeaderCell, styles.cellNum]}
 								>
-									Participante
-								</Text>
-								<Text style={[styles.tableHeaderCell, styles.cellPC]}>
-									PC
-								</Text>
-								<Text style={[styles.tableHeaderCell, styles.cellDoc]}>
-									Documento
+									N°
 								</Text>
 								<Text
-									style={[styles.tableHeaderCell, styles.cellStatus]}
+									style={[styles.tableHeaderCell, styles.cellName]}
 								>
-									Estado
+									Nombre y Apellido
+								</Text>
+								<Text
+									style={[styles.tableHeaderCell, styles.cellDoc]}
+								>
+									Número de Cédula
+								</Text>
+								<Text
+									style={[styles.tableHeaderCell, styles.cellEmail]}
+								>
+									Correo Electrónico
 								</Text>
 								<Text
 									style={[
@@ -373,16 +392,16 @@ const AttendanceListPDF = ({
 								>
 									Firma
 								</Text>
+								<Text
+									style={[styles.tableHeaderCell, styles.cellDate]}
+								>
+									Fecha
+								</Text>
 							</View>
 
-							{students.map((cs) => {
-								const attendanceRec = dayDate
-									? getAttendanceForDay(cs.id, dayDate)
-									: undefined;
+							{students.map((cs, index) => {
+								const attendanceRec = getAttendanceForDay(cs, day);
 								const sigUrl = getSignatureUrl(attendanceRec);
-								const statusName = attendanceRec
-									? getStatusName(attendanceRec.attendance_status_id)
-									: '---';
 
 								return (
 									<View
@@ -390,60 +409,64 @@ const AttendanceListPDF = ({
 										style={styles.tableRow}
 										wrap={false}
 									>
+										<Text style={styles.cellNum}>
+											{String(index + 1).padStart(2, '0')}
+										</Text>
 										<Text style={styles.cellName}>
 											{getStudentName(cs)}
-										</Text>
-										<Text style={styles.cellPC}>
-											{getStudentPC(cs)}
 										</Text>
 										<Text style={styles.cellDoc}>
 											{getStudentDoc(cs)}
 										</Text>
-										<Text style={styles.cellStatus}>
-											{statusName}
+										<Text style={styles.cellEmail}>
+											{getStudentEmail(cs)}
 										</Text>
 										<View style={styles.cellSignature}>
 											{sigUrl ? (
 												<Image style={styles.sigImage} src={sigUrl} />
 											) : (
-												<Text style={styles.noSignature}>
-													{attendanceRec ? 'Sin firma' : '---'}
-												</Text>
+												<Text style={styles.noSignature}></Text>
 											)}
 										</View>
+										<Text style={styles.cellDate}>
+											{attendanceRec?.date
+												? formatDate(attendanceRec.date)
+												: ''}
+										</Text>
 									</View>
 								);
 							})}
 						</View>
 
-						<View style={styles.instructorSection}>
-							<Text style={styles.instructorTitle}>
-								Firmas de Instructores - Día {day}
-							</Text>
-							<View style={styles.instructorRow}>
-								{daySigs.length > 0 ? (
-									daySigs.map((sig) => (
-										<View
-											key={sig.id}
-											style={styles.instructorSigBlock}
-										>
-											<Text style={styles.instructorLabel}>
-												Firma {sig.signature_number}
-											</Text>
+						{/* Firmas del instructor, al pie, como en el Word */}
+						<View style={styles.instructorFooter}>
+							{daySigs.length > 0 ? (
+								daySigs.map((sig) => (
+									<View
+										key={sig.id}
+										style={styles.instructorSigBlock}
+									>
+										<Text style={styles.instructorSigLabel}>
+											Firma del Instructor {sig.signature_number}
+										</Text>
+										{sig.signature_url ? (
 											<Image
 												style={styles.instructorSigImage}
 												src={sig.signature_url}
 											/>
-										</View>
-									))
-								) : (
-									<View style={styles.instructorEmpty}>
-										<Text style={styles.instructorEmptyText}>
-											Sin firma
-										</Text>
+										) : (
+											<View style={styles.instructorLine} />
+										)}
 									</View>
-								)}
-							</View>
+								))
+							) : (
+								<View style={styles.instructorSigBlock}>
+									<Text style={styles.instructorSigLabel}>
+										Firma del Instructor
+									</Text>
+									<View style={styles.instructorLine} />
+								</View>
+							)}
 						</View>
 
 						<Text style={styles.footer}>

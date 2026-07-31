@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseGroupState, courseGroup, courseGroupSignature, courseStudent } from '../types/utilities';
+import { CourseGroupState, courseGroup, courseGroupAttendanceReport, courseGroupSignature, courseStudent } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 const initialState: CourseGroupState = {
@@ -7,6 +7,11 @@ const initialState: CourseGroupState = {
     courseGroupSelected: null,
     courseGroupStudents: [],
     courseGroupSignatures: [],
+    courseGroupReportList: [],
+    courseGroupReportTotalItems: 0,
+    courseGroupReportCurrentPage: 1,
+    courseGroupReportPageSize: 10,
+    courseGroupReportTotalPages: 1,
     status: 'idle',
     error: null,
 };
@@ -150,6 +155,27 @@ export const deleteCourseGroupSignature = createAsyncThunk<number, { groupId: nu
         try {
             await axiosDeleteSlice(`api/course_groups/${groupId}/signatures/${signatureId}`);
             return signatureId;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const fetchCourseGroupAttendanceReport = createAsyncThunk<
+    courseGroupAttendanceReport,
+    { currentPage?: number; pageSize?: number; course_group_id?: number; course_id?: number }
+>(
+    'courseGroup/fetchCourseGroupAttendanceReport',
+    async ({ currentPage = 1, pageSize = 10, course_group_id, course_id }, { rejectWithValue }) => {
+        try {
+            const params: { currentPage: number; pageSize: number; course_group_id?: number; course_id?: number } = {
+                currentPage,
+                pageSize,
+            };
+            if (course_group_id !== undefined) params.course_group_id = course_group_id;
+            if (course_id !== undefined) params.course_id = course_id;
+            const response = await axiosGetSlice('api/course_groups/report/attendance', params);
+            return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -336,6 +362,22 @@ const courseGroupSlice = createSlice({
                 state.courseGroupSignatures = state.courseGroupSignatures.filter(s => s.id !== action.payload);
             })
             .addCase(deleteCourseGroupSignature.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            .addCase(fetchCourseGroupAttendanceReport.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCourseGroupAttendanceReport.fulfilled, (state, action: PayloadAction<courseGroupAttendanceReport>) => {
+                state.status = 'succeeded';
+                state.courseGroupReportList = Array.isArray(action.payload?.data) ? action.payload.data : [];
+                state.courseGroupReportTotalItems = action.payload?.totalItems ?? 0;
+                state.courseGroupReportCurrentPage = action.payload?.currentPage ?? 1;
+                state.courseGroupReportPageSize = action.payload?.pageSize ?? 10;
+                state.courseGroupReportTotalPages = action.payload?.totalPages ?? 1;
+            })
+            .addCase(fetchCourseGroupAttendanceReport.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

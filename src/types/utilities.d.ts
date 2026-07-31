@@ -485,6 +485,11 @@ export interface CourseGroupState {
     courseGroupSelected: courseGroup | null;
     courseGroupStudents: courseStudent[];
     courseGroupSignatures: courseGroupSignature[];
+    courseGroupReportList: courseGroupReportItem[];
+    courseGroupReportTotalItems: number;
+    courseGroupReportCurrentPage: number;
+    courseGroupReportPageSize: number;
+    courseGroupReportTotalPages: number;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
 }
@@ -587,6 +592,7 @@ export type attendance = {
     id: number;
     course_student_id: number;
     course_student?: courseStudent;
+    day?: number;
     date: string;
     attendance_status_id: number;
     attendance_status?: attendanceStatus;
@@ -596,6 +602,95 @@ export type attendance = {
     attendance_signature?: attendanceSignatureRecord;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export type courseGroupReportCourse = {
+    id: number;
+    name: string;
+    description?: string;
+    code: string;
+    hours: number;
+    days: number;
+    plane_model?: string | null;
+    status: boolean;
+    course_type: courseType;
+    course_level: courseLevel;
+}
+
+export type courseGroupReportStudent = {
+    id: number;
+    user_id: number;
+    status?: boolean;
+    user: user;
+}
+
+export type courseGroupReportSchedule = {
+    id: number;
+    course_student_id: number;
+    instructor_id: number | null;
+    student_id: number;
+    subject_id: number;
+    subject_days_id: number;
+    date: string;
+    hour: string;
+    classTime: number;
+    instructor?: instructor | null;
+    subject?: subject | null;
+    subject_day?: subjectDays | null;
+}
+
+export type courseGroupReportAttendance = {
+    id: number;
+    course_student_id: number;
+    day: number;
+    date: string;
+    attendance_status_id: number;
+    comments?: string;
+    attendance_status?: attendanceStatus | null;
+    attendance_signature?: attendanceSignatureRecord | null;
+}
+
+export type courseGroupReportCourseStudent = {
+    id: number;
+    course_id: number;
+    student_id: number;
+    course_group_id: number;
+    code: string;
+    date: string | null;
+    score: number | null;
+    approve: boolean | null;
+    type_trip: number;
+    license: number;
+    regulation: number;
+    status: boolean;
+    max_attempts: number | null;
+    instructor_code: string | null;
+    student?: courseGroupReportStudent;
+    course?: course;
+    schedules: courseGroupReportSchedule[];
+    attendances: courseGroupReportAttendance[];
+}
+
+export type courseGroupReportItem = {
+    id: number;
+    title: string;
+    code: string;
+    user_code?: string | null;
+    date?: string | null;
+    status: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    course?: courseGroupReportCourse | null;
+    course_group_signatures: courseGroupSignature[];
+    course_students: courseGroupReportCourseStudent[];
+}
+
+export type courseGroupAttendanceReport = {
+    data: courseGroupReportItem[];
+    totalItems: number;
+    currentPage: number;
+    pageSize: number;
+    totalPages: number;
 }
 
 export interface AttendanceState {

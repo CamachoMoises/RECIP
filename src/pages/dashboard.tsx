@@ -27,8 +27,6 @@ const Dashboard = () => {
 		const handleScroll = () => {
 			if (window.scrollY > 200) {
 				setIsVisible(false);
-			} else {
-				setIsVisible(true);
 			}
 		};
 
