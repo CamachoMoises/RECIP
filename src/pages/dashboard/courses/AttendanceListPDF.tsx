@@ -340,7 +340,6 @@ const AttendanceListPDF = ({
 									{typeof course?.hours === 'number'
 										? course.hours
 										: ''}
-									d
 								</Text>
 
 								<Text style={styles.infoValueCell}>
