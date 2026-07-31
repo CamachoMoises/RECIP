@@ -320,7 +320,7 @@ const DetailAssessment = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Fecha de inicio
+											Fecha de entrenamiento
 										</Typography>
 										<Typography
 											variant="small"

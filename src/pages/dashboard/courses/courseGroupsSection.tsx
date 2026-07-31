@@ -789,6 +789,7 @@ const CourseGroupsSection = ({
 													</>
 												)}
 												{/* Instructor Signatures por día */}
+												{group.course?.course_type?.id === 2 ? null : (
 												<div className="border-t pt-3 mt-4">
 													<Typography
 														variant="small"
@@ -1011,6 +1012,8 @@ const CourseGroupsSection = ({
 														})}
 													</div>
 												</div>
+												)}
+												{group.course?.course_type?.id === 2 ? null : (
 												<div className="flex justify-center mt-4 pt-3 border-t">
 													<Button
 														size="sm"
@@ -1028,6 +1031,7 @@ const CourseGroupsSection = ({
 														Exportar PDF de Asistencia
 													</Button>
 												</div>
+												)}
 											</AccordionBody>
 										</Accordion>
 									</Card>
