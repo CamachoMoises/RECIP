@@ -352,9 +352,11 @@ const DetailAssessment = () => {
 											onPointerLeaveCapture={undefined}
 										>
 											{moment(
-												assessment.courseStudentAssessmentDaySelected
-													?.createdAt,
-											).format('DD-MM-YYYY')}
+												assessment.courseStudentAssessmentSelected
+													?.date,
+											)
+												.add(activeStep, 'days')
+												.format('DD-MM-YYYY')}
 										</Typography>
 									</div>
 								</div>
@@ -482,6 +484,49 @@ const DetailAssessment = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex flex-col gap-2 ">
+							<div className="flex flex-col items-start gap-1 rounded-lg bg-blue-gray-50 p-3 text-left">
+								<Typography
+									variant="h6"
+									className="font-bold"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Proeficiencia de entrenamiento
+								</Typography>
+								<Typography
+									variant="small"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									1. es insatisfactorio.
+								</Typography>
+								<Typography
+									variant="small"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									2. es por debajo del estándar esperado.
+								</Typography>
+								<Typography
+									variant="small"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									3. cumple con los estándares.
+								</Typography>
+								<Typography
+									variant="small"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									4. excelente.
+								</Typography>
+							</div>
 							<CSAD_form
 								day={activeStep + 1}
 								printCSA={printCSA}
