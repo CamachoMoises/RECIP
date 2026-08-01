@@ -265,7 +265,7 @@ const CSAD_form = ({
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<div
 					className={`grid grid-cols-4 gap-4 py-3 rounded-md ${
-						dayStarted ? '' : 'bg-orange-100'
+						dayStarted ? '' : 'bg-orange-100 p-2'
 					}`}
 				>
 					<div>
@@ -568,6 +568,7 @@ const CSAD_form = ({
 						)}
 					</div>
 				</div>
+				<br />
 				<hr />
 				{assessment.courseStudentAssessmentDaySelected?.airport && (
 					<>
