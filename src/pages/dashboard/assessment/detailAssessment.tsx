@@ -241,130 +241,137 @@ const DetailAssessment = () => {
 							</Typography>
 						</div>
 						<hr />
-						<div className="flex flex-col gap-2 ">
-							<div className="flex flex-row">
-								<div className="basis-1/2">
-									<div className="flex flex-row gap-3">
-										<Typography
-											variant="lead"
-											className="font-bold"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Cliente:{' '}
-											{
-												assessment.courseStudentAssessmentSelected
-													?.student?.user?.name
-											}{' '}
-											{
-												assessment.courseStudentAssessmentSelected
-													?.student?.user?.last_name
-											}
-										</Typography>
-									</div>
-									<div className="flex flex-row gap-3">
-										<Typography
-											variant="small"
-											className="font-bold"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Número de Identificación{' '}
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{
-												assessment.courseStudentAssessmentSelected
-													?.student?.user?.user_doc_type?.symbol
-											}
-											-
-											{
-												assessment.courseStudentAssessmentSelected
-													?.student?.user?.doc_number
-											}
-										</Typography>
-										<Typography
-											variant="small"
-											className="font-bold"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Telefono
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{
-												assessment.courseStudentAssessmentSelected
-													?.student?.user?.phone
-											}
-										</Typography>
-									</div>
+						<div className="flex flex-col gap-4 pt-2">
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<div className="flex flex-col gap-1">
+									<Typography
+										variant="small"
+										className="font-bold text-blue-gray-600"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Cliente
+									</Typography>
+									<Typography
+										variant="lead"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{
+											assessment.courseStudentAssessmentSelected
+												?.student?.user?.name
+										}{' '}
+										{
+											assessment.courseStudentAssessmentSelected
+												?.student?.user?.last_name
+										}
+									</Typography>
 								</div>
-								<div className="basis-1/2">
-									<div className="flex flex-row gap-3">
-										<Typography
-											variant="small"
-											className="font-bold"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Fecha de entrenamiento
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{assessment.courseStudentAssessmentSelected
-												?.course_student?.date
-												? moment(
-														assessment.courseStudentAssessmentSelected
-															?.course_student?.date,
-													).format('DD-MM-YYYY')
-												: ''}
-										</Typography>
-										<Typography
-											variant="small"
-											className="font-bold"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											Fecha de evaluación
-										</Typography>
-										<Typography
-											variant="small"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{moment(
-												assessment.courseStudentAssessmentSelected
-													?.date,
-											)
-												.add(activeStep, 'days')
-												.format('DD-MM-YYYY')}
-										</Typography>
-									</div>
+								<div className="flex flex-col gap-1">
+									<Typography
+										variant="small"
+										className="font-bold text-blue-gray-600"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Número de Identificación
+									</Typography>
+									<Typography
+										variant="lead"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{
+											assessment.courseStudentAssessmentSelected
+												?.student?.user?.user_doc_type?.symbol
+										}
+										-
+										{
+											assessment.courseStudentAssessmentSelected
+												?.student?.user?.doc_number
+										}
+									</Typography>
+								</div>
+								<div className="flex flex-col gap-1">
+									<Typography
+										variant="small"
+										className="font-bold text-blue-gray-600"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Teléfono
+									</Typography>
+									<Typography
+										variant="lead"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{
+											assessment.courseStudentAssessmentSelected
+												?.student?.user?.phone
+										}
+									</Typography>
+								</div>
+								<div className="flex flex-col gap-1">
+									<Typography
+										variant="small"
+										className="font-bold text-blue-gray-600"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Fecha de inicio de entrenamiento
+									</Typography>
+									<Typography
+										variant="lead"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{assessment.courseStudentAssessmentSelected
+											?.course_student?.date
+											? moment(
+													assessment.courseStudentAssessmentSelected
+														?.course_student?.date,
+												).format('DD-MM-YYYY')
+											: ''}
+									</Typography>
+								</div>
+								<div className="flex flex-col gap-1">
+									<Typography
+										variant="small"
+										className="font-bold text-blue-gray-600"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Fecha de evaluación
+									</Typography>
+									<Typography
+										variant="lead"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{moment(
+											assessment.courseStudentAssessmentSelected
+												?.date,
+										)
+											.add(activeStep, 'days')
+											.format('DD-MM-YYYY')}
+									</Typography>
 								</div>
 							</div>
 							{missingDay && (
 								<div>
 									<Typography
-										variant="h4"
+										variant="h5"
 										color="red"
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
@@ -374,9 +381,9 @@ const DetailAssessment = () => {
 									</Typography>
 								</div>
 							)}
-							<div className="flex flex-col gap-2 ">
+							<div className="flex flex-row items-center justify-between rounded-lg bg-blue-gray-50 p-3">
 								<Typography
-									variant="h4"
+									variant="h5"
 									color={isApproved ? 'green' : 'indigo'}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
@@ -384,25 +391,23 @@ const DetailAssessment = () => {
 								>
 									{isApproved ? 'Aprobado' : 'Por aprobar'}
 								</Typography>
-								<div className="flex flex-row text-left justify-center">
-									<Switch
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-										crossOrigin={undefined}
-										ripple={false}
-										defaultChecked={isApproved}
-										onChange={(event) => {
-											handleChangeStatus(event);
-										}}
-										className="h-full w-full checked:bg-[#134475]"
-										containerProps={{
-											className: 'w-11 h-6',
-										}}
-										circleProps={{
-											className: 'before:hidden left-0.5 border-none',
-										}}
-									/>
-								</div>
+								<Switch
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									crossOrigin={undefined}
+									ripple={false}
+									defaultChecked={isApproved}
+									onChange={(event) => {
+										handleChangeStatus(event);
+									}}
+									className="h-full w-full checked:bg-[#134475]"
+									containerProps={{
+										className: 'w-11 h-6',
+									}}
+									circleProps={{
+										className: 'before:hidden left-0.5 border-none',
+									}}
+								/>
 							</div>
 						</div>
 					</CardBody>
