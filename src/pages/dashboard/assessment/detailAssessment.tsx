@@ -59,9 +59,7 @@ const DetailAssessment = () => {
 		let weekdaysAdded = 0;
 		while (weekdaysAdded < step) {
 			daysToAdd++;
-			const dayOfWeek = moment(baseDate)
-				.add(daysToAdd, 'days')
-				.day();
+			const dayOfWeek = moment(baseDate).add(daysToAdd, 'days').day();
 			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
 				weekdaysAdded++;
 			}
@@ -378,8 +376,7 @@ const DetailAssessment = () => {
 										onPointerLeaveCapture={undefined}
 									>
 										{getEvaluationDate(
-											assessment
-												.courseStudentAssessmentSelected
+											assessment.courseStudentAssessmentSelected
 												?.date,
 											activeStep,
 										).format('DD-MM-YYYY')}
@@ -515,7 +512,7 @@ const DetailAssessment = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									Proeficiencia de entrenamiento
+									Proficiencia de la evaluacion
 								</Typography>
 								<Typography
 									variant="small"
@@ -523,31 +520,9 @@ const DetailAssessment = () => {
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 								>
-									1. es insatisfactorio.
-								</Typography>
-								<Typography
-									variant="small"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									2. es por debajo del estándar esperado.
-								</Typography>
-								<Typography
-									variant="small"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									3. cumple con los estándares.
-								</Typography>
-								<Typography
-									variant="small"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									4. excelente.
+									(1) Insatisfacción. (2) Por debajo del estándar
+									esperado. (3) Cumple con los estándares (4)
+									Excelente
 								</Typography>
 							</div>
 							<CSAD_form
