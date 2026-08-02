@@ -374,7 +374,7 @@ export type courseStudentAssessment = {
     student?: student;
     course_student_id: number;
     course_student?: courseStudent;
-    course_student_assessment_days?: courseStudentAssessmentDay[],
+    CourseStudentAssessmentDays?: courseStudentAssessmentDay[],
     score: number;
     approve: boolean;
     date: string;
@@ -382,6 +382,7 @@ export type courseStudentAssessment = {
     status: boolean;
     finished: boolean;
     comments: string;
+    course_score_average?: number;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -409,6 +410,14 @@ export type courseStudentAssessmentDay = {
     power: string;
     takeoff?: number;
     landing?: number;
+    takeoff_day?: number;
+    takeoff_night?: number;
+    landing_day?: number;
+    landing_night?: number;
+    training_time?: string;
+    check_time?: string;
+    type?: string;
+    score_average?: number;
     seat: string;
     comments: string;
     createdAt?: string;

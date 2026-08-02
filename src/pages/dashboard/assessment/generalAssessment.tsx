@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import {
 	createCourseStudentAssessment,
-	fetchCourseStudentAssessment,
+	fetchAssessmentData,
 } from '../../../features/assessmentSlice';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -108,7 +108,7 @@ const GeneralAssessment = () => {
 	) => {
 		if (CS.course_student_assessment?.id) {
 			await dispatch(
-				fetchCourseStudentAssessment(CS.course_student_assessment.id),
+				fetchAssessmentData(CS.course_student_assessment.id),
 			);
 		} else {
 			await dispatch(

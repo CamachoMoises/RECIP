@@ -1,11 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../../../store';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
 	Button,
 	Checkbox,
 	Input,
+	Option,
+	Select,
 	Textarea,
 	Typography,
 } from '@material-tailwind/react';
@@ -36,6 +38,13 @@ type Inputs = {
 	power: string;
 	takeoff: number;
 	landing: number;
+	takeoff_day: number;
+	takeoff_night: number;
+	landing_day: number;
+	landing_night: number;
+	training_time: string;
+	check_time: string;
+	type: string;
 	seat: string;
 	comments: string;
 	consent: boolean;
@@ -119,6 +128,7 @@ const CSAD_form = ({
 	const {
 		register,
 		handleSubmit,
+		control,
 
 		formState: { errors },
 	} = useForm<Inputs>({
@@ -140,6 +150,19 @@ const CSAD_form = ({
 			seat: assessment.courseStudentAssessmentDaySelected?.seat,
 			takeoff: assessment.courseStudentAssessmentDaySelected?.takeoff,
 			landing: assessment.courseStudentAssessmentDaySelected?.landing,
+			takeoff_day:
+				assessment.courseStudentAssessmentDaySelected?.takeoff_day,
+			takeoff_night:
+				assessment.courseStudentAssessmentDaySelected?.takeoff_night,
+			landing_day:
+				assessment.courseStudentAssessmentDaySelected?.landing_day,
+			landing_night:
+				assessment.courseStudentAssessmentDaySelected?.landing_night,
+			training_time:
+				assessment.courseStudentAssessmentDaySelected?.training_time,
+			check_time:
+				assessment.courseStudentAssessmentDaySelected?.check_time,
+			type: assessment.courseStudentAssessmentDaySelected?.type,
 			comments:
 				assessment.courseStudentAssessmentDaySelected?.comments,
 			consent: false,
@@ -149,6 +172,18 @@ const CSAD_form = ({
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		const req: courseStudentAssessmentDay = {
 			...data,
+			takeoff_day: Number.isNaN(data.takeoff_day)
+				? undefined
+				: Number(data.takeoff_day),
+			takeoff_night: Number.isNaN(data.takeoff_night)
+				? undefined
+				: Number(data.takeoff_night),
+			landing_day: Number.isNaN(data.landing_day)
+				? undefined
+				: Number(data.landing_day),
+			landing_night: Number.isNaN(data.landing_night)
+				? undefined
+				: Number(data.landing_night),
 			id: assessment.courseStudentAssessmentDaySelected?.id
 				? assessment.courseStudentAssessmentDaySelected.id
 				: -1,
@@ -257,6 +292,19 @@ const CSAD_form = ({
 				}
 			}
 		}
+	};
+
+	const dayAverage =
+		assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.find(
+			(CSAD) => CSAD.day === day,
+		)?.score_average;
+	const courseScoreAverage =
+		assessment.courseStudentAssessmentSelected?.course_score_average;
+	const proficiencyLabel = (score: number | undefined) => {
+		if (score == null) return '';
+		if (score < 3) return 'Insatisfactorio';
+		if (score < 4) return 'Satisfactorio';
+		return 'Excelente';
 	};
 
 	return (
@@ -574,34 +622,225 @@ const CSAD_form = ({
 					<>
 						<LessonDetails day={day} />
 						<hr />
-						<div className="flex flex-row gap-2 my-3">
-							<div className="basis-1/2">
-								<Input
+						<div className="flex flex-col sm:flex-row gap-4 my-4">
+							<div className="flex-1 rounded-lg border border-blue-gray-200 bg-white p-4">
+								<Typography
+									variant="small"
+									className="font-bold text-blue-gray-600 mb-1"
+									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									type="number"
-									label="Despegues"
-									placeholder="Despegues"
-									maxLength={20}
-									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-									crossOrigin={undefined}
-									{...register('takeoff', {})}
-									aria-invalid={errors.takeoff ? 'true' : 'false'}
+								>
+									Promedio del curso
+								</Typography>
+								<Typography
+									variant="h6"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{courseScoreAverage != null
+										? `${courseScoreAverage} (${proficiencyLabel(
+												courseScoreAverage,
+											)})`
+										: '—'}
+								</Typography>
+							</div>
+						</div>
+						<div className="grid grid-cols-1 gap-6 my-6">
+							<div className="rounded-lg border border-blue-gray-200 bg-white p-4">
+								<Typography
+									variant="small"
+									className="font-bold text-blue-gray-600 mb-3"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Despegues
+								</Typography>
+								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="number"
+										label="Total"
+										placeholder="Total"
+										maxLength={20}
+										className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('takeoff', {})}
+										aria-invalid={errors.takeoff ? 'true' : 'false'}
+									/>
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="number"
+										min={0}
+										label="Día"
+										placeholder="Día"
+										maxLength={20}
+										className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('takeoff_day', {
+											valueAsNumber: true,
+										})}
+										aria-invalid={
+											errors.takeoff_day ? 'true' : 'false'
+										}
+									/>
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="number"
+										min={0}
+										label="Noche"
+										placeholder="Noche"
+										maxLength={20}
+										className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('takeoff_night', {
+											valueAsNumber: true,
+										})}
+										aria-invalid={
+											errors.takeoff_night ? 'true' : 'false'
+										}
+									/>
+								</div>
+							</div>
+							<div className="rounded-lg border border-blue-gray-200 bg-white p-4">
+								<Typography
+									variant="small"
+									className="font-bold text-blue-gray-600 mb-3"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Aterrizajes
+								</Typography>
+								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="number"
+										label="Total"
+										placeholder="Total"
+										maxLength={20}
+										className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('landing', {})}
+										aria-invalid={errors.landing ? 'true' : 'false'}
+									/>
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="number"
+										min={0}
+										label="Día"
+										placeholder="Día"
+										maxLength={20}
+										className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('landing_day', {
+											valueAsNumber: true,
+										})}
+										aria-invalid={
+											errors.landing_day ? 'true' : 'false'
+										}
+									/>
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="number"
+										min={0}
+										label="Noche"
+										placeholder="Noche"
+										maxLength={20}
+										className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('landing_night', {
+											valueAsNumber: true,
+										})}
+										aria-invalid={
+											errors.landing_night ? 'true' : 'false'
+										}
+									/>
+								</div>
+							</div>
+							<div className="rounded-lg border border-blue-gray-200 bg-white p-4">
+								<Typography
+									variant="small"
+									className="font-bold text-blue-gray-600 mb-3"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Tipo
+								</Typography>
+								<Controller
+									name="type"
+									control={control}
+									render={({ field }) => (
+										<Select
+											label="Tipo"
+											placeholder="Tipo"
+											value={field.value ?? ''}
+											onChange={(value) => field.onChange(value)}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<Option value="entrenamiento">
+												Entrenamiento
+											</Option>
+											<Option value="reentrenamiento">
+												Reentrenamiento
+											</Option>
+											<Option value="chequeo">Chequeo</Option>
+											<Option value="re-chequeo">Re-chequeo</Option>
+											<Option value="experiencia_reciente">
+												Experiencia reciente
+											</Option>
+										</Select>
+									)}
 								/>
 							</div>
-							<div className="basis-1/2">
-								<Input
+							<div className="rounded-lg border border-blue-gray-200 bg-white p-4">
+								<Typography
+									variant="small"
+									className="font-bold text-blue-gray-600 mb-3"
+									placeholder={undefined}
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
-									type="number"
-									label="Aterrizajes"
-									placeholder="Aterrizajes"
-									maxLength={20}
-									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
-									crossOrigin={undefined}
-									{...register('landing', {})}
-									aria-invalid={errors.landing ? 'true' : 'false'}
-								/>
+								>
+									Tiempos de vuelo
+								</Typography>
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="time"
+										step={1}
+										label="Entrenamiento"
+										className="no-ampm bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('training_time', {})}
+										aria-invalid={
+											errors.training_time ? 'true' : 'false'
+										}
+									/>
+									<Input
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										type="time"
+										step={1}
+										label="Chequeo"
+										className="no-ampm bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+										crossOrigin={undefined}
+										{...register('check_time', {})}
+										aria-invalid={
+											errors.check_time ? 'true' : 'false'
+										}
+									/>
+								</div>
 							</div>
 						</div>
 						<div className="flex flex-col py-2">

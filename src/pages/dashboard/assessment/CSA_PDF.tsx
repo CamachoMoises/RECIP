@@ -34,17 +34,87 @@ const CSA_PDF = ({ day }: { day: number }) => {
 	let sumLanding = 0;
 	let sumTakeOff = 0;
 	for (const key in assessment.courseStudentAssessmentSelected
-		?.course_student_assessment_days) {
+		?.CourseStudentAssessmentDays) {
 		const landing =
 			assessment.courseStudentAssessmentSelected
-				.course_student_assessment_days[parseInt(key)].landing;
+				.CourseStudentAssessmentDays[parseInt(key)].landing;
 		const takeoff =
 			assessment.courseStudentAssessmentSelected
-				.course_student_assessment_days[parseInt(key)].takeoff;
+				.CourseStudentAssessmentDays[parseInt(key)].takeoff;
 		sumLanding += landing ? landing : 0;
 
 		sumTakeOff += takeoff ? takeoff : 0;
 	}
+	const timeToSeconds = (time?: string) => {
+		if (!time) return 0;
+		const parts = time.split(':').map(Number);
+		return parts[0] * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+	};
+	const secondsToTime = (seconds: number) => {
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const secs = seconds % 60;
+		return [hours, minutes, secs]
+			.map((part) => String(part).padStart(2, '0'))
+			.join(':');
+	};
+	const getEvaluationDate = (
+		baseDate: string | undefined,
+		step: number,
+	) => {
+		let daysToAdd = 0;
+		let weekdaysAdded = 0;
+		while (weekdaysAdded < step) {
+			daysToAdd++;
+			const dayOfWeek = moment(baseDate)
+				.add(daysToAdd, 'days')
+				.day();
+			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+				weekdaysAdded++;
+			}
+		}
+		return moment(baseDate).add(daysToAdd, 'days');
+	};
+	const typeValues = [
+		{ value: 'entrenamiento', label: 'Entrenamiento' },
+		{ value: 'reentrenamiento', label: 'Reentrenamiento' },
+		{ value: 'chequeo', label: 'Chequeo' },
+		{ value: 're-chequeo', label: 'Re-chequeo' },
+		{ value: 'experiencia_reciente', label: 'Experiencia reciente' },
+	];
+	const selectedTypes = new Set(
+		assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays
+			?.map((CSAD) => CSAD.type)
+			.filter((type): type is string => Boolean(type)) ?? [],
+	);
+	const firstAirport =
+		assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.find(
+			(CSAD) => CSAD.airport,
+		)?.airport;
+	const courseScoreAverage =
+		assessment.courseStudentAssessmentSelected?.course_score_average;
+	const proficiencyLabel = (score: number | undefined) => {
+		if (score == null) return '';
+		if (score < 3) return 'Insatisfactorio';
+		if (score < 4) return 'Satisfactorio';
+		return 'Excelente';
+	};
+	let sumTakeoffDay = 0;
+	let sumTakeoffNight = 0;
+	let sumLandingDay = 0;
+	let sumLandingNight = 0;
+	let sumTrainingTime = 0;
+	let sumCheckTime = 0;
+	assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.forEach(
+		(CSAD) => {
+			sumTakeoffDay += CSAD.takeoff_day || 0;
+			sumTakeoffNight += CSAD.takeoff_night || 0;
+			sumLandingDay += CSAD.landing_day || 0;
+			sumLandingNight += CSAD.landing_night || 0;
+			sumTrainingTime += timeToSeconds(CSAD.training_time);
+			sumCheckTime += timeToSeconds(CSAD.check_time);
+		},
+	);
 	return (
 		<div className="printable">
 			<div className="flex flex-col text-center gap-2">
@@ -202,9 +272,10 @@ const CSA_PDF = ({ day }: { day: number }) => {
 										className="border border-blue-gray-800 px-2 text-xs"
 									>
 										<strong>Base de operaciones piloto:</strong>{' '}
+										{firstAirport}
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
-										<strong> Certificado 360ATC::</strong>
+										<strong> Certificado:</strong> CEA 360ATC
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
 										<strong> Tipo de curso:</strong> <br />
@@ -224,6 +295,72 @@ const CSA_PDF = ({ day }: { day: number }) => {
 							</tbody>
 						</table>
 					</div>
+				</div>
+				<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
+					<table className="table-auto border-collapse border border-gray-300">
+						<tbody>
+							<tr>
+								<td className="border border-blue-gray-800 px-2 text-xs">
+									<strong>Evaluación Tipo:</strong>
+								</td>
+								{typeValues.map((type, index) => (
+									<td
+										key={index}
+										className="border border-blue-gray-800 px-2 text-xs"
+									>
+										{selectedTypes.has(type.value) ? (
+											<strong>{type.label}</strong>
+										) : (
+											type.label
+										)}
+									</td>
+								))}
+							</tr>
+							<tr>
+								<td className="border border-blue-gray-800 px-2 text-xs">
+									<strong>
+										Evaluación en el FFS / Proficiencia :
+									</strong>
+								</td>
+								<td
+									colSpan={5}
+									className="border border-blue-gray-800 px-2 text-xs"
+								>
+									(1) Insatisfactorio. (2) Por Debajo de los
+									Estándares. (3) Satisfactorio. (4) Excelente
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
+					<table className="table-auto border-collapse border border-gray-300">
+						<tbody>
+							<tr>
+								<td className="border border-blue-gray-800 px-2 text-xs">
+									<strong>Periodo de Entrenamiento</strong>
+								</td>
+								<td
+									colSpan={3}
+									className="border border-blue-gray-800 px-2 text-xs"
+								>
+									<strong>Fecha:</strong>{' '}
+									{days.map((day, index) => (
+										<span key={index}>
+											{getEvaluationDate(
+												assessment
+													.courseStudentAssessmentSelected
+													?.date,
+												day.id,
+											).format('DD-MM-YYYY')}
+											{index < days.length - 1 &&
+												' / '}
+										</span>
+									))}
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 				<div className="flex flex-col border-4 w-full gap-2">
 					<div className="flex flex-col border border-blue-gray-800 bg-white">
@@ -253,20 +390,19 @@ const CSA_PDF = ({ day }: { day: number }) => {
 									<td className="border border-blue-gray-800 px-2 text-xs">
 										<strong>Fecha:</strong>
 									</td>
-									<td className="border border-blue-gray-800 px-2 text-xs">
-										{moment(
-											assessment.courseStudentAssessmentSelected
-												?.course_student?.date,
-										).format('DD-MM-YYYY')}
-									</td>
-									<td className="border border-blue-gray-800 px-2 text-xs">
-										{moment(
-											assessment.courseStudentAssessmentSelected
-												?.course_student?.date,
-										)
-											.add(days.length, 'days')
-											.format('DD-MM-YYYY')}
-									</td>
+									{days.map((day, index) => (
+										<td
+											key={`fecha-${index}`}
+											className="border border-blue-gray-800 px-2 text-xs"
+										>
+											{getEvaluationDate(
+												assessment
+													.courseStudentAssessmentSelected
+													?.date,
+												day.id,
+											).format('DD-MM-YYYY')}
+										</td>
+									))}
 								</tr>
 								<tr>
 									<td
@@ -364,17 +500,67 @@ const CSA_PDF = ({ day }: { day: number }) => {
 					</div>
 
 					<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
+						<table className="table-auto border-collapse border border-gray-300">
+							<thead className="bg-gray-300">
+								<tr>
+									<th
+										colSpan={3}
+										className="border border-blue-gray-800 px-2 text-xs w-36"
+									>
+										<strong>
+											Resumen de Evaluación/Proficiencia por
+											día
+										</strong>
+									</th>
+									{days.map((day, index) => {
+										const dayAverage =
+											assessment
+												.courseStudentAssessmentSelected
+												?.CourseStudentAssessmentDays?.find(
+													(CSAD) =>
+														CSAD.day ===
+														day.id + 1,
+												)?.score_average;
+										return (
+											<th
+												key={index}
+												className="border border-blue-gray-800 px-2 w-16 text-xs"
+											>
+												{dayAverage != null
+													? dayAverage
+													: ''}
+											</th>
+										);
+									})}
+								</tr>
+							</thead>
+						</table>
+					</div>
+
+					<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
 						<table className="table-auto border border-gray-300">
 							<thead className="bg-gray-300">
-								<th className="border border-blue-gray-800 px-2 text-xs">
+								<th
+									colSpan={6}
+									className="border border-blue-gray-800 px-2 text-xs"
+								>
 									<strong>RESUMEN DE DESPEGUES Y ATERRIZAJES </strong>
-								</th>
-								<th className="border border-blue-gray-800 px-2 text-xs">
-									<strong>.</strong>
 								</th>
 							</thead>
 							<tbody>
 								<tr>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										DESPEGUES DIURNOS
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{sumTakeoffDay}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										DESPEGUES NOCTURNOS
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{sumTakeoffNight}
+									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
 										DESPEGUES
 									</td>
@@ -384,15 +570,65 @@ const CSA_PDF = ({ day }: { day: number }) => {
 								</tr>
 								<tr>
 									<td className="border border-blue-gray-800 px-2 text-xs">
+										ATERRIZAJES DIURNOS
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{sumLandingDay}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										ATERRIZAJES NOCTURNOS
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{sumLandingNight}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
 										ATERRIZAJES
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
 										{sumLanding}
 									</td>
 								</tr>
+								<tr>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										TIEMPO DE ENTRENAMIENTO
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{secondsToTime(sumTrainingTime)}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										TIEMPO DE CHEQUEO
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs">
+										{secondsToTime(sumCheckTime)}
+									</td>
+									<td className="border border-blue-gray-800 px-2 text-xs"></td>
+									<td className="border border-blue-gray-800 px-2 text-xs"></td>
+								</tr>
 							</tbody>
 						</table>
 					</div>
+					{courseScoreAverage != null && (
+						<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
+							<table className="table-auto border border-gray-300">
+								<tbody>
+									<tr>
+										<td className="border border-blue-gray-800 px-2 text-xs">
+											<strong>
+												Proficiencia del curso
+												(entrenamiento o chequeo o
+												experiencia reciente):
+											</strong>{' '}
+											{courseScoreAverage} (
+											{proficiencyLabel(
+												courseScoreAverage,
+											)}
+											)
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					)}
 					<div className="flex flex-col border border-blue-gray-800 bg-white my-2">
 						<table className="table-auto border border-gray-300">
 							<thead className="bg-gray-300">
@@ -442,7 +678,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 							<tbody>
 								{days.map((day, index) => {
 									const dayComments =
-										assessment.courseStudentAssessmentSelected?.course_student_assessment_days?.find(
+										assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.find(
 											(CSAD_C) => CSAD_C.day === day.id + 1,
 										);
 									return (

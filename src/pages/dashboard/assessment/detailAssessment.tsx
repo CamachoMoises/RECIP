@@ -51,6 +51,24 @@ const DetailAssessment = () => {
 	const handlePrev = () =>
 		!isFirstStep && setActiveStep((cur) => cur - 1);
 
+	const getEvaluationDate = (
+		baseDate: string | undefined,
+		step: number,
+	) => {
+		let daysToAdd = 0;
+		let weekdaysAdded = 0;
+		while (weekdaysAdded < step) {
+			daysToAdd++;
+			const dayOfWeek = moment(baseDate)
+				.add(daysToAdd, 'days')
+				.day();
+			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+				weekdaysAdded++;
+			}
+		}
+		return moment(baseDate).add(daysToAdd, 'days');
+	};
+
 	const { assessment } = useSelector((state: RootState) => {
 		return {
 			assessment: state.assessment,
@@ -359,12 +377,12 @@ const DetailAssessment = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{moment(
-											assessment.courseStudentAssessmentSelected
+										{getEvaluationDate(
+											assessment
+												.courseStudentAssessmentSelected
 												?.date,
-										)
-											.add(activeStep, 'days')
-											.format('DD-MM-YYYY')}
+											activeStep,
+										).format('DD-MM-YYYY')}
 									</Typography>
 								</div>
 							</div>
@@ -443,7 +461,7 @@ const DetailAssessment = () => {
 						>
 							{days.map((day, index) => {
 								const dayActive =
-									assessment.courseStudentAssessmentSelected?.course_student_assessment_days?.find(
+									assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.find(
 										(CSAD_D) =>
 											CSAD_D.day === day.id + 1 && CSAD_D.airport,
 									);

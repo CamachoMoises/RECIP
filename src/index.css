@@ -12,6 +12,10 @@
 	}
 }
 
+input.no-ampm::-webkit-datetime-edit-ampm-field {
+	display: none;
+}
+
 :root {
 	--aviation-navy: #1a365d;
 	--aviation-blue: #2c5282;
