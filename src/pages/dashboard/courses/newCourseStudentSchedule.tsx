@@ -34,6 +34,7 @@ import { pdf } from '@react-pdf/renderer';
 import { getLogoBase64 } from '../../../utils/logoBase64';
 import PDFCourseScheduleDocument from './PDFCourseScheduleDocument';
 import SearchableParticipantSelect from './SearchableParticipantSelect';
+import SendEmailModal from '../../../components/SendEmailModal';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -68,6 +69,7 @@ const NewCourseStudentSchedule = () => {
 		course.courseStudent?.license || 1,
 	);
 	const [mailsended, setMailsended] = useState(false);
+	const [sendModalOpen, setSendModalOpen] = useState(false);
 	const regulationRef = useRef<number>(
 		course.courseStudent?.regulation || 1,
 	);
@@ -98,12 +100,12 @@ const NewCourseStudentSchedule = () => {
 			toast.error('Error al generar el PDF');
 		}
 	};
-	const handleSend = async () => {
+	const sendEmail = async (to: string) => {
 		toast('enviando documento...', { icon: '📧' });
 		setMailsended(true);
 
-		if (!studentSelect?.email) {
-			toast.error('Selecciona un piloto con email');
+		if (!to) {
+			toast.error('El correo de destino no es válido');
 			return;
 		}
 
@@ -127,7 +129,7 @@ const NewCourseStudentSchedule = () => {
 				pdfBlob,
 				`Curso-${course.courseStudent?.code}.pdf`,
 			);
-			formData.append('to', studentSelect.email);
+			formData.append('to', to);
 			formData.append(
 				'subject',
 				`Horario del Curso - ${course.courseSelected?.name}`,
@@ -143,14 +145,15 @@ const NewCourseStudentSchedule = () => {
 			dispatch(
 				createEmailHistory({
 					user_id: authUser?.id ?? undefined,
-					email: studentSelect.email,
+					email: to,
 					nombre_archivo: `Curso-${course.courseStudent?.code}.pdf`,
 					fecha: new Date().toISOString(),
 					tipo: 'correo',
-					descripcion: `Horario del curso ${course.courseSelected?.name} (${course.courseSelected?.course_level.name} - ${course.courseSelected?.course_type.name}) enviado a ${studentSelect.email}`,
+					descripcion: `Horario del curso ${course.courseSelected?.name} (${course.courseSelected?.course_level.name} - ${course.courseSelected?.course_type.name}) enviado a ${to}`,
 					modulo: 'CourseSchedule',
 				}),
 			);
+			setSendModalOpen(false);
 		} catch (e) {
 			console.error(e);
 			toast.error('Error al enviar el correo');
@@ -640,7 +643,7 @@ const NewCourseStudentSchedule = () => {
 									size="sm"
 									className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
 									onClick={() => {
-										handleSend();
+										setSendModalOpen(true);
 									}}
 									disabled={!studentSelect || mailsended}
 									placeholder={undefined}
@@ -938,6 +941,18 @@ const NewCourseStudentSchedule = () => {
 					</Accordion>
 				</CardBody>
 			</Card>
+			<SendEmailModal
+				open={sendModalOpen}
+				onClose={() => setSendModalOpen(false)}
+				participantEmail={studentSelect?.email}
+				participantName={
+					studentSelect
+						? `${studentSelect.name} ${studentSelect.last_name}`
+						: undefined
+				}
+				sending={mailsended}
+				onSend={sendEmail}
+			/>
 		</div>
 	);
 };

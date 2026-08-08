@@ -32,6 +32,7 @@ import { getLogoBase64 } from '../../../utils/logoBase64';
 import { sendCourseScheduleEmail } from '../../../features/courseSlice';
 import { createEmailHistory } from '../../../features/emailSlice';
 import CSAssessmentPDFDocument from './CSAssessmentPDFDocument';
+import SendEmailModal from '../../../components/SendEmailModal';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -48,6 +49,7 @@ const DetailAssessment = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [missingDay, setMissingDay] = useState(false);
 	const [mailsended, setMailsended] = useState(false);
+	const [sendModalOpen, setSendModalOpen] = useState(false);
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () =>
 		!isLastStep && setActiveStep((cur) => cur + 1);
@@ -159,7 +161,7 @@ const DetailAssessment = () => {
 				<CSAssessmentPDFDocument
 					assessment={freshAssessment}
 					logoBase64={logoBase64}
-					day={fresh.CSA?.course?.days}
+					day={activeStep + 1}
 				/>,
 			).toBlob();
 			const url = URL.createObjectURL(pdfBlob);
@@ -199,16 +201,15 @@ const DetailAssessment = () => {
 		);
 		console.log(res);
 	};
-	const handleSend = async () => {
+	const sendEmail = async (to: string) => {
+		if (!to) {
+			toast.error('El correo de destino no es válido');
+			return;
+		}
 		toast('enviando documento...', { icon: '📧' });
 		setMailsended(true);
 
 		const CSA = assessment.courseStudentAssessmentSelected;
-		const studentEmail = CSA?.student?.user?.email;
-		if (!studentEmail) {
-			toast.error('El piloto no tiene email registrado');
-			return;
-		}
 
 		try {
 			// 1. Obtener los datos completos de la evaluación para el PDF
@@ -240,7 +241,7 @@ const DetailAssessment = () => {
 				pdfBlob,
 				`Evaluacion-${fresh.CSA?.code}.pdf`,
 			);
-			formData.append('to', studentEmail);
+			formData.append('to', to);
 			formData.append(
 				'subject',
 				`Evaluación de ${fresh.CSA?.course?.name}`,
@@ -256,14 +257,15 @@ const DetailAssessment = () => {
 			dispatch(
 				createEmailHistory({
 					user_id: authUser?.id ?? undefined,
-					email: studentEmail,
+					email: to,
 					nombre_archivo: `Evaluacion-${fresh.CSA?.code}.pdf`,
 					fecha: new Date().toISOString(),
 					tipo: 'correo',
-					descripcion: `Evaluación del curso ${fresh.CSA?.course?.name} (${fresh.CSA?.course?.course_level.name} - ${fresh.CSA?.course?.course_type.name}) enviada a ${studentEmail}`,
+					descripcion: `Evaluación del curso ${fresh.CSA?.course?.name} (${fresh.CSA?.course?.course_level.name} - ${fresh.CSA?.course?.course_type.name}) enviada a ${to}`,
 					modulo: 'Assessment',
 				}),
 			);
+			setSendModalOpen(false);
 		} catch (e) {
 			console.error(e);
 			toast.error('Error al enviar el correo');
@@ -619,7 +621,7 @@ const DetailAssessment = () => {
 						<CSAD_form
 							day={activeStep + 1}
 							printCSA={printCSA}
-							sendCSA={handleSend}
+							sendCSA={async () => setSendModalOpen(true)}
 							sendingEmail={mailsended}
 							isLastStep={isLastStep}
 							isFirstStep={isFirstStep}
@@ -655,6 +657,17 @@ const DetailAssessment = () => {
 					</CardFooter>
 				</Card>
 			</div>
+			<SendEmailModal
+				open={sendModalOpen}
+				onClose={() => setSendModalOpen(false)}
+				participantEmail={
+					assessment.courseStudentAssessmentSelected?.student?.user
+						?.email
+				}
+				participantName={`${assessment.courseStudentAssessmentSelected?.student?.user?.name} ${assessment.courseStudentAssessmentSelected?.student?.user?.last_name}`}
+				sending={mailsended}
+				onSend={sendEmail}
+			/>
 		</>
 	);
 };

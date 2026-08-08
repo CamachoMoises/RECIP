@@ -7,7 +7,10 @@ import {
 	View,
 } from '@react-pdf/renderer';
 import moment from 'moment';
-import { assessmentState } from '../../../types/utilities';
+import {
+	assessmentState,
+	courseStudentAssessmentDay,
+} from '../../../types/utilities';
 
 const styles = StyleSheet.create({
 	page: {
@@ -96,14 +99,35 @@ const CSAssessmentPDFDocument = ({
 }) => {
 	moment.locale('es');
 	const CSA = assessment.courseStudentAssessmentSelected;
+	const assessmentDays = CSA?.CourseStudentAssessmentDays ?? [];
+	const findDay = (dayNum: number) =>
+		assessmentDays.find((CSAD) => Number(CSAD.day) === dayNum);
+	console.log(
+		'[CSAssessmentPDF] CourseStudentAssessmentDays:',
+		assessmentDays,
+	);
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const courseDays = CSA?.course?.days ?? 0;
 	const maxDay = day ?? courseDays;
+	const loadedDayNumbers = assessmentDays
+		.map((CSAD) => CSAD.day)
+		.filter((d): d is number => !!d && d > 0);
+	const maxLoadedDay = loadedDayNumbers.length
+		? Math.max(...loadedDayNumbers)
+		: 0;
+	const lastDayToShow = maxLoadedDay
+		? maxLoadedDay
+		: maxDay > 0 && maxDay <= courseDays
+			? maxDay
+			: courseDays;
 	const days = courseDays
 		? Array.from(
 				{
-					length: courseDays <= maxDay ? courseDays : maxDay,
+					length:
+						lastDayToShow > 0
+							? Math.min(courseDays, lastDayToShow)
+							: 0,
 				},
 				(_, i) => ({
 					id: i,
@@ -114,11 +138,9 @@ const CSAssessmentPDFDocument = ({
 
 	let sumLanding = 0;
 	let sumTakeOff = 0;
-	for (const key in CSA?.CourseStudentAssessmentDays) {
-		const landing =
-			CSA?.CourseStudentAssessmentDays[parseInt(key)].landing;
-		const takeoff =
-			CSA?.CourseStudentAssessmentDays[parseInt(key)].takeoff;
+	for (const key in assessmentDays) {
+		const landing = assessmentDays[parseInt(key)].landing;
+		const takeoff = assessmentDays[parseInt(key)].takeoff;
 		sumLanding += landing ? landing : 0;
 		sumTakeOff += takeoff ? takeoff : 0;
 	}
@@ -161,13 +183,35 @@ const CSAssessmentPDFDocument = ({
 		{ value: 're-chequeo', label: 'Re-chequeo' },
 		{ value: 'experiencia_reciente', label: 'Experiencia reciente' },
 	];
+	const typeLabelMap: Record<string, string> = {};
+	typeValues.forEach((type) => {
+		typeLabelMap[type.value] = type.label;
+	});
+	const despeguesText = (day?: courseStudentAssessmentDay) => {
+		if (!day) return '';
+		const takeoffDay = Number(day.takeoff_day) || 0;
+		const takeoffNight = Number(day.takeoff_night) || 0;
+		if (takeoffDay > 0 || takeoffNight > 0) {
+			return `${takeoffDay}D/${takeoffNight}N`;
+		}
+		return day.takeoff != null ? String(Number(day.takeoff)) : '';
+	};
+	const aterrizajesText = (day?: courseStudentAssessmentDay) => {
+		if (!day) return '';
+		const landingDay = Number(day.landing_day) || 0;
+		const landingNight = Number(day.landing_night) || 0;
+		if (landingDay > 0 || landingNight > 0) {
+			return `${landingDay}D/${landingNight}N`;
+		}
+		return day.landing != null ? String(Number(day.landing)) : '';
+	};
 	const selectedTypes = new Set(
-		CSA?.CourseStudentAssessmentDays?.map((CSAD) => CSAD.type).filter(
+		assessmentDays.map((CSAD) => CSAD.type).filter(
 			(type): type is string => Boolean(type),
 		) ?? [],
 	);
 	const firstAirport =
-		CSA?.CourseStudentAssessmentDays?.find((CSAD) => CSAD.airport)?.airport;
+		assessmentDays.find((CSAD) => CSAD.airport)?.airport;
 	const courseScoreAverage = CSA?.course_score_average;
 	const proficiencyLabel = (score: number | undefined) => {
 		if (score == null) return '';
@@ -181,7 +225,7 @@ const CSAssessmentPDFDocument = ({
 	let sumLandingNight = 0;
 	let sumTrainingTime = 0;
 	let sumCheckTime = 0;
-	CSA?.CourseStudentAssessmentDays?.forEach((CSAD) => {
+	assessmentDays.forEach((CSAD) => {
 		sumTakeoffDay += CSAD.takeoff_day || 0;
 		sumTakeoffNight += CSAD.takeoff_night || 0;
 		sumLandingDay += CSAD.landing_day || 0;
@@ -573,9 +617,7 @@ const CSAssessmentPDFDocument = ({
 							</Text>
 							{days.map((dayItem, index) => {
 								const dayAverage =
-									CSA?.CourseStudentAssessmentDays?.find(
-										(CSAD) => CSAD.day === dayItem.id + 1,
-									)?.score_average;
+									findDay(dayItem.id + 1)?.score_average;
 								return (
 									<Text
 										key={`avg-${index}`}
@@ -706,6 +748,137 @@ const CSAssessmentPDFDocument = ({
 						</View>
 					</View>
 
+					{/* Detalle de evaluación por día */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 6, textAlign: 'center' },
+								]}
+							>
+								DETALLE DE EVALUACIÓN POR DÍA
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								Dia
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 2, textAlign: 'center' },
+								]}
+							>
+								Tipo
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 2, textAlign: 'center' },
+								]}
+							>
+								Despegues
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 2, textAlign: 'center' },
+								]}
+							>
+								Aterrizajes
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								Promedio
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 3, textAlign: 'center' },
+								]}
+							>
+								Observaciones
+							</Text>
+						</View>
+						{days.map((dayItem, index) => {
+							const dayCSAD = findDay(dayItem.id + 1);
+							return (
+								<View
+									key={`daydetail-${index}`}
+									style={styles.row}
+								>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
+									>
+										{dayItem.id + 1}
+									</Text>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 2, textAlign: 'center' },
+										]}
+									>
+										{dayCSAD?.type
+											? typeLabelMap[dayCSAD.type] ??
+												dayCSAD.type
+											: ''}
+									</Text>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 2, textAlign: 'center' },
+										]}
+									>
+										{despeguesText(dayCSAD)}
+									</Text>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 2, textAlign: 'center' },
+										]}
+									>
+										{aterrizajesText(dayCSAD)}
+									</Text>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
+									>
+										{dayCSAD?.score_average != null
+											? dayCSAD.score_average
+											: ''}
+									</Text>
+									<Text style={[styles.cell, { flex: 3 }]}>
+										{dayCSAD?.comments
+											? dayCSAD.comments
+											: ''}
+									</Text>
+								</View>
+							);
+						})}
+					</View>
+
 					{/* Proficiencia del curso */}
 					{courseScoreAverage != null && (
 						<View style={styles.table}>
@@ -778,10 +951,7 @@ const CSAssessmentPDFDocument = ({
 							</Text>
 						</View>
 						{days.map((dayItem, index) => {
-							const dayComments =
-								CSA?.CourseStudentAssessmentDays?.find(
-									(CSAD_C) => CSAD_C.day === dayItem.id + 1,
-								);
+							const dayComments = findDay(dayItem.id + 1);
 							return (
 								<View key={`comments-${index}`} style={styles.row}>
 									<Text
