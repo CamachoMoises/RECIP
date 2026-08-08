@@ -87,7 +87,7 @@ const TableInstructors = () => {
 			});
 			toast.success('Instructor deshabilitado correctamente');
 			handleRefreshData();
-		} catch (error) {
+		} catch {
 			toast.error('Error al deshabilitar instructor');
 		}
 	};

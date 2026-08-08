@@ -197,7 +197,7 @@ const GeneralCourses = () => {
 					: 'Registro deshabilitado',
 			);
 			fetchWithFilter(active);
-		} catch (error) {
+		} catch {
 			toast.error('Error al actualizar el estado');
 		} finally {
 			setTogglingId(null);

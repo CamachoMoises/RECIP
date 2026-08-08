@@ -74,7 +74,6 @@ const CourseStudentsSection = ({
 	onClearFilters,
 	getItemProps,
 }: Props) => {
-	const [open, setOpen] = useState(true);
 	const [selectedStudent, setSelectedStudent] =
 		useState<courseStudent | null>(null);
 	const [openDialog, setOpenDialog] = useState(false);

@@ -1,8 +1,6 @@
 import {
 	Button,
 	Input,
-	Option,
-	Select,
 	Typography,
 } from '@material-tailwind/react';
 import {

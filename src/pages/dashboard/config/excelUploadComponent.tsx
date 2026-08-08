@@ -48,7 +48,6 @@ interface QuestionTypeUpload {
 const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 	open,
 	setOpen,
-	courseId,
 	questionTypes,
 	testList,
 }) => {

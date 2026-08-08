@@ -13,7 +13,7 @@ import { useTheme } from '../../../hooks/useTheme';
 import PageTitle from '../../../components/PageTitle';
 import { AppDispatch, RootState } from '../../../store';
 import { fetchSuggestions } from '../../../features/userSlice';
-import { BarChart3, FileText, TrendingUp, Mailbox, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mailbox, ChevronDown, ChevronUp } from 'lucide-react';
 import EmailHistoryPanel from './EmailHistoryPanel';
 
 const breadCrumbs = [

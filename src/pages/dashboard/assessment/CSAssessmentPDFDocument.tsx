@@ -1,0 +1,827 @@
+import {
+	Document,
+	Image,
+	Page,
+	StyleSheet,
+	Text,
+	View,
+} from '@react-pdf/renderer';
+import moment from 'moment';
+import { assessmentState } from '../../../types/utilities';
+
+const styles = StyleSheet.create({
+	page: {
+		padding: 12,
+		fontSize: 8,
+		backgroundColor: 'white',
+		fontFamily: 'Helvetica',
+	},
+	outerBox: {
+		borderWidth: 2,
+		borderColor: '#263238',
+		backgroundColor: '#e0e0e0',
+		padding: 4,
+		gap: 3,
+	},
+	// --- Header ---
+	headerRow: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginBottom: 3,
+		gap: 8,
+	},
+	logo: {
+		width: 70,
+	},
+	headerTextBlock: {
+		flexDirection: 'column',
+		alignItems: 'center',
+	},
+	headerText: {
+		fontSize: 10,
+		fontWeight: 'bold',
+		textAlign: 'center',
+	},
+	// --- Cells ---
+	cell: {
+		borderWidth: 1,
+		borderColor: '#263238',
+		padding: 3,
+		fontSize: 7,
+		backgroundColor: 'white',
+	},
+	cellBold: {
+		fontWeight: 'bold',
+	},
+	cellGray: {
+		backgroundColor: '#9e9e9e',
+	},
+	cellHeader: {
+		backgroundColor: '#e0e0e0',
+		fontWeight: 'bold',
+	},
+	// --- Tables ---
+	table: {
+		width: '100%',
+		borderWidth: 2,
+		borderColor: '#263238',
+		backgroundColor: 'white',
+		marginBottom: 3,
+	},
+	row: {
+		flexDirection: 'row',
+	},
+	// --- Footer legal ---
+	legal: {
+		borderWidth: 1,
+		borderColor: '#263238',
+		padding: 6,
+		marginTop: 3,
+		fontSize: 7,
+		lineHeight: 1.4,
+		textAlign: 'justify',
+		backgroundColor: 'white',
+	},
+});
+
+const CSAssessmentPDFDocument = ({
+	assessment,
+	logoBase64,
+	day,
+}: {
+	assessment: assessmentState;
+	logoBase64: string;
+	day?: number;
+}) => {
+	moment.locale('es');
+	const CSA = assessment.courseStudentAssessmentSelected;
+	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
+	const regulation = ['', 'INAC', 'No-INAC'];
+	const courseDays = CSA?.course?.days ?? 0;
+	const maxDay = day ?? courseDays;
+	const days = courseDays
+		? Array.from(
+				{
+					length: courseDays <= maxDay ? courseDays : maxDay,
+				},
+				(_, i) => ({
+					id: i,
+					name: `Dia ${i + 1}`,
+				}),
+			)
+		: [];
+
+	let sumLanding = 0;
+	let sumTakeOff = 0;
+	for (const key in CSA?.CourseStudentAssessmentDays) {
+		const landing =
+			CSA?.CourseStudentAssessmentDays[parseInt(key)].landing;
+		const takeoff =
+			CSA?.CourseStudentAssessmentDays[parseInt(key)].takeoff;
+		sumLanding += landing ? landing : 0;
+		sumTakeOff += takeoff ? takeoff : 0;
+	}
+
+	const timeToSeconds = (time?: string) => {
+		if (!time) return 0;
+		const parts = time.split(':').map(Number);
+		return parts[0] * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+	};
+	const secondsToTime = (seconds: number) => {
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const secs = seconds % 60;
+		return [hours, minutes, secs]
+			.map((part) => String(part).padStart(2, '0'))
+			.join(':');
+	};
+	const getEvaluationDate = (
+		baseDate: string | undefined,
+		step: number,
+	) => {
+		let daysToAdd = 0;
+		let weekdaysAdded = 0;
+		while (weekdaysAdded < step) {
+			daysToAdd++;
+			const dayOfWeek = moment(baseDate)
+				.add(daysToAdd, 'days')
+				.day();
+			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+				weekdaysAdded++;
+			}
+		}
+		return moment(baseDate).add(daysToAdd, 'days');
+	};
+
+	const typeValues = [
+		{ value: 'entrenamiento', label: 'Entrenamiento' },
+		{ value: 'reentrenamiento', label: 'Reentrenamiento' },
+		{ value: 'chequeo', label: 'Chequeo' },
+		{ value: 're-chequeo', label: 'Re-chequeo' },
+		{ value: 'experiencia_reciente', label: 'Experiencia reciente' },
+	];
+	const selectedTypes = new Set(
+		CSA?.CourseStudentAssessmentDays?.map((CSAD) => CSAD.type).filter(
+			(type): type is string => Boolean(type),
+		) ?? [],
+	);
+	const firstAirport =
+		CSA?.CourseStudentAssessmentDays?.find((CSAD) => CSAD.airport)?.airport;
+	const courseScoreAverage = CSA?.course_score_average;
+	const proficiencyLabel = (score: number | undefined) => {
+		if (score == null) return '';
+		if (score < 3) return 'Insatisfactorio';
+		if (score < 4) return 'Satisfactorio';
+		return 'Excelente';
+	};
+	let sumTakeoffDay = 0;
+	let sumTakeoffNight = 0;
+	let sumLandingDay = 0;
+	let sumLandingNight = 0;
+	let sumTrainingTime = 0;
+	let sumCheckTime = 0;
+	CSA?.CourseStudentAssessmentDays?.forEach((CSAD) => {
+		sumTakeoffDay += CSAD.takeoff_day || 0;
+		sumTakeoffNight += CSAD.takeoff_night || 0;
+		sumLandingDay += CSAD.landing_day || 0;
+		sumLandingNight += CSAD.landing_night || 0;
+		sumTrainingTime += timeToSeconds(CSAD.training_time);
+		sumCheckTime += timeToSeconds(CSAD.check_time);
+	});
+
+	const dateFormat = 'DD-MM-YYYY';
+	const courseDate = CSA?.course_student?.date
+		? moment(CSA.course_student.date).format(dateFormat)
+		: '';
+
+	return (
+		<Document>
+			<Page size="LETTER" style={styles.page}>
+				<View style={styles.outerBox}>
+					{/* Header */}
+					<View style={styles.headerRow}>
+						<Image style={styles.logo} src={logoBase64} />
+						<View style={styles.headerTextBlock}>
+							<Text style={styles.headerText}>
+								Registro De Entrenamiento De Vuelo Del Piloto
+							</Text>
+							<Text style={styles.headerText}>
+								{CSA?.course?.name} - Curso{' '}
+								{CSA?.course?.course_level.name}
+							</Text>
+						</View>
+					</View>
+
+					{/* Info table */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Nombre del Piloto:{'\n'}
+								{CSA?.student?.user?.name}{' '}
+								{CSA?.student?.user?.last_name}
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Documento de Identificacion:{'\n'}
+								{CSA?.student?.user?.user_doc_type?.symbol}-
+								{CSA?.student?.user?.doc_number}
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Fecha del Curso:{'\n'}
+								{courseDate}
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								<Text style={styles.cellBold}>Cliente:</Text>{'\n'}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>Objetivos:</Text>{' '}
+								{'✔ '}
+								{
+									regulation[
+										CSA?.course_student?.regulation
+											? CSA.course_student.regulation
+											: 0
+									]
+								}
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>
+									Certificado Piloto Numero:
+								</Text>{' '}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>
+									Tipo de Licencia:
+								</Text>{' '}
+								{'✔ '}
+								{
+									license[
+										CSA?.course_student?.license
+											? CSA.course_student.license
+											: 0
+									]
+								}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>Curso Numero:</Text>
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>Revisión:</Text>
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>
+									Fecha de revisión:
+								</Text>{' '}
+								{courseDate}
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>
+									Modelo de avión:
+								</Text>
+								{'\n'}
+								{CSA?.course?.plane_model}
+							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								<Text style={styles.cellBold}>
+									Base de operaciones piloto:
+								</Text>{' '}
+								{firstAirport}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>Certificado:</Text>{' '}
+								CEA 360ATC
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>
+									Tipo de curso:
+								</Text>
+								{'\n'}
+								{CSA?.course?.name}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>
+									País del participante:
+								</Text>
+								{'\n'}
+								{CSA?.student?.user?.country_name}
+							</Text>
+						</View>
+					</View>
+
+					{/* Evaluación Tipo */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Evaluación Tipo:
+							</Text>
+							{typeValues.map((type, index) => (
+								<Text
+									key={index}
+									style={[
+										styles.cell,
+										{
+											flex: 1,
+											fontWeight: selectedTypes.has(
+												type.value,
+											)
+												? 'bold'
+												: 'normal',
+										},
+									]}
+								>
+									{type.label}
+								</Text>
+							))}
+						</View>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Evaluación en el FFS / Proficiencia:
+							</Text>
+							<Text style={[styles.cell, { flex: 4 }]}>
+								(1) Insatisfactorio. (2) Por Debajo de los
+								Estándares. (3) Satisfactorio. (4) Excelente
+							</Text>
+						</View>
+					</View>
+
+					{/* Periodo de Entrenamiento */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Periodo de Entrenamiento
+							</Text>
+							<Text style={[styles.cell, { flex: 4 }]}>
+								<Text style={styles.cellBold}>Fecha:</Text>{' '}
+								{days.map((dayItem, index) => (
+									<Text key={index}>
+										{getEvaluationDate(CSA?.date, dayItem.id).format(
+											dateFormat,
+										)}
+										{index < days.length - 1 ? ' / ' : ''}
+									</Text>
+								))}
+							</Text>
+						</View>
+					</View>
+
+					{/* Periodo de formación */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 2, fontSize: 7 },
+								]}
+							>
+								Periodo de formación
+							</Text>
+							{days.map((dayItem, index) => (
+								<Text
+									key={`pf-h-${index}`}
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 1, textAlign: 'center' },
+									]}
+								>
+									{dayItem.id + 1}
+								</Text>
+							))}
+						</View>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Fecha:
+							</Text>
+							{days.map((dayItem, index) => (
+								<Text
+									key={`pf-f-${index}`}
+									style={[
+										styles.cell,
+										{ flex: 1, textAlign: 'center' },
+									]}
+								>
+									{getEvaluationDate(
+										CSA?.date,
+										dayItem.id,
+									).format(dateFormat)}
+								</Text>
+							))}
+						</View>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, fontWeight: 'bold' },
+								]}
+							>
+								Iniciales de instructor
+							</Text>
+							{days.map((dayItem, index) => (
+								<Text
+									key={`pf-i-${index}`}
+									style={[
+										styles.cell,
+										{ flex: 1, textAlign: 'center' },
+									]}
+								>
+									{dayItem.id + 1} FF
+								</Text>
+							))}
+						</View>
+
+						{assessment.daysSubjectList?.map((sub, index) => (
+							<View key={`subject-${index}`}>
+								<View style={styles.row}>
+									<Text
+										style={[
+											styles.cell,
+											styles.cellHeader,
+											{ flex: 2 },
+										]}
+									>
+										{sub.name}
+									</Text>
+									{days.map((dayItem, dIndex) => (
+										<Text
+											key={`s-${index}-h-${dIndex}`}
+											style={[
+												styles.cell,
+												styles.cellHeader,
+												{ flex: 1, textAlign: 'center' },
+											]}
+										>
+											{dayItem.id + 1}
+										</Text>
+									))}
+								</View>
+								{sub.subject_lessons?.map((SL, slIndex) => (
+									<View
+										key={`SL-${index}-${slIndex}`}
+										style={styles.row}
+									>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, fontWeight: 'bold' },
+											]}
+										>
+											{SL.name}
+										</Text>
+										{days.map((dayItem, dIndex) => {
+											const dayActive =
+												SL.subject_lesson_days?.find(
+													(SLD) =>
+														SLD.day === dayItem.id + 1,
+												);
+											const CSALD =
+												dayActive?.course_student_assessment_lesson_days;
+											const tryCount =
+												CSALD && CSALD.length > 0
+													? CSALD[0]
+													: null;
+											const score = tryCount?.score ?? '';
+											const score2 =
+												tryCount?.score_2 &&
+												tryCount.score <= 2
+													? ` / ${tryCount.score_2}`
+													: '';
+											const score3 =
+												tryCount?.score_3 &&
+												tryCount.score_2 &&
+												tryCount.score_2 <= 2
+													? ` / ${tryCount.score_3}`
+													: '';
+											return (
+												<Text
+													key={`s-${index}-${dIndex}`}
+													style={[
+														styles.cell,
+														{
+															flex: 1,
+															textAlign: 'center',
+														},
+														...(dayActive
+															? [styles.cellGray]
+															: []),
+													]}
+												>
+													{score}
+													{score2}
+													{score3}
+												</Text>
+											);
+										})}
+									</View>
+								))}
+							</View>
+						))}
+					</View>
+
+					{/* Resumen de Evaluación/Proficiencia por día */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 2 },
+								]}
+							>
+								Resumen de Evaluación/Proficiencia por día
+							</Text>
+							{days.map((dayItem, index) => {
+								const dayAverage =
+									CSA?.CourseStudentAssessmentDays?.find(
+										(CSAD) => CSAD.day === dayItem.id + 1,
+									)?.score_average;
+								return (
+									<Text
+										key={`avg-${index}`}
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
+									>
+										{dayAverage != null ? dayAverage : ''}
+									</Text>
+								);
+							})}
+						</View>
+					</View>
+
+					{/* Resumen de despegues y aterrizajes */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 6, textAlign: 'center' },
+								]}
+							>
+								RESUMEN DE DESPEGUES Y ATERRIZAJES
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								DESPEGUES DIURNOS
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{sumTakeoffDay}
+							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								DESPEGUES NOCTURNOS
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{sumTakeoffNight}
+							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								DESPEGUES
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{sumTakeOff}
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								ATERRIZAJES DIURNOS
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{sumLandingDay}
+							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								ATERRIZAJES NOCTURNOS
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{sumLandingNight}
+							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								ATERRIZAJES
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{sumLanding}
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								TIEMPO DE ENTRENAMIENTO
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{secondsToTime(sumTrainingTime)}
+							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								TIEMPO DE CHEQUEO
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{secondsToTime(sumCheckTime)}
+							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								{' '}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								{' '}
+							</Text>
+						</View>
+					</View>
+
+					{/* Proficiencia del curso */}
+					{courseScoreAverage != null && (
+						<View style={styles.table}>
+							<View style={styles.row}>
+								<Text style={[styles.cell, { flex: 6 }]}>
+									<Text style={styles.cellBold}>
+										Proficiencia del curso (entrenamiento o
+										chequeo o experiencia reciente):
+									</Text>{' '}
+									{courseScoreAverage} (
+									{proficiencyLabel(courseScoreAverage)})
+								</Text>
+							</View>
+						</View>
+					)}
+
+					{/* Avales */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 1 },
+								]}
+							>
+								Avales
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 1 },
+								]}
+							>
+								Firma digital
+							</Text>
+						</View>
+						<View style={styles.row}>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								Recomendado para: Tipo evaluación de
+								habilitación. {CSA?.approve ? '✔' : '✘'}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								{' '}
+							</Text>
+						</View>
+					</View>
+
+					{/* Observaciones */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 1 },
+								]}
+							>
+								Dia
+							</Text>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellHeader,
+									{ flex: 3 },
+								]}
+							>
+								Observaciones
+							</Text>
+						</View>
+						{days.map((dayItem, index) => {
+							const dayComments =
+								CSA?.CourseStudentAssessmentDays?.find(
+									(CSAD_C) => CSAD_C.day === dayItem.id + 1,
+								);
+							return (
+								<View key={`comments-${index}`} style={styles.row}>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
+									>
+										{dayItem.id + 1}
+									</Text>
+									<Text style={[styles.cell, { flex: 3 }]}>
+										{dayComments?.comments
+											? dayComments.comments
+											: 'Sin observaciones'}
+									</Text>
+								</View>
+							);
+						})}
+					</View>
+
+					{/* Legal */}
+					<View style={styles.legal}>
+						<Text>
+							Por medio del presente, autorizo a CEA 360 ATC, de
+							forma expresa el registro en audio y video de la
+							sesión de entrenamiento con el único fin de recibir
+							instrucción, evaluación técnica y retroalimentación
+							operativa. Esta captura de imagen y voz se gestionará
+							bajo estricta confidencialidad, garantizando que el
+							material no será difundido públicamente ni utilizado
+							con fines comerciales. Asimismo, se reconoce el
+							derecho a revocar este consentimiento y a solicitar
+							el borrado seguro del contenido audiovisual según la
+							normativa vigente de protección de datos.
+						</Text>
+					</View>
+				</View>
+			</Page>
+		</Document>
+	);
+};
+
+export default CSAssessmentPDFDocument;

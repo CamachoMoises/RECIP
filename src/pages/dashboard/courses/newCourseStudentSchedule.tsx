@@ -6,9 +6,7 @@ import {
 	Card,
 	CardBody,
 	Input,
-	Option,
 	Radio,
-	Select,
 	Tab,
 	TabPanel,
 	Tabs,
@@ -163,17 +161,6 @@ const NewCourseStudentSchedule = () => {
 
 	const handleOpen = (value: number) =>
 		setOpen(open === value ? 0 : value);
-
-	const handlePilot = (value: string | undefined) => {
-		const studentSelected = user.studentList.find(
-			(part) => part.student?.id === parseInt(value || '-1'),
-		);
-		if (studentSelected) {
-			setStudentSelect(studentSelected);
-			studentSelectRef.current = studentSelected;
-		}
-		handleChange();
-	};
 
 	const handleChange = async () => {
 		if (course.courseSelected?.id && course.courseStudent?.id) {

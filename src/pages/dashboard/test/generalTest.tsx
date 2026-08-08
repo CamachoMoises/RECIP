@@ -140,7 +140,7 @@ const GeneralTest = () => {
 			await dispatch(fetchTest(CST.test_id));
 			toast.dismiss(loadingToast);
 			navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
-		} catch (error) {
+		} catch {
 			toast.dismiss(loadingToast);
 			toast.error('Error al generar el examen');
 			setIsGeneratingTest(false);

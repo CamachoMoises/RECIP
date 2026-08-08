@@ -195,7 +195,6 @@ const ViewCourseStudentSchedule = () => {
 		shallowEqual,
 	);
 	const canViewAttendance =
-		(canEditAttendance || true) &&
 		course.courseSelected?.course_type?.id !== 2;
 
 	const handleToggleAccordion = (accordionId: number) => {

@@ -28,7 +28,6 @@ import { axiosPostDefault } from '../../../services/axios';
 import QuestionTypeCompletion from './questionTypeCompletion';
 import { fetchCourseStudentTest } from '../../../features/testSlice';
 import ResultsTestPdf from './resultsTestPdf';
-import { useReactToPrint } from 'react-to-print';
 import { fetchUser } from '../../../features/userSlice';
 import toast from 'react-hot-toast';
 import { useTheme } from '../../../hooks/useTheme';
@@ -148,7 +147,7 @@ const NewTest = () => {
 								course_student_test_id: courseStudentTestId,
 							}),
 						);
-					} catch (error) {
+					} catch {
 						// Ignorar errores en unload
 					}
 				}
@@ -180,9 +179,6 @@ const NewTest = () => {
 		};
 	}, [ended, test.courseStudentTestSelected?.id]);
 
-	const _seeResults = async () => {
-		handlePrint();
-	};
 	const testTime = test.testSelected?.duration
 		? test.testSelected.duration
 		: 0;
@@ -193,10 +189,6 @@ const NewTest = () => {
 		? test.testSelected.test_question_types
 		: [];
 	let totalPoints = 0;
-	const handlePrint = useReactToPrint({
-		contentRef: componentRef,
-		documentTitle: `Examen-${test.testSelected?.code}`,
-	});
 	const [testActive, setTestActive] = useState<boolean>(true);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const endTimeTest = async () => {

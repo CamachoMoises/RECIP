@@ -83,7 +83,7 @@ const TableStudents = () => {
 			});
 			toast.success('Participante deshabilitado correctamente');
 			handleRefreshData();
-		} catch (error) {
+		} catch {
 			toast.error('Error al deshabilitar participante');
 		}
 	};

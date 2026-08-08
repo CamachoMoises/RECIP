@@ -5,7 +5,7 @@ import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import PageTitle from '../../../components/PageTitle';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
 	Button,
 	Card,
@@ -25,9 +25,13 @@ import {
 } from '../../../features/assessmentSlice';
 import moment from 'moment';
 import CSAD_form from './CSAD_form';
-import { useReactToPrint } from 'react-to-print';
-import CSA_PDF from './CSA_PDF';
 import { axiosPostDefault } from '../../../services/axios';
+import toast from 'react-hot-toast';
+import { pdf } from '@react-pdf/renderer';
+import { getLogoBase64 } from '../../../utils/logoBase64';
+import { sendCourseScheduleEmail } from '../../../features/courseSlice';
+import { createEmailHistory } from '../../../features/emailSlice';
+import CSAssessmentPDFDocument from './CSAssessmentPDFDocument';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -43,8 +47,7 @@ const DetailAssessment = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
 	const [missingDay, setMissingDay] = useState(false);
-	const [isDataLoaded, setIsDataLoaded] = useState(false);
-	const componentRef = useRef<HTMLDivElement>(null);
+	const [mailsended, setMailsended] = useState(false);
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () =>
 		!isLastStep && setActiveStep((cur) => cur + 1);
@@ -67,9 +70,10 @@ const DetailAssessment = () => {
 		return moment(baseDate).add(daysToAdd, 'days');
 	};
 
-	const { assessment } = useSelector((state: RootState) => {
+	const { assessment, authUser } = useSelector((state: RootState) => {
 		return {
 			assessment: state.assessment,
+			authUser: state.auth.user,
 		};
 	});
 
@@ -139,25 +143,40 @@ const DetailAssessment = () => {
 		course_student_id,
 	]);
 	const printCSA = async () => {
-		await dispatch(
-			fetchAssessmentData(
-				assessment.courseStudentAssessmentSelected?.id
-					? assessment.courseStudentAssessmentSelected.id
-					: -1,
-			),
-		);
-		setIsDataLoaded(true);
-		handlePrint();
-		// console.log(componentRef, isDataLoaded, data);
-		// setTimeout(() => {
-		// }, 5000);
-		// // ;
+		const printWindow = window.open('', '_blank');
+		const CSA = assessment.courseStudentAssessmentSelected;
+		try {
+			const fresh = await dispatch(
+				fetchAssessmentData(CSA?.id ?? -1),
+			).unwrap();
+			const freshAssessment = {
+				...assessment,
+				courseStudentAssessmentSelected: fresh.CSA,
+				daysSubjectList: fresh.CASD,
+			};
+			const logoBase64 = await getLogoBase64();
+			const pdfBlob = await pdf(
+				<CSAssessmentPDFDocument
+					assessment={freshAssessment}
+					logoBase64={logoBase64}
+					day={fresh.CSA?.course?.days}
+				/>,
+			).toBlob();
+			const url = URL.createObjectURL(pdfBlob);
+			if (printWindow) {
+				printWindow.addEventListener('load', () => {
+					setTimeout(() => printWindow.print(), 500);
+				});
+				printWindow.location.href = url;
+			} else {
+				window.open(url, '_blank');
+			}
+		} catch {
+			printWindow?.close();
+			toast.error('Error al generar el PDF');
+		}
 	};
 
-	const handlePrint = useReactToPrint({
-		contentRef: componentRef,
-		documentTitle: `Evaluacion-${assessment.courseStudentAssessmentSelected?.code}`,
-	});
 	const [isLastStep, setIsLastStep] = useState(false);
 	const [isFirstStep, setIsFirstStep] = useState(false);
 	const [isApproved, setIsApproved] = useState(
@@ -179,6 +198,78 @@ const DetailAssessment = () => {
 			req,
 		);
 		console.log(res);
+	};
+	const handleSend = async () => {
+		toast('enviando documento...', { icon: '📧' });
+		setMailsended(true);
+
+		const CSA = assessment.courseStudentAssessmentSelected;
+		const studentEmail = CSA?.student?.user?.email;
+		if (!studentEmail) {
+			toast.error('El piloto no tiene email registrado');
+			return;
+		}
+
+		try {
+			// 1. Obtener los datos completos de la evaluación para el PDF
+			const fresh = await dispatch(
+				fetchAssessmentData(CSA?.id ?? -1),
+			).unwrap();
+			const freshAssessment = {
+				...assessment,
+				courseStudentAssessmentSelected: fresh.CSA,
+				daysSubjectList: fresh.CASD,
+			};
+
+			// 2. Obtener el logo en base64
+			const logoBase64 = await getLogoBase64();
+
+			// 3. Generar el blob del PDF directamente desde el componente
+			const pdfBlob = await pdf(
+				<CSAssessmentPDFDocument
+					assessment={freshAssessment}
+					logoBase64={logoBase64}
+					day={fresh.CSA?.course?.days}
+				/>,
+			).toBlob();
+
+			// 4. Armar el FormData y enviar
+			const formData = new FormData();
+			formData.append(
+				'adjunto',
+				pdfBlob,
+				`Evaluacion-${fresh.CSA?.code}.pdf`,
+			);
+			formData.append('to', studentEmail);
+			formData.append(
+				'subject',
+				`Evaluación de ${fresh.CSA?.course?.name}`,
+			);
+			formData.append(
+				'body',
+				`Adjunto la evaluación del curso ${fresh.CSA?.course?.name} de ${CSA?.student?.user?.name} ${CSA?.student?.user?.last_name}`,
+			);
+
+			await dispatch(sendCourseScheduleEmail(formData)).unwrap();
+			toast.success('Correo enviado exitosamente');
+
+			dispatch(
+				createEmailHistory({
+					user_id: authUser?.id ?? undefined,
+					email: studentEmail,
+					nombre_archivo: `Evaluacion-${fresh.CSA?.code}.pdf`,
+					fecha: new Date().toISOString(),
+					tipo: 'correo',
+					descripcion: `Evaluación del curso ${fresh.CSA?.course?.name} (${fresh.CSA?.course?.course_level.name} - ${fresh.CSA?.course?.course_type.name}) enviada a ${studentEmail}`,
+					modulo: 'Assessment',
+				}),
+			);
+		} catch (e) {
+			console.error(e);
+			toast.error('Error al enviar el correo');
+		} finally {
+			setMailsended(false);
+		}
 	};
 	if (assessment.status === 'loading') {
 		return (
@@ -525,12 +616,14 @@ const DetailAssessment = () => {
 									Excelente
 								</Typography>
 							</div>
-							<CSAD_form
-								day={activeStep + 1}
-								printCSA={printCSA}
-								isLastStep={isLastStep}
-								isFirstStep={isFirstStep}
-							/>
+						<CSAD_form
+							day={activeStep + 1}
+							printCSA={printCSA}
+							sendCSA={handleSend}
+							sendingEmail={mailsended}
+							isLastStep={isLastStep}
+							isFirstStep={isFirstStep}
+						/>
 						</div>
 					</CardBody>
 					<CardFooter
@@ -562,13 +655,6 @@ const DetailAssessment = () => {
 					</CardFooter>
 				</Card>
 			</div>
-			{isDataLoaded && (
-				<div style={{ display: 'none' }}>
-					<div ref={componentRef} className="flex flex-col w-full">
-						<CSA_PDF day={activeStep + 1} />
-					</div>
-				</div>
-			)}
 		</>
 	);
 };
