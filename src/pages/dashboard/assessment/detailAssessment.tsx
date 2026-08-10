@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
-import { breadCrumbsItems } from '../../../types/utilities';
+import { breadCrumbsItems, courseStudentAssessmentDay } from '../../../types/utilities';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import PageTitle from '../../../components/PageTitle';
@@ -33,6 +33,39 @@ import { sendCourseScheduleEmail } from '../../../features/courseSlice';
 import { createEmailHistory } from '../../../features/emailSlice';
 import CSAssessmentPDFDocument from './CSAssessmentPDFDocument';
 import SendEmailModal from '../../../components/SendEmailModal';
+import { getCloudinaryPngBase64 } from '../../../utils/imageBase64';
+
+type DaySignatures = {
+	student?: string;
+	instructor?: string;
+	fcaa?: string;
+};
+
+const buildSignatures = async (
+	days: courseStudentAssessmentDay[],
+): Promise<Record<number, DaySignatures>> => {
+	const result: Record<number, DaySignatures> = {};
+	const sorted = [...days].sort((a, b) => Number(a.day) - Number(b.day));
+	for (const csad of sorted) {
+		const id = csad.id;
+		const dayNum = Number(csad.day);
+		if (!id || !dayNum) continue;
+		const isLastDay = Number(sorted[sorted.length - 1].day) === dayNum;
+		const [student, instructor, fcaa] = await Promise.all([
+			getCloudinaryPngBase64(`firmas/firmas/signature_1_${id}`),
+			getCloudinaryPngBase64(`firmas/firmas/signature_2_${id}`),
+			isLastDay
+				? getCloudinaryPngBase64(`firmas/firmas/signature_3_${id}`)
+				: Promise.resolve(''),
+		]);
+		result[dayNum] = {
+			student: student || undefined,
+			instructor: instructor || undefined,
+			fcaa: fcaa || undefined,
+		};
+	}
+	return result;
+};
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -144,26 +177,34 @@ const DetailAssessment = () => {
 		student_id,
 		course_student_id,
 	]);
+	const generatePdf = async (dayToShow?: number) => {
+		const CSA = assessment.courseStudentAssessmentSelected;
+		const fresh = await dispatch(
+			fetchAssessmentData(CSA?.id ?? -1),
+		).unwrap();
+		const freshAssessment = {
+			...assessment,
+			courseStudentAssessmentSelected: fresh.CSA,
+			daysSubjectList: fresh.CASD,
+		};
+		const [logoBase64, signatures] = await Promise.all([
+			getLogoBase64(),
+			buildSignatures(fresh.CSA?.CourseStudentAssessmentDays ?? []),
+		]);
+		const pdfBlob = await pdf(
+			<CSAssessmentPDFDocument
+				assessment={freshAssessment}
+				logoBase64={logoBase64}
+				day={dayToShow ?? fresh.CSA?.course?.days}
+				signatures={signatures}
+			/>,
+		).toBlob();
+		return { pdfBlob, fresh };
+	};
 	const printCSA = async () => {
 		const printWindow = window.open('', '_blank');
-		const CSA = assessment.courseStudentAssessmentSelected;
 		try {
-			const fresh = await dispatch(
-				fetchAssessmentData(CSA?.id ?? -1),
-			).unwrap();
-			const freshAssessment = {
-				...assessment,
-				courseStudentAssessmentSelected: fresh.CSA,
-				daysSubjectList: fresh.CASD,
-			};
-			const logoBase64 = await getLogoBase64();
-			const pdfBlob = await pdf(
-				<CSAssessmentPDFDocument
-					assessment={freshAssessment}
-					logoBase64={logoBase64}
-					day={activeStep + 1}
-				/>,
-			).toBlob();
+			const { pdfBlob } = await generatePdf(activeStep + 1);
 			const url = URL.createObjectURL(pdfBlob);
 			if (printWindow) {
 				printWindow.addEventListener('load', () => {
@@ -212,29 +253,10 @@ const DetailAssessment = () => {
 		const CSA = assessment.courseStudentAssessmentSelected;
 
 		try {
-			// 1. Obtener los datos completos de la evaluación para el PDF
-			const fresh = await dispatch(
-				fetchAssessmentData(CSA?.id ?? -1),
-			).unwrap();
-			const freshAssessment = {
-				...assessment,
-				courseStudentAssessmentSelected: fresh.CSA,
-				daysSubjectList: fresh.CASD,
-			};
+			// 1. Generar el PDF completo (datos + logo + firmas)
+			const { pdfBlob, fresh } = await generatePdf();
 
-			// 2. Obtener el logo en base64
-			const logoBase64 = await getLogoBase64();
-
-			// 3. Generar el blob del PDF directamente desde el componente
-			const pdfBlob = await pdf(
-				<CSAssessmentPDFDocument
-					assessment={freshAssessment}
-					logoBase64={logoBase64}
-					day={fresh.CSA?.course?.days}
-				/>,
-			).toBlob();
-
-			// 4. Armar el FormData y enviar
+			// 2. Armar el FormData y enviar
 			const formData = new FormData();
 			formData.append(
 				'adjunto',

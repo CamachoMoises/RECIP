@@ -86,16 +86,33 @@ const styles = StyleSheet.create({
 		textAlign: 'justify',
 		backgroundColor: 'white',
 	},
+	// --- Firmas ---
+	sigImage: {
+		width: 60,
+		height: 26,
+		objectFit: 'contain',
+	},
+	noSignature: {
+		color: '#9ca3af',
+		fontSize: 6,
+		fontStyle: 'italic',
+		textAlign: 'center',
+	},
 });
 
 const CSAssessmentPDFDocument = ({
 	assessment,
 	logoBase64,
 	day,
+	signatures,
 }: {
 	assessment: assessmentState;
 	logoBase64: string;
 	day?: number;
+	signatures?: Record<
+		number,
+		{ student?: string; instructor?: string; fcaa?: string }
+	>;
 }) => {
 	moment.locale('es');
 	const CSA = assessment.courseStudentAssessmentSelected;
@@ -108,6 +125,7 @@ const CSAssessmentPDFDocument = ({
 	);
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
+	const jerarquia = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
 	const courseDays = CSA?.course?.days ?? 0;
 	const maxDay = day ?? courseDays;
 	const loadedDayNumbers = assessmentDays
@@ -166,9 +184,7 @@ const CSAssessmentPDFDocument = ({
 		let weekdaysAdded = 0;
 		while (weekdaysAdded < step) {
 			daysToAdd++;
-			const dayOfWeek = moment(baseDate)
-				.add(daysToAdd, 'days')
-				.day();
+			const dayOfWeek = moment(baseDate).add(daysToAdd, 'days').day();
 			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
 				weekdaysAdded++;
 			}
@@ -205,13 +221,9 @@ const CSAssessmentPDFDocument = ({
 		}
 		return day.landing != null ? String(Number(day.landing)) : '';
 	};
-	const selectedTypes = new Set(
-		assessmentDays.map((CSAD) => CSAD.type).filter(
-			(type): type is string => Boolean(type),
-		) ?? [],
-	);
-	const firstAirport =
-		assessmentDays.find((CSAD) => CSAD.airport)?.airport;
+	const firstAirport = assessmentDays.find(
+		(CSAD) => CSAD.airport,
+	)?.airport;
 	const courseScoreAverage = CSA?.course_score_average;
 	const proficiencyLabel = (score: number | undefined) => {
 		if (score == null) return '';
@@ -238,7 +250,7 @@ const CSAssessmentPDFDocument = ({
 	const courseDate = CSA?.course_student?.date
 		? moment(CSA.course_student.date).format(dateFormat)
 		: '';
-
+	const usercode = CSA?.course_student?.instructor_code ?? '';
 	return (
 		<Document>
 			<Page size="LETTER" style={styles.page}>
@@ -261,41 +273,43 @@ const CSAssessmentPDFDocument = ({
 					<View style={styles.table}>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Nombre del Piloto:{'\n'}
 								{CSA?.student?.user?.name}{' '}
 								{CSA?.student?.user?.last_name}
 							</Text>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Documento de Identificacion:{'\n'}
 								{CSA?.student?.user?.user_doc_type?.symbol}-
 								{CSA?.student?.user?.doc_number}
 							</Text>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Fecha del Curso:{'\n'}
 								{courseDate}
 							</Text>
 						</View>
 						<View style={styles.row}>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								<Text style={styles.cellBold}>Cliente:</Text>{'\n'}
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>Cliente: AMB</Text>
+								{'\n'}
 							</Text>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>Objetivos:</Text>{' '}
+								<Text style={styles.cellBold}>Jerarquia:</Text> {'✔ '}
+								{
+									jerarquia[
+										CSA?.course_student?.type_trip
+											? CSA.course_student.type_trip
+											: 0
+									]
+								}
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								<Text style={styles.cellBold}>Regulacion:</Text>{' '}
 								{'✔ '}
 								{
 									regulation[
@@ -309,13 +323,13 @@ const CSAssessmentPDFDocument = ({
 						<View style={styles.row}>
 							<Text style={[styles.cell, { flex: 1 }]}>
 								<Text style={styles.cellBold}>
-									Certificado Piloto Numero:
-								</Text>{' '}
+									País del participante:
+								</Text>
+								{'\n'}
+								{CSA?.student?.user?.country_name}
 							</Text>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>
-									Tipo de Licencia:
-								</Text>{' '}
+								<Text style={styles.cellBold}>Tipo de Licencia:</Text>{' '}
 								{'✔ '}
 								{
 									license[
@@ -326,11 +340,16 @@ const CSAssessmentPDFDocument = ({
 								}
 							</Text>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>Curso Numero:</Text>
+								<Text style={styles.cellBold}>Codigo:</Text>
+								{'\n'}
+								{usercode}
 							</Text>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>Revisión:</Text>
+								<Text style={styles.cellBold}>Certificado:</Text>
+								{'\n'}
+								CEA 360ATC
 							</Text>
+
 							<Text style={[styles.cell, { flex: 1 }]}>
 								<Text style={styles.cellBold}>
 									Fecha de revisión:
@@ -340,35 +359,22 @@ const CSAssessmentPDFDocument = ({
 						</View>
 						<View style={styles.row}>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>
-									Modelo de avión:
-								</Text>
+								<Text style={styles.cellBold}>Modelo de avión:</Text>
 								{'\n'}
 								{CSA?.course?.plane_model}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
 								<Text style={styles.cellBold}>
 									Base de operaciones piloto:
-								</Text>{' '}
+								</Text>
+								{'\n'}
 								{firstAirport}
 							</Text>
+
 							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>Certificado:</Text>{' '}
-								CEA 360ATC
-							</Text>
-							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>
-									Tipo de curso:
-								</Text>
+								<Text style={styles.cellBold}>Tipo de curso:</Text>
 								{'\n'}
 								{CSA?.course?.name}
-							</Text>
-							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>
-									País del participante:
-								</Text>
-								{'\n'}
-								{CSA?.student?.user?.country_name}
 							</Text>
 						</View>
 					</View>
@@ -377,44 +383,45 @@ const CSAssessmentPDFDocument = ({
 					<View style={styles.table}>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 							>
-								Evaluación Tipo:
+								Dia
 							</Text>
-							{typeValues.map((type, index) => (
-								<Text
-									key={index}
-									style={[
-										styles.cell,
-										{
-											flex: 1,
-											fontWeight: selectedTypes.has(
-												type.value,
-											)
-												? 'bold'
-												: 'normal',
-										},
-									]}
-								>
-									{type.label}
-								</Text>
-							))}
+							<Text
+								style={[styles.cell, styles.cellHeader, { flex: 3 }]}
+							>
+								Evaluación Tipo
+							</Text>
 						</View>
+						{days.map((dayItem, index) => {
+							const dayType = findDay(dayItem.id + 1);
+							return (
+								<View key={`type-${index}`} style={styles.row}>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
+									>
+										{dayItem.id + 1}
+									</Text>
+									<Text style={[styles.cell, { flex: 3 }]}>
+										{dayType?.type && typeLabelMap[dayType.type]
+											? typeLabelMap[dayType.type]
+											: 'Sin tipo'}
+									</Text>
+								</View>
+							);
+						})}
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Evaluación en el FFS / Proficiencia:
 							</Text>
 							<Text style={[styles.cell, { flex: 4 }]}>
-								(1) Insatisfactorio. (2) Por Debajo de los
-								Estándares. (3) Satisfactorio. (4) Excelente
+								(1) Insatisfactorio. (2) Por Debajo de los Estándares.
+								(3) Satisfactorio. (4) Excelente
 							</Text>
 						</View>
 					</View>
@@ -423,10 +430,7 @@ const CSAssessmentPDFDocument = ({
 					<View style={styles.table}>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Periodo de Entrenamiento
 							</Text>
@@ -471,10 +475,7 @@ const CSAssessmentPDFDocument = ({
 						</View>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Fecha:
 							</Text>
@@ -486,19 +487,15 @@ const CSAssessmentPDFDocument = ({
 										{ flex: 1, textAlign: 'center' },
 									]}
 								>
-									{getEvaluationDate(
-										CSA?.date,
-										dayItem.id,
-									).format(dateFormat)}
+									{getEvaluationDate(CSA?.date, dayItem.id).format(
+										dateFormat,
+									)}
 								</Text>
 							))}
 						</View>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									{ flex: 2, fontWeight: 'bold' },
-								]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Iniciales de instructor
 							</Text>
@@ -554,21 +551,16 @@ const CSAssessmentPDFDocument = ({
 											{SL.name}
 										</Text>
 										{days.map((dayItem, dIndex) => {
-											const dayActive =
-												SL.subject_lesson_days?.find(
-													(SLD) =>
-														SLD.day === dayItem.id + 1,
-												);
+											const dayActive = SL.subject_lesson_days?.find(
+												(SLD) => SLD.day === dayItem.id + 1,
+											);
 											const CSALD =
 												dayActive?.course_student_assessment_lesson_days;
 											const tryCount =
-												CSALD && CSALD.length > 0
-													? CSALD[0]
-													: null;
+												CSALD && CSALD.length > 0 ? CSALD[0] : null;
 											const score = tryCount?.score ?? '';
 											const score2 =
-												tryCount?.score_2 &&
-												tryCount.score <= 2
+												tryCount?.score_2 && tryCount.score <= 2
 													? ` / ${tryCount.score_2}`
 													: '';
 											const score3 =
@@ -586,9 +578,7 @@ const CSAssessmentPDFDocument = ({
 															flex: 1,
 															textAlign: 'center',
 														},
-														...(dayActive
-															? [styles.cellGray]
-															: []),
+														...(dayActive ? [styles.cellGray] : []),
 													]}
 												>
 													{score}
@@ -607,17 +597,14 @@ const CSAssessmentPDFDocument = ({
 					<View style={styles.table}>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 2 },
-								]}
+								style={[styles.cell, styles.cellHeader, { flex: 2 }]}
 							>
 								Resumen de Evaluación/Proficiencia por día
 							</Text>
 							{days.map((dayItem, index) => {
-								const dayAverage =
-									findDay(dayItem.id + 1)?.score_average;
+								const dayAverage = findDay(
+									dayItem.id + 1,
+								)?.score_average;
 								return (
 									<Text
 										key={`avg-${index}`}
@@ -739,12 +726,8 @@ const CSAssessmentPDFDocument = ({
 							>
 								{secondsToTime(sumCheckTime)}
 							</Text>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								{' '}
-							</Text>
-							<Text style={[styles.cell, { flex: 1 }]}>
-								{' '}
-							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}> </Text>
+							<Text style={[styles.cell, { flex: 1 }]}> </Text>
 						</View>
 					</View>
 
@@ -820,10 +803,7 @@ const CSAssessmentPDFDocument = ({
 						{days.map((dayItem, index) => {
 							const dayCSAD = findDay(dayItem.id + 1);
 							return (
-								<View
-									key={`daydetail-${index}`}
-									style={styles.row}
-								>
+								<View key={`daydetail-${index}`} style={styles.row}>
 									<Text
 										style={[
 											styles.cell,
@@ -839,8 +819,7 @@ const CSAssessmentPDFDocument = ({
 										]}
 									>
 										{dayCSAD?.type
-											? typeLabelMap[dayCSAD.type] ??
-												dayCSAD.type
+											? (typeLabelMap[dayCSAD.type] ?? dayCSAD.type)
 											: ''}
 									</Text>
 									<Text
@@ -870,9 +849,7 @@ const CSAssessmentPDFDocument = ({
 											: ''}
 									</Text>
 									<Text style={[styles.cell, { flex: 3 }]}>
-										{dayCSAD?.comments
-											? dayCSAD.comments
-											: ''}
+										{dayCSAD?.comments ? dayCSAD.comments : ''}
 									</Text>
 								</View>
 							);
@@ -885,8 +862,8 @@ const CSAssessmentPDFDocument = ({
 							<View style={styles.row}>
 								<Text style={[styles.cell, { flex: 6 }]}>
 									<Text style={styles.cellBold}>
-										Proficiencia del curso (entrenamiento o
-										chequeo o experiencia reciente):
+										Proficiencia del curso (entrenamiento o chequeo o
+										experiencia reciente):
 									</Text>{' '}
 									{courseScoreAverage} (
 									{proficiencyLabel(courseScoreAverage)})
@@ -899,32 +876,22 @@ const CSAssessmentPDFDocument = ({
 					<View style={styles.table}>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 1 },
-								]}
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 							>
 								Avales
 							</Text>
 							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 1 },
-								]}
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 							>
 								Firma digital
 							</Text>
 						</View>
 						<View style={styles.row}>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								Recomendado para: Tipo evaluación de
-								habilitación. {CSA?.approve ? '✔' : '✘'}
+								Recomendado para: Tipo evaluación de habilitación.{' '}
+								{CSA?.approve ? '✔' : '✘'}
 							</Text>
-							<Text style={[styles.cell, { flex: 1 }]}>
-								{' '}
-							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}> </Text>
 						</View>
 					</View>
 
@@ -932,20 +899,12 @@ const CSAssessmentPDFDocument = ({
 					<View style={styles.table}>
 						<View style={styles.row}>
 							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 1 },
-								]}
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 							>
 								Dia
 							</Text>
 							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 3 },
-								]}
+								style={[styles.cell, styles.cellHeader, { flex: 3 }]}
 							>
 								Observaciones
 							</Text>
@@ -972,20 +931,125 @@ const CSAssessmentPDFDocument = ({
 						})}
 					</View>
 
+					{/* Firmas por día */}
+					<View style={styles.table}>
+						<View style={styles.row}>
+							<Text
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+							>
+								Dia
+							</Text>
+							<Text
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+							>
+								Firma del alumno
+							</Text>
+							<Text
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+							>
+								Firma del instructor
+							</Text>
+							<Text
+								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+							>
+								Firma FCAA
+							</Text>
+						</View>
+						{[...assessmentDays]
+							.sort((a, b) => Number(a.day) - Number(b.day))
+							.map((csad, index) => {
+								const dayNum = Number(csad.day);
+								const daySigs = signatures?.[dayNum] ?? {};
+								return (
+									<View
+										key={`firmas-${index}`}
+										style={styles.row}
+										wrap={false}
+									>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 1, textAlign: 'center' },
+											]}
+										>
+											{dayNum}
+										</Text>
+										<View
+											style={[
+												styles.cell,
+												{
+													flex: 1,
+													alignItems: 'center',
+													justifyContent: 'center',
+												},
+											]}
+										>
+											{daySigs.student ? (
+												<Image
+													style={styles.sigImage}
+													src={daySigs.student}
+												/>
+											) : (
+												<Text style={styles.noSignature}>—</Text>
+											)}
+										</View>
+										<View
+											style={[
+												styles.cell,
+												{
+													flex: 1,
+													alignItems: 'center',
+													justifyContent: 'center',
+												},
+											]}
+										>
+											{daySigs.instructor ? (
+												<Image
+													style={styles.sigImage}
+													src={daySigs.instructor}
+												/>
+											) : (
+												<Text style={styles.noSignature}>—</Text>
+											)}
+										</View>
+										<View
+											style={[
+												styles.cell,
+												{
+													flex: 1,
+													alignItems: 'center',
+													justifyContent: 'center',
+												},
+											]}
+										>
+											{daySigs.fcaa ? (
+												<Image
+													style={styles.sigImage}
+													src={daySigs.fcaa}
+												/>
+											) : (
+												<Text style={styles.noSignature}>—</Text>
+											)}
+										</View>
+									</View>
+								);
+							})}
+					</View>
+
 					{/* Legal */}
 					<View style={styles.legal}>
 						<Text>
-							Por medio del presente, autorizo a CEA 360 ATC, de
-							forma expresa el registro en audio y video de la
-							sesión de entrenamiento con el único fin de recibir
-							instrucción, evaluación técnica y retroalimentación
-							operativa. Esta captura de imagen y voz se gestionará
-							bajo estricta confidencialidad, garantizando que el
-							material no será difundido públicamente ni utilizado
-							con fines comerciales. Asimismo, se reconoce el
-							derecho a revocar este consentimiento y a solicitar
-							el borrado seguro del contenido audiovisual según la
-							normativa vigente de protección de datos.
+							Por medio del presente, autorizo a CEA 360 ATC, de forma
+							expresa el registro en audio y video de la sesión de
+							entrenamiento con el único fin de recibir instrucción,
+							evaluación técnica y retroalimentación operativa. Esta
+							captura de imagen y voz se gestionará bajo estricta
+							confidencialidad, garantizando que el material no será
+							difundido públicamente ni utilizado con fines
+							comerciales. Asimismo, se reconoce el derecho a revocar
+							este consentimiento y a solicitar el borrado seguro del
+							contenido audiovisual según la normativa vigente de
+							protección de datos.
 						</Text>
 					</View>
 				</View>

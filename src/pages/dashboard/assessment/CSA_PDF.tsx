@@ -66,9 +66,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 		let weekdaysAdded = 0;
 		while (weekdaysAdded < step) {
 			daysToAdd++;
-			const dayOfWeek = moment(baseDate)
-				.add(daysToAdd, 'days')
-				.day();
+			const dayOfWeek = moment(baseDate).add(daysToAdd, 'days').day();
 			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
 				weekdaysAdded++;
 			}
@@ -83,9 +81,9 @@ const CSA_PDF = ({ day }: { day: number }) => {
 		{ value: 'experiencia_reciente', label: 'Experiencia reciente' },
 	];
 	const selectedTypes = new Set(
-		assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays
-			?.map((CSAD) => CSAD.type)
-			.filter((type): type is string => Boolean(type)) ?? [],
+		assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.map(
+			(CSAD) => CSAD.type,
+		).filter((type): type is string => Boolean(type)) ?? [],
 	);
 	const firstAirport =
 		assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.find(
@@ -348,13 +346,11 @@ const CSA_PDF = ({ day }: { day: number }) => {
 									{days.map((day, index) => (
 										<span key={index}>
 											{getEvaluationDate(
-												assessment
-													.courseStudentAssessmentSelected
+												assessment.courseStudentAssessmentSelected
 													?.date,
 												day.id,
 											).format('DD-MM-YYYY')}
-											{index < days.length - 1 &&
-												' / '}
+											{index < days.length - 1 && ' / '}
 										</span>
 									))}
 								</td>
@@ -396,8 +392,7 @@ const CSA_PDF = ({ day }: { day: number }) => {
 											className="border border-blue-gray-800 px-2 text-xs"
 										>
 											{getEvaluationDate(
-												assessment
-													.courseStudentAssessmentSelected
+												assessment.courseStudentAssessmentSelected
 													?.date,
 												day.id,
 											).format('DD-MM-YYYY')}
@@ -508,27 +503,20 @@ const CSA_PDF = ({ day }: { day: number }) => {
 										className="border border-blue-gray-800 px-2 text-xs w-36"
 									>
 										<strong>
-											Resumen de Evaluación/Proficiencia por
-											día
+											Resumen de Evaluación/Proficiencia por día
 										</strong>
 									</th>
 									{days.map((day, index) => {
 										const dayAverage =
-											assessment
-												.courseStudentAssessmentSelected
-												?.CourseStudentAssessmentDays?.find(
-													(CSAD) =>
-														CSAD.day ===
-														day.id + 1,
-												)?.score_average;
+											assessment.courseStudentAssessmentSelected?.CourseStudentAssessmentDays?.find(
+												(CSAD) => CSAD.day === day.id + 1,
+											)?.score_average;
 										return (
 											<th
 												key={index}
 												className="border border-blue-gray-800 px-2 w-16 text-xs"
 											>
-												{dayAverage != null
-													? dayAverage
-													: ''}
+												{dayAverage != null ? dayAverage : ''}
 											</th>
 										);
 									})}
@@ -614,15 +602,11 @@ const CSA_PDF = ({ day }: { day: number }) => {
 									<tr>
 										<td className="border border-blue-gray-800 px-2 text-xs">
 											<strong>
-												Proficiencia del curso
-												(entrenamiento o chequeo o
-												experiencia reciente):
+												Proficiencia del curso (entrenamiento o
+												chequeo o experiencia reciente):
 											</strong>{' '}
 											{courseScoreAverage} (
-											{proficiencyLabel(
-												courseScoreAverage,
-											)}
-											)
+											{proficiencyLabel(courseScoreAverage)})
 										</td>
 									</tr>
 								</tbody>
@@ -705,13 +689,14 @@ const CSA_PDF = ({ day }: { day: number }) => {
 					Por medio del presente, autorizo a CEA 360 ATC, de forma
 					expresa el registro en audio y video de la sesión de
 					entrenamiento con el único fin de recibir instrucción,
-					evaluación técnica y retroalimentación operativa. Esta captura
-					de imagen y voz se gestionará bajo estricta confidencialidad,
-					garantizando que el material no será difundido públicamente ni
-					utilizado con fines comerciales. Asimismo, se reconoce el
-					derecho a revocar este consentimiento y a solicitar el borrado
-					seguro del contenido audiovisual según la normativa vigente de
-					protección de datos.
+					evaluación técnica y retroalimentación operativa. Esta
+					captura de imagen y voz se gestionará bajo estricta
+					confidencialidad, garantizando que el material no será
+					difundido públicamente ni utilizado con fines comerciales.
+					Asimismo, se reconoce el derecho a revocar este
+					consentimiento y a solicitar el borrado seguro del contenido
+					audiovisual según la normativa vigente de protección de
+					datos.
 				</div>
 			</div>
 		</div>
