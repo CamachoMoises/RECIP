@@ -163,18 +163,9 @@ const CSAssessmentPDFDocument = ({
 		sumTakeOff += takeoff ? takeoff : 0;
 	}
 
-	const timeToSeconds = (time?: string) => {
-		if (!time) return 0;
-		const parts = time.split(':').map(Number);
-		return parts[0] * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
-	};
-	const secondsToTime = (seconds: number) => {
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-		const secs = seconds % 60;
-		return [hours, minutes, secs]
-			.map((part) => String(part).padStart(2, '0'))
-			.join(':');
+	const formatHours = (value: number) => {
+		if (!value) return '0';
+		return String(Math.round(value * 100) / 100);
 	};
 	const getEvaluationDate = (
 		baseDate: string | undefined,
@@ -242,8 +233,8 @@ const CSAssessmentPDFDocument = ({
 		sumTakeoffNight += CSAD.takeoff_night || 0;
 		sumLandingDay += CSAD.landing_day || 0;
 		sumLandingNight += CSAD.landing_night || 0;
-		sumTrainingTime += timeToSeconds(CSAD.training_time);
-		sumCheckTime += timeToSeconds(CSAD.check_time);
+		sumTrainingTime += Number(CSAD.training_time) || 0;
+		sumCheckTime += Number(CSAD.check_time) || 0;
 	});
 
 	const dateFormat = 'DD-MM-YYYY';
@@ -705,7 +696,7 @@ const CSAssessmentPDFDocument = ({
 						</View>
 						<View style={styles.row}>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								TIEMPO DE ENTRENAMIENTO
+								TIEMPO DE ENTRENAMIENTO (HORAS)
 							</Text>
 							<Text
 								style={[
@@ -713,10 +704,10 @@ const CSAssessmentPDFDocument = ({
 									{ flex: 1, textAlign: 'center' },
 								]}
 							>
-								{secondsToTime(sumTrainingTime)}
+								{formatHours(sumTrainingTime)}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								TIEMPO DE CHEQUEO
+								TIEMPO DE CHEQUEO (HORAS)
 							</Text>
 							<Text
 								style={[
@@ -724,7 +715,7 @@ const CSAssessmentPDFDocument = ({
 									{ flex: 1, textAlign: 'center' },
 								]}
 							>
-								{secondsToTime(sumCheckTime)}
+								{formatHours(sumCheckTime)}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}> </Text>
 							<Text style={[styles.cell, { flex: 1 }]}> </Text>
@@ -952,7 +943,7 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 							>
-								Firma FCAA
+								Firma Chequeador / Ins. Inac
 							</Text>
 						</View>
 						{[...assessmentDays]

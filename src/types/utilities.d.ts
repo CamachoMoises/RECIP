@@ -414,8 +414,8 @@ export type courseStudentAssessmentDay = {
     takeoff_night?: number;
     landing_day?: number;
     landing_night?: number;
-    training_time?: string;
-    check_time?: string;
+    training_time?: number;
+    check_time?: number;
     type?: string;
     score_average?: number;
     seat: string;

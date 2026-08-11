@@ -43,8 +43,8 @@ type Inputs = {
 	takeoff_night: number;
 	landing_day: number;
 	landing_night: number;
-	training_time: string;
-	check_time: string;
+	training_time: number;
+	check_time: number;
 	type: string;
 	seat: string;
 	comments: string;
@@ -65,12 +65,14 @@ const CSAD_form = ({
 	isFirstStep: boolean;
 	isLastStep: boolean;
 }) => {
-	const { assessment, userLogged } = useSelector((state: RootState) => {
-		return {
-			assessment: state.assessment,
-			userLogged: state.users.userLogged,
-		};
-	});
+	const { assessment, userLogged } = useSelector(
+		(state: RootState) => {
+			return {
+				assessment: state.assessment,
+				userLogged: state.users.userLogged,
+			};
+		},
+	);
 	const [signatureUrls, setSignatureUrls] = useState<SignatureUrls>(
 		{},
 	);
@@ -167,18 +169,6 @@ const CSAD_form = ({
 		sigCanvas3.current?.clear();
 	};
 
-		const toTimeInputValue = (value?: string) => {
-		if (!value) return undefined;
-		const match = value.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-		return match ? `${match[1]}:${match[2]}` : undefined;
-	};
-
-	const toTimeHHMMSS = (value?: string) => {
-		if (!value) return undefined;
-		const match = value.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-		return match ? `${match[1]}:${match[2]}:${match[3] ?? '00'}` : undefined;
-	};
-
 	const {
 		register,
 		handleSubmit,
@@ -212,23 +202,18 @@ const CSAD_form = ({
 				assessment.courseStudentAssessmentDaySelected?.landing_day,
 			landing_night:
 				assessment.courseStudentAssessmentDaySelected?.landing_night,
-			training_time: toTimeInputValue(
+			training_time:
 				assessment.courseStudentAssessmentDaySelected?.training_time,
-			),
-			check_time: toTimeInputValue(
+			check_time:
 				assessment.courseStudentAssessmentDaySelected?.check_time,
-			),
 			type: assessment.courseStudentAssessmentDaySelected?.type,
 			comments:
 				assessment.courseStudentAssessmentDaySelected?.comments,
 			consent: false,
 		},
-	}
-);
+	});
 
-	const buildCSADReq = (
-		data: Inputs,
-	): courseStudentAssessmentDay => {
+	const buildCSADReq = (data: Inputs): courseStudentAssessmentDay => {
 		const CSAD = assessment.courseStudentAssessmentDaySelected;
 		return {
 			...data,
@@ -244,16 +229,19 @@ const CSAD_form = ({
 			landing_night: Number.isNaN(data.landing_night)
 				? undefined
 				: Number(data.landing_night),
-			training_time: toTimeHHMMSS(data.training_time),
-			check_time: toTimeHHMMSS(data.check_time),
+			training_time: Number.isNaN(data.training_time)
+				? undefined
+				: Number(data.training_time),
+			check_time: Number.isNaN(data.check_time)
+				? undefined
+				: Number(data.check_time),
 			id: CSAD?.id ? CSAD.id : -1,
 			course_id: CSAD?.course_id ? CSAD.course_id : -1,
 			student_id: CSAD?.student_id ? CSAD.student_id : -1,
 			course_student_id: CSAD?.course_student_id
 				? CSAD.course_student_id
 				: -1,
-			course_student_assessment_id: CSAD
-				?.course_student_assessment_id
+			course_student_assessment_id: CSAD?.course_student_assessment_id
 				? CSAD.course_student_assessment_id
 				: -1,
 			day: CSAD?.day ? CSAD.day : -1,
@@ -891,11 +879,15 @@ const CSAD_form = ({
 										<Input
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
-											type="time"
-											label="Entrenamiento"
-											className="no-ampm bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+											type="number"
+											min={0}
+											step="0.01"
+											label="Entrenamiento (horas)"
+											className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
 											crossOrigin={undefined}
-											{...register('training_time', {})}
+											{...register('training_time', {
+												valueAsNumber: true,
+											})}
 											aria-invalid={
 												errors.training_time ? 'true' : 'false'
 											}
@@ -903,11 +895,15 @@ const CSAD_form = ({
 										<Input
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
-											type="time"
-											label="Chequeo"
-											className="no-ampm bg-slate-400 rounded-md p-2 w-full block text-slate-900"
+											type="number"
+											min={0}
+											step="0.01"
+											label="Chequeo (horas)"
+											className="bg-slate-400 rounded-md p-2 w-full block text-slate-900"
 											crossOrigin={undefined}
-											{...register('check_time', {})}
+											{...register('check_time', {
+												valueAsNumber: true,
+											})}
 											aria-invalid={
 												errors.check_time ? 'true' : 'false'
 											}
@@ -1051,8 +1047,8 @@ const CSAD_form = ({
 														width: 500,
 														height: 200,
 														className: isFormDisabled
-														? 'signatureCanvas pointer-events-none'
-														: 'signatureCanvas',
+															? 'signatureCanvas pointer-events-none'
+															: 'signatureCanvas',
 													}}
 												/>
 											)}
@@ -1116,11 +1112,9 @@ const CSAD_form = ({
 						</span>
 					)}
 				</div>
+				<br />
 				<div className="flex flex-row gap-2">
-					<fieldset
-						disabled={isFormDisabled}
-						className="contents"
-					>
+					<fieldset disabled={isFormDisabled} className="contents">
 						<Button
 							variant="gradient"
 							color="green"

@@ -45,18 +45,9 @@ const CSA_PDF = ({ day }: { day: number }) => {
 
 		sumTakeOff += takeoff ? takeoff : 0;
 	}
-	const timeToSeconds = (time?: string) => {
-		if (!time) return 0;
-		const parts = time.split(':').map(Number);
-		return parts[0] * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
-	};
-	const secondsToTime = (seconds: number) => {
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-		const secs = seconds % 60;
-		return [hours, minutes, secs]
-			.map((part) => String(part).padStart(2, '0'))
-			.join(':');
+	const formatHours = (value: number) => {
+		if (!value) return '0';
+		return String(Math.round(value * 100) / 100);
 	};
 	const getEvaluationDate = (
 		baseDate: string | undefined,
@@ -109,8 +100,8 @@ const CSA_PDF = ({ day }: { day: number }) => {
 			sumTakeoffNight += CSAD.takeoff_night || 0;
 			sumLandingDay += CSAD.landing_day || 0;
 			sumLandingNight += CSAD.landing_night || 0;
-			sumTrainingTime += timeToSeconds(CSAD.training_time);
-			sumCheckTime += timeToSeconds(CSAD.check_time);
+			sumTrainingTime += Number(CSAD.training_time) || 0;
+			sumCheckTime += Number(CSAD.check_time) || 0;
 		},
 	);
 	return (
@@ -578,16 +569,16 @@ const CSA_PDF = ({ day }: { day: number }) => {
 								</tr>
 								<tr>
 									<td className="border border-blue-gray-800 px-2 text-xs">
-										TIEMPO DE ENTRENAMIENTO
+										TIEMPO DE ENTRENAMIENTO (HORAS)
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
-										{secondsToTime(sumTrainingTime)}
+										{formatHours(sumTrainingTime)}
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
-										TIEMPO DE CHEQUEO
+										TIEMPO DE CHEQUEO (HORAS)
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs">
-										{secondsToTime(sumCheckTime)}
+										{formatHours(sumCheckTime)}
 									</td>
 									<td className="border border-blue-gray-800 px-2 text-xs"></td>
 									<td className="border border-blue-gray-800 px-2 text-xs"></td>
