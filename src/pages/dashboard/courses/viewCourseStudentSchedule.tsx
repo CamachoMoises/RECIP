@@ -267,6 +267,17 @@ const ViewCourseStudentSchedule = () => {
 		return `${instructor.name} ${instructor.last_name}`;
 	};
 
+	const getDayForSchedule = (schedule: {
+		subject_day?: { day?: number };
+		subject_days_id?: number;
+	}) => {
+		if (schedule?.subject_day?.day) return schedule.subject_day.day;
+		const subjectDay = subject.subjectList
+			.flatMap((s) => s.subject_days ?? [])
+			.find((d) => d.id === schedule?.subject_days_id);
+		return subjectDay?.day;
+	};
+
 	const getAttendanceForDate = (date: string) => {
 		const dateStr = moment(date).format('YYYY-MM-DD');
 		const attendanceRecord = attendance.attendanceList?.find(
@@ -300,8 +311,15 @@ const ViewCourseStudentSchedule = () => {
 		}
 	};
 
-	const handleSaveAttendance = async (scheduleDate: string) => {
+	const handleSaveAttendance = async (
+		scheduleDate: string,
+		day: number | undefined,
+	) => {
 		if (!course.courseStudent?.id) return;
+		if (!day) {
+			toast.error('No se pudo determinar el día del curso');
+			return;
+		}
 
 		setIsSaving(true);
 		const existingAttendance = getAttendanceForDate(scheduleDate);
@@ -312,6 +330,7 @@ const ViewCourseStudentSchedule = () => {
 					updateAttendance({
 						id: existingAttendance.id,
 						course_student_id: course.courseStudent.id,
+						day,
 						date: scheduleDate,
 						attendance_status_id: selectedAttendanceStatus,
 						comments: attendanceComments,
@@ -322,6 +341,7 @@ const ViewCourseStudentSchedule = () => {
 				await dispatch(
 					createAttendance({
 						course_student_id: course.courseStudent.id,
+						day,
 						date: scheduleDate,
 						attendance_status_id: selectedAttendanceStatus,
 						comments: attendanceComments,
@@ -1145,11 +1165,14 @@ const ViewCourseStudentSchedule = () => {
 																					<Button
 																						size="sm"
 																						color="green"
-																						onClick={() =>
-																							handleSaveAttendance(
-																								firstSchedule.date,
-																							)
-																						}
+														onClick={() =>
+															handleSaveAttendance(
+																firstSchedule.date,
+																getDayForSchedule(
+																	firstSchedule,
+																),
+															)
+														}
 																						disabled={isSaving}
 																						placeholder={undefined}
 																						onPointerEnterCapture={

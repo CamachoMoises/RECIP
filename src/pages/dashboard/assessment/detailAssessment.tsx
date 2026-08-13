@@ -29,7 +29,10 @@ import { axiosPostDefault } from '../../../services/axios';
 import toast from 'react-hot-toast';
 import { pdf } from '@react-pdf/renderer';
 import { getLogoBase64 } from '../../../utils/logoBase64';
-import { sendCourseScheduleEmail } from '../../../features/courseSlice';
+import {
+	fetchSchedule,
+	sendCourseScheduleEmail,
+} from '../../../features/courseSlice';
 import { createEmailHistory } from '../../../features/emailSlice';
 import CSAssessmentPDFDocument from './CSAssessmentPDFDocument';
 import SendEmailModal from '../../../components/SendEmailModal';
@@ -179,9 +182,10 @@ const DetailAssessment = () => {
 	]);
 	const generatePdf = async (dayToShow?: number) => {
 		const CSA = assessment.courseStudentAssessmentSelected;
-		const fresh = await dispatch(
-			fetchAssessmentData(CSA?.id ?? -1),
-		).unwrap();
+		const [fresh, scheduleRes] = await Promise.all([
+			dispatch(fetchAssessmentData(CSA?.id ?? -1)).unwrap(),
+			dispatch(fetchSchedule(CSA?.course_student_id ?? -1)).unwrap(),
+		]);
 		const freshAssessment = {
 			...assessment,
 			courseStudentAssessmentSelected: fresh.CSA,
@@ -197,6 +201,7 @@ const DetailAssessment = () => {
 				logoBase64={logoBase64}
 				day={dayToShow ?? fresh.CSA?.course?.days}
 				signatures={signatures}
+				schedules={scheduleRes}
 			/>,
 		).toBlob();
 		return { pdfBlob, fresh };

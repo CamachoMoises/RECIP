@@ -204,7 +204,7 @@ export type course = {
 
 export type schedule = {
     id?: number;
-    course_id: number;
+    course_id?: number;
     course_student?: courseStudent;
     course_student_id: number;
     instructor?: instructor;
@@ -264,13 +264,13 @@ export type courseGroup = {
     id: number;
     title: string;
     code: string;
-    user_code?: string | null;
-    date?: string | null;
-    course_id?: number | null;
+    user_code: string | null;
+    date: string | null;
+    course_id: number | null;
     course?: course | null;
     course_students?: courseStudent[];
     course_group_signatures?: courseGroupSignature[];
-    status?: boolean;
+    status: boolean;
     createdAt?: string;
     updatedAt?: string;
 }

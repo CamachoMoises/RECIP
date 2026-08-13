@@ -81,7 +81,7 @@ export const fetchAttendanceByDateRange = createAsyncThunk<attendance[], { start
     }
 );
 
-export const createAttendance = createAsyncThunk<attendance, { course_student_id: number, date: string, attendance_status_id: number, comments?: string }>(
+export const createAttendance = createAsyncThunk<attendance, { course_student_id: number, day: number, date: string, attendance_status_id: number, comments?: string }>(
     'attendance/createAttendance',
     async (attendanceData, { rejectWithValue }) => {
         try {
@@ -93,7 +93,7 @@ export const createAttendance = createAsyncThunk<attendance, { course_student_id
     }
 );
 
-export const updateAttendance = createAsyncThunk<attendance, { id: number, course_student_id?: number, date?: string, attendance_status_id?: number, comments?: string }>(
+export const updateAttendance = createAsyncThunk<attendance, { id: number, course_student_id?: number, day?: number, date?: string, attendance_status_id?: number, comments?: string }>(
     'attendance/updateAttendance',
     async (attendanceData, { rejectWithValue }) => {
         try {

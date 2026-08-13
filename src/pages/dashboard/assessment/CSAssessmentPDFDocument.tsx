@@ -10,6 +10,7 @@ import moment from 'moment';
 import {
 	assessmentState,
 	courseStudentAssessmentDay,
+	schedule,
 } from '../../../types/utilities';
 
 const styles = StyleSheet.create({
@@ -105,6 +106,7 @@ const CSAssessmentPDFDocument = ({
 	logoBase64,
 	day,
 	signatures,
+	schedules,
 }: {
 	assessment: assessmentState;
 	logoBase64: string;
@@ -113,6 +115,7 @@ const CSAssessmentPDFDocument = ({
 		number,
 		{ student?: string; instructor?: string; fcaa?: string }
 	>;
+	schedules?: schedule[];
 }) => {
 	moment.locale('es');
 	const CSA = assessment.courseStudentAssessmentSelected;
@@ -242,6 +245,49 @@ const CSAssessmentPDFDocument = ({
 		? moment(CSA.course_student.date).format(dateFormat)
 		: '';
 	const usercode = CSA?.course_student?.instructor_code ?? '';
+	const subjectDaysById: Record<number, number> = {};
+	(assessment.daysSubjectList ?? []).forEach((sub) =>
+		(sub.subject_days ?? []).forEach((sd) => {
+			if (sd.id != null && sd.day) {
+				subjectDaysById[Number(sd.id)] = Number(sd.day);
+			}
+		}),
+	);
+	const scheduleDayDate: Record<number, string> = {};
+	const scheduleDayInstructor: Record<number, string> = {};
+	(schedules ?? []).forEach((s) => {
+		const dayNum =
+			s.subject_day?.day ??
+			subjectDaysById[Number(s.subject_days_id)];
+		if (!dayNum || scheduleDayDate[dayNum]) return;
+		scheduleDayDate[dayNum] = s.date;
+		const inst = s.instructor?.user;
+		if (inst) {
+			scheduleDayInstructor[dayNum] =
+				`${inst.name} ${inst.last_name}`;
+		}
+	});
+	const getDayDate = (dayItemId: number) => {
+		const dayNum = dayItemId + 1;
+		const scheduleDate = scheduleDayDate[dayNum];
+		return scheduleDate
+			? moment(scheduleDate).format(dateFormat)
+			: getEvaluationDate(CSA?.date, dayItemId).format(dateFormat);
+	};
+	const getInstructorInitials = (dayItemId: number) => {
+		const name = scheduleDayInstructor[dayItemId + 1];
+		if (!name) return '';
+		return name
+			.trim()
+			.split(/\s+/)
+			.map((w) => w.charAt(0).toUpperCase())
+			.join('');
+	};
+	const lastScheduleDate = (schedules ?? [])
+		.map((s) => s.date)
+		.filter(Boolean)
+		.sort()
+		.pop();
 	return (
 		<Document>
 			<Page size="LETTER" style={styles.page}>
@@ -345,7 +391,9 @@ const CSAssessmentPDFDocument = ({
 								<Text style={styles.cellBold}>
 									Fecha de revisión:
 								</Text>{' '}
-								{courseDate}
+								{lastScheduleDate
+									? moment(lastScheduleDate).format(dateFormat)
+									: courseDate}
 							</Text>
 						</View>
 						<View style={styles.row}>
@@ -374,36 +422,46 @@ const CSAssessmentPDFDocument = ({
 					<View style={styles.table}>
 						<View style={styles.row}>
 							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+								style={[styles.cell, styles.cellHeader, { flex: 2 }]}
 							>
 								Dia
 							</Text>
+							{days.map((dayItem, index) => (
+								<Text
+									key={`type-h-${index}`}
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 1, textAlign: 'center' },
+									]}
+								>
+									{dayItem.id + 1}
+								</Text>
+							))}
+						</View>
+						<View style={styles.row}>
 							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 3 }]}
+								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
 								Evaluación Tipo
 							</Text>
-						</View>
-						{days.map((dayItem, index) => {
-							const dayType = findDay(dayItem.id + 1);
-							return (
-								<View key={`type-${index}`} style={styles.row}>
+							{days.map((dayItem, index) => {
+								const dayType = findDay(dayItem.id + 1);
+								return (
 									<Text
+										key={`type-v-${index}`}
 										style={[
 											styles.cell,
 											{ flex: 1, textAlign: 'center' },
 										]}
 									>
-										{dayItem.id + 1}
-									</Text>
-									<Text style={[styles.cell, { flex: 3 }]}>
 										{dayType?.type && typeLabelMap[dayType.type]
 											? typeLabelMap[dayType.type]
 											: 'Sin tipo'}
 									</Text>
-								</View>
-							);
-						})}
+								);
+							})}
+						</View>
 						<View style={styles.row}>
 							<Text
 								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
@@ -429,9 +487,7 @@ const CSAssessmentPDFDocument = ({
 								<Text style={styles.cellBold}>Fecha:</Text>{' '}
 								{days.map((dayItem, index) => (
 									<Text key={index}>
-										{getEvaluationDate(CSA?.date, dayItem.id).format(
-											dateFormat,
-										)}
+										{getDayDate(dayItem.id)}
 										{index < days.length - 1 ? ' / ' : ''}
 									</Text>
 								))}
@@ -478,9 +534,7 @@ const CSAssessmentPDFDocument = ({
 										{ flex: 1, textAlign: 'center' },
 									]}
 								>
-									{getEvaluationDate(CSA?.date, dayItem.id).format(
-										dateFormat,
-									)}
+									{getDayDate(dayItem.id)}
 								</Text>
 							))}
 						</View>
@@ -498,7 +552,7 @@ const CSAssessmentPDFDocument = ({
 										{ flex: 1, textAlign: 'center' },
 									]}
 								>
-									{dayItem.id + 1} FF
+									{getInstructorInitials(dayItem.id)}
 								</Text>
 							))}
 						</View>
@@ -884,42 +938,6 @@ const CSAssessmentPDFDocument = ({
 							</Text>
 							<Text style={[styles.cell, { flex: 1 }]}> </Text>
 						</View>
-					</View>
-
-					{/* Observaciones */}
-					<View style={styles.table}>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
-							>
-								Dia
-							</Text>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 3 }]}
-							>
-								Observaciones
-							</Text>
-						</View>
-						{days.map((dayItem, index) => {
-							const dayComments = findDay(dayItem.id + 1);
-							return (
-								<View key={`comments-${index}`} style={styles.row}>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 1, textAlign: 'center' },
-										]}
-									>
-										{dayItem.id + 1}
-									</Text>
-									<Text style={[styles.cell, { flex: 3 }]}>
-										{dayComments?.comments
-											? dayComments.comments
-											: 'Sin observaciones'}
-									</Text>
-								</View>
-							);
-						})}
 					</View>
 
 					{/* Firmas por día */}
