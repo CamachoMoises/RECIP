@@ -108,12 +108,15 @@ const DetailAssessment = () => {
 		return moment(baseDate).add(daysToAdd, 'days');
 	};
 
-	const { assessment, authUser } = useSelector((state: RootState) => {
-		return {
-			assessment: state.assessment,
-			authUser: state.auth.user,
-		};
-	});
+	const { assessment, authUser, scheduleList } = useSelector(
+		(state: RootState) => {
+			return {
+				assessment: state.assessment,
+				authUser: state.auth.user,
+				scheduleList: state.courses.scheduleList,
+			};
+		},
+	);
 
 	const CSA_id = assessment.courseStudentAssessmentSelected?.id
 		? assessment.courseStudentAssessmentSelected.id
@@ -143,6 +146,27 @@ const DetailAssessment = () => {
 				}),
 			)
 		: [];
+	useEffect(() => {
+		if (course_student_id !== -1) {
+			dispatch(fetchSchedule(course_student_id));
+		}
+	}, [course_student_id, dispatch]);
+	const scheduleDayDate: Record<number, string> = {};
+	scheduleList.forEach((s) => {
+		const dayNum = s.subject_day?.day;
+		if (!dayNum || scheduleDayDate[dayNum]) return;
+		scheduleDayDate[dayNum] = s.date;
+	});
+	const getDayDate = (dayItemId: number) => {
+		const dayNum = dayItemId + 1;
+		const scheduleDate = scheduleDayDate[dayNum];
+		return scheduleDate
+			? moment(scheduleDate).format('DD-MM-YYYY')
+			: getEvaluationDate(
+					assessment.courseStudentAssessmentSelected?.date,
+					dayItemId,
+				).format('DD-MM-YYYY');
+	};
 	useEffect(() => {
 		if (assessment.courseStudentAssessmentSelected === null) {
 			navigate('/dashboard');
@@ -495,11 +519,7 @@ const DetailAssessment = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{getEvaluationDate(
-											assessment.courseStudentAssessmentSelected
-												?.date,
-											activeStep,
-										).format('DD-MM-YYYY')}
+										{getDayDate(activeStep)}
 									</Typography>
 								</div>
 							</div>

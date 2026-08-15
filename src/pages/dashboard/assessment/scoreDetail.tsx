@@ -9,10 +9,12 @@ import {
 const ScoreDetail = ({
 	SLE,
 	SLD_id,
+	disabled,
 	handleChangeRadio,
 }: {
 	SLE: subjectLesson;
 	SLD_id: number;
+	disabled: boolean;
 	handleChangeRadio: (
 		id: number | undefined,
 		value: number,
@@ -117,8 +119,9 @@ const ScoreDetail = ({
 							defaultChecked={score === 1}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-						/>
+						crossOrigin={undefined}
+						disabled={disabled}
+					/>
 						<Radio
 							name={`SLE-Radio-${SLE.id}`}
 							label="2"
@@ -139,8 +142,9 @@ const ScoreDetail = ({
 							defaultChecked={score === 2}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-						/>
+						crossOrigin={undefined}
+						disabled={disabled}
+					/>
 						<Radio
 							name={`SLE-Radio-${SLE.id}`}
 							label="3"
@@ -161,8 +165,9 @@ const ScoreDetail = ({
 							defaultChecked={score === 3}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-						/>
+						crossOrigin={undefined}
+						disabled={disabled}
+					/>
 						<Radio
 							name={`SLE-Radio-${SLE.id}`}
 							label="4"
@@ -183,8 +188,9 @@ const ScoreDetail = ({
 							defaultChecked={score === 4}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-						/>
+						crossOrigin={undefined}
+						disabled={disabled}
+					/>
 					</div>
 					{score && score <= 2 && (
 						<div className="flex flex-row gap-2 px-3 bg-red-100 rounded-sm">
@@ -208,8 +214,9 @@ const ScoreDetail = ({
 								defaultChecked={score_2 === 1}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 							<Radio
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="2"
@@ -230,8 +237,9 @@ const ScoreDetail = ({
 								defaultChecked={score_2 === 2}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 							<Radio
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="3"
@@ -252,8 +260,9 @@ const ScoreDetail = ({
 								defaultChecked={score_2 === 3}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 							<Radio
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="4"
@@ -274,8 +283,9 @@ const ScoreDetail = ({
 								defaultChecked={score_2 === 4}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 						</div>
 					)}
 
@@ -301,8 +311,9 @@ const ScoreDetail = ({
 								defaultChecked={score_3 === 1}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 							<Radio
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="2"
@@ -323,8 +334,9 @@ const ScoreDetail = ({
 								defaultChecked={score_3 === 2}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 							<Radio
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="3"
@@ -345,8 +357,9 @@ const ScoreDetail = ({
 								defaultChecked={score_3 === 3}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 							<Radio
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="4"
@@ -367,8 +380,9 @@ const ScoreDetail = ({
 								defaultChecked={score_3 === 4}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
-								crossOrigin={undefined}
-							/>
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
 						</div>
 					)}
 				</div>

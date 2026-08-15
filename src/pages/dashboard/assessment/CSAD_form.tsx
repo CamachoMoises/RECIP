@@ -358,35 +358,6 @@ const CSAD_form = ({
 		<div className="content-center">
 			{/* Form for CSAD */}
 			<form onSubmit={handleSubmit(onSubmit)}>
-				{isFormDisabled && (
-					<div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-						{isSuperuser ? (
-							<Button
-								variant="outlined"
-								color="blue"
-								onClick={() => {
-									setIsFormDisabled(false);
-									setConsentChecked(false);
-								}}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Editar
-							</Button>
-						) : (
-							<Typography
-								variant="small"
-								className="text-slate-700"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Formulario bloqueado
-							</Typography>
-						)}
-					</div>
-				)}
 				<fieldset disabled={isFormDisabled}>
 					<div
 						className={`grid grid-cols-4 gap-4 py-3 rounded-md ${
@@ -682,7 +653,7 @@ const CSAD_form = ({
 					<hr />
 					{assessment.courseStudentAssessmentDaySelected?.airport && (
 						<>
-							<LessonDetails day={day} />
+							<LessonDetails day={day} disabled={isFormDisabled} />
 							<hr />
 							<div className="flex flex-col sm:flex-row gap-4 my-4">
 								<div className="flex-1 rounded-lg border border-blue-gray-200 bg-white p-4">
@@ -1113,6 +1084,37 @@ const CSAD_form = ({
 					)}
 				</div>
 				<br />
+				<div className="flex flex-row gap-2">
+					{isFormDisabled && (
+						<div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+							{isSuperuser ? (
+								<Button
+									variant="outlined"
+									color="blue"
+									onClick={() => {
+										setIsFormDisabled(false);
+										setConsentChecked(false);
+									}}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Editar
+								</Button>
+							) : (
+								<Typography
+									variant="small"
+									className="text-slate-700"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Formulario bloqueado
+								</Typography>
+							)}
+						</div>
+					)}
+				</div>
 				<div className="flex flex-row gap-2">
 					<fieldset disabled={isFormDisabled} className="contents">
 						<Button

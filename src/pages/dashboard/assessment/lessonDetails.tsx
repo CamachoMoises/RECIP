@@ -6,7 +6,7 @@ import { courseStudentAssessmentLessonDay } from '../../../types/utilities';
 import { changeCourseStudentAssessmentLessonDay } from '../../../features/assessmentSlice';
 import ScoreDetail from './scoreDetail';
 
-const LessonDetails = ({ day }: { day: number }) => {
+const LessonDetails = ({ day, disabled }: { day: number; disabled: boolean }) => {
 	const dispatch = useDispatch<AppDispatch>();
 
 	const { assessment } = useSelector((state: RootState) => {
@@ -106,11 +106,12 @@ const LessonDetails = ({ day }: { day: number }) => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											<ScoreDetail
-												SLE={SLE}
-												SLD_id={SLD_id}
-												handleChangeRadio={handleChangeRadio}
-											/>
+										<ScoreDetail
+											SLE={SLE}
+											SLD_id={SLD_id}
+											disabled={disabled}
+											handleChangeRadio={handleChangeRadio}
+										/>
 										</ListItem>
 									);
 								})}
