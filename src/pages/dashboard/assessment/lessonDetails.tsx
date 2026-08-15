@@ -6,7 +6,13 @@ import { courseStudentAssessmentLessonDay } from '../../../types/utilities';
 import { changeCourseStudentAssessmentLessonDay } from '../../../features/assessmentSlice';
 import ScoreDetail from './scoreDetail';
 
-const LessonDetails = ({ day, disabled }: { day: number; disabled: boolean }) => {
+const LessonDetails = ({
+	day,
+	disabled,
+}: {
+	day: number;
+	disabled: boolean;
+}) => {
 	const dispatch = useDispatch<AppDispatch>();
 
 	const { assessment } = useSelector((state: RootState) => {
@@ -74,7 +80,7 @@ const LessonDetails = ({ day, disabled }: { day: number; disabled: boolean }) =>
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				Sessión del Dia {day}
+				Sesión del Dia {day}
 			</Typography>
 			<div className="flex flex-col gap-2 py-2">
 				{assessment.subjectList?.map((SL, index) => {
@@ -106,12 +112,12 @@ const LessonDetails = ({ day, disabled }: { day: number; disabled: boolean }) =>
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-										<ScoreDetail
-											SLE={SLE}
-											SLD_id={SLD_id}
-											disabled={disabled}
-											handleChangeRadio={handleChangeRadio}
-										/>
+											<ScoreDetail
+												SLE={SLE}
+												SLD_id={SLD_id}
+												disabled={disabled}
+												handleChangeRadio={handleChangeRadio}
+											/>
 										</ListItem>
 									);
 								})}
