@@ -104,13 +104,11 @@ const styles = StyleSheet.create({
 const CSAssessmentPDFDocument = ({
 	assessment,
 	logoBase64,
-	day,
 	signatures,
 	schedules,
 }: {
 	assessment: assessmentState;
 	logoBase64: string;
-	day?: number;
 	signatures?: Record<
 		number,
 		{ student?: string; instructor?: string; fcaa?: string }
@@ -129,33 +127,13 @@ const CSAssessmentPDFDocument = ({
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const jerarquia = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
-	const courseDays = CSA?.course?.days ?? 0;
-	const maxDay = day ?? courseDays;
-	const loadedDayNumbers = assessmentDays
-		.map((CSAD) => CSAD.day)
-		.filter((d): d is number => !!d && d > 0);
-	const maxLoadedDay = loadedDayNumbers.length
-		? Math.max(...loadedDayNumbers)
-		: 0;
-	const lastDayToShow = maxLoadedDay
-		? maxLoadedDay
-		: maxDay > 0 && maxDay <= courseDays
-			? maxDay
-			: courseDays;
-	const days = courseDays
-		? Array.from(
-				{
-					length:
-						lastDayToShow > 0
-							? Math.min(courseDays, lastDayToShow)
-							: 0,
-				},
-				(_, i) => ({
-					id: i,
-					name: `Dia ${i + 1}`,
-				}),
-			)
-		: [];
+	const evaluatedDays = [...assessmentDays]
+		.filter((CSAD) => !!CSAD.airport && Number(CSAD.day) > 0)
+		.sort((a, b) => Number(a.day) - Number(b.day));
+	const days = evaluatedDays.map((CSAD) => ({
+		id: Number(CSAD.day) - 1,
+		name: `Dia ${Number(CSAD.day)}`,
+	}));
 
 	let sumLanding = 0;
 	let sumTakeOff = 0;
@@ -389,7 +367,7 @@ const CSAssessmentPDFDocument = ({
 
 							<Text style={[styles.cell, { flex: 1 }]}>
 								<Text style={styles.cellBold}>
-									Fecha de revisión:
+									Fecha de evaluación:
 								</Text>{' '}
 								{lastScheduleDate
 									? moment(lastScheduleDate).format(dateFormat)
@@ -928,7 +906,7 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 							>
-								Firma digital
+								Firma: Director de 360ATC
 							</Text>
 						</View>
 						<View style={styles.row}>
@@ -964,85 +942,83 @@ const CSAssessmentPDFDocument = ({
 								Firma Chequeador / Ins. Inac
 							</Text>
 						</View>
-						{[...assessmentDays]
-							.sort((a, b) => Number(a.day) - Number(b.day))
-							.map((csad, index) => {
-								const dayNum = Number(csad.day);
-								const daySigs = signatures?.[dayNum] ?? {};
-								return (
-									<View
-										key={`firmas-${index}`}
-										style={styles.row}
-										wrap={false}
+						{evaluatedDays.map((csad, index) => {
+							const dayNum = Number(csad.day);
+							const daySigs = signatures?.[dayNum] ?? {};
+							return (
+								<View
+									key={`firmas-${index}`}
+									style={styles.row}
+									wrap={false}
+								>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
 									>
-										<Text
-											style={[
-												styles.cell,
-												{ flex: 1, textAlign: 'center' },
-											]}
-										>
-											{dayNum}
-										</Text>
-										<View
-											style={[
-												styles.cell,
-												{
-													flex: 1,
-													alignItems: 'center',
-													justifyContent: 'center',
-												},
-											]}
-										>
-											{daySigs.student ? (
-												<Image
-													style={styles.sigImage}
-													src={daySigs.student}
-												/>
-											) : (
-												<Text style={styles.noSignature}>—</Text>
-											)}
-										</View>
-										<View
-											style={[
-												styles.cell,
-												{
-													flex: 1,
-													alignItems: 'center',
-													justifyContent: 'center',
-												},
-											]}
-										>
-											{daySigs.instructor ? (
-												<Image
-													style={styles.sigImage}
-													src={daySigs.instructor}
-												/>
-											) : (
-												<Text style={styles.noSignature}>—</Text>
-											)}
-										</View>
-										<View
-											style={[
-												styles.cell,
-												{
-													flex: 1,
-													alignItems: 'center',
-													justifyContent: 'center',
-												},
-											]}
-										>
-											{daySigs.fcaa ? (
-												<Image
-													style={styles.sigImage}
-													src={daySigs.fcaa}
-												/>
-											) : (
-												<Text style={styles.noSignature}>—</Text>
-											)}
-										</View>
+										{dayNum}
+									</Text>
+									<View
+										style={[
+											styles.cell,
+											{
+												flex: 1,
+												alignItems: 'center',
+												justifyContent: 'center',
+											},
+										]}
+									>
+										{daySigs.student ? (
+											<Image
+												style={styles.sigImage}
+												src={daySigs.student}
+											/>
+										) : (
+											<Text style={styles.noSignature}>—</Text>
+										)}
 									</View>
-								);
-							})}
+									<View
+										style={[
+											styles.cell,
+											{
+												flex: 1,
+												alignItems: 'center',
+												justifyContent: 'center',
+											},
+										]}
+									>
+										{daySigs.instructor ? (
+											<Image
+												style={styles.sigImage}
+												src={daySigs.instructor}
+											/>
+										) : (
+											<Text style={styles.noSignature}>—</Text>
+										)}
+									</View>
+									<View
+										style={[
+											styles.cell,
+											{
+												flex: 1,
+												alignItems: 'center',
+												justifyContent: 'center',
+											},
+										]}
+									>
+										{daySigs.fcaa ? (
+											<Image
+												style={styles.sigImage}
+												src={daySigs.fcaa}
+											/>
+										) : (
+											<Text style={styles.noSignature}>—</Text>
+										)}
+									</View>
+								</View>
+							);
+						})}
 					</View>
 
 					{/* Legal */}

@@ -1,6 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
-import { breadCrumbsItems, courseStudentAssessmentDay } from '../../../types/utilities';
+import {
+	breadCrumbsItems,
+	courseStudentAssessmentDay,
+} from '../../../types/utilities';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import PageTitle from '../../../components/PageTitle';
@@ -48,12 +51,15 @@ const buildSignatures = async (
 	days: courseStudentAssessmentDay[],
 ): Promise<Record<number, DaySignatures>> => {
 	const result: Record<number, DaySignatures> = {};
-	const sorted = [...days].sort((a, b) => Number(a.day) - Number(b.day));
+	const sorted = [...days].sort(
+		(a, b) => Number(a.day) - Number(b.day),
+	);
 	for (const csad of sorted) {
 		const id = csad.id;
 		const dayNum = Number(csad.day);
 		if (!id || !dayNum) continue;
-		const isLastDay = Number(sorted[sorted.length - 1].day) === dayNum;
+		const isLastDay =
+			Number(sorted[sorted.length - 1].day) === dayNum;
 		const [student, instructor, fcaa] = await Promise.all([
 			getCloudinaryPngBase64(`firmas/firmas/signature_1_${id}`),
 			getCloudinaryPngBase64(`firmas/firmas/signature_2_${id}`),
@@ -204,7 +210,7 @@ const DetailAssessment = () => {
 		student_id,
 		course_student_id,
 	]);
-	const generatePdf = async (dayToShow?: number) => {
+	const generatePdf = async () => {
 		const CSA = assessment.courseStudentAssessmentSelected;
 		const [fresh, scheduleRes] = await Promise.all([
 			dispatch(fetchAssessmentData(CSA?.id ?? -1)).unwrap(),
@@ -223,7 +229,6 @@ const DetailAssessment = () => {
 			<CSAssessmentPDFDocument
 				assessment={freshAssessment}
 				logoBase64={logoBase64}
-				day={dayToShow ?? fresh.CSA?.course?.days}
 				signatures={signatures}
 				schedules={scheduleRes}
 			/>,
@@ -233,7 +238,7 @@ const DetailAssessment = () => {
 	const printCSA = async () => {
 		const printWindow = window.open('', '_blank');
 		try {
-			const { pdfBlob } = await generatePdf(activeStep + 1);
+			const { pdfBlob } = await generatePdf();
 			const url = URL.createObjectURL(pdfBlob);
 			if (printWindow) {
 				printWindow.addEventListener('load', () => {
@@ -523,7 +528,7 @@ const DetailAssessment = () => {
 									</Typography>
 								</div>
 							</div>
-							{missingDay && (
+							{/* {missingDay && (
 								<div>
 									<Typography
 										variant="h5"
@@ -535,7 +540,7 @@ const DetailAssessment = () => {
 										Faltan dias por calificar
 									</Typography>
 								</div>
-							)}
+							)} */}
 							<div className="flex flex-row items-center justify-between rounded-lg bg-blue-gray-50 p-3">
 								<Typography
 									variant="h5"
@@ -665,14 +670,14 @@ const DetailAssessment = () => {
 									Excelente
 								</Typography>
 							</div>
-						<CSAD_form
-							day={activeStep + 1}
-							printCSA={printCSA}
-							sendCSA={async () => setSendModalOpen(true)}
-							sendingEmail={mailsended}
-							isLastStep={isLastStep}
-							isFirstStep={isFirstStep}
-						/>
+							<CSAD_form
+								day={activeStep + 1}
+								printCSA={printCSA}
+								sendCSA={async () => setSendModalOpen(true)}
+								sendingEmail={mailsended}
+								isLastStep={isLastStep}
+								isFirstStep={isFirstStep}
+							/>
 						</div>
 					</CardBody>
 					<CardFooter
