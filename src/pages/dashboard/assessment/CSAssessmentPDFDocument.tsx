@@ -120,15 +120,29 @@ const CSAssessmentPDFDocument = ({
 	const assessmentDays = CSA?.CourseStudentAssessmentDays ?? [];
 	const findDay = (dayNum: number) =>
 		assessmentDays.find((CSAD) => Number(CSAD.day) === dayNum);
-	console.log(
-		'[CSAssessmentPDF] CourseStudentAssessmentDays:',
-		assessmentDays,
-	);
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const jerarquia = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+	const daysWithLessons = new Set<number>();
+	(assessment.daysSubjectList ?? []).forEach((sub) =>
+		(sub.subject_lessons ?? []).forEach((SL) =>
+			(SL.subject_lesson_days ?? []).forEach((SLD) => {
+				if (
+					(SLD.course_student_assessment_lesson_days?.length ?? 0) >
+						0 &&
+					SLD.day
+				) {
+					daysWithLessons.add(Number(SLD.day));
+				}
+			}),
+		),
+	);
 	const evaluatedDays = [...assessmentDays]
-		.filter((CSAD) => !!CSAD.airport && Number(CSAD.day) > 0)
+		.filter(
+			(CSAD) =>
+				daysWithLessons.has(Number(CSAD.day)) &&
+				Number(CSAD.day) > 0,
+		)
 		.sort((a, b) => Number(a.day) - Number(b.day));
 	const days = evaluatedDays.map((CSAD) => ({
 		id: Number(CSAD.day) - 1,
@@ -396,253 +410,257 @@ const CSAssessmentPDFDocument = ({
 						</View>
 					</View>
 
-					{/* Evaluación Tipo */}
-					<View style={styles.table}>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 2 }]}
-							>
-								Dia
-							</Text>
-							{days.map((dayItem, index) => (
+					{days.length > 0 && (
+						<>
+						{/* Evaluación Tipo */}
+						<View style={styles.table}>
+							<View style={styles.row}>
 								<Text
-									key={`type-h-${index}`}
-									style={[
-										styles.cell,
-										styles.cellHeader,
-										{ flex: 1, textAlign: 'center' },
-									]}
+									style={[styles.cell, styles.cellHeader, { flex: 2 }]}
 								>
-									{dayItem.id + 1}
+									Dia
 								</Text>
-							))}
-						</View>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
-							>
-								Evaluación Tipo
-							</Text>
-							{days.map((dayItem, index) => {
-								const dayType = findDay(dayItem.id + 1);
-								return (
-									<Text
-										key={`type-v-${index}`}
-										style={[
-											styles.cell,
-											{ flex: 1, textAlign: 'center' },
-										]}
-									>
-										{dayType?.type && typeLabelMap[dayType.type]
-											? typeLabelMap[dayType.type]
-											: 'Sin tipo'}
-									</Text>
-								);
-							})}
-						</View>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
-							>
-								Evaluación en el FFS / Proficiencia:
-							</Text>
-							<Text style={[styles.cell, { flex: 4 }]}>
-								(1) Insatisfactorio. (2) Por Debajo de los Estándares.
-								(3) Satisfactorio. (4) Excelente
-							</Text>
-						</View>
-					</View>
-
-					{/* Periodo de Entrenamiento */}
-					<View style={styles.table}>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
-							>
-								Periodo de Entrenamiento
-							</Text>
-							<Text style={[styles.cell, { flex: 4 }]}>
-								<Text style={styles.cellBold}>Fecha:</Text>{' '}
 								{days.map((dayItem, index) => (
-									<Text key={index}>
-										{getDayDate(dayItem.id)}
-										{index < days.length - 1 ? ' / ' : ''}
-									</Text>
-								))}
-							</Text>
-						</View>
-					</View>
-
-					{/* Periodo de formación */}
-					<View style={styles.table}>
-						<View style={styles.row}>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 2, fontSize: 7 },
-								]}
-							>
-								Periodo de formación
-							</Text>
-							{days.map((dayItem, index) => (
-								<Text
-									key={`pf-h-${index}`}
-									style={[
-										styles.cell,
-										styles.cellHeader,
-										{ flex: 1, textAlign: 'center' },
-									]}
-								>
-									{dayItem.id + 1}
-								</Text>
-							))}
-						</View>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
-							>
-								Fecha:
-							</Text>
-							{days.map((dayItem, index) => (
-								<Text
-									key={`pf-f-${index}`}
-									style={[
-										styles.cell,
-										{ flex: 1, textAlign: 'center' },
-									]}
-								>
-									{getDayDate(dayItem.id)}
-								</Text>
-							))}
-						</View>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
-							>
-								Iniciales de instructor
-							</Text>
-							{days.map((dayItem, index) => (
-								<Text
-									key={`pf-i-${index}`}
-									style={[
-										styles.cell,
-										{ flex: 1, textAlign: 'center' },
-									]}
-								>
-									{getInstructorInitials(dayItem.id)}
-								</Text>
-							))}
-						</View>
-
-						{assessment.daysSubjectList?.map((sub, index) => (
-							<View key={`subject-${index}`}>
-								<View style={styles.row}>
 									<Text
+										key={`type-h-${index}`}
 										style={[
 											styles.cell,
 											styles.cellHeader,
-											{ flex: 2 },
+											{ flex: 1, textAlign: 'center' },
 										]}
 									>
-										{sub.name}
+										{dayItem.id + 1}
 									</Text>
-									{days.map((dayItem, dIndex) => (
+								))}
+							</View>
+							<View style={styles.row}>
+								<Text
+									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
+								>
+									Evaluación Tipo
+								</Text>
+								{days.map((dayItem, index) => {
+									const dayType = findDay(dayItem.id + 1);
+									return (
 										<Text
-											key={`s-${index}-h-${dIndex}`}
+											key={`type-v-${index}`}
 											style={[
 												styles.cell,
-												styles.cellHeader,
 												{ flex: 1, textAlign: 'center' },
 											]}
 										>
-											{dayItem.id + 1}
+											{dayType?.type && typeLabelMap[dayType.type]
+												? typeLabelMap[dayType.type]
+												: 'Sin tipo'}
+										</Text>
+									);
+								})}
+							</View>
+							<View style={styles.row}>
+								<Text
+									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
+								>
+									Evaluación en el FFS / Proficiencia:
+								</Text>
+								<Text style={[styles.cell, { flex: 4 }]}>
+									(1) Insatisfactorio. (2) Por Debajo de los Estándares.
+									(3) Satisfactorio. (4) Excelente
+								</Text>
+							</View>
+						</View>
+
+						{/* Periodo de Entrenamiento */}
+						<View style={styles.table}>
+							<View style={styles.row}>
+								<Text
+									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
+								>
+									Periodo de Entrenamiento
+								</Text>
+								<Text style={[styles.cell, { flex: 4 }]}>
+									<Text style={styles.cellBold}>Fecha:</Text>{' '}
+									{days.map((dayItem, index) => (
+										<Text key={index}>
+											{getDayDate(dayItem.id)}
+											{index < days.length - 1 ? ' / ' : ''}
 										</Text>
 									))}
-								</View>
-								{sub.subject_lessons?.map((SL, slIndex) => (
-									<View
-										key={`SL-${index}-${slIndex}`}
-										style={styles.row}
+								</Text>
+							</View>
+						</View>
+
+						{/* Periodo de formación */}
+						<View style={styles.table}>
+							<View style={styles.row}>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 2, fontSize: 7 },
+									]}
+								>
+									Periodo de formación
+								</Text>
+								{days.map((dayItem, index) => (
+									<Text
+										key={`pf-h-${index}`}
+										style={[
+											styles.cell,
+											styles.cellHeader,
+											{ flex: 1, textAlign: 'center' },
+										]}
 									>
-										<Text
-											style={[
-												styles.cell,
-												{ flex: 2, fontWeight: 'bold' },
-											]}
-										>
-											{SL.name}
-										</Text>
-										{days.map((dayItem, dIndex) => {
-											const dayActive = SL.subject_lesson_days?.find(
-												(SLD) => SLD.day === dayItem.id + 1,
-											);
-											const CSALD =
-												dayActive?.course_student_assessment_lesson_days;
-											const tryCount =
-												CSALD && CSALD.length > 0 ? CSALD[0] : null;
-											const score = tryCount?.score ?? '';
-											const score2 =
-												tryCount?.score_2 && tryCount.score <= 2
-													? ` / ${tryCount.score_2}`
-													: '';
-											const score3 =
-												tryCount?.score_3 &&
-												tryCount.score_2 &&
-												tryCount.score_2 <= 2
-													? ` / ${tryCount.score_3}`
-													: '';
-											return (
-												<Text
-													key={`s-${index}-${dIndex}`}
-													style={[
-														styles.cell,
-														{
-															flex: 1,
-															textAlign: 'center',
-														},
-														...(dayActive ? [styles.cellGray] : []),
-													]}
-												>
-													{score}
-													{score2}
-													{score3}
-												</Text>
-											);
-										})}
-									</View>
+										{dayItem.id + 1}
+									</Text>
 								))}
 							</View>
-						))}
-					</View>
-
-					{/* Resumen de Evaluación/Proficiencia por día */}
-					<View style={styles.table}>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 2 }]}
-							>
-								Resumen de Evaluación/Proficiencia por día
-							</Text>
-							{days.map((dayItem, index) => {
-								const dayAverage = findDay(
-									dayItem.id + 1,
-								)?.score_average;
-								return (
+							<View style={styles.row}>
+								<Text
+									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
+								>
+									Fecha:
+								</Text>
+								{days.map((dayItem, index) => (
 									<Text
-										key={`avg-${index}`}
+										key={`pf-f-${index}`}
 										style={[
 											styles.cell,
 											{ flex: 1, textAlign: 'center' },
 										]}
 									>
-										{dayAverage != null ? dayAverage : ''}
+										{getDayDate(dayItem.id)}
 									</Text>
-								);
-							})}
-						</View>
-					</View>
+								))}
+							</View>
+							<View style={styles.row}>
+								<Text
+									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
+								>
+									Iniciales de instructor
+								</Text>
+								{days.map((dayItem, index) => (
+									<Text
+										key={`pf-i-${index}`}
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
+									>
+										{getInstructorInitials(dayItem.id)}
+									</Text>
+								))}
+							</View>
 
+							{assessment.daysSubjectList?.map((sub, index) => (
+								<View key={`subject-${index}`}>
+									<View style={styles.row}>
+										<Text
+											style={[
+												styles.cell,
+												styles.cellHeader,
+												{ flex: 2 },
+											]}
+										>
+											{sub.name}
+										</Text>
+										{days.map((dayItem, dIndex) => (
+											<Text
+												key={`s-${index}-h-${dIndex}`}
+												style={[
+													styles.cell,
+													styles.cellHeader,
+													{ flex: 1, textAlign: 'center' },
+												]}
+											>
+												{dayItem.id + 1}
+											</Text>
+										))}
+									</View>
+									{sub.subject_lessons?.map((SL, slIndex) => (
+										<View
+											key={`SL-${index}-${slIndex}`}
+											style={styles.row}
+										>
+											<Text
+												style={[
+													styles.cell,
+													{ flex: 2, fontWeight: 'bold' },
+												]}
+											>
+												{SL.name}
+											</Text>
+											{days.map((dayItem, dIndex) => {
+												const dayActive = SL.subject_lesson_days?.find(
+													(SLD) => SLD.day === dayItem.id + 1,
+												);
+												const CSALD =
+													dayActive?.course_student_assessment_lesson_days;
+												const tryCount =
+													CSALD && CSALD.length > 0 ? CSALD[0] : null;
+												const score = tryCount?.score ?? '';
+												const score2 =
+													tryCount?.score_2 && tryCount.score <= 2
+														? ` / ${tryCount.score_2}`
+														: '';
+												const score3 =
+													tryCount?.score_3 &&
+													tryCount.score_2 &&
+													tryCount.score_2 <= 2
+														? ` / ${tryCount.score_3}`
+														: '';
+												return (
+													<Text
+														key={`s-${index}-${dIndex}`}
+														style={[
+															styles.cell,
+															{
+																flex: 1,
+																textAlign: 'center',
+															},
+															...(dayActive ? [styles.cellGray] : []),
+														]}
+													>
+														{score}
+														{score2}
+														{score3}
+													</Text>
+												);
+											})}
+										</View>
+									))}
+								</View>
+							))}
+						</View>
+
+						{/* Resumen de Evaluación/Proficiencia por día */}
+						<View style={styles.table}>
+							<View style={styles.row}>
+								<Text
+									style={[styles.cell, styles.cellHeader, { flex: 2 }]}
+								>
+									Resumen de Evaluación/Proficiencia por día
+								</Text>
+								{days.map((dayItem, index) => {
+									const dayAverage = findDay(
+										dayItem.id + 1,
+									)?.score_average;
+									return (
+										<Text
+											key={`avg-${index}`}
+											style={[
+												styles.cell,
+												{ flex: 1, textAlign: 'center' },
+											]}
+										>
+											{dayAverage != null ? dayAverage : ''}
+										</Text>
+									);
+								})}
+							</View>
+						</View>
+
+						</>
+					)}
 					{/* Resumen de despegues y aterrizajes */}
 					<View style={styles.table}>
 						<View style={styles.row}>
@@ -754,131 +772,135 @@ const CSAssessmentPDFDocument = ({
 						</View>
 					</View>
 
-					{/* Detalle de evaluación por día */}
-					<View style={styles.table}>
-						<View style={styles.row}>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 6, textAlign: 'center' },
-								]}
-							>
-								DETALLE DE EVALUACIÓN POR DÍA
-							</Text>
+					{days.length > 0 && (
+						<>
+						{/* Detalle de evaluación por día */}
+						<View style={styles.table}>
+							<View style={styles.row}>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 6, textAlign: 'center' },
+									]}
+								>
+									DETALLE DE EVALUACIÓN POR DÍA
+								</Text>
+							</View>
+							<View style={styles.row}>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 1, textAlign: 'center' },
+									]}
+								>
+									Dia
+								</Text>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 2, textAlign: 'center' },
+									]}
+								>
+									Tipo
+								</Text>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 2, textAlign: 'center' },
+									]}
+								>
+									Despegues
+								</Text>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 2, textAlign: 'center' },
+									]}
+								>
+									Aterrizajes
+								</Text>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 1, textAlign: 'center' },
+									]}
+								>
+									Promedio
+								</Text>
+								<Text
+									style={[
+										styles.cell,
+										styles.cellHeader,
+										{ flex: 3, textAlign: 'center' },
+									]}
+								>
+									Observaciones
+								</Text>
+							</View>
+							{days.map((dayItem, index) => {
+								const dayCSAD = findDay(dayItem.id + 1);
+								return (
+									<View key={`daydetail-${index}`} style={styles.row}>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 1, textAlign: 'center' },
+											]}
+										>
+											{dayItem.id + 1}
+										</Text>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, textAlign: 'center' },
+											]}
+										>
+											{dayCSAD?.type
+												? (typeLabelMap[dayCSAD.type] ?? dayCSAD.type)
+												: ''}
+										</Text>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, textAlign: 'center' },
+											]}
+										>
+											{despeguesText(dayCSAD)}
+										</Text>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, textAlign: 'center' },
+											]}
+										>
+											{aterrizajesText(dayCSAD)}
+										</Text>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 1, textAlign: 'center' },
+											]}
+										>
+											{dayCSAD?.score_average != null
+												? dayCSAD.score_average
+												: ''}
+										</Text>
+										<Text style={[styles.cell, { flex: 3 }]}>
+											{dayCSAD?.comments ? dayCSAD.comments : ''}
+										</Text>
+									</View>
+								);
+							})}
 						</View>
-						<View style={styles.row}>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 1, textAlign: 'center' },
-								]}
-							>
-								Dia
-							</Text>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 2, textAlign: 'center' },
-								]}
-							>
-								Tipo
-							</Text>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 2, textAlign: 'center' },
-								]}
-							>
-								Despegues
-							</Text>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 2, textAlign: 'center' },
-								]}
-							>
-								Aterrizajes
-							</Text>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 1, textAlign: 'center' },
-								]}
-							>
-								Promedio
-							</Text>
-							<Text
-								style={[
-									styles.cell,
-									styles.cellHeader,
-									{ flex: 3, textAlign: 'center' },
-								]}
-							>
-								Observaciones
-							</Text>
-						</View>
-						{days.map((dayItem, index) => {
-							const dayCSAD = findDay(dayItem.id + 1);
-							return (
-								<View key={`daydetail-${index}`} style={styles.row}>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 1, textAlign: 'center' },
-										]}
-									>
-										{dayItem.id + 1}
-									</Text>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, textAlign: 'center' },
-										]}
-									>
-										{dayCSAD?.type
-											? (typeLabelMap[dayCSAD.type] ?? dayCSAD.type)
-											: ''}
-									</Text>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, textAlign: 'center' },
-										]}
-									>
-										{despeguesText(dayCSAD)}
-									</Text>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, textAlign: 'center' },
-										]}
-									>
-										{aterrizajesText(dayCSAD)}
-									</Text>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 1, textAlign: 'center' },
-										]}
-									>
-										{dayCSAD?.score_average != null
-											? dayCSAD.score_average
-											: ''}
-									</Text>
-									<Text style={[styles.cell, { flex: 3 }]}>
-										{dayCSAD?.comments ? dayCSAD.comments : ''}
-									</Text>
-								</View>
-							);
-						})}
-					</View>
 
+						</>
+					)}
 					{/* Proficiencia del curso */}
 					{courseScoreAverage != null && (
 						<View style={styles.table}>
@@ -918,109 +940,113 @@ const CSAssessmentPDFDocument = ({
 						</View>
 					</View>
 
-					{/* Firmas por día */}
-					<View style={styles.table}>
-						<View style={styles.row}>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
-							>
-								Dia
-							</Text>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
-							>
-								Firma del alumno
-							</Text>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
-							>
-								Firma del instructor
-							</Text>
-							<Text
-								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
-							>
-								Firma Chequeador / Ins. Inac
-							</Text>
-						</View>
-						{evaluatedDays.map((csad, index) => {
-							const dayNum = Number(csad.day);
-							const daySigs = signatures?.[dayNum] ?? {};
-							return (
-								<View
-									key={`firmas-${index}`}
-									style={styles.row}
-									wrap={false}
+					{days.length > 0 && (
+						<>
+						{/* Firmas por día */}
+						<View style={styles.table}>
+							<View style={styles.row}>
+								<Text
+									style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 								>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 1, textAlign: 'center' },
-										]}
-									>
-										{dayNum}
-									</Text>
+									Dia
+								</Text>
+								<Text
+									style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+								>
+									Firma del alumno
+								</Text>
+								<Text
+									style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+								>
+									Firma del instructor
+								</Text>
+								<Text
+									style={[styles.cell, styles.cellHeader, { flex: 1 }]}
+								>
+									Firma Chequeador / Ins. Inac
+								</Text>
+							</View>
+							{evaluatedDays.map((csad, index) => {
+								const dayNum = Number(csad.day);
+								const daySigs = signatures?.[dayNum] ?? {};
+								return (
 									<View
-										style={[
-											styles.cell,
-											{
-												flex: 1,
-												alignItems: 'center',
-												justifyContent: 'center',
-											},
-										]}
+										key={`firmas-${index}`}
+										style={styles.row}
+										wrap={false}
 									>
-										{daySigs.student ? (
-											<Image
-												style={styles.sigImage}
-												src={daySigs.student}
-											/>
-										) : (
-											<Text style={styles.noSignature}>—</Text>
-										)}
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 1, textAlign: 'center' },
+											]}
+										>
+											{dayNum}
+										</Text>
+										<View
+											style={[
+												styles.cell,
+												{
+													flex: 1,
+													alignItems: 'center',
+													justifyContent: 'center',
+												},
+											]}
+										>
+											{daySigs.student ? (
+												<Image
+													style={styles.sigImage}
+													src={daySigs.student}
+												/>
+											) : (
+												<Text style={styles.noSignature}>—</Text>
+											)}
+										</View>
+										<View
+											style={[
+												styles.cell,
+												{
+													flex: 1,
+													alignItems: 'center',
+													justifyContent: 'center',
+												},
+											]}
+										>
+											{daySigs.instructor ? (
+												<Image
+													style={styles.sigImage}
+													src={daySigs.instructor}
+												/>
+											) : (
+												<Text style={styles.noSignature}>—</Text>
+											)}
+										</View>
+										<View
+											style={[
+												styles.cell,
+												{
+													flex: 1,
+													alignItems: 'center',
+													justifyContent: 'center',
+												},
+											]}
+										>
+											{daySigs.fcaa ? (
+												<Image
+													style={styles.sigImage}
+													src={daySigs.fcaa}
+												/>
+											) : (
+												<Text style={styles.noSignature}>—</Text>
+											)}
+										</View>
 									</View>
-									<View
-										style={[
-											styles.cell,
-											{
-												flex: 1,
-												alignItems: 'center',
-												justifyContent: 'center',
-											},
-										]}
-									>
-										{daySigs.instructor ? (
-											<Image
-												style={styles.sigImage}
-												src={daySigs.instructor}
-											/>
-										) : (
-											<Text style={styles.noSignature}>—</Text>
-										)}
-									</View>
-									<View
-										style={[
-											styles.cell,
-											{
-												flex: 1,
-												alignItems: 'center',
-												justifyContent: 'center',
-											},
-										]}
-									>
-										{daySigs.fcaa ? (
-											<Image
-												style={styles.sigImage}
-												src={daySigs.fcaa}
-											/>
-										) : (
-											<Text style={styles.noSignature}>—</Text>
-										)}
-									</View>
-								</View>
-							);
-						})}
-					</View>
+								);
+							})}
+						</View>
 
+						</>
+					)}
 					{/* Legal */}
 					<View style={styles.legal}>
 						<Text>
