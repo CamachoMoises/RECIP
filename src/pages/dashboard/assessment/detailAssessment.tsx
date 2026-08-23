@@ -428,22 +428,42 @@ const DetailAssessment = () => {
 											assessment.courseStudentAssessmentSelected
 												?.student?.user?.name
 										}{' '}
-										{
-											assessment.courseStudentAssessmentSelected
-												?.student?.user?.last_name
-										}
-									</Typography>
-								</div>
-								<div className="flex flex-col gap-1">
-									<Typography
-										variant="small"
-										className="font-bold text-blue-gray-600"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Número de Identificación
-									</Typography>
+									{
+										assessment.courseStudentAssessmentSelected
+											?.student?.user?.last_name
+									}
+								</Typography>
+							</div>
+							<div className="flex flex-col gap-1">
+								<Typography
+									variant="small"
+									className="font-bold text-blue-gray-600"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Rango
+								</Typography>
+								<Typography
+									variant="lead"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{assessment.courseStudentAssessmentSelected
+										?.student?.user?.rank || 'N/A'}
+								</Typography>
+							</div>
+							<div className="flex flex-col gap-1">
+								<Typography
+									variant="small"
+									className="font-bold text-blue-gray-600"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Número de Identificación
+								</Typography>
 									<Typography
 										variant="lead"
 										placeholder={undefined}

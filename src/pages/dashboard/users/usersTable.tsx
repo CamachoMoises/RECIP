@@ -64,6 +64,7 @@ const UserTable = () => {
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase()) ||
 			user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			user.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			user.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			`${user.user_doc_type?.symbol}-${user.doc_number}`
 				.toLowerCase()
@@ -106,10 +107,8 @@ const UserTable = () => {
 	}
 
 	const TABLE_HEAD = [
-		'ID',
-		'Nombre',
-		'Teléfono',
-		'Email',
+		'Usuario',
+		'Contacto',
 		'Tipo',
 		'Estatus',
 		'Acciones',
@@ -221,7 +220,7 @@ const UserTable = () => {
 						placeholder={undefined}
 					>
 						<div className="overflow-x-auto">
-							<table className="w-full min-w-max">
+							<table className="w-full">
 								<thead>
 									<tr>
 										{TABLE_HEAD.map((head) => (
@@ -258,46 +257,76 @@ const UserTable = () => {
 													key={user.id}
 													className="hover:bg-blue-gray-50/50"
 												>
-													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
-														{user.user_doc_type?.symbol}-
-														{user.doc_number}
-													</td>
 													<td className="py-3 px-4 border-b border-blue-gray-100">
-														<div className="flex items-center gap-3">
-															{/* <Avatar
-																src={user.photo || undefined}
-																alt={`${user.name} ${user.last_name}`}
-																size="sm"
-																className="border-2 border-white shadow-lg shadow-blue-gray-500/10"
+														{user.rank && (
+															<Typography
+																variant="small"
+																color="blue-gray"
+																className="text-xs opacity-70"
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
 																placeholder={undefined}
 															>
-																{!user.photo && (
-																	<User className="h-4 w-4" />
-																)}
-															</Avatar> */}
-															<div>
-																<Typography
-																	variant="small"
-																	color="blue-gray"
-																	className="font-semibold"
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
-																	placeholder={undefined}
-																>
-																	{user.name} {user.last_name}
-																</Typography>
-															</div>
-														</div>
+																Rango: {user.rank}
+															</Typography>
+														)}
+														<Typography
+															variant="small"
+															color="blue-gray"
+															className="font-semibold"
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															placeholder={undefined}
+														>
+															{user.name} {user.last_name}
+														</Typography>
+														<Typography
+															variant="small"
+															color="gray"
+															className="text-xs break-all"
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															placeholder={undefined}
+														>
+															Email: {user.email}
+														</Typography>
 													</td>
 													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
-														{user.phone || 'N/A'}
+														<Typography
+															variant="small"
+															color="blue-gray"
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															placeholder={undefined}
+														>
+															Doc: {user.user_doc_type?.symbol}-
+															{user.doc_number}
+														</Typography>
+														<Typography
+															variant="small"
+															color="gray"
+															className="text-xs"
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															placeholder={undefined}
+														>
+															Tel: {user.phone || 'N/A'}
+														</Typography>
 													</td>
-													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
-														{user.email}
-													</td>
-													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
-														{userType.join(' / ')}
-													</td>
+												<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+													{userType.map((type) => (
+														<Typography
+															key={type}
+															variant="small"
+															color="blue-gray"
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															placeholder={undefined}
+														>
+															{type}
+														</Typography>
+													))}
+												</td>
 													<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
 														<Chip
 															color={user.is_active ? 'green' : 'red'}

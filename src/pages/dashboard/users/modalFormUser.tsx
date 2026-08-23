@@ -38,6 +38,7 @@ type Inputs = {
 	password: string;
 	password2: string;
 	country_name: string;
+	rank: string;
 };
 const ModalFormUser = ({
 	userSelect,
@@ -89,6 +90,7 @@ const ModalFormUser = ({
 			phone: userSelect?.phone,
 			email: userSelect?.email,
 			country_name: userSelect?.country_name,
+			rank: userSelect?.rank ?? '',
 			password: '',
 			password2: '',
 			user_doc_type: userSelect?.user_doc_type?.id
@@ -152,6 +154,7 @@ const ModalFormUser = ({
 				is_active: isActive,
 				is_staff: isStaff,
 				is_superuser: isSuperuser,
+				rank: data.rank ? data.rank : null,
 				password: data.password,
 			};
 
@@ -250,6 +253,20 @@ const ModalFormUser = ({
 										{errors.last_name.message}
 									</span>
 								)}
+							</div>
+
+							<div className="">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									label="Rango"
+									maxLength={30}
+									placeholder="Rango"
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('rank')}
+								/>
 							</div>
 
 							<div>

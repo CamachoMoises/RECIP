@@ -55,7 +55,11 @@ const TableStudents = () => {
 			student.email
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase()) ||
-			student.phone?.toLowerCase().includes(searchTerm.toLowerCase()),
+			student.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			student.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			`${student.user_doc_type?.symbol}-${student.doc_number}`
+				.toLowerCase()
+				.includes(searchTerm.toLowerCase()),
 	);
 
 	const handleOpen = async (user: user | null = null) => {
@@ -192,7 +196,7 @@ const TableStudents = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="overflow-x-auto">
-							<table className="w-full min-w-max table-auto">
+							<table className="w-full table-auto">
 								<thead>
 									<tr>
 										<th className="border-b border-blue-gray-50 py-3 px-4 text-left">
@@ -228,7 +232,7 @@ const TableStudents = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Estado
+												Estatus
 											</Typography>
 										</th>
 										<th className="border-b border-blue-gray-50 py-3 px-4 text-center">
@@ -246,7 +250,8 @@ const TableStudents = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{filteredStudents?.map((student) => (
+									{filteredStudents?.length ? (
+										filteredStudents.map((student) => (
 										<tr
 											key={student.id}
 											className="hover:bg-blue-gray-50/50 transition-colors"
@@ -270,17 +275,8 @@ const TableStudents = () => {
 															<User className="h-5 w-5 text-blue-gray-500" />
 														</div>
 													)}
-													<div>
-														<Typography
-															variant="small"
-															color="blue-gray"
-															className="font-semibold"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															{student.name} {student.last_name}
-														</Typography>
+												<div>
+													{student.rank && (
 														<Typography
 															variant="small"
 															color="blue-gray"
@@ -289,48 +285,62 @@ const TableStudents = () => {
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 														>
-															ID: {student.id}
+															Rango: {student.rank}
 														</Typography>
-													</div>
-												</div>
-											</td>
-											<td className="py-3 px-4 border-b border-blue-gray-50">
-												<div className="flex flex-col">
+													)}
 													<Typography
 														variant="small"
 														color="blue-gray"
+														className="font-semibold"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														{student.email}
+														{student.name} {student.last_name}
 													</Typography>
 													<Typography
 														variant="small"
-														color="blue-gray"
-														className="text-xs"
+														color="gray"
+														className="text-xs break-all"
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														{student.phone || 'Sin teléfono'}
+														Email: {student.email}
 													</Typography>
 												</div>
-											</td>
+											</div>
+										</td>
+										<td className="py-3 px-4 border-b border-blue-gray-50 text-center">
+											<Typography
+												variant="small"
+												color="blue-gray"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Doc: {student.user_doc_type?.symbol}-
+												{student.doc_number}
+											</Typography>
+											<Typography
+												variant="small"
+												color="gray"
+												className="text-xs"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Tel: {student.phone || 'N/A'}
+											</Typography>
+										</td>
 											<td className="py-3 px-4 border-b border-blue-gray-50">
-												<Chip
-													variant="ghost"
-													color={
-														student.is_superuser ? 'green' : 'red'
-													}
-													size="sm"
-													value={
-														student.is_superuser
-															? 'Super user'
-															: 'Regular'
-													}
-													className="w-fit capitalize"
-												/>
+											<Chip
+												variant="ghost"
+												color={student.is_active ? 'green' : 'red'}
+												size="sm"
+												value={student.is_active ? 'Activo' : 'Inactivo'}
+												className="w-fit capitalize"
+											/>
 											</td>
 											<td className="py-3 px-4 border-b border-blue-gray-50 text-center">
 												<div className="flex justify-center gap-2">
@@ -367,7 +377,25 @@ const TableStudents = () => {
 												</div>
 											</td>
 										</tr>
-									))}
+									))
+									) : (
+										<tr>
+											<td
+												colSpan={4}
+												className="py-6 text-center"
+											>
+												<Typography
+													variant="small"
+													color="blue-gray"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													No se encontraron pilotos
+												</Typography>
+											</td>
+										</tr>
+									)}
 								</tbody>
 							</table>
 						</div>

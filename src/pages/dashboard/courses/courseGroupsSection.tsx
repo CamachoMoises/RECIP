@@ -660,6 +660,23 @@ const CourseGroupsSection = ({
 																	>
 																		<div className="flex items-center justify-between w-full">
 																			<div className="min-w-0 flex-1">
+																				{cs.student?.user?.rank && (
+																					<Typography
+																						variant="small"
+																						color="blue-gray"
+																						className="text-xs opacity-70 truncate"
+																						placeholder={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																					>
+																						Rango:{' '}
+																						{cs.student?.user?.rank}
+																					</Typography>
+																				)}
 																				<Typography
 																					variant="small"
 																					color="blue-gray"

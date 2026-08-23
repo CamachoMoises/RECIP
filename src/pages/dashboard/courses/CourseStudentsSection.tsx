@@ -228,6 +228,18 @@ const CourseStudentsSection = ({
 									className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 ${CL.status === false ? 'opacity-50' : ''}`}
 								>
 									<div className="min-w-0">
+										{CL.student?.user?.rank && (
+											<Typography
+												variant="small"
+												color="blue-gray"
+												className="text-xs opacity-70 truncate max-w-[150px] sm:max-w-none"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Rango: {CL.student?.user?.rank}
+											</Typography>
+										)}
 										<Typography
 											variant="h6"
 											color="blue-gray"
@@ -430,6 +442,25 @@ const CourseStudentsSection = ({
 											{selectedStudent.course?.name} (
 											{selectedStudent.course?.course_level?.name}-
 											{selectedStudent.course?.course_type?.name})
+										</Typography>
+									</div>
+									<div>
+										<Typography
+											variant="small"
+											color="gray"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Rango:
+										</Typography>
+										<Typography
+											variant="paragraph"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{selectedStudent.student?.user?.rank || 'N/A'}
 										</Typography>
 									</div>
 									<div>

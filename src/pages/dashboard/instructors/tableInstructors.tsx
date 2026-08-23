@@ -57,8 +57,12 @@ const TableInstructors = () => {
 			instructor.email
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase()) ||
+			instructor.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			instructor.phone
 				?.toLowerCase()
+				.includes(searchTerm.toLowerCase()) ||
+			`${instructor.user_doc_type?.symbol}-${instructor.doc_number}`
+				.toLowerCase()
 				.includes(searchTerm.toLowerCase()),
 	);
 
@@ -204,7 +208,7 @@ const TableInstructors = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="overflow-x-auto">
-							<table className="w-full min-w-max">
+							<table className="w-full">
 								<thead>
 									<tr>
 										<th className="border-b border-blue-gray-100 bg-blue-gray-50 py-3 px-4 text-left">
@@ -240,7 +244,7 @@ const TableInstructors = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Estado
+												Estatus
 											</Typography>
 										</th>
 										<th className="border-b border-blue-gray-100 bg-blue-gray-50 py-3 px-4 text-center">
@@ -258,60 +262,68 @@ const TableInstructors = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{filteredInstructors?.map((instructor) => (
+									{filteredInstructors?.length ? (
+										filteredInstructors.map((instructor) => (
 										<tr
 											key={instructor.id}
 											className="hover:bg-blue-gray-50/50"
 										>
-											<td className="py-3 px-4 border-b border-blue-gray-100">
-												<div className="flex items-center gap-3">
-													<div>
-														<Typography
-															variant="small"
-															color="blue-gray"
-															className="font-semibold"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															{instructor.name} {instructor.last_name}
-														</Typography>
-														<Typography
-															variant="small"
-															color="blue-gray"
-															className="text-xs opacity-70"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															ID: {instructor.id}
-														</Typography>
-													</div>
-												</div>
-											</td>
-											<td className="py-3 px-4 border-b border-blue-gray-100">
-												<div className="flex flex-col">
-													<Typography
-														variant="small"
-														color="blue-gray"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														{instructor.email}
-													</Typography>
-													<Typography
-														variant="small"
-														color="blue-gray"
-														className="text-xs"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														{instructor.phone || 'Sin teléfono'}
-													</Typography>
-												</div>
-											</td>
+										<td className="py-3 px-4 border-b border-blue-gray-100">
+											{instructor.rank && (
+												<Typography
+													variant="small"
+													color="blue-gray"
+													className="text-xs opacity-70"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													Rango: {instructor.rank}
+												</Typography>
+											)}
+											<Typography
+												variant="small"
+												color="blue-gray"
+												className="font-semibold"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{instructor.name} {instructor.last_name}
+											</Typography>
+											<Typography
+												variant="small"
+												color="gray"
+												className="text-xs break-all"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Email: {instructor.email}
+											</Typography>
+										</td>
+										<td className="py-3 px-4 border-b border-blue-gray-100 text-center">
+											<Typography
+												variant="small"
+												color="blue-gray"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Doc: {instructor.user_doc_type?.symbol}-
+												{instructor.doc_number}
+											</Typography>
+											<Typography
+												variant="small"
+												color="gray"
+												className="text-xs"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Tel: {instructor.phone || 'N/A'}
+											</Typography>
+										</td>
 											<td className="py-3 px-4 border-b border-blue-gray-100">
 												<div className="flex flex-col gap-1">
 													<Chip
@@ -373,7 +385,25 @@ const TableInstructors = () => {
 												</div>
 											</td>
 										</tr>
-									))}
+									))
+									) : (
+										<tr>
+											<td
+												colSpan={4}
+												className="py-6 text-center"
+											>
+												<Typography
+													variant="small"
+													color="blue-gray"
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													No se encontraron instructores
+												</Typography>
+											</td>
+										</tr>
+									)}
 								</tbody>
 							</table>
 						</div>

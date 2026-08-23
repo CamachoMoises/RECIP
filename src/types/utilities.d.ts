@@ -240,6 +240,7 @@ export interface user {
     instructor?: instructor | null;
     password?: string;
     phone: string;
+    rank?: string | null;
     photo?: string;
     country_name?: string;
     flag: string | null;
