@@ -80,8 +80,6 @@ const QuestionType = ({
 								variant={edit ? 'outlined' : 'filled'}
 								size="sm"
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 								onClick={() => {
 									setEdit(!edit);
 								}}

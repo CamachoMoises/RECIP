@@ -86,8 +86,6 @@ const QuestionTest = ({
 					title={edit ? 'Cancelar' : 'Cambiar cantidad preguntas'}
 					variant={edit ? 'outlined' : 'filled'}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 					onClick={() => {
 						setEdit(!edit);
 					}}

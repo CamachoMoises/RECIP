@@ -141,8 +141,6 @@ const TestCheck = ({
 							title="Agregar respuesta"
 							variant="filled"
 							disabled={editHeader || editAnswer}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
 							placeholder={undefined}
 							onClick={() => {
 								setOpen(!open);

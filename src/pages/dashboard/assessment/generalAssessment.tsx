@@ -242,8 +242,6 @@ const GeneralAssessment = () => {
 												<Button
 													title="Evaluacion del piloto"
 													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
 													onClick={() => {
 														navigateCourseStudentAssessment(CS);
 													}}

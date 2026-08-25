@@ -183,8 +183,6 @@ const SendEmailModal = ({
 					disabled={sending}
 					className="mr-2"
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					Cancelar
 				</Button>
@@ -194,8 +192,6 @@ const SendEmailModal = ({
 					onClick={handleSend}
 					disabled={sending}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					Enviar
 				</Button>

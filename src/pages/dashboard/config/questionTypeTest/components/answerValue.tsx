@@ -77,8 +77,6 @@ const AnswerValue = ({
 							editAnswer && editAnswerLocal ? 'outlined' : 'filled'
 						}
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						onClick={() => {
 							setEditAnswer(!editAnswer);
 							setEditAnswerLocal(!editAnswerLocal);
@@ -97,8 +95,6 @@ const AnswerValue = ({
 							title="Guardar"
 							size="sm"
 							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
 							onClick={async () => {
 								await updateAnswerQuestion();
 								setEditAnswer(false);

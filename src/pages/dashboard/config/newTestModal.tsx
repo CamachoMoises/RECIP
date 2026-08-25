@@ -133,8 +133,6 @@ const NewTestModal = ({
 						color="green"
 						type="submit"
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 					>
 						<span>Crear</span>
 					</Button>

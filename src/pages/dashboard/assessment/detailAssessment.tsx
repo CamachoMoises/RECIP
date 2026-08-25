@@ -710,8 +710,6 @@ const DetailAssessment = () => {
 								onClick={handlePrev}
 								disabled={isFirstStep}
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								{isFirstStep ? 'x' : `Dia ${activeStep}`}
 							</Button>
@@ -720,8 +718,6 @@ const DetailAssessment = () => {
 								onClick={handleNext}
 								disabled={isLastStep}
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								{isLastStep ? 'x' : `Dia ${activeStep + 2}`}
 							</Button>

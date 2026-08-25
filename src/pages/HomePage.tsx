@@ -15,8 +15,6 @@ const HomePage = () => {
 			<Button
 				onClick={handleContactClick}
 				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
 			>
 				Ir a Dashboard
 			</Button>

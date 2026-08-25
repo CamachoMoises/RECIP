@@ -41,8 +41,6 @@ const TestListPagination = ({
 					onClick={onPrev}
 					disabled={active === 1}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					<ChevronLeft
 						strokeWidth={2}
@@ -80,8 +78,6 @@ const TestListPagination = ({
 					onClick={onNext}
 					disabled={active === totalPages}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					<span className="hidden sm:inline">Siguiente</span>
 					<ChevronRight

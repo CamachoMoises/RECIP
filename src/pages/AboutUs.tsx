@@ -22,8 +22,6 @@ const AboutUs = () => {
 			<SEO title="Acerca de" description="Conoce más sobre R.E.C.I.P., el sistema de registro de evaluación, capacitación e instrucción del piloto." url="/about" />
 			<Button
 				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
 				onClick={callUser}
 			>
 				OJO

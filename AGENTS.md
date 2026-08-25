@@ -31,6 +31,8 @@ src/
       courses/      # Course scheduling
       students/     # Pilot management
       instructors/  # Instructor management
+      instructorCourses/ # Instructor dashboard (my courses, schedule, groups, attendance, assessments, tests)
+        tabs/       # Tab components for instructor course detail
       config/       # Course/subject/lesson/test config
       assessment/   # FSTD/ATD evaluations
       test/         # Exams/tests
@@ -65,11 +67,13 @@ src/
 | `review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id` | ReviewTest | student, instructor |
 | `new_course/:id/:course_id` | NewCourse | staff, instructor |
 | `view_course/:id/:course_id` | ViewCourseStudentSchedule | staff, instructor, student |
+| `my-instructor-courses` | MyInstructorCourses | instructor |
+| `my-instructor-course/:course_id` | MyInstructorCourseDetail | instructor |
 | `reports` | Reports | super_user |
 
 ## Key Patterns
 
-- **All MT components** need `placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}`
+- **All MT components** need `placeholder={undefined}` and `onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}` (except `Button` — omit the pointer props from Button to avoid React DOM warnings)
 - **API**: Use `axiosGetSlice`, `axiosPostSlice`, `axiosPutSlice` from `services/axios.ts`
 - **Auth**: Token auto-injected; 403 triggers logout via Redux dispatch
 - **Permissions**: `PermissionsValidate(['staff', 'instructor'])` returns boolean

@@ -18,6 +18,8 @@ import QuestionTestList from './dashboard/config/questionTestList';
 import { useEffect, useState } from 'react';
 import DetailAssessment from './dashboard/assessment/detailAssessment';
 import ReviewTest from './dashboard/test/reviewTest';
+import MyInstructorCourses from './dashboard/instructorCourses/myInstructorCourses';
+import MyInstructorCourseDetail from './dashboard/instructorCourses/myInstructorCourseDetail';
 import RouteGuard from '../components/RouteGuard';
 
 const Dashboard = () => {
@@ -116,6 +118,14 @@ const Dashboard = () => {
 								<Route
 									path="review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id"
 									element={<RouteGuard roles={['student', 'instructor']}><ReviewTest /></RouteGuard>}
+								/>
+								<Route
+									path="my-instructor-courses"
+									element={<RouteGuard roles={['instructor']}><MyInstructorCourses /></RouteGuard>}
+								/>
+								<Route
+									path="my-instructor-course/:course_id"
+									element={<RouteGuard roles={['instructor']}><MyInstructorCourseDetail /></RouteGuard>}
 								/>
 							</Routes>
 						</div>

@@ -187,8 +187,6 @@ const GeneralConfig = () => {
 								<div className="flex flex-col">
 									<Button
 										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
 										className="flex flex-col text-center justify-center w-max mx-auto"
 										onClick={() => {
 											handleOpenEdit();
@@ -275,8 +273,6 @@ const GeneralConfig = () => {
 															<Button
 																title="Editar el Curso"
 																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
 																onClick={() => handleOpenEdit(course)}
 															>
 																<Pencil size={20} />
@@ -284,8 +280,6 @@ const GeneralConfig = () => {
 															<Button
 																title="Secciones del Curso"
 																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
 																onClick={() =>
 																	navigate(
 																		`../config/course/${course.id}`,
@@ -298,8 +292,6 @@ const GeneralConfig = () => {
 															<Button
 																title="Editar examenes del curso"
 																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
 																disabled={course.course_type.id !== 1}
 																onClick={() =>
 																	navigate(

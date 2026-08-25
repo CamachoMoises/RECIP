@@ -25,7 +25,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 | Modelo | Claves |
 |---|---|
-| User | `id, uuid, name, doc_number, user_doc_type_id, flag, country_name, phone, last_name, password, email, is_superuser, is_staff, is_active` |
+| User | `id, uuid, name, doc_number, user_doc_type_id, flag, country_name, phone, last_name, password, email, rank, is_superuser, is_staff, is_active` |
 | Student | `id, user_id, status` |
 | Instructor | `id, user_id, status` |
 | UserDocType | `id, name, symbol` |
@@ -114,7 +114,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### POST /api/users/
 - Body (Joi): `doc_number` (requerido), `email` (requerido, TLD .com/.net), `name`, `last_name`,
-  `country_name`, `flag`, `phone`, `password`, `user_doc_type_id`, `is_superuser`, `is_staff`, `is_active`
+  `country_name`, `flag`, `phone`, `rank` (TEXT, opcional), `password`, `user_doc_type_id`, `is_superuser`, `is_staff`, `is_active`
 - `201` → User (sin includes)
 - `400` texto plano `Input Validation Error <msg>`
 
@@ -129,7 +129,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 ### PUT /api/users/
 - Body (Joi): `id` (requerido), `doc_number` (requerido), `email` (requerido), `uuid` (requerido de
   facto, busca al usuario por uuid), `name`, `last_name`, `country_name`, `flag`, `phone`,
-  `password`, `user_doc_type_id`, `is_superuser`, `is_staff`, `is_active`, `createdAt`, `updatedAt`
+  `rank` (TEXT, opcional), `password`, `user_doc_type_id`, `is_superuser`, `is_staff`, `is_active`, `createdAt`, `updatedAt`
 - `201` → User con `student`, `instructor`, `user_doc_type`
 - `404` texto plano `User not found`; `400` `Input Validation Error <msg>`
 
@@ -166,13 +166,15 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 - `200` → Course con `course_type`, `course_level`
 
 ### GET /coursesStudents
-- Query: `course_type_id`, `status`, `course_group_id`, `course_id`, `student_id` (opcionales),
+- Query: `course_type_id`, `status`, `course_group_id`, `course_id`, `student_id`, `instructor_id` (opcionales),
   `pageSize` (default 10), `currentPage` (default 1)
 - `200` → `{ data: CourseStudent[], totalItems, currentPage, pageSize, totalPages }`
   Cada fila: claves de CourseStudent + `highest_score` (calculado) + alias
   `student` (con `user`), `course_group`, `course` (con `course_type`, `course_level`),
   `course_student_tests`, `course_student_assessment`, `schedules` (cada uno con `subject`
   e `instructor` con `user`)
+- Nota: cuando `instructor_id` está presente, filtra solo los CourseStudent cuyos schedules
+  pertenecen al instructor indicado. Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
 
 ### GET /courseStudent/:id
 - Params: `id`
@@ -224,10 +226,13 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 ## Course Groups — `/api/course_groups`
 
 ### GET /
-- Query: `title`, `course_id`, `user_code`, `status` (opcionales), `pageSize` (default 10),
+- Query: `title`, `course_id`, `user_code`, `status`, `instructor_id` (opcionales), `pageSize` (default 10),
   `currentPage` (default 1)
 - `200` → `{ data: CourseGroup[], totalItems, currentPage, pageSize, totalPages }`
   Cada fila con `course` (con `course_type`, `course_level`)
+- Nota: cuando `instructor_id` está presente, filtra grupos por los cursos del instructor
+  y cada grupo incluye `course_students[]` con `student.user` anidados.
+  Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
 
 ### GET /:id
 - Params: `id`
@@ -520,10 +525,12 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 ## Attendance — `/api/attendance`
 
 ### GET /
-- Query: `course_student_id`, `day`, `attendance_status_id`, `date_from`, `date_to` (opcionales),
+- Query: `course_student_id`, `day`, `attendance_status_id`, `date_from`, `date_to`, `instructor_id` (opcionales),
   `pageSize` (default 10), `currentPage` (default 1)
 - `200` → `{ data: Attendance[], totalItems, currentPage, pageSize, totalPages }`
   Cada fila con `course_student`, `attendance_status`, `attendance_signature`
+- Nota: cuando `instructor_id` está presente, filtra asistencias de los CourseStudent
+  del instructor indicado. Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
 
 ### GET /:id
 - Params: `id`
@@ -580,6 +587,37 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 - Params: `id` (attendance_id)
 - `200` → `{ success: true, message: 'Firma eliminada correctamente.' }`
 - `404` JSON `{ success: false, error: 'Firma no encontrada.' }`
+
+---
+
+## Instructor — `/api/instructor`
+
+> Endpoints para el dashboard del instructor. Filtran datos por `instructor_id` a través
+> de la tabla `Schedule` (Instructor → Schedule → CourseStudent → datos).
+
+### GET /schedule/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array de Schedule (order date/hora ASC) con `student` (con `user`), `instructor` (con `user`),
+  `course_student`, `subject_days`, `subject`
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /assessments
+- Query: `instructor_id` (requerido), `course_id` (opcional), `pageSize` (default 10),
+  `currentPage` (default 1)
+- Auth: sí
+- `200` → `{ data: CourseStudentAssessment[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila con `course_student` (con `student.user`) y `course` (con `course_type`, `course_level`)
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /tests
+- Query: `instructor_id` (requerido), `course_id` (opcional), `finished` (opcional),
+  `pageSize` (default 10), `currentPage` (default 1)
+- Auth: sí
+- `200` → `{ data: CourseStudentTest[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila con `test`, `course_student` (con `student.user`), y `course_student_test_questions`
+  (cada uno con `course_student_test_answer`)
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
 
 ---
 
@@ -657,3 +695,24 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### GET /status
 - Auth: no → `200` `{ status: 'Server is running', timestamp, dbConnected }`
+
+---
+
+## Nota: Filtro por instructor
+
+Los siguientes endpoints soportan el parámetro `instructor_id` para filtrar datos
+específicos de un instructor. Estos endpoints son la base para el dashboard "Mis Cursos"
+del instructor en el frontend:
+
+| Endpoint | Parámetro | Descripción |
+|---|---|---|
+| `GET /api/courses/coursesStudents` | `instructor_id` (query) | Filtra CourseStudent cuyos schedules pertenecen al instructor |
+| `GET /api/course_groups` | `instructor_id` (query) | Filtra grupos por cursos del instructor; incluye `course_students[]` con `student.user` |
+| `GET /api/attendance` | `instructor_id` (query) | Filtra asistencias de los CourseStudent del instructor |
+| `GET /api/instructor/schedule/:instructor_id` | `instructor_id` (path) | Retorna todos los schedules del instructor |
+| `GET /api/instructor/assessments` | `instructor_id` (query) | Retorna evaluaciones de los alumnos del instructor |
+| `GET /api/instructor/tests` | `instructor_id` (query) | Retorna exámenes con questions y answers de los alumnos del instructor |
+
+**Frontend files relacionados:**
+- `src/pages/dashboard/instructorCourses/` — Componentes del dashboard de instructor
+- `src/features/courseSlice.ts` — Thunk `fetchCoursesStudentsByInstructor`

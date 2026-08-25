@@ -196,8 +196,6 @@ const Login = () => {
 								className="glass-button py-3 text-base shadow-lg shadow-blue-500/20"
 								fullWidth
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								<span className="flex items-center justify-center gap-2">
 									<Plane className="w-4 h-4" />

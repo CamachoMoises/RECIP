@@ -614,8 +614,6 @@ const ModalFormUser = ({
 						color="green"
 						type="submit"
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 					>
 						<span>{userSelect ? 'Actualizar' : 'Crear'}</span>
 					</Button>

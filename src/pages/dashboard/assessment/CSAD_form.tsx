@@ -402,8 +402,6 @@ const CSAD_form = ({
 											fullWidth
 											className="flex flex-row justify-center"
 											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
 										>
 											<Eraser size={15} />
 										</Button>

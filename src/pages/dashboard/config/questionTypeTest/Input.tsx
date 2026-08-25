@@ -108,8 +108,6 @@ const TestInput = ({
 						size="lg"
 						disabled={!hasChange}
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						onClick={async () => handleSaveAnswer()}
 					>
 						<Save size={15} />
@@ -123,8 +121,6 @@ const TestInput = ({
 								title="Agregar respuesta"
 								variant="filled"
 								disabled={editHeader}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 								placeholder={undefined}
 								onClick={() => {
 									setOpen(!open);

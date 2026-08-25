@@ -172,8 +172,6 @@ const ModalAssignStudents = ({
 									color="blue"
 									onClick={selectAll}
 									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
 								>
 									{selectedIds.length === availableStudents.length
 										? 'Deseleccionar todos'
@@ -251,8 +249,6 @@ const ModalAssignStudents = ({
 					onClick={handleOpen}
 					className="mr-1"
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					<span>Cancelar</span>
 				</Button>
@@ -262,8 +258,6 @@ const ModalAssignStudents = ({
 					onClick={handleAssign}
 					disabled={selectedIds.length === 0}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					<span>
 						Asignar ({selectedIds.length})

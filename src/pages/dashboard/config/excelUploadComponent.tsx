@@ -288,8 +288,6 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 					size="sm"
 					onClick={handleClose}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					<X size={20} />
 				</Button>
@@ -531,8 +529,6 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 					onClick={handleClose}
 					className="mr-2"
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					Cancelar
 				</Button>
@@ -542,8 +538,6 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 					disabled={uploading || parsedData.length === 0}
 					loading={uploading}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					{uploading ? 'Subiendo...' : 'Subir Preguntas'}
 				</Button>

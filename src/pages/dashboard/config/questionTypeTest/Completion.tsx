@@ -855,8 +855,6 @@ const TestCompletion = ({
 					size="sm"
 					disabled={!hasChange}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 					onClick={async () => handleSaveAnswer()}
 				>
 					<Save size={15} />

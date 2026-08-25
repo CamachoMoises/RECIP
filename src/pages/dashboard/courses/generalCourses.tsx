@@ -250,8 +250,6 @@ const GeneralCourses = () => {
 								color="blue"
 								onClick={toggleOpen}
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								Agendar piloto a un curso
 							</Button>
@@ -329,8 +327,6 @@ const GeneralCourses = () => {
 																	title="Agendar nuevo curso"
 																	className="flex flex-col justify-center text-center align-middle"
 																	placeholder={undefined}
-																	onPointerEnterCapture={undefined}
-																	onPointerLeaveCapture={undefined}
 																	onClick={() =>
 																		handleNewCourseSchedule(
 																			course.id ? course.id : -1,

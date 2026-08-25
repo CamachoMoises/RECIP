@@ -142,8 +142,6 @@ const TestList = () => {
 									size="sm"
 									title="Agregar examen"
 									variant="filled"
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
 									onClick={() => {
 										setOpen(!open);
 									}}
@@ -155,8 +153,6 @@ const TestList = () => {
 									size="sm"
 									title="Subir preguntas desde Excel"
 									variant="outlined"
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
 									onClick={() => {
 										setOpenExcelUpload(!openExcelUpload);
 									}}

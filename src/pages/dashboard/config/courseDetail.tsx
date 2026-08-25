@@ -294,8 +294,6 @@ const CourseDetail = () => {
 										fullWidth
 										size="sm"
 										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
 										className="flex flex-row justify-center text-center"
 										onClick={() => handleOpenEdit(-1)}
 									>
@@ -456,8 +454,6 @@ const CourseDetail = () => {
 																>
 																	<Button
 																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
 																		disabled={subject.order <= 1}
 																		onClick={() =>
 																			handleSwitchSubject(
@@ -472,8 +468,6 @@ const CourseDetail = () => {
 
 																	<Button
 																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
 																		onClick={() =>
 																			handleOpenEdit(subject.id)
 																		}
@@ -482,8 +476,6 @@ const CourseDetail = () => {
 																	</Button>
 																	<Button
 																		placeholder={undefined}
-																		onPointerEnterCapture={undefined}
-																		onPointerLeaveCapture={undefined}
 																		disabled={
 																			maxOrderSubject
 																				? maxOrderSubject <=

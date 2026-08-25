@@ -56,6 +56,26 @@ export const fetchCoursesStudents = createAsyncThunk<{ data: courseStudent[], to
     }
 );
 
+export const fetchCoursesStudentsByInstructor = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { instructor_id: number, currentPage: number, pageSize: number, status?: boolean }>(
+    'course/fetchCoursesStudentsByInstructor',
+    async ({ instructor_id, currentPage, pageSize, status }, { rejectWithValue }) => {
+        try {
+            const params: { instructor_id: number; currentPage: number; pageSize: number; status?: boolean } = {
+                instructor_id,
+                currentPage,
+                pageSize,
+            };
+            if (status !== undefined) {
+                params.status = status;
+            }
+            const response = await axiosGetSlice('api/courses/coursesStudents', params);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const fetchCoursesStudentsTests = createAsyncThunk<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage: number, pageSize: number, course_type_id: number, status?: boolean }>(
     'course/fetchCoursesStudentsTests',
     async ({ currentPage, pageSize, course_type_id, status }, { rejectWithValue }) => {
@@ -290,6 +310,23 @@ const courseSlice = createSlice({
                 state.totalItems = action.payload.totalItems;
             })
             .addCase(fetchCoursesStudents.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            //Reducers para la acción fetchCoursesStudentsByInstructor
+            .addCase(fetchCoursesStudentsByInstructor.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchCoursesStudentsByInstructor.fulfilled, (state, action: PayloadAction<{ data: courseStudent[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }>) => {
+                state.status = 'succeeded';
+                state.courseStudentList = action.payload.data;
+                state.currentPage = action.payload.currentPage;
+                state.totalPages = action.payload.totalPages;
+                state.pageSize = action.payload.pageSize;
+                state.totalItems = action.payload.totalItems;
+            })
+            .addCase(fetchCoursesStudentsByInstructor.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

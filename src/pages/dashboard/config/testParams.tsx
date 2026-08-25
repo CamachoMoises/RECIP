@@ -210,8 +210,6 @@ const TestParams = ({
 						title={edit ? 'Cancelar' : 'Cambiar Encabezado'}
 						variant={edit ? 'outlined' : 'filled'}
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						onClick={() => {
 							setEdit(!edit);
 						}}
@@ -225,8 +223,6 @@ const TestParams = ({
 							title="Guardar"
 							size="sm"
 							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
 							type="submit"
 						>
 							<Save size={15} />

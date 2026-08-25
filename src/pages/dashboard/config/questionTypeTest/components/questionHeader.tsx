@@ -75,8 +75,6 @@ const QuestionHeader = ({
 						variant={editHeader ? 'outlined' : 'filled'}
 						placeholder={undefined}
 						disabled={editAnswer}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						onClick={() => {
 							setEditHeader(!editHeader);
 						}}
@@ -89,8 +87,6 @@ const QuestionHeader = ({
 						title="Guardar"
 						size="sm"
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						onClick={async () => {
 							await updateTestQuestion();
 							setEditHeader(false);

@@ -328,8 +328,6 @@ const ModalFormCourseGroup = ({
 						type="submit"
 						disabled={!courseGroupSelected && !isValid}
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 					>
 						<span>
 							{courseGroupSelected ? 'Actualizar' : 'Crear'}

@@ -39,6 +39,7 @@ const manualRoutes = {
 		reports: 'manual_reports',
 		test: 'manual_test',
 		assessment: 'manual_assessment',
+		my_instructor_courses: 'manual_my_instructor_courses',
 		_: 'manual_dashboard',
 	},
 	login: 'manual_login',

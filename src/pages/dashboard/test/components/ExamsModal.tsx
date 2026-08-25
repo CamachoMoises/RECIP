@@ -166,8 +166,6 @@ const ExamsModal = ({
 											disabled={!isSuperuser}
 											className="text-xs flex items-center gap-1 py-1.5 px-3 normal-case"
 											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
 											onClick={() => {
 												const courseId =
 													cst.course_student?.course?.id || -1;
@@ -189,8 +187,6 @@ const ExamsModal = ({
 											color="red"
 											className="text-xs flex items-center gap-1 py-1.5 px-3 normal-case"
 											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
 											onClick={() => onHandleEndTest(cst.id)}
 										>
 											<StopCircle size={13} />
@@ -227,8 +223,6 @@ const ExamsModal = ({
 					size="sm"
 					onClick={onClose}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					Cerrar
 				</Button>

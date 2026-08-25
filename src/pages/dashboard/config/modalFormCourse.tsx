@@ -390,8 +390,6 @@ const ModalFormCourse = ({
 						onClick={handleOpen}
 						className="mr-1"
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 					>
 						<span>Cancelar</span>
 					</Button>
@@ -400,8 +398,6 @@ const ModalFormCourse = ({
 						color="green"
 						type="submit"
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 					>
 						<span>{courseSelected ? 'Actualizar' : 'Crear'}</span>
 					</Button>

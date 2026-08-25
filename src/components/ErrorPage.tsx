@@ -33,8 +33,6 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ error }) => {
 				<div className="flex flex-row gap-2">
 					<Button
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						onClick={() => {
 							window.location.reload();
 						}}
@@ -43,8 +41,6 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ error }) => {
 					</Button>
 					<Button
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						onClick={() => {
 							navigate('/dashboard');
 						}}

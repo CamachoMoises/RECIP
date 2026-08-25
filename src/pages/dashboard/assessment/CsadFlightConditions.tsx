@@ -130,8 +130,6 @@ const CsadFlightConditions = ({
 						title="Guardar datos del formulario superior"
 						className="flex flex-row justify-center"
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 					>
 						<Save size={15} /> Guardar
 					</Button>

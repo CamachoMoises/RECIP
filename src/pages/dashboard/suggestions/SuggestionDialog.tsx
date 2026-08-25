@@ -86,8 +86,6 @@ const SuggestionDialog = ({ open, handler }: Props) => {
 					onClick={handler}
 					className="mr-2"
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					Cancelar
 				</Button>
@@ -96,8 +94,6 @@ const SuggestionDialog = ({ open, handler }: Props) => {
 					color="blue"
 					onClick={handleSubmit}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					Enviar Sugerencia
 				</Button>

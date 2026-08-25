@@ -347,8 +347,6 @@ const StudentCourseList = ({
 								onClick={handleCloseDialog}
 								className="mr-2"
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								Cerrar
 							</Button>

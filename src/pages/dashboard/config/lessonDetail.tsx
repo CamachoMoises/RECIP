@@ -170,8 +170,6 @@ const LessonDetail = ({
 			> */}
 				{/* <Button
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 					disabled={SL.order <= 1 || editLesson}
 					onClick={() =>
 						handleSwitchSubject(
@@ -187,8 +185,6 @@ const LessonDetail = ({
 				<Button
 					placeholder={undefined}
 					variant={editLesson ? 'outlined' : 'filled'}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 					onClick={() => setEditLesson(!editLesson)}
 				>
 					{editLesson ? <X size={12} /> : <Pencil size={12} />}
@@ -196,8 +192,6 @@ const LessonDetail = ({
 				{editLesson && (
 					<Button
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						disabled={!lessonName}
 						onClick={() => {
 							handleEditLesson(
@@ -213,8 +207,6 @@ const LessonDetail = ({
 				)}
 				{/* <Button
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 					disabled={maxOrderLesson <= SL.order || editLesson}
 					onClick={() =>
 						handleSwitchSubject(

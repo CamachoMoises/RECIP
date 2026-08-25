@@ -112,8 +112,6 @@ const SuggestionListDialog = ({ open, handler }: Props) => {
 					color="red"
 					onClick={handler}
 					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
 				>
 					Cerrar
 				</Button>

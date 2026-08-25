@@ -33,8 +33,6 @@ const CsadActionsRow = ({
 								color="blue"
 								onClick={onEdit}
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								Editar
 							</Button>
@@ -63,8 +61,6 @@ const CsadActionsRow = ({
 						fullWidth
 						disabled={!consentChecked}
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 					>
 						<Save size={15} />
 					</Button>

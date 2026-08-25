@@ -302,8 +302,6 @@ const NewCourseSubject = ({
 								type="submit"
 								disabled={approve || !canViewContent}
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								<Save size={18} />
 							</Button>

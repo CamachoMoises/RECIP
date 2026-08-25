@@ -77,8 +77,6 @@ const TestListItemActions = ({
 						title="Iniciar examen"
 						className="flex items-center gap-1 px-2 sm:px-3"
 						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
 						disabled={!active || isGeneratingTest}
 						onClick={() => {
 							onNavigateCourseStudentTest(
@@ -112,8 +110,6 @@ const TestListItemActions = ({
 							className="flex items-center gap-1 px-2 sm:px-3"
 							disabled={!CL.student?.user?.id || !CL.id}
 							placeholder={undefined}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
 							onClick={() => {
 								onOpenExamsList(
 									CL.student?.id || -1,
@@ -135,8 +131,6 @@ const TestListItemActions = ({
 								className="flex items-center gap-1 px-2 sm:px-3"
 								disabled={!selfInstructor || exams_submitted === 0}
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 								onClick={() => {
 									onNavigateReviewTest(
 										lastTest.id,

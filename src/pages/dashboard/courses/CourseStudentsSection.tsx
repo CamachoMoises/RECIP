@@ -187,8 +187,6 @@ const CourseStudentsSection = ({
 										title="Limpiar filtros"
 										onClick={onClearFilters}
 										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
 										className="p-2"
 									>
 										<Trash2 size={16} />
@@ -562,8 +560,6 @@ const CourseStudentsSection = ({
 									onClick={handleCloseDialog}
 									className="mr-2"
 									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
 								>
 									Cerrar
 								</Button>

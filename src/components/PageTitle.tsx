@@ -72,8 +72,6 @@ export default function PageTitle({
 											className="text-xs bg-blue-gray-50"
 											size="sm"
 											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
 										>
 											<ChevronLeft size={13} />
 										</Button>

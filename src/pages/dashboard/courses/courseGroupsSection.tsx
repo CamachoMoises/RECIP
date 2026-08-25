@@ -394,8 +394,6 @@ const CourseGroupsSection = ({
 								color={showInactive ? 'blue' : 'gray'}
 								onClick={handleToggleShowInactive}
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								<Filter size={14} className="mr-1" />
 							</Button>

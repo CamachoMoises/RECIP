@@ -146,8 +146,6 @@ const QuestionTestList = () => {
 								size="sm"
 								title="Agregar pregunta"
 								variant="filled"
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 								placeholder={undefined}
 								onClick={() => {
 									setOpen(!open);

@@ -306,8 +306,6 @@ const ModalFormSubject = ({
 								onClick={handleOpen}
 								className="mr-1"
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								<span>Cancelar</span>
 							</Button>
@@ -316,8 +314,6 @@ const ModalFormSubject = ({
 								color="green"
 								type="submit"
 								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
 							>
 								<span>
 									{subjectSelected ? 'Actualizar' : 'Crear'}
@@ -365,8 +361,6 @@ const ModalFormSubject = ({
 												openNewSubjectLesson ? 'outlined' : 'filled'
 											}
 											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
 											className="flex flex-row justify-center text-center"
 											onClick={() => {
 												setOpenNewSubjectLesson(
@@ -386,8 +380,6 @@ const ModalFormSubject = ({
 												size="sm"
 												placeholder={undefined}
 												disabled={!lessonState}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
 												className="flex flex-row justify-center text-center"
 												onClick={async () => {
 													await handleNewLesson();
