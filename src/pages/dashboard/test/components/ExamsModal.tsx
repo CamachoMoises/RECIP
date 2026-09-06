@@ -7,7 +7,7 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import moment from 'moment';
-import { NotebookText, X, Eye, StopCircle } from 'lucide-react';
+import { NotebookText, X, Eye, StopCircle, FileDown } from 'lucide-react';
 import { courseStudentTest } from '../../../../types/utilities';
 
 interface ExamsModalProps {
@@ -24,6 +24,11 @@ interface ExamsModalProps {
 		user_id: number,
 	) => void;
 	onHandleEndTest: (course_student_test_id: number) => void;
+	onPrintResults: (
+		CST_id: number,
+		course_id: number,
+		user_id: number,
+	) => void;
 }
 
 const getStatusBadge = (cst: courseStudentTest) => {
@@ -47,6 +52,7 @@ const ExamsModal = ({
 	userId,
 	onNavigateReviewTest,
 	onHandleEndTest,
+	onPrintResults,
 }: ExamsModalProps) => {
 	return (
 		<Dialog
@@ -191,6 +197,25 @@ const ExamsModal = ({
 										>
 											<StopCircle size={13} />
 											Evaluar
+										</Button>
+										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+											size="sm"
+											variant="outlined"
+											color="green"
+											className="text-xs flex items-center gap-1 py-1.5 px-3 normal-case"
+											placeholder={undefined}
+											onClick={() => {
+												const courseId =
+													cst.course_student?.course?.id || -1;
+												onPrintResults(
+													cst.id,
+													courseId,
+													userId,
+												);
+											}}
+										>
+											<FileDown size={13} />
+											PDF
 										</Button>
 									</div>
 								</div>

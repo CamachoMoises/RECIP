@@ -340,6 +340,7 @@ const GeneralTest = () => {
 				isSuperuser={auth.user?.is_superuser || false}
 				onNavigateReviewTest={navigateReviewTest}
 				onHandleEndTest={handleEndTest}
+				onPrintResults={seeReults}
 			/>
 
 			<ResultsPdfContainer

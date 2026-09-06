@@ -79,6 +79,9 @@ export const updateCourseStudentAssessmentDay = createAsyncThunk<courseStudentAs
     async (CSAD, { rejectWithValue }) => {
         try {
             const response = await axiosPutSlice(`api/assessment/updateCourseStudentAssessmentDay`, CSAD);
+            if (CSAD.ifr_time !== undefined || CSAD.vfr_time !== undefined) {
+                console.log('CSAD payload:', JSON.stringify(CSAD));
+            }
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);

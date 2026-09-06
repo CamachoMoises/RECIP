@@ -155,6 +155,10 @@ const CSAD_form = ({
 				assessment.courseStudentAssessmentDaySelected?.training_time,
 			check_time:
 				assessment.courseStudentAssessmentDaySelected?.check_time,
+			ifr_time:
+				assessment.courseStudentAssessmentDaySelected?.ifr_time,
+			vfr_time:
+				assessment.courseStudentAssessmentDaySelected?.vfr_time,
 			type: assessment.courseStudentAssessmentDaySelected?.type,
 			comments:
 				assessment.courseStudentAssessmentDaySelected?.comments,
@@ -186,6 +190,12 @@ const CSAD_form = ({
 			check_time: Number.isNaN(data.check_time)
 				? undefined
 				: Number(data.check_time),
+			ifr_time: Number.isNaN(data.ifr_time)
+				? undefined
+				: Number(data.ifr_time),
+			vfr_time: Number.isNaN(data.vfr_time)
+				? undefined
+				: Number(data.vfr_time),
 			id: CSAD?.id ? CSAD.id : -1,
 			course_id: CSAD?.course_id ? CSAD.course_id : -1,
 			student_id: CSAD?.student_id ? CSAD.student_id : -1,
