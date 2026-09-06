@@ -17,13 +17,12 @@ const styles = StyleSheet.create({
 	page: {
 		padding: 12,
 		fontSize: 8,
-		backgroundColor: 'white',
+		backgroundColor: '#e0e0e0',
 		fontFamily: 'Helvetica',
 	},
 	outerBox: {
 		borderWidth: 2,
 		borderColor: '#263238',
-		backgroundColor: '#e0e0e0',
 		padding: 4,
 		gap: 3,
 	},
@@ -306,7 +305,7 @@ const CSAssessmentPDFDocument = ({
 
 					{/* Info table */}
 					<View style={styles.table}>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text
 								style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 							>
@@ -328,7 +327,7 @@ const CSAssessmentPDFDocument = ({
 								{courseDate}
 							</Text>
 						</View>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 1 }]}>
 								<Text style={styles.cellBold}>Cliente: AMB</Text>
 								{'\n'}
@@ -355,7 +354,7 @@ const CSAssessmentPDFDocument = ({
 								}
 							</Text>
 						</View>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 1 }]}>
 								<Text style={styles.cellBold}>
 									País del participante:
@@ -394,7 +393,7 @@ const CSAssessmentPDFDocument = ({
 									: courseDate}
 							</Text>
 						</View>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 1 }]}>
 								<Text style={styles.cellBold}>Modelo de avión:</Text>
 								{'\n'}
@@ -420,7 +419,7 @@ const CSAssessmentPDFDocument = ({
 						<>
 						{/* Evaluación Tipo */}
 						<View style={styles.table}>
-							<View style={styles.row}>
+							<View style={styles.row} wrap={false}>
 								<Text
 									style={[styles.cell, styles.cellHeader, { flex: 2 }]}
 								>
@@ -439,7 +438,7 @@ const CSAssessmentPDFDocument = ({
 									</Text>
 								))}
 							</View>
-							<View style={styles.row}>
+							<View style={styles.row} wrap={false}>
 								<Text
 									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 								>
@@ -462,7 +461,7 @@ const CSAssessmentPDFDocument = ({
 									);
 								})}
 							</View>
-							<View style={styles.row}>
+							<View style={styles.row} wrap={false}>
 								<Text
 									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 								>
@@ -497,7 +496,7 @@ const CSAssessmentPDFDocument = ({
 
 						{/* Periodo de formación */}
 						<View style={styles.table}>
-							<View style={styles.row}>
+							<View style={styles.row} fixed>
 								<Text
 									style={[
 										styles.cell,
@@ -520,7 +519,7 @@ const CSAssessmentPDFDocument = ({
 									</Text>
 								))}
 							</View>
-							<View style={styles.row}>
+							<View style={styles.row} wrap={false}>
 								<Text
 									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 								>
@@ -538,7 +537,7 @@ const CSAssessmentPDFDocument = ({
 									</Text>
 								))}
 							</View>
-							<View style={styles.row}>
+							<View style={styles.row} wrap={false}>
 								<Text
 									style={[styles.cell, { flex: 2, fontWeight: 'bold' }]}
 								>
@@ -586,6 +585,7 @@ const CSAssessmentPDFDocument = ({
 										<View
 											key={`SL-${index}-${slIndex}`}
 											style={styles.row}
+											wrap={false}
 										>
 											<Text
 												style={[
@@ -668,8 +668,8 @@ const CSAssessmentPDFDocument = ({
 						</>
 					)}
 					{/* Resumen de despegues y aterrizajes */}
-					<View style={styles.table}>
-						<View style={styles.row}>
+					<View style={styles.table} break="before">
+						<View style={styles.row} wrap={false}>
 							<Text
 								style={[
 									styles.cell,
@@ -680,7 +680,7 @@ const CSAssessmentPDFDocument = ({
 								RESUMEN DE DESPEGUES Y ATERRIZAJES
 							</Text>
 						</View>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 2 }]}>
 								DESPEGUES DIURNOS
 							</Text>
@@ -715,7 +715,7 @@ const CSAssessmentPDFDocument = ({
 								{sumTakeOff}
 							</Text>
 						</View>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 2 }]}>
 								ATERRIZAJES DIURNOS
 							</Text>
@@ -750,7 +750,7 @@ const CSAssessmentPDFDocument = ({
 								{sumLanding}
 							</Text>
 						</View>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 2 }]}>
 								TIEMPO DE ENTRENAMIENTO (HORAS)
 							</Text>
@@ -811,7 +811,7 @@ const CSAssessmentPDFDocument = ({
 									DETALLE DE EVALUACIÓN POR DÍA
 								</Text>
 							</View>
-							<View style={styles.row}>
+							<View style={styles.row} fixed>
 								<Text
 									style={[
 										styles.cell,
@@ -870,7 +870,7 @@ const CSAssessmentPDFDocument = ({
 							{days.map((dayItem, index) => {
 								const dayCSAD = findDay(dayItem.id + 1);
 								return (
-									<View key={`daydetail-${index}`} style={styles.row}>
+									<View key={`daydetail-${index}`} style={styles.row} wrap={false}>
 										<Text
 											style={[
 												styles.cell,
@@ -943,7 +943,7 @@ const CSAssessmentPDFDocument = ({
 
 					{/* Avales */}
 					<View style={styles.table}>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text
 								style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 							>
@@ -955,7 +955,7 @@ const CSAssessmentPDFDocument = ({
 								Firma: Director de 360ATC
 							</Text>
 						</View>
-						<View style={styles.row}>
+						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 1 }]}>
 								Recomendado para: Tipo evaluación de habilitación.{' '}
 								{CSA?.approve ? '✔' : '✘'}
@@ -984,7 +984,7 @@ const CSAssessmentPDFDocument = ({
 						<>
 						{/* Firmas por día */}
 						<View style={styles.table}>
-							<View style={styles.row}>
+							<View style={styles.row} fixed>
 								<Text
 									style={[styles.cell, styles.cellHeader, { flex: 1 }]}
 								>
