@@ -383,7 +383,7 @@ const CourseGroupsSection = ({
 							</Typography>
 						</div>
 						<div className="flex gap-2">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								size="sm"
 								variant="outlined"
 								title={

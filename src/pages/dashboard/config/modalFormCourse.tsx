@@ -384,7 +384,7 @@ const ModalFormCourse = ({
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						variant="text"
 						color="red"
 						onClick={handleOpen}
@@ -393,7 +393,7 @@ const ModalFormCourse = ({
 					>
 						<span>Cancelar</span>
 					</Button>
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						variant="gradient"
 						color="green"
 						type="submit"

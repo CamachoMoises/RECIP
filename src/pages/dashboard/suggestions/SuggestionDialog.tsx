@@ -80,7 +80,7 @@ const SuggestionDialog = ({ open, handler }: Props) => {
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					color="red"
 					onClick={handler}
@@ -89,7 +89,7 @@ const SuggestionDialog = ({ open, handler }: Props) => {
 				>
 					Cancelar
 				</Button>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="gradient"
 					color="blue"
 					onClick={handleSubmit}

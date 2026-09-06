@@ -103,7 +103,7 @@ const TestInput = ({
 
 			<div className="flex flex-row justify-center gap-2">
 				<div>
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						title="Guardar"
 						size="lg"
 						disabled={!hasChange}
@@ -116,7 +116,7 @@ const TestInput = ({
 				<div>
 					{add && (
 						<div className="flex flex-col justify-center align-middle">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								size="lg"
 								title="Agregar respuesta"
 								variant="filled"

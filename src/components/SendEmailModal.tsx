@@ -176,7 +176,7 @@ const SendEmailModal = ({
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					color="red"
 					onClick={onClose}
@@ -186,7 +186,7 @@ const SendEmailModal = ({
 				>
 					Cancelar
 				</Button>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="gradient"
 					color="blue"
 					onClick={handleSend}

@@ -296,7 +296,7 @@ const NewCourseSubject = ({
 							)}
 						</div>
 						<div className="flex justify-center align-bottom py-6 px-2 ">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								variant="gradient"
 								color="green"
 								type="submit"

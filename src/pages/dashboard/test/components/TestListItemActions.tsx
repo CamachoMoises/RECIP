@@ -73,7 +73,7 @@ const TestListItemActions = ({
 		<div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
 			<div className="hidden sm:flex">
 				<div className="flex flex-row items-center gap-2">
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						title="Iniciar examen"
 						className="flex items-center gap-1 px-2 sm:px-3"
 						placeholder={undefined}
@@ -105,7 +105,7 @@ const TestListItemActions = ({
 					)}
 
 					{(selfUser || isSuperuser) && (
-						<Button
+						<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 							title="Ver examenes"
 							className="flex items-center gap-1 px-2 sm:px-3"
 							disabled={!CL.student?.user?.id || !CL.id}
@@ -126,7 +126,7 @@ const TestListItemActions = ({
 						lastTest &&
 						CL.student?.user?.id &&
 						isSuperuser && (
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								title="Revisión del ultimo examen"
 								className="flex items-center gap-1 px-2 sm:px-3"
 								disabled={!selfInstructor || exams_submitted === 0}

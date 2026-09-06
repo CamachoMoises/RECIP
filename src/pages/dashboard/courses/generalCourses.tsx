@@ -245,7 +245,7 @@ const GeneralCourses = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								fullWidth
 								color="blue"
 								onClick={toggleOpen}
@@ -323,7 +323,7 @@ const GeneralCourses = () => {
 																onPointerEnterCapture={undefined}
 																onPointerLeaveCapture={undefined}
 															>
-																<Button
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																	title="Agendar nuevo curso"
 																	className="flex flex-col justify-center text-center align-middle"
 																	placeholder={undefined}

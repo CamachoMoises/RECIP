@@ -80,7 +80,7 @@ const QuestionTest = ({
 				)}
 			</Typography>
 			<div className="flex flex-wrap gap-1 sm:gap-2 justify-end">
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					size="sm"
 					className="text-xs"
 					title={edit ? 'Cancelar' : 'Cambiar cantidad preguntas'}

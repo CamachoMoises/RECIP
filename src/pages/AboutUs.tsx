@@ -20,7 +20,7 @@ const AboutUs = () => {
 	return (
 		<>
 			<SEO title="Acerca de" description="Conoce más sobre R.E.C.I.P., el sistema de registro de evaluación, capacitación e instrucción del piloto." url="/about" />
-			<Button
+			<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 				placeholder={undefined}
 				onClick={callUser}
 			>

@@ -239,7 +239,7 @@ const GeneralAssessment = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												<Button
+												<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 													title="Evaluacion del piloto"
 													placeholder={undefined}
 													onClick={() => {

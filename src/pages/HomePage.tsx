@@ -12,7 +12,7 @@ const HomePage = () => {
 		<>
 			<SEO title="Inicio" url="/" />
 			<div className="py-14">
-			<Button
+			<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 				onClick={handleContactClick}
 				placeholder={undefined}
 			>

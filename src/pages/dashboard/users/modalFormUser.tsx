@@ -609,7 +609,7 @@ const ModalFormUser = ({
 					>
 						<span>Cancelar</span>
 					</Button>
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						variant="gradient"
 						color="green"
 						type="submit"

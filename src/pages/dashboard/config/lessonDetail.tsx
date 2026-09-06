@@ -168,7 +168,7 @@ const LessonDetail = ({
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			> */}
-				{/* <Button
+				{/* <Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					placeholder={undefined}
 					disabled={SL.order <= 1 || editLesson}
 					onClick={() =>
@@ -182,7 +182,7 @@ const LessonDetail = ({
 					<ArrowUp size={12} />
 				</Button> */}
 
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					placeholder={undefined}
 					variant={editLesson ? 'outlined' : 'filled'}
 					onClick={() => setEditLesson(!editLesson)}
@@ -190,7 +190,7 @@ const LessonDetail = ({
 					{editLesson ? <X size={12} /> : <Pencil size={12} />}
 				</Button>
 				{editLesson && (
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						placeholder={undefined}
 						disabled={!lessonName}
 						onClick={() => {
@@ -205,7 +205,7 @@ const LessonDetail = ({
 						<Save size={12} />
 					</Button>
 				)}
-				{/* <Button
+				{/* <Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					placeholder={undefined}
 					disabled={maxOrderLesson <= SL.order || editLesson}
 					onClick={() =>

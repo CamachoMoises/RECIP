@@ -69,7 +69,7 @@ const QuestionHeader = ({
 
 			<div className="flex flex-row justify-center gap-4">
 				<div>
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						size="sm"
 						title={editHeader ? 'Cancelar' : 'Cambiar Encabezado'}
 						variant={editHeader ? 'outlined' : 'filled'}
@@ -83,7 +83,7 @@ const QuestionHeader = ({
 					</Button>
 				</div>
 				{editHeader && (
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						title="Guardar"
 						size="sm"
 						placeholder={undefined}

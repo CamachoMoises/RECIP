@@ -850,7 +850,7 @@ const TestCompletion = ({
 				</table>
 			)}
 			<div>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					title="Guardar"
 					size="sm"
 					disabled={!hasChange}

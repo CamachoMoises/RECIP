@@ -185,7 +185,7 @@ const GeneralConfig = () => {
 									Crear Curso
 								</Typography>
 								<div className="flex flex-col">
-									<Button
+									<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 										placeholder={undefined}
 										className="flex flex-col text-center justify-center w-max mx-auto"
 										onClick={() => {
@@ -270,14 +270,14 @@ const GeneralConfig = () => {
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture={undefined}
 														>
-															<Button
+															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																title="Editar el Curso"
 																placeholder={undefined}
 																onClick={() => handleOpenEdit(course)}
 															>
 																<Pencil size={20} />
 															</Button>
-															<Button
+															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																title="Secciones del Curso"
 																placeholder={undefined}
 																onClick={() =>
@@ -289,7 +289,7 @@ const GeneralConfig = () => {
 																<BookCheck size={20} />
 															</Button>
 
-															<Button
+															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																title="Editar examenes del curso"
 																placeholder={undefined}
 																disabled={course.course_type.id !== 1}

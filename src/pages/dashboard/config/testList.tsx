@@ -138,7 +138,7 @@ const TestList = () => {
 								Cantidad de examenes {test.testList.length}
 							</Typography>
 							<div className="flex flex-wrap gap-2">
-								<Button
+								<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 									size="sm"
 									title="Agregar examen"
 									variant="filled"
@@ -149,7 +149,7 @@ const TestList = () => {
 								>
 									<Plus size={15} className="mx-auto text-lg" />
 								</Button>
-								<Button
+								<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 									size="sm"
 									title="Subir preguntas desde Excel"
 									variant="outlined"

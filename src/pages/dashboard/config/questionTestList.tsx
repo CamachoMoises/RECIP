@@ -142,7 +142,7 @@ const QuestionTestList = () => {
 					)}
 					{questionType.id != 4 && (
 						<div className="flex flex-col">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								size="sm"
 								title="Agregar pregunta"
 								variant="filled"

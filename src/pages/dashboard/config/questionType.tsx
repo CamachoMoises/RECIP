@@ -75,7 +75,7 @@ const QuestionType = ({
 						)}
 						<br />
 						<div className="w-full flex flex-row  gap-5 justify-center">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								title="Editar el Curso"
 								variant={edit ? 'outlined' : 'filled'}
 								size="sm"

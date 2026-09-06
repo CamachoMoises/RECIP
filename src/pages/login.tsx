@@ -191,7 +191,7 @@ const Login = () => {
 								)}
 							</div>
 
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								type="submit"
 								className="glass-button py-3 text-base shadow-lg shadow-blue-500/20"
 								fullWidth

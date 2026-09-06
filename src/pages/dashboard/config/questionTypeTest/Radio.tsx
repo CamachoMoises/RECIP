@@ -91,7 +91,7 @@ const TestRadio = ({
 				))}
 				{add && (
 					<div className="flex flex-col justify-center align-middle">
-						<Button
+						<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 							size="sm"
 							title="Agregar respuesta"
 							variant="filled"

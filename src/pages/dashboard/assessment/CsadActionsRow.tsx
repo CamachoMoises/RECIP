@@ -28,7 +28,7 @@ const CsadActionsRow = ({
 				{isFormDisabled && (
 					<div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
 						{isSuperuser ? (
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								variant="outlined"
 								color="blue"
 								onClick={onEdit}
@@ -52,7 +52,7 @@ const CsadActionsRow = ({
 			</div>
 			<div className="flex flex-row gap-2">
 				<fieldset disabled={isFormDisabled} className="contents">
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						variant="gradient"
 						color="green"
 						type="submit"

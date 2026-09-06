@@ -205,7 +205,7 @@ const TestParams = ({
 			)}
 			<div className="flex flex-row gap-3 my-2 justify-center">
 				<div>
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						size="sm"
 						title={edit ? 'Cancelar' : 'Cambiar Encabezado'}
 						variant={edit ? 'outlined' : 'filled'}
@@ -219,7 +219,7 @@ const TestParams = ({
 				</div>
 				{edit && (
 					<div>
-						<Button
+						<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 							title="Guardar"
 							size="sm"
 							placeholder={undefined}

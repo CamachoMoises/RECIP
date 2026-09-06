@@ -136,7 +136,7 @@ const TestCheck = ({
 				})}
 				{add && (
 					<div className="flex flex-col justify-center align-middle">
-						<Button
+						<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 							size="lg"
 							title="Agregar respuesta"
 							variant="filled"

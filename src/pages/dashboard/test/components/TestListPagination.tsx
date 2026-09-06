@@ -35,7 +35,7 @@ const TestListPagination = ({
 			</div>
 
 			<div className="flex w-full justify-center gap-4">
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					className="flex items-center gap-1 rounded-full text-xs sm:text-sm"
 					onClick={onPrev}
@@ -72,7 +72,7 @@ const TestListPagination = ({
 					</Typography>
 				</div>
 
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					className="flex items-center gap-1 rounded-full text-xs sm:text-sm"
 					onClick={onNext}

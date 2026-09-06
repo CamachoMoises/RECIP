@@ -290,7 +290,7 @@ const CourseDetail = () => {
 									>
 										Secciones/ Modulos
 									</Typography>
-									<Button
+									<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 										fullWidth
 										size="sm"
 										placeholder={undefined}
@@ -452,7 +452,7 @@ const CourseDetail = () => {
 																	onPointerEnterCapture={undefined}
 																	onPointerLeaveCapture={undefined}
 																>
-																	<Button
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																		placeholder={undefined}
 																		disabled={subject.order <= 1}
 																		onClick={() =>
@@ -466,7 +466,7 @@ const CourseDetail = () => {
 																		<ArrowUp size={12} />
 																	</Button>
 
-																	<Button
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																		placeholder={undefined}
 																		onClick={() =>
 																			handleOpenEdit(subject.id)
@@ -474,7 +474,7 @@ const CourseDetail = () => {
 																	>
 																		<Pencil size={12} />
 																	</Button>
-																	<Button
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																		placeholder={undefined}
 																		disabled={
 																			maxOrderSubject

@@ -283,7 +283,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 				>
 					Subir Preguntas desde Excel
 				</Typography>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					size="sm"
 					onClick={handleClose}
@@ -524,7 +524,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					onClick={handleClose}
 					className="mr-2"
@@ -532,7 +532,7 @@ const ExcelUploadComponent: React.FC<ExcelUploadComponentProps> = ({
 				>
 					Cancelar
 				</Button>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="filled"
 					onClick={handleUpload}
 					disabled={uploading || parsedData.length === 0}

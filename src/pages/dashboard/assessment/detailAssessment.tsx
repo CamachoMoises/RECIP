@@ -711,7 +711,7 @@ const DetailAssessment = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="mt-16 flex justify-between gap-1">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								onClick={handlePrev}
 								disabled={isFirstStep}
 								placeholder={undefined}
@@ -719,7 +719,7 @@ const DetailAssessment = () => {
 								{isFirstStep ? 'x' : `Dia ${activeStep}`}
 							</Button>
 
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								onClick={handleNext}
 								disabled={isLastStep}
 								placeholder={undefined}

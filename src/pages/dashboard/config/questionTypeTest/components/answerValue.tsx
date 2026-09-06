@@ -65,7 +65,7 @@ const AnswerValue = ({
 			)}
 			<div className="flex flex-row justify-center gap-1 ps-4">
 				<div>
-					<Button
+					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						size="sm"
 						title={
 							editAnswer && editAnswerLocal
@@ -91,7 +91,7 @@ const AnswerValue = ({
 				</div>
 				{editAnswerLocal && (
 					<div>
-						<Button
+						<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 							title="Guardar"
 							size="sm"
 							placeholder={undefined}

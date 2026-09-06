@@ -159,7 +159,7 @@ const ExamsModal = ({
 										)}
 									</div>
 									<div className="flex flex-col gap-2 flex-shrink-0">
-										<Button
+										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 											size="sm"
 											variant="outlined"
 											color="blue-gray"
@@ -181,7 +181,7 @@ const ExamsModal = ({
 											<Eye size={13} />
 											Revisión
 										</Button>
-										<Button
+										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 											size="sm"
 											variant="outlined"
 											color="red"
@@ -217,7 +217,7 @@ const ExamsModal = ({
 				onPointerLeaveCapture={undefined}
 				className="border-t border-gray-100 pt-3"
 			>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					color="gray"
 					size="sm"

@@ -341,7 +341,7 @@ const StudentCourseList = ({
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								variant="outlined"
 								color="gray"
 								onClick={handleCloseDialog}

@@ -438,7 +438,7 @@ const MyInstructorCourses = () => {
 							registros)
 						</Typography>
 						<div className="flex items-center gap-2">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								variant="text"
 								className="flex items-center gap-2 rounded-full"
 								onClick={prev}
@@ -448,7 +448,7 @@ const MyInstructorCourses = () => {
 								<ChevronLeft strokeWidth={2} className="h-4 w-4" />
 								Prev
 							</Button>
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								variant="text"
 								className="flex items-center gap-2 rounded-full"
 								onClick={next}

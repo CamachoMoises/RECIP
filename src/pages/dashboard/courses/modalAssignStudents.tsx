@@ -166,7 +166,7 @@ const ModalAssignStudents = ({
 								>
 									{availableStudents.length} disponible(s)
 								</Typography>
-								<Button
+								<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 									size="sm"
 									variant="text"
 									color="blue"
@@ -243,7 +243,7 @@ const ModalAssignStudents = ({
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="text"
 					color="red"
 					onClick={handleOpen}
@@ -252,7 +252,7 @@ const ModalAssignStudents = ({
 				>
 					<span>Cancelar</span>
 				</Button>
-				<Button
+				<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 					variant="gradient"
 					color="blue"
 					onClick={handleAssign}

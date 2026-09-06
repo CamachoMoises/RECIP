@@ -65,7 +65,7 @@ export default function PageTitle({
 							<div className="flex flex-row gap-2">
 								{pathName !== '/' && breadCrumbs.length > 0 && (
 									<>
-										<Button
+										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 											onClick={handleBack}
 											variant="text"
 											title="Volver"

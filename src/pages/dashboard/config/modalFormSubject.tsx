@@ -300,7 +300,7 @@ const ModalFormSubject = ({
 							</div>
 						</div>
 						<div className="flex flex-row justify-end py-2">
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								variant="text"
 								color="red"
 								onClick={handleOpen}
@@ -309,7 +309,7 @@ const ModalFormSubject = ({
 							>
 								<span>Cancelar</span>
 							</Button>
-							<Button
+							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								variant="gradient"
 								color="green"
 								type="submit"
@@ -355,7 +355,7 @@ const ModalFormSubject = ({
 										</div>
 									)}
 									<div className="flex flex-row gap-3 justify-center">
-										<Button
+										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 											size="sm"
 											variant={
 												openNewSubjectLesson ? 'outlined' : 'filled'
@@ -376,7 +376,7 @@ const ModalFormSubject = ({
 											)}
 										</Button>
 										{openNewSubjectLesson && (
-											<Button
+											<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 												size="sm"
 												placeholder={undefined}
 												disabled={!lessonState}
