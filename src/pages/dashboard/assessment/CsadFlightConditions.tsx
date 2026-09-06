@@ -1,6 +1,9 @@
 import { Button, Input } from '@material-tailwind/react';
 import { Save } from 'lucide-react';
-import { CsadFieldConfig, CsadFormFieldProps } from './csadForm.types';
+import {
+	CsadFieldConfig,
+	CsadFormFieldProps,
+} from '../../../types/utilities';
 
 const FIELD_CONFIG: CsadFieldConfig[] = [
 	{
@@ -108,9 +111,7 @@ const CsadFlightConditions = ({
 									message: field.requiredMessage ?? '',
 								},
 							})}
-							aria-invalid={
-								errors[field.name] ? 'true' : 'false'
-							}
+							aria-invalid={errors[field.name] ? 'true' : 'false'}
 						/>
 						{errors[field.name] && (
 							<span className="text-red-500">
@@ -130,6 +131,8 @@ const CsadFlightConditions = ({
 						title="Guardar datos del formulario superior"
 						className="flex flex-row justify-center"
 						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
 					>
 						<Save size={15} /> Guardar
 					</Button>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { SignatureUrls } from '../../../types/utilities';
-import { signatureUrl } from './csadForm.utils';
+import { signatureUrl } from '../../../lib/utils';
 
 export const useCsadSignatures = (isLastStep: boolean) => {
 	const CSAD_id = useSelector(

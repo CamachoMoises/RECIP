@@ -31,7 +31,10 @@ import CSAD_form from './CSAD_form';
 import { axiosPostDefault } from '../../../services/axios';
 import toast from 'react-hot-toast';
 import { pdf } from '@react-pdf/renderer';
-import { getLogoBase64 } from '../../../utils/logoBase64';
+import {
+	getFirmaDirectorBase64,
+	getLogoBase64,
+} from '../../../utils/logoBase64';
 import {
 	fetchSchedule,
 	sendCourseScheduleEmail,
@@ -221,14 +224,16 @@ const DetailAssessment = () => {
 			courseStudentAssessmentSelected: fresh.CSA,
 			daysSubjectList: fresh.CASD,
 		};
-		const [logoBase64, signatures] = await Promise.all([
+		const [logoBase64, signatures, firmaBase64] = await Promise.all([
 			getLogoBase64(),
 			buildSignatures(fresh.CSA?.CourseStudentAssessmentDays ?? []),
+			getFirmaDirectorBase64(),
 		]);
 		const pdfBlob = await pdf(
 			<CSAssessmentPDFDocument
 				assessment={freshAssessment}
 				logoBase64={logoBase64}
+				firmaBase64={firmaBase64}
 				signatures={signatures}
 				schedules={scheduleRes}
 			/>,

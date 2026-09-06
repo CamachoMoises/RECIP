@@ -23,6 +23,8 @@ export type CsadInputs = {
 	landing_night: number;
 	training_time: number;
 	check_time: number;
+	ifr_time: number;
+	vfr_time: number;
 	type: string;
 	seat: string;
 	comments: string;

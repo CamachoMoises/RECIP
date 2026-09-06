@@ -13,8 +13,8 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import toast from 'react-hot-toast';
-import { CsadInputs } from './csadForm.types';
-import { signatureUrl } from './csadForm.utils';
+import { CsadInputs } from '../../../types/utilities';
+import { signatureUrl } from '../../../lib/utils';
 import useCsadSignatures from './useCsadSignatures';
 import CsadFlightConditions from './CsadFlightConditions';
 import CsadOperationsSection from './CsadOperationsSection';
@@ -402,6 +402,8 @@ const CSAD_form = ({
 											fullWidth
 											className="flex flex-row justify-center"
 											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
 										>
 											<Eraser size={15} />
 										</Button>

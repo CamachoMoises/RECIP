@@ -104,11 +104,13 @@ const styles = StyleSheet.create({
 const CSAssessmentPDFDocument = ({
 	assessment,
 	logoBase64,
+	firmaBase64,
 	signatures,
 	schedules,
 }: {
 	assessment: assessmentState;
 	logoBase64: string;
+	firmaBase64?: string;
 	signatures?: Record<
 		number,
 		{ student?: string; instructor?: string; fcaa?: string }
@@ -223,6 +225,8 @@ const CSAssessmentPDFDocument = ({
 	let sumLandingNight = 0;
 	let sumTrainingTime = 0;
 	let sumCheckTime = 0;
+	let sumIfrTime = 0;
+	let sumVfrTime = 0;
 	assessmentDays.forEach((CSAD) => {
 		sumTakeoffDay += CSAD.takeoff_day || 0;
 		sumTakeoffNight += CSAD.takeoff_night || 0;
@@ -230,6 +234,8 @@ const CSAssessmentPDFDocument = ({
 		sumLandingNight += CSAD.landing_night || 0;
 		sumTrainingTime += Number(CSAD.training_time) || 0;
 		sumCheckTime += Number(CSAD.check_time) || 0;
+		sumIfrTime += Number(CSAD.ifr_time) || 0;
+		sumVfrTime += Number(CSAD.vfr_time) || 0;
 	});
 
 	const dateFormat = 'DD-MM-YYYY';
@@ -767,6 +773,24 @@ const CSAssessmentPDFDocument = ({
 							>
 								{formatHours(sumCheckTime)}
 							</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>TIEMPO IFR (HORAS)</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{formatHours(sumIfrTime)}
+</Text>
+							<Text style={[styles.cell, { flex: 2 }]}>TIEMPO VFR (HORAS)</Text>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 1, textAlign: 'center' },
+								]}
+							>
+								{formatHours(sumVfrTime)}
+</Text>
 							<Text style={[styles.cell, { flex: 2 }]}> </Text>
 							<Text style={[styles.cell, { flex: 1 }]}> </Text>
 						</View>
@@ -936,7 +960,23 @@ const CSAssessmentPDFDocument = ({
 								Recomendado para: Tipo evaluación de habilitación.{' '}
 								{CSA?.approve ? '✔' : '✘'}
 							</Text>
-							<Text style={[styles.cell, { flex: 1 }]}> </Text>
+							<View
+								style={[
+									styles.cell,
+									{
+										flex: 1,
+										alignItems: 'center',
+										justifyContent: 'center',
+									},
+								]}
+							>
+								{firmaBase64 && (
+									<Image
+										style={styles.sigImage}
+										src={firmaBase64}
+									/>
+								)}
+							</View>
 						</View>
 					</View>
 

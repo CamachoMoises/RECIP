@@ -9,8 +9,8 @@ import {
 	Controller,
 	UseFormRegister,
 } from 'react-hook-form';
-import { CsadFieldConfig, CsadInputs } from './csadForm.types';
-import { proficiencyLabel } from './csadForm.utils';
+import { CsadFieldConfig, CsadInputs } from '../../../types/utilities';
+import { proficiencyLabel } from '../../../lib/utils';
 
 const countFields = (prefix: 'takeoff' | 'landing'): CsadFieldConfig[] => [
 	{ name: prefix, label: 'Total' },
@@ -29,6 +29,20 @@ const countFields = (prefix: 'takeoff' | 'landing'): CsadFieldConfig[] => [
 ];
 
 const TIME_FIELDS: CsadFieldConfig[] = [
+	{
+		name: 'ifr_time',
+		label: 'IFR (horas)',
+		valueAsNumber: true,
+		min: 0,
+		step: '0.01',
+	},
+	{
+		name: 'vfr_time',
+		label: 'VFR (horas)',
+		valueAsNumber: true,
+		min: 0,
+		step: '0.01',
+	},
 	{
 		name: 'training_time',
 		label: 'Entrenamiento (horas)',

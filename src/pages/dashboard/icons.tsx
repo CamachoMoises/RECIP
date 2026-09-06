@@ -127,7 +127,7 @@ const sections: { label: string; items: IconItem[] }[] = [
 			},
 			{
 				id: 'config',
-				title: 'Configuración',
+				title: 'Configuración de curso',
 				icon: Cog,
 				permission: ['staff'],
 				route: 'config',
@@ -190,14 +190,14 @@ const Icons = () => {
 												}`}
 											>
 												<div
-													className={`flex items-center justify-center rounded-xl bg-gradient-to-br ${item.color} w-11 h-11 shadow-md transition-shadow group-hover:shadow-xl`}
+													className={`flex items-center justify-center rounded-xl bg-gradient-to-br ${item.color} w-14 h-14 shadow-md transition-shadow group-hover:shadow-xl`}
 												>
 													<IconComponent
-														size={22}
+														size={28}
 														className="text-white"
 													/>
 												</div>
-												<span className="text-[10px] sm:text-[11px] font-medium text-center leading-tight opacity-80">
+												<span className="text-[12px] sm:text-[13px] font-medium text-center leading-tight opacity-80">
 													{item.title}
 												</span>
 											</button>
