@@ -40,7 +40,7 @@ const sections: { label: string; items: IconItem[] }[] = [
 			},
 			{
 				id: 'my-courses',
-				title: 'Mis Cursos (Alumno)',
+				title: 'Mis Cursos (Piloto)',
 				icon: GraduationCap,
 				permission: ['student'],
 				route: 'my-courses',

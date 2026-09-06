@@ -73,7 +73,7 @@ src/
 
 ## Key Patterns
 
-- **All MT components** need `placeholder={undefined}` and `onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}` (except `Button` — omit the pointer props from Button to avoid React DOM warnings)
+- **All MT components** (including `Button`) need `placeholder={undefined}` and `onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}` — with @types/react 18.3 these props are **required** by the MT Button type; `undefined` value causes no React DOM warnings
 - **API**: Use `axiosGetSlice`, `axiosPostSlice`, `axiosPutSlice` from `services/axios.ts`
 - **Auth**: Token auto-injected; 403 triggers logout via Redux dispatch
 - **Permissions**: `PermissionsValidate(['staff', 'instructor'])` returns boolean
