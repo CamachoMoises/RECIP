@@ -668,7 +668,7 @@ const CSAssessmentPDFDocument = ({
 						</>
 					)}
 					{/* Resumen de despegues y aterrizajes */}
-					<View style={styles.table} break="before">
+					<View style={styles.table} break>
 						<View style={styles.row} wrap={false}>
 							<Text
 								style={[
