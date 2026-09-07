@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	cellGray: {
-		backgroundColor: '#9e9e9e',
+		backgroundColor: '#e0e0e0',
 	},
 	cellHeader: {
 		backgroundColor: '#e0e0e0',
@@ -777,7 +777,12 @@ const CSAssessmentPDFDocument = ({
 							</Text>
 						</View>
 						<View style={styles.row} wrap={false}>
-							<Text style={[styles.cell, { flex: 2 }]}>
+							<Text
+								style={[
+									styles.cell,
+									{ flex: 2, textAlign: 'center' },
+								]}
+							>
 								HORAS IFR
 							</Text>
 							<Text
@@ -802,7 +807,6 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellGray,
 									{ flex: 2, textAlign: 'center' },
 								]}
 							>
@@ -820,7 +824,6 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellGray,
 									{ flex: 2, textAlign: 'center' },
 								]}
 							>
@@ -829,7 +832,6 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellGray,
 									{ flex: 1, textAlign: 'center' },
 								]}
 							>
@@ -839,7 +841,6 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellGray,
 									{ flex: 2, textAlign: 'center' },
 								]}
 							>
