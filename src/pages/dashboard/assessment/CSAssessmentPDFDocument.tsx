@@ -778,7 +778,7 @@ const CSAssessmentPDFDocument = ({
 						</View>
 						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								TIEMPO IFR
+								HORAS IFR
 							</Text>
 							<Text
 								style={[
@@ -789,7 +789,7 @@ const CSAssessmentPDFDocument = ({
 								{formatHours(sumIfrTime)}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								TIEMPO VFR
+								HORAS VFR
 							</Text>
 							<Text
 								style={[
@@ -800,7 +800,7 @@ const CSAssessmentPDFDocument = ({
 								{formatHours(sumVfrTime)}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								TIEMPO DE ENTRENAMIENTO
+								HORAS DE ENTRENAMIENTO
 							</Text>
 							<Text
 								style={[
@@ -811,7 +811,7 @@ const CSAssessmentPDFDocument = ({
 								{formatHours(sumTrainingTime)}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								TIEMPO DE CHEQUEO
+								HORAS DE CHEQUEO
 							</Text>
 							<Text
 								style={[
@@ -822,8 +822,13 @@ const CSAssessmentPDFDocument = ({
 								{formatHours(sumCheckTime)}
 							</Text>
 
-							<Text style={[styles.cell, { flex: 2 }]}> </Text>
-							<Text style={[styles.cell, { flex: 1 }]}> </Text>
+							<Text style={[styles.cell, { flex: 2 }]}>
+								HORAS TOTALES EN FFS
+							</Text>
+							<Text style={[styles.cell, { flex: 1 }]}>
+								{' '}
+								formatHours(sumTrainingTime + sumCheckTime)
+							</Text>
 						</View>
 					</View>
 
