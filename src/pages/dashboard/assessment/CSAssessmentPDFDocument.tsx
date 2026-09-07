@@ -815,7 +815,6 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellGray,
 									{ flex: 1, textAlign: 'center' },
 								]}
 							>
