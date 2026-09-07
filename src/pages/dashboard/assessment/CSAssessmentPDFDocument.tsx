@@ -800,7 +800,7 @@ const CSAssessmentPDFDocument = ({
 								{formatHours(sumVfrTime)}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								HORAS DE ENTRENAMIENTO
+								HORAS DE{'\n'}ENTRENAMIENTO
 							</Text>
 							<Text
 								style={[
@@ -826,8 +826,7 @@ const CSAssessmentPDFDocument = ({
 								HORAS TOTALES EN FFS
 							</Text>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								{' '}
-								formatHours(sumTrainingTime + sumCheckTime)
+								{formatHours(sumTrainingTime + sumCheckTime)}
 							</Text>
 						</View>
 					</View>
