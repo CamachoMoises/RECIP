@@ -293,7 +293,7 @@ const CSAssessmentPDFDocument = ({
 						<Image style={styles.logo} src={logoBase64} />
 						<View style={styles.headerTextBlock}>
 							<Text style={styles.headerText}>
-								Registro De Entrenamiento De Vuelo Del Piloto
+								Registro Progresivo De Entrenamiento En FFS
 							</Text>
 							<Text style={styles.headerText}>
 								{CSA?.course?.name} - Curso{' '}
