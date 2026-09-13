@@ -293,11 +293,11 @@ const CSAssessmentPDFDocument = ({
 						<Image style={styles.logo} src={logoBase64} />
 						<View style={styles.headerTextBlock}>
 							<Text style={styles.headerText}>
-								Registro Progresivo De Entrenamiento En FFS
+								Registro Progresivo de Entrenamiento en FFS
 							</Text>
 							<Text style={styles.headerText}>
 								{CSA?.course?.name} - Curso{' '}
-								{CSA?.course?.course_level.name}
+								{/* {CSA?.course?.course_level.name} */}
 							</Text>
 						</View>
 					</View>
