@@ -278,7 +278,7 @@ const PDFCourseScheduleDocument = ({
 	moment.locale('es');
 
 	const data = course.scheduleList;
-	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const lastInstructor =

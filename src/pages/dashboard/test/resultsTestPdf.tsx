@@ -18,7 +18,7 @@ const ResultsTestPdf = ({
 	course: CourseState;
 	user: UserState;
 }) => {
-	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const questions =

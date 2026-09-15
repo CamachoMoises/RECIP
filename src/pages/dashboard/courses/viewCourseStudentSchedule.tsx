@@ -225,6 +225,8 @@ const ViewCourseStudentSchedule = () => {
 				return 'SFI';
 			case 4:
 				return 'SFE';
+			case 5:
+				return 'PI';
 			default:
 				return '-';
 		}

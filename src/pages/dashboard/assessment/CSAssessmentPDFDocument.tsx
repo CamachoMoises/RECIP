@@ -123,7 +123,7 @@ const CSAssessmentPDFDocument = ({
 		assessmentDays.find((CSAD) => Number(CSAD.day) === dayNum);
 	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
-	const jerarquia = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+	const jerarquia = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
 	const daysWithLessons = new Set<number>();
 	(assessment.daysSubjectList ?? []).forEach((sub) =>
 		(sub.subject_lessons ?? []).forEach((SL) =>
@@ -293,10 +293,10 @@ const CSAssessmentPDFDocument = ({
 						<Image style={styles.logo} src={logoBase64} />
 						<View style={styles.headerTextBlock}>
 							<Text style={styles.headerText}>
-								Registro Progresivo de Entrenamiento en FFS
+								Registro Progresivo de Entrenamiento en FFS Nivel C
 							</Text>
 							<Text style={styles.headerText}>
-								{CSA?.course?.name} - Curso{' '}
+								{CSA?.course?.name}{' '}
 								{/* {CSA?.course?.course_level.name} */}
 							</Text>
 						</View>

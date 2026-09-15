@@ -22,7 +22,7 @@ const breadCrumbs: breadCrumbsItems[] = [
 	{ name: 'Examenes', href: '/dashboard/test' },
 ];
 
-const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE'];
+const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
 const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
 const regulation = ['', 'INAC', 'No-INAC'];
 

@@ -495,6 +495,25 @@ const NewCourseStudentSchedule = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										/>
+										<Radio
+											name="type_trip"
+											defaultChecked={
+												course.courseStudent?.type_trip === 5
+											}
+											label="PI"
+											disabled={
+												course.courseStudent?.approve ||
+												!canViewContent
+											}
+											onChange={() =>
+												handleChangeRadio(5, 'type_trip')
+											}
+											color="red"
+											crossOrigin={undefined}
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
 									</div>
 								</div>
 
