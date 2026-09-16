@@ -75,6 +75,7 @@ const NewCourseStudentSchedule = () => {
 	);
 	const studentSelectRef = useRef<user | null>(null);
 	const instructorCodeRef = useRef<string>('');
+	const clientRef = useRef<string>('');
 
 	// State
 	const [studentSelect, setStudentSelect] = useState<user | null>(
@@ -180,6 +181,7 @@ const NewCourseStudentSchedule = () => {
 					license: licenseRef.current,
 					regulation: regulationRef.current,
 					instructorCode: instructorCodeRef.current,
+					client: clientRef.current,
 				}),
 			);
 		}
@@ -224,6 +226,7 @@ const NewCourseStudentSchedule = () => {
 			regulationRef.current = course.courseStudent.regulation;
 			instructorCodeRef.current =
 				course.courseStudent.instructor_code || '';
+			clientRef.current = course.courseStudent.client || '';
 		}
 	}, [course.courseStudent, user.studentList]);
 
@@ -394,6 +397,27 @@ const NewCourseStudentSchedule = () => {
 									}
 									onChange={(e) => {
 										instructorCodeRef.current = e.target.value;
+									}}
+									onBlur={() => handleChange()}
+									crossOrigin={undefined}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								/>
+							</div>
+
+							<div className="mt-4">
+								<Input
+									label="Cliente"
+									maxLength={500}
+									disabled={
+										course.courseStudent?.approve || !canViewContent
+									}
+									defaultValue={
+										course.courseStudent?.client || ''
+									}
+									onChange={(e) => {
+										clientRef.current = e.target.value;
 									}}
 									onBlur={() => handleChange()}
 									crossOrigin={undefined}

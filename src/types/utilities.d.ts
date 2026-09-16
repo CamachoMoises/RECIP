@@ -196,6 +196,7 @@ export type course = {
     level?: number;
     status: boolean;
     plane_model?: string;
+    client?: string;
     course_type: courseType;
     course_level: courseLevel;
     createdAt?: string;
@@ -297,6 +298,7 @@ export type courseStudent = {
     status?: boolean;
     max_attempts: number | null;
     instructor_code?: string;
+    client?: string;
     courseGroupId?: number | null;
     courseGroup?: courseGroup | null;
     createdAt: string;
@@ -671,6 +673,7 @@ export type courseGroupReportCourse = {
     hours: number;
     days: number;
     plane_model?: string | null;
+    client?: string | null;
     status: boolean;
     course_type: courseType;
     course_level: courseLevel;
@@ -724,6 +727,7 @@ export type courseGroupReportCourseStudent = {
     status: boolean;
     max_attempts: number | null;
     instructor_code: string | null;
+    client?: string | null;
     student?: courseGroupReportStudent;
     course?: course;
     schedules: courseGroupReportSchedule[];

@@ -328,6 +328,7 @@ const AttendanceListPDF = ({
 								<Text style={styles.infoHeaderCell}>
 									Finalización
 								</Text>
+								<Text style={styles.infoHeaderCell}>Cliente</Text>
 							</View>
 							<View style={styles.infoRow}>
 								<Text style={styles.infoValueCell}>
@@ -350,6 +351,9 @@ const AttendanceListPDF = ({
 										getDayDate(totalDays) ||
 											addDays(groupDate, totalDays - 1),
 									)}
+								</Text>
+								<Text style={styles.infoValueCell}>
+									{course?.client || ''}
 								</Text>
 							</View>
 						</View>

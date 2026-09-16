@@ -263,6 +263,16 @@ const GeneralConfig = () => {
 													>
 														{course.course_type.name}
 													</Typography>
+													{course.client && (
+														<Typography
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+															variant="small"
+														>
+															Cliente: {course.client}
+														</Typography>
+													)}
 													<div className="flex flex-row justify-center flex-wrap gap-1 sm:gap-0">
 														<ButtonGroup
 															size="sm"

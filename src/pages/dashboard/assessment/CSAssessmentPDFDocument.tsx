@@ -328,7 +328,8 @@ const CSAssessmentPDFDocument = ({
 						</View>
 						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 1 }]}>
-								<Text style={styles.cellBold}>Cliente: AMB</Text>
+								<Text style={styles.cellBold}>Cliente:</Text>{' '}
+								{CSA?.course_student?.client || CSA?.course?.client}
 								{'\n'}
 							</Text>
 							<Text style={[styles.cell, { flex: 1 }]}>

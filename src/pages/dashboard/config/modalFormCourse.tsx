@@ -30,6 +30,7 @@ type Inputs = {
 	days: string;
 	hours: number;
 	plane_model: string;
+	client: string;
 	course_type: string;
 	course_level: string;
 };
@@ -83,6 +84,7 @@ const ModalFormCourse = ({
 			code: courseSelected?.code,
 			hours: courseSelected?.hours,
 			plane_model: courseSelected?.plane_model,
+			client: courseSelected?.client,
 			course_type: courseSelected?.course_type.id
 				? `${courseSelected.course_type.id}`
 				: '',
@@ -109,8 +111,9 @@ const ModalFormCourse = ({
 				days: parseInt(data.days),
 				type: parseInt(data.course_type),
 				level: parseInt(data.course_level),
-				plane_model: data.plane_model,
-				status: isActive,
+plane_model: data.plane_model,
+			client: data.client,
+			status: isActive,
 				course_type: newCourseType,
 				course_level: newCourseLevel,
 			};
@@ -326,6 +329,25 @@ const ModalFormCourse = ({
 								{errors.plane_model && (
 									<span className="text-red-500 text-sm/[8px] py-2">
 										{errors.plane_model.message}
+									</span>
+								)}
+							</div>
+							<div className="">
+								<Input
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									type="text"
+									label="Cliente"
+									placeholder="Cliente"
+									maxLength={500}
+									className="bg-slate-400 rounded-md p-2 w-full mb-2 block text-slate-900"
+									crossOrigin={undefined}
+									{...register('client', {})}
+									aria-invalid={errors.client ? 'true' : 'false'}
+								/>
+								{errors.client && (
+									<span className="text-red-500 text-sm/[8px] py-2">
+										{errors.client.message}
 									</span>
 								)}
 							</div>

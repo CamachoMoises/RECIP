@@ -499,6 +499,17 @@ const ViewCourseStudentSchedule = () => {
 						>
 							PC: {course.courseStudent?.student?.user_id}
 						</Typography>
+						{course.courseSelected?.client && (
+							<Typography
+								variant="small"
+								className="text-xs sm:text-sm"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Cliente del curso: {course.courseSelected.client}
+							</Typography>
+						)}
 					</div>
 
 					<hr className="my-4" />
@@ -695,6 +706,28 @@ const ViewCourseStudentSchedule = () => {
 											{getRegulationLabel(
 												course.courseStudent?.regulation,
 											)}
+										</Typography>
+									</div>
+								</div>
+								<div>
+									<Typography
+										variant="h6"
+										className="mb-2 text-gray-600"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										Cliente
+									</Typography>
+									<div className="p-2 rounded bg-gray-100">
+										<Typography
+											variant="small"
+											className="font-bold"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{course.courseStudent?.client || '—'}
 										</Typography>
 									</div>
 								</div>

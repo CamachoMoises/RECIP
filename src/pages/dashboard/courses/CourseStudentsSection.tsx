@@ -309,6 +309,18 @@ const CourseStudentsSection = ({
 												Código: {CL.instructor_code}
 											</Typography>
 										)}
+										{CL.client && (
+											<Typography
+												variant="small"
+												color="blue-gray"
+												className="font-normal mt-1"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Cliente: {CL.client}
+											</Typography>
+										)}
 									</div>
 									<div
 										onClick={(e) => e.stopPropagation()}
@@ -498,6 +510,48 @@ const CourseStudentsSection = ({
 												onPointerLeaveCapture={undefined}
 											>
 												{selectedStudent.instructor_code}
+											</Typography>
+										</div>
+									)}
+									{selectedStudent.client && (
+										<div>
+											<Typography
+												variant="small"
+												color="gray"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Cliente del piloto:
+											</Typography>
+											<Typography
+												variant="paragraph"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{selectedStudent.client}
+											</Typography>
+										</div>
+									)}
+									{selectedStudent.course?.client && (
+										<div>
+											<Typography
+												variant="small"
+												color="gray"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												Cliente del curso:
+											</Typography>
+											<Typography
+												variant="paragraph"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{selectedStudent.course.client}
 											</Typography>
 										</div>
 									)}

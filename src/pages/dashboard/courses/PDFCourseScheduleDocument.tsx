@@ -363,6 +363,20 @@ const PDFCourseScheduleDocument = ({
 								{studentSelect?.country_name}
 							</Text>
 						</View>
+						<View style={styles.infoRow}>
+							<Text style={styles.infoCell}>
+								<Text style={{ fontWeight: 'bold' }}>
+									Cliente del piloto:{' '}
+								</Text>
+								{course.courseStudent?.client || '—'}
+							</Text>
+							<Text style={styles.infoCell}>
+								<Text style={{ fontWeight: 'bold' }}>
+									Cliente del curso:{' '}
+								</Text>
+								{course.courseSelected?.client || '—'}
+							</Text>
+						</View>
 					</View>
 
 					{/* Título cronograma */}

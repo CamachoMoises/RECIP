@@ -29,10 +29,10 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 | Student | `id, user_id, status` |
 | Instructor | `id, user_id, status` |
 | UserDocType | `id, name, symbol` |
-| Course | `id, name, description, code, hours, plane_model, days, status, course_type_id, course_level_id` |
+| Course | `id, name, description, code, hours, plane_model, days, status, course_type_id, course_level_id, client` |
 | CourseType | `id, name` |
 | CourseLevel | `id, name` |
-| CourseStudent | `id, course_id, date, score, approve, student_id, code, type_trip, license, regulation, status, max_attempts, instructor_code` |
+| CourseStudent | `id, course_id, date, score, approve, student_id, code, type_trip, license, regulation, status, max_attempts, instructor_code, client` |
 | CourseGroup | `id, title, code, user_code, date, course_id, status` |
 | CourseGroupSignature | `id, course_group_id, day_number, signature_number, signature_url` |
 | CourseStudentTest | `id, course_id, score, approve, test_id, attempts, course_student_id, date, student_id, code, status, finished` |
@@ -148,7 +148,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### POST /
 - Body (Joi; `type`→`course_type_id`, `level`→`course_level_id`): `name`, `description`, `code`,
-  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status` (opcionales)
+  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status`, `client` (opcionales)
 - `201` → Course con `course_type`, `course_level`
 
 ### PUT /
@@ -188,7 +188,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### PUT /courseStudent/:course_id
 - Params: `course_id` (ignorado); Body: `course_student_id` (requerido), `date`, `student_id`,
-  `typeTrip`, `license`, `regulation`, `instructorCode`, `courseGroupId`
+  `typeTrip`, `license`, `regulation`, `instructorCode`, `courseGroupId`, `client`
 - `200` → CourseStudent (sin includes)
 - `400` texto plano `course_student_id is required`
 
@@ -368,8 +368,9 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### GET /courseStudentAssessmentDay
 - Query: `CSA_id`, `day`, `course_id`, `student_id`, `course_student_id`, `takeoff_day`,
-  `takeoff_night`, `landing_day`, `landing_night`, `training_time`, `check_time`, `type`
-  (`training_time`/`check_time`: números decimales en horas)
+  `takeoff_night`, `landing_day`, `landing_night`, `training_time`, `check_time`, `ifr_time`,
+  `vfr_time`, `type`
+  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas)
 - `200` → CourseStudentAssessmentDay (si no existe el día, lo crea y lo devuelve)
 
 ### POST /createCourseStudentAssessment
@@ -384,8 +385,9 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 ### PUT /updateCourseStudentAssessmentDay
 - Body: `id` (requerido), `airport`, `airstrip`, `elevation`, `meteorology`, `temperature`, `qnh`,
   `wind`, `weight`, `flaps`, `power`, `seat`, `takeoff`, `landing`, `comments`, `takeoff_day`,
-  `takeoff_night`, `landing_day`, `landing_night`, `training_time`, `check_time`, `type`
-  (`training_time`/`check_time`: números decimales en horas)
+  `takeoff_night`, `landing_day`, `landing_night`, `training_time`, `check_time`, `ifr_time`,
+  `vfr_time`, `type`
+  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas)
 - `200` → CourseStudentAssessmentDay
 
 ### GET /fetchSubjectAssessment

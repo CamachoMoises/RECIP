@@ -245,7 +245,7 @@ export const updateCourse = createAsyncThunk<course, course>(
     }
 );
 // Acción para actualizar un curso por estudiante
-export const updateCourseStudent = createAsyncThunk<courseStudent, { course_id: number, course_student_id: number, date: string | undefined, student_id: number | null | undefined, typeTrip: number, license: number, regulation: number, instructorCode?: string }>(
+export const updateCourseStudent = createAsyncThunk<courseStudent, { course_id: number, course_student_id: number, date: string | undefined, student_id: number | null | undefined, typeTrip: number, license: number, regulation: number, instructorCode?: string, client?: string }>(
     'course/updateCourseStudent',
     async (courseData, { rejectWithValue }) => {
         try {

@@ -137,6 +137,14 @@ const ResultsTestPdf = ({
 										</div>
 									</td>
 								</tr>
+								<tr>
+									<td className="border border-green-800 px-2 text-xs">
+										<strong>Cliente:</strong>{' '}
+										{course.courseStudent?.client ||
+											course.courseSelected?.client}
+									</td>
+									<td className="border border-green-800 px-2 text-xs"></td>
+								</tr>
 							</tbody>
 						</table>
 					</div>
