@@ -140,8 +140,7 @@ const ResultsTestPdf = ({
 								<tr>
 									<td className="border border-green-800 px-2 text-xs">
 										<strong>Cliente:</strong>{' '}
-										{course.courseStudent?.client ||
-											course.courseSelected?.client}
+										{course.courseStudent?.client}
 									</td>
 									<td className="border border-green-800 px-2 text-xs"></td>
 								</tr>

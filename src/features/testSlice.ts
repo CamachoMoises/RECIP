@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { answer, courseStudentTest, question, questionType, test, testQuestionType, testState } from '../types/utilities';
+import { answer, courseStudentTest, question, questionType, test, testImportResult, testQuestionType, testState } from '../types/utilities';
 import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 const initialState: testState = {
@@ -232,6 +232,46 @@ export const fetchTestStudent = createAsyncThunk<courseStudentTest[], { student_
         }
     }
 );
+// Importación masiva de preguntas desde Excel
+export const importExcelQuestions = createAsyncThunk<testImportResult, { test_id: number, file: File, course_id: number, test_question_type_id: number, question_type_id?: number }>(
+    'questionTypes/importExcelQuestions',
+    async ({ test_id, file, course_id, test_question_type_id, question_type_id }, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('excel_file', file);
+            formData.append('course_id', String(course_id));
+            formData.append('test_question_type_id', String(test_question_type_id));
+            if (question_type_id !== undefined) {
+                formData.append('question_type_id', String(question_type_id));
+            }
+            const response = await axiosPostSlice(`api/test/import-excel/${test_id}`, formData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// Importación masiva de preguntas desde CSV
+export const importCsvQuestions = createAsyncThunk<testImportResult, { test_id: number, file: File, course_id: number, test_question_type_id: number, question_type_id?: number }>(
+    'questionTypes/importCsvQuestions',
+    async ({ test_id, file, course_id, test_question_type_id, question_type_id }, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('csv_file', file);
+            formData.append('course_id', String(course_id));
+            formData.append('test_question_type_id', String(test_question_type_id));
+            if (question_type_id !== undefined) {
+                formData.append('question_type_id', String(question_type_id));
+            }
+            const response = await axiosPostSlice(`api/test/import-csv?test_id=${test_id}`, formData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 export const updateCourseStudentTestScore = createAsyncThunk<courseStudentTest, { course_student_test_id: number, course_student_test_answer_id: number, score: number }>(
     'user/updateCourseStudentTestScore',
     async ({ course_student_test_id, course_student_test_answer_id, score }, { rejectWithValue }) => {

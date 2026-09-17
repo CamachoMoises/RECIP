@@ -499,17 +499,6 @@ const ViewCourseStudentSchedule = () => {
 						>
 							PC: {course.courseStudent?.student?.user_id}
 						</Typography>
-						{course.courseSelected?.client && (
-							<Typography
-								variant="small"
-								className="text-xs sm:text-sm"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Cliente del curso: {course.courseSelected.client}
-							</Typography>
-						)}
 					</div>
 
 					<hr className="my-4" />

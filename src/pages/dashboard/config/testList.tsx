@@ -288,7 +288,6 @@ const TestList = () => {
 						open={openExcelUpload}
 						setOpen={setOpenExcelUpload}
 						courseId={course.courseSelected?.id || -1}
-						questionTypes={test.questionTypes}
 						testList={test.testList}
 					/>
 				)}

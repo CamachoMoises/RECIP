@@ -167,6 +167,13 @@ export type answer = {
     updatedAt?: string;
 }
 
+export type testImportResult = {
+    message: string;
+    questionsImported: number;
+    answersImported: number;
+    skippedRows: number;
+}
+
 export type instructor = {
     id: number | null;
     user_id: number;
@@ -196,7 +203,6 @@ export type course = {
     level?: number;
     status: boolean;
     plane_model?: string;
-    client?: string;
     course_type: courseType;
     course_level: courseLevel;
     createdAt?: string;
@@ -673,7 +679,6 @@ export type courseGroupReportCourse = {
     hours: number;
     days: number;
     plane_model?: string | null;
-    client?: string | null;
     status: boolean;
     course_type: courseType;
     course_level: courseLevel;

@@ -370,12 +370,6 @@ const PDFCourseScheduleDocument = ({
 								</Text>
 								{course.courseStudent?.client || '—'}
 							</Text>
-							<Text style={styles.infoCell}>
-								<Text style={{ fontWeight: 'bold' }}>
-									Cliente del curso:{' '}
-								</Text>
-								{course.courseSelected?.client || '—'}
-							</Text>
 						</View>
 					</View>
 

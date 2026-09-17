@@ -29,7 +29,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 | Student | `id, user_id, status` |
 | Instructor | `id, user_id, status` |
 | UserDocType | `id, name, symbol` |
-| Course | `id, name, description, code, hours, plane_model, days, status, course_type_id, course_level_id, client` |
+| Course | `id, name, description, code, hours, plane_model, days, status, course_type_id, course_level_id` |
 | CourseType | `id, name` |
 | CourseLevel | `id, name` |
 | CourseStudent | `id, course_id, date, score, approve, student_id, code, type_trip, license, regulation, status, max_attempts, instructor_code, client` |
@@ -148,7 +148,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### POST /
 - Body (Joi; `type`→`course_type_id`, `level`→`course_level_id`): `name`, `description`, `code`,
-  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status`, `client` (opcionales)
+  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status` (opcionales)
 - `201` → Course con `course_type`, `course_level`
 
 ### PUT /
@@ -510,17 +510,32 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 - `400` texto plano `Error <msg>`
 
 ### POST /import-excel/:test_id
-- Params: `test_id`; File: `excel_file` (xlsx/xls, máx 10MB)
-- Columnas esperadas: `course_id, question_type_id, test_question_type_id, header,
-  answer_1..answer_5, answer_1_correct..answer_5_correct`
-- `201` → `{ message: 'Excel import completed', questionsImported, answersImported }`
+- Auth: sí
+- Params: `test_id` (requerido); File: `excel_file` (`.xlsx`, máx 10MB)
+- Form (multipart): además del archivo, campos `course_id`, `question_type_id`,
+  `test_question_type_id` (usados cuando la fila es de plantilla en español; `question_type_id`
+  por defecto `1`).
+- Se soportan **dos plantillas** de columnas:
+  - **Español (frontend)**: `Pregunta`, `Respuesta1..RespuestaN`, `RespuestaCorrecta`
+    (índice 1-based o letra `a..e` de la respuesta correcta; selección única). Los metadatos
+    `course_id`, `question_type_id`, `test_question_type_id` se toman del body.
+  - **Inglés (legado)**: `course_id, question_type_id, test_question_type_id, header,
+    answer_1..answer_5, answer_1_correct..answer_5_correct`. Los flags `answer_*_correct`
+    se normalizan (acepta `true`/`1`/`'true'`/`'1'`/`'yes'`/`'si'`/`'sí'`/`'verdadero'`/
+    `'correcto'`); puede haber más de una respuesta correcta por pregunta.
+- Si falta metadata (o fila sin `Pregunta`/`header`), la fila se salta y suma a `skippedRows`.
+- `201` → `{ message: 'Excel import completed', questionsImported, answersImported, skippedRows }`
+- `400` JSON `{ error: 'test_id parameter is required and must be a valid number' }` | `{ error: 'Test not found' }`
 - `400` texto plano `No file uploaded`
 
 ### POST /import-csv
-- Auth: **no**
-- Query: `test_id` (requerido); File: `csv_file`
-- `201` → `{ message: 'CSV import completed', questionsImported, answersImported }`
-- `400` texto plano `No file uploaded`
+- Auth: **sí**
+- Query: `test_id` (requerido); File: `csv_file` (`.csv`, máx 10MB)
+- Igual que `import-excel` (mismas plantillas, metadatos `course_id`, `question_type_id`,
+  `test_question_type_id` en el body; headers con/ sin BOM, valores trim)
+- `201` → `{ message: 'CSV import completed', questionsImported, answersImported, skippedRows }`
+- `400` JSON `{ error: 'test_id query parameter is required and must be a valid number' }` | `{ error: 'Test not found' }`
+- `400` JSON `{ error: 'No file uploaded' }`
 
 ---
 

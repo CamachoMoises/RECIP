@@ -534,27 +534,6 @@ const CourseStudentsSection = ({
 											</Typography>
 										</div>
 									)}
-									{selectedStudent.course?.client && (
-										<div>
-											<Typography
-												variant="small"
-												color="gray"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Cliente del curso:
-											</Typography>
-											<Typography
-												variant="paragraph"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{selectedStudent.course.client}
-											</Typography>
-										</div>
-									)}
 									<div>
 										<Typography
 											variant="small"
