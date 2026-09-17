@@ -207,38 +207,32 @@ const GeneralConfig = () => {
 									Lista de Cursos
 								</Typography>
 							</div>
-							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4">
+							<div className="grid grid-cols-2 gap-2 sm:gap-4">
 								{course.courseList.map((course) => {
 									return (
-										<div key={course.id}>
+										<div key={course.id} className="min-w-0 h-full">
 											<Card
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
+												className="h-full"
 											>
 												<CardBody
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													className="flex flex-col justify-center p-2 sm:p-4"
+													className="flex flex-col justify-center h-full p-2 sm:p-4"
 												>
-													<div className="relative group text-center sm:text-left">
+													<div className="text-center sm:text-left">
 														<Typography
 															placeholder={undefined}
 															onPointerEnterCapture={undefined}
 															onPointerLeaveCapture
 															variant="lead"
-															className="truncate cursor-pointer"
+															className="cursor-pointer break-words whitespace-normal"
 														>
-															{course.name.length > 40
-																? course.name.substring(0, 40) + '...'
-																: course.name}
+															{course.name}
 														</Typography>
-														{course.name.length > 40 && (
-															<div className="absolute z-50 hidden group-hover:block bg-gray-800 text-white text-sm px-3 py-2 rounded-md shadow-lg -top-8 left-0 w-max max-w-xs whitespace-normal">
-																{course.name}
-															</div>
-														)}
 													</div>
 													<Typography
 														placeholder={undefined}

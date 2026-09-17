@@ -517,7 +517,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 2, fontSize: 7 },
 										]}
 									>
-										Periodo de formación
+										Periodo de entrenamiento
 									</Text>
 									{days.map((dayItem, index) => (
 										<Text
@@ -1083,7 +1083,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 1 },
 										]}
 									>
-										Firma Chequeador / Ins. Inac
+										Firma Chequeador / Inspector INAC
 									</Text>
 								</View>
 								{evaluatedDays.map((csad, index) => {
