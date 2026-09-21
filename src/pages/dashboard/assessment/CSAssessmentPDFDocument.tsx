@@ -64,6 +64,12 @@ const styles = StyleSheet.create({
 		backgroundColor: '#e0e0e0',
 		fontWeight: 'bold',
 	},
+	cellGreen: {
+		backgroundColor: '#d6e3bc',
+	},
+	cellPeach: {
+		backgroundColor: '#fabf8f',
+	},
 	// --- Tables ---
 	table: {
 		width: '100%',
@@ -513,7 +519,7 @@ const CSAssessmentPDFDocument = ({
 									<Text
 										style={[
 											styles.cell,
-											styles.cellHeader,
+											styles.cellGreen,
 											{ flex: 2, fontSize: 7 },
 										]}
 									>
@@ -524,7 +530,7 @@ const CSAssessmentPDFDocument = ({
 											key={`pf-h-${index}`}
 											style={[
 												styles.cell,
-												styles.cellHeader,
+												styles.cellGreen,
 												{ flex: 1, textAlign: 'center' },
 											]}
 										>
@@ -581,7 +587,7 @@ const CSAssessmentPDFDocument = ({
 											<Text
 												style={[
 													styles.cell,
-													styles.cellHeader,
+													styles.cellGreen,
 													{ flex: 2 },
 												]}
 											>
@@ -592,7 +598,7 @@ const CSAssessmentPDFDocument = ({
 													key={`s-${index}-h-${dIndex}`}
 													style={[
 														styles.cell,
-														styles.cellHeader,
+														styles.cellGreen,
 														{ flex: 1, textAlign: 'center' },
 													]}
 												>
@@ -700,7 +706,7 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellHeader,
+									styles.cellPeach,
 									{ flex: 6, textAlign: 'center' },
 								]}
 							>
@@ -841,7 +847,7 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellGray,
+									styles.cellPeach,
 									{ flex: 2, textAlign: 'center' },
 								]}
 							>
@@ -850,7 +856,7 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellGray,
+									styles.cellPeach,
 									{ flex: 1, textAlign: 'center' },
 								]}
 							>
