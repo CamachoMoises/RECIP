@@ -85,7 +85,7 @@ const SearchableParticipantSelect = ({
 				<label
 					className={`absolute left-3 transition-all pointer-events-none bg-white z-10 px-1 ${labelUp ? '-top-2 text-xs text-gray-900' : 'top-1/2 -translate-y-1/2 text-sm text-blue-gray-400'}`}
 				>
-					Participante
+					Piloto / Participante
 				</label>
 				{isLoading && (
 					<div className="absolute right-3 top-1/2 -translate-y-1/2">

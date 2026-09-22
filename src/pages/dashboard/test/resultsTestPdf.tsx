@@ -19,7 +19,7 @@ const ResultsTestPdf = ({
 	user: UserState;
 }) => {
 	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
-	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
+	const license = ['', 'TLA', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const questions =
 		test.courseStudentTestSelected?.course_student_test_questions;

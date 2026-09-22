@@ -127,7 +127,7 @@ const CSAssessmentPDFDocument = ({
 	const assessmentDays = CSA?.CourseStudentAssessmentDays ?? [];
 	const findDay = (dayNum: number) =>
 		assessmentDays.find((CSAD) => Number(CSAD.day) === dayNum);
-	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
+	const license = ['', 'TLA', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const jerarquia = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
 	const daysWithLessons = new Set<number>();

@@ -279,7 +279,7 @@ const PDFCourseScheduleDocument = ({
 
 	const data = course.scheduleList;
 	const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
-	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
+	const license = ['', 'TLA', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const lastInstructor =
 		data.length > 0
@@ -295,8 +295,8 @@ const PDFCourseScheduleDocument = ({
 						<Image style={styles.logo} src={logoBase64} />
 						<View style={styles.headerTextBlock}>
 							<Text style={styles.headerText}>
-								Curso {course.courseSelected?.course_level.name}{' '}
-								{course.courseSelected?.name}
+								{course.courseSelected?.name} (
+								{course.courseSelected?.course_level.name})
 							</Text>
 							<Text style={styles.headerText}>
 								{course.courseSelected?.description}{' '}

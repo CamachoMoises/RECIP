@@ -23,7 +23,7 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 
 const type_trip = ['', 'PIC', 'SIC', 'SFI', 'SFE', 'PI'];
-const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
+const license = ['', 'TLA', 'Commercial', 'Privado', 'FANB'];
 const regulation = ['', 'INAC', 'No-INAC'];
 
 const ReviewTest = () => {

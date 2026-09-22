@@ -270,8 +270,8 @@ const NewCourseStudentSchedule = () => {
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							{course.courseSelected?.name}{' '}
-							{course.courseSelected?.course_level.name}
+							{course.courseSelected?.name} (
+							{course.courseSelected?.course_level.name})
 						</Typography>
 						<Typography
 							variant="small"
@@ -413,9 +413,7 @@ const NewCourseStudentSchedule = () => {
 									disabled={
 										course.courseStudent?.approve || !canViewContent
 									}
-									defaultValue={
-										course.courseStudent?.client || ''
-									}
+									defaultValue={course.courseStudent?.client || ''}
 									onChange={(e) => {
 										clientRef.current = e.target.value;
 									}}
@@ -562,7 +560,7 @@ const NewCourseStudentSchedule = () => {
 												course.courseStudent?.approve ||
 												!canViewContent
 											}
-											label="ATP"
+											label="TLA"
 											onChange={() => handleChangeRadio(1, 'license')}
 											color="red"
 											crossOrigin={undefined}

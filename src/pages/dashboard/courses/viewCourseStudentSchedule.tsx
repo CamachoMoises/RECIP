@@ -235,7 +235,7 @@ const ViewCourseStudentSchedule = () => {
 	const getLicenseLabel = (license: number | undefined) => {
 		switch (license) {
 			case 1:
-				return 'ATP';
+				return 'TLA';
 			case 2:
 				return 'Commercial';
 			case 3:
@@ -1189,14 +1189,14 @@ const ViewCourseStudentSchedule = () => {
 																					<Button
 																						size="sm"
 																						color="green"
-														onClick={() =>
-															handleSaveAttendance(
-																firstSchedule.date,
-																getDayForSchedule(
-																	firstSchedule,
-																),
-															)
-														}
+																						onClick={() =>
+																							handleSaveAttendance(
+																								firstSchedule.date,
+																								getDayForSchedule(
+																									firstSchedule,
+																								),
+																							)
+																						}
 																						disabled={isSaving}
 																						placeholder={undefined}
 																						onPointerEnterCapture={

@@ -7,7 +7,7 @@ import { Check, X } from 'lucide-react';
 
 const CSA_PDF = ({ day }: { day: number }) => {
 	moment.locale('es');
-	const license = ['', 'ATP', 'Commercial', 'Privado', 'FANB'];
+	const license = ['', 'TLA', 'Commercial', 'Privado', 'FANB'];
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const { assessment } = useSelector((state: RootState) => {
 		return {
