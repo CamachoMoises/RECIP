@@ -151,7 +151,7 @@ const DetailAssessment = () => {
 				},
 				(_, i) => ({
 					id: i,
-					name: `Dia ${i + 1}`,
+					name: `Sesión ${i + 1}`,
 				}),
 			)
 		: [];
@@ -558,7 +558,7 @@ const DetailAssessment = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Faltan dias por calificar
+										Faltan sesiones por calificar
 									</Typography>
 								</div>
 							)} */}
@@ -714,7 +714,7 @@ const DetailAssessment = () => {
 								disabled={isFirstStep}
 								placeholder={undefined}
 							>
-								{isFirstStep ? 'x' : `Dia ${activeStep}`}
+								{isFirstStep ? 'x' : `Sesión ${activeStep}`}
 							</Button>
 
 							<Button
@@ -724,7 +724,7 @@ const DetailAssessment = () => {
 								disabled={isLastStep}
 								placeholder={undefined}
 							>
-								{isLastStep ? 'x' : `Dia ${activeStep + 2}`}
+								{isLastStep ? 'x' : `Sesión ${activeStep + 2}`}
 							</Button>
 						</div>
 					</CardFooter>

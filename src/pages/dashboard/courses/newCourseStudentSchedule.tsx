@@ -234,7 +234,7 @@ const NewCourseStudentSchedule = () => {
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
-				name: `Dia ${i + 1}`,
+				name: `Sesión ${i + 1}`,
 			}))
 		: [];
 
@@ -731,7 +731,7 @@ const NewCourseStudentSchedule = () => {
 						</AccordionHeader>
 						<AccordionBody>
 							<Tabs
-								value={`Dia ${course.day}`}
+								value={`Sesión ${course.day}`}
 								orientation="vertical"
 							>
 								<TabsHeader
@@ -950,12 +950,12 @@ const NewCourseStudentSchedule = () => {
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													Días totales clases:
+													Total de sesiones de clase:
 												</Typography>
 												<Input
 													type="number"
 													inputMode="numeric"
-													label="Días"
+													label="Sesiones"
 													className="[&::-webkit-inner-spin-button]:appearance-none"
 													value={course.courseSelected?.days || -1}
 													crossOrigin={undefined}

@@ -162,7 +162,7 @@ const InstructorAttendanceTab = ({ instructor_id, course_id }: Props) => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Día
+											Sesión
 										</Typography>
 									</th>
 									<th className="border-b border-blue-gray-100 bg-blue-gray-50 py-3 px-4 text-left">
@@ -225,7 +225,7 @@ const InstructorAttendanceTab = ({ instructor_id, course_id }: Props) => {
 											{moment(a.date).format('DD/MM/YYYY')}
 										</td>
 										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm font-medium">
-											Día {a.day}
+											Sesión {a.day}
 										</td>
 										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm">
 											{a.course_student?.student?.user

@@ -319,7 +319,7 @@ const ViewCourseStudentSchedule = () => {
 	) => {
 		if (!course.courseStudent?.id) return;
 		if (!day) {
-			toast.error('No se pudo determinar el día del curso');
+			toast.error('No se pudo determinar la sesión del curso');
 			return;
 		}
 
@@ -432,7 +432,7 @@ const ViewCourseStudentSchedule = () => {
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
-				name: `Dia ${i + 1}`,
+				name: `Sesión ${i + 1}`,
 			}))
 		: [];
 
@@ -945,7 +945,7 @@ const ViewCourseStudentSchedule = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Días Totales
+											Total de Sesiones
 										</Typography>
 										<Typography
 											variant="h5"
@@ -953,7 +953,7 @@ const ViewCourseStudentSchedule = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{course.courseSelected?.days || 0} días
+											{course.courseSelected?.days || 0} sesiones
 										</Typography>
 									</div>
 								</div>

@@ -158,7 +158,7 @@ const CourseDetail = () => {
 		if (selectedCourse) {
 			const days = Array.from(
 				{ length: selectedCourse.days },
-				(_, i) => ({ id: i, name: `Dia ${i + 1}` }),
+				(_, i) => ({ id: i, name: `Sesión ${i + 1}` }),
 			);
 
 			const hoursByDays = subject.subjectList.flatMap((sub) => {
@@ -309,7 +309,7 @@ const CourseDetail = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Dias impartidos
+												Sesiones impartidas
 											</Typography>
 											<div className="flex w-dvh lg:w-full">
 												<List

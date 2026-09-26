@@ -47,21 +47,21 @@ const ModalFormCourse = ({
 	courseLevel: courseLevel[];
 }) => {
 	const course_days = [
-		{ value: '1', label: '1 dias' },
-		{ value: '2', label: '2 dias' },
-		{ value: '3', label: '3 dias' },
-		{ value: '4', label: '4 dias' },
-		{ value: '5', label: '5 dias' },
-		{ value: '6', label: '6 dias' },
-		{ value: '7', label: '7 dias' },
-		{ value: '8', label: '8 dias' },
-		{ value: '9', label: '9 dias' },
-		{ value: '10', label: '10 dias' },
-		{ value: '11', label: '11 dias' },
-		{ value: '12', label: '12 dias' },
-		{ value: '13', label: '13 dias' },
-		{ value: '14', label: '14 dias' },
-		{ value: '15', label: '15 dias' },
+		{ value: '1', label: '1 sesión' },
+		{ value: '2', label: '2 sesiones' },
+		{ value: '3', label: '3 sesiones' },
+		{ value: '4', label: '4 sesiones' },
+		{ value: '5', label: '5 sesiones' },
+		{ value: '6', label: '6 sesiones' },
+		{ value: '7', label: '7 sesiones' },
+		{ value: '8', label: '8 sesiones' },
+		{ value: '9', label: '9 sesiones' },
+		{ value: '10', label: '10 sesiones' },
+		{ value: '11', label: '11 sesiones' },
+		{ value: '12', label: '12 sesiones' },
+		{ value: '13', label: '13 sesiones' },
+		{ value: '14', label: '14 sesiones' },
+		{ value: '15', label: '15 sesiones' },
 	];
 
 	// Implementación del modal para el formulario de nuevo curso o edición de un curso

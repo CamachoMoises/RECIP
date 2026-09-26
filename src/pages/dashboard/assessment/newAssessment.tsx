@@ -63,7 +63,7 @@ const NewAssessment = () => {
 	const days = course.courseSelected
 		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
 				id: i,
-				name: `Dia ${i + 1}`,
+				name: `Sesión ${i + 1}`,
 			}))
 		: [];
 	useEffect(() => {

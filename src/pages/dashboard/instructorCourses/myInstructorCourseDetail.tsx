@@ -189,7 +189,7 @@ const MyInstructorCourseDetail = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Horas / Días
+										Horas / Sesiones
 									</Typography>
 									<Typography
 										variant="h6"

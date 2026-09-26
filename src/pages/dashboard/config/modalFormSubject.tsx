@@ -398,7 +398,7 @@ const ModalFormSubject = ({
 													onPointerLeaveCapture={undefined}
 													className="text-center"
 												>
-													Dias impartidos
+													Sesiones impartidas
 												</Typography>
 												<List
 													placeholder={undefined}

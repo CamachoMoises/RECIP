@@ -356,7 +356,7 @@ const AttendanceListPDF = ({
 
 						{totalDays > 1 && (
 							<Text style={styles.dayHeader}>
-								Día {day} - {formatDate(dayDate)}
+								Sesión {day} - {formatDate(dayDate)}
 							</Text>
 						)}
 
