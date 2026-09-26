@@ -523,7 +523,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 2, fontSize: 7 },
 										]}
 									>
-										Periodo de entrenamiento
+										Sesión
 									</Text>
 									{days.map((dayItem, index) => (
 										<Text

@@ -290,7 +290,7 @@ plane_model: data.plane_model,
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 											{...field}
-											label="Duracion del curso "
+											label="Numero de sesiones"
 										>
 											{course_days.map((courseDay) => (
 												<Option
@@ -305,7 +305,7 @@ plane_model: data.plane_model,
 								/>
 								{errors.days && (
 									<span className="text-red-500">
-										La duracion del curso es requerida
+										La sesiones del curso es requerida
 									</span>
 								)}
 							</div>
