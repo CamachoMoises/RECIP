@@ -209,7 +209,7 @@ const CourseGroupsSection = ({
 		dayNumber: number,
 	) => {
 		if (
-			!confirm(`¿Eliminar firma ${signatureId} de la sesión ${dayNumber}?`)
+			!confirm(`¿Eliminar firma ${signatureId} del día ${dayNumber}?`)
 		)
 			return;
 		try {
@@ -742,7 +742,7 @@ const CourseGroupsSection = ({
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														Firmas del instructor por sesión
+														Firmas del instructor por día
 													</Typography>
 													<div className="flex flex-col gap-1 max-w-md mx-auto">
 														{Array.from(
@@ -782,7 +782,7 @@ const CourseGroupsSection = ({
 																				size={14}
 																				className={`transition-transform ${isOpen ? 'rotate-180' : ''} ${fullDay ? 'text-green-500' : 'text-gray-400'}`}
 																			/>
-																			Sesión {day}
+																			Día {day}
 																			{fullDay && (
 																				<span className="text-xs text-green-600 font-normal">
 																					✓ completo
@@ -820,7 +820,7 @@ const CourseGroupsSection = ({
 																						{canDeleteSignature && (
 																							<IconButton
 																								size="sm"
-																								title={`Eliminar firma ${sig.signature_number} de la sesión ${day}`}
+																								title={`Eliminar firma ${sig.signature_number} del día ${day}`}
 																								variant="text"
 																								color="red"
 																								onClick={() =>
@@ -846,7 +846,7 @@ const CourseGroupsSection = ({
 																					</div>
 																					<img
 																						src={sig.signature_url}
-																						alt={`Firma ${sig.signature_number} sesión ${day}`}
+																						alt={`Firma ${sig.signature_number} día ${day}`}
 																						className="max-w-xs h-auto border rounded"
 																					/>
 																				</div>

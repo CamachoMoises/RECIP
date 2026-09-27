@@ -418,7 +418,7 @@ const PDFCourseScheduleDocument = ({
 								<Text style={styles.resultsCell}>
 									Total de horas: {course.courseSelected?.hours}
 									{'\n'}
-									Total de sesiones: {course.courseSelected?.days}
+									Total de días: {course.courseSelected?.days}
 								</Text>
 							</View>
 							<View style={styles.resultsRow}>

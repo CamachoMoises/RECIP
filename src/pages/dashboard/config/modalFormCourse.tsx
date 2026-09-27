@@ -47,21 +47,21 @@ const ModalFormCourse = ({
 	courseLevel: courseLevel[];
 }) => {
 	const course_days = [
-		{ value: '1', label: '1 sesión' },
-		{ value: '2', label: '2 sesiones' },
-		{ value: '3', label: '3 sesiones' },
-		{ value: '4', label: '4 sesiones' },
-		{ value: '5', label: '5 sesiones' },
-		{ value: '6', label: '6 sesiones' },
-		{ value: '7', label: '7 sesiones' },
-		{ value: '8', label: '8 sesiones' },
-		{ value: '9', label: '9 sesiones' },
-		{ value: '10', label: '10 sesiones' },
-		{ value: '11', label: '11 sesiones' },
-		{ value: '12', label: '12 sesiones' },
-		{ value: '13', label: '13 sesiones' },
-		{ value: '14', label: '14 sesiones' },
-		{ value: '15', label: '15 sesiones' },
+		{ value: '1', label: '1 día' },
+		{ value: '2', label: '2 días' },
+		{ value: '3', label: '3 días' },
+		{ value: '4', label: '4 días' },
+		{ value: '5', label: '5 días' },
+		{ value: '6', label: '6 días' },
+		{ value: '7', label: '7 días' },
+		{ value: '8', label: '8 días' },
+		{ value: '9', label: '9 días' },
+		{ value: '10', label: '10 días' },
+		{ value: '11', label: '11 días' },
+		{ value: '12', label: '12 días' },
+		{ value: '13', label: '13 días' },
+		{ value: '14', label: '14 días' },
+		{ value: '15', label: '15 días' },
 	];
 
 	// Implementación del modal para el formulario de nuevo curso o edición de un curso
@@ -290,7 +290,7 @@ plane_model: data.plane_model,
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 											{...field}
-											label="Numero de sesiones"
+											label="Número de días"
 										>
 											{course_days.map((courseDay) => (
 												<Option
@@ -305,7 +305,7 @@ plane_model: data.plane_model,
 								/>
 								{errors.days && (
 									<span className="text-red-500">
-										La sesiones del curso es requerida
+										El número de días es requerido
 									</span>
 								)}
 							</div>

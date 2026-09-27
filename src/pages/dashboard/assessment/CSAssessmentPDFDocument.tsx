@@ -152,7 +152,7 @@ const CSAssessmentPDFDocument = ({
 		.sort((a, b) => Number(a.day) - Number(b.day));
 	const days = evaluatedDays.map((CSAD) => ({
 		id: Number(CSAD.day) - 1,
-		name: `Sesión ${Number(CSAD.day)}`,
+		name: `Día ${Number(CSAD.day)}`,
 	}));
 
 	let sumLanding = 0;
@@ -433,7 +433,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 2 },
 										]}
 									>
-										Sesión
+										Día
 									</Text>
 									{days.map((dayItem, index) => (
 										<Text
@@ -523,7 +523,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 2, fontSize: 7 },
 										]}
 									>
-										Sesión
+										Día
 									</Text>
 									{days.map((dayItem, index) => (
 										<Text
@@ -678,7 +678,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 2 },
 										]}
 									>
-										Resumen de Evaluación/Proficiencia por sesión
+										Resumen de Evaluación/Proficiencia por día
 									</Text>
 									{days.map((dayItem, index) => {
 										const dayAverage = findDay(
@@ -877,7 +877,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 6, textAlign: 'center' },
 										]}
 									>
-										DETALLE DE EVALUACIÓN POR SESIÓN
+										DETALLE DE EVALUACIÓN POR DÍA
 									</Text>
 								</View>
 								<View style={styles.row} fixed>
@@ -888,7 +888,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 1, textAlign: 'center' },
 										]}
 									>
-										Sesión
+										Día
 									</Text>
 									<Text
 										style={[
@@ -1062,7 +1062,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 1 },
 										]}
 									>
-										Sesión
+										Día
 									</Text>
 									<Text
 										style={[

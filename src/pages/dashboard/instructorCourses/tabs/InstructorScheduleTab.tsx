@@ -132,7 +132,7 @@ const InstructorScheduleTab = ({ instructor_id, course_id }: Props) => {
 									onPointerLeaveCapture={undefined}
 								>
 									<Calendar size={16} />
-									Sesión {day}
+									Día {day}
 								</Typography>
 								<div className="flex flex-col gap-2 ml-6">
 									{groupedByDay[day]
