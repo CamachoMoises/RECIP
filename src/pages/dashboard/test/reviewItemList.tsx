@@ -8,25 +8,7 @@ import { Save, X, CheckCircle, User, Minus } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../store';
 import { updateCourseStudentTestScore } from '../../../features/testSlice';
-
-const TYPE_LABELS: Record<number, string> = {
-	1: 'Opción única',
-	2: 'Opción múltiple',
-	3: 'Verdadero / Falso',
-	4: 'Completar',
-	5: 'Desarrollo',
-};
-
-const TYPE_BADGE_COLORS: Record<
-	number,
-	{ bg: string; text: string }
-> = {
-	1: { bg: '#E6F1FB', text: '#0C447C' },
-	2: { bg: '#E6F1FB', text: '#0C447C' },
-	3: { bg: '#EEEDFE', text: '#3C3489' },
-	4: { bg: '#FAEEDA', text: '#633806' },
-	5: { bg: '#FAEEDA', text: '#633806' },
-};
+import { TYPE_BADGE_COLORS, TYPE_LABELS } from './components/questionTypeMeta';
 
 const ReviewItemList = ({
 	question,

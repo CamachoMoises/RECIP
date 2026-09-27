@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { AttendanceState, attendance, attendanceSignatureRecord, attendanceStatus } from '../types/utilities';
+import { AttendanceState, attendance, attendanceCreatePayload, attendanceSignatureRecord, attendanceStatus, attendanceUpdatePayload } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 
@@ -16,11 +16,23 @@ const initialState: AttendanceState = {
     totalItems: 0,
 };
 
-export const fetchAttendances = createAsyncThunk<{ data: attendance[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, { currentPage?: number, pageSize?: number, course_student_id?: number, attendance_status_id?: number, date_from?: string, date_to?: string }>(
+type fetchAttendancesArgs = {
+    currentPage?: number;
+    pageSize?: number;
+    course_student_id?: number;
+    attendance_status_id?: number;
+    day?: number;
+    session_number?: number;
+    instructor_id?: number;
+    date_from?: string;
+    date_to?: string;
+};
+
+export const fetchAttendances = createAsyncThunk<{ data: attendance[], totalItems: number, currentPage: number, pageSize: number, totalPages: number }, fetchAttendancesArgs>(
     'attendance/fetchAttendances',
-    async ({ currentPage = 1, pageSize = 10, course_student_id, attendance_status_id, date_from, date_to }, { rejectWithValue }) => {
+    async ({ currentPage = 1, pageSize = 10, course_student_id, attendance_status_id, day, session_number, instructor_id, date_from, date_to }, { rejectWithValue }) => {
         try {
-            const params: { currentPage: number; pageSize: number; course_student_id?: number; attendance_status_id?: number; date_from?: string; date_to?: string } = {
+            const params: { currentPage: number; pageSize: number; course_student_id?: number; attendance_status_id?: number; day?: number; session_number?: number; instructor_id?: number; date_from?: string; date_to?: string } = {
                 currentPage,
                 pageSize,
             };
@@ -29,6 +41,15 @@ export const fetchAttendances = createAsyncThunk<{ data: attendance[], totalItem
             }
             if (attendance_status_id !== undefined) {
                 params.attendance_status_id = attendance_status_id;
+            }
+            if (day !== undefined) {
+                params.day = day;
+            }
+            if (session_number !== undefined) {
+                params.session_number = session_number;
+            }
+            if (instructor_id !== undefined) {
+                params.instructor_id = instructor_id;
             }
             if (date_from !== undefined) {
                 params.date_from = date_from;
@@ -61,7 +82,6 @@ export const fetchAttendanceByCourseStudent = createAsyncThunk<attendance[], num
     async (course_student_id, { rejectWithValue }) => {
         try {
             const response = await axiosGetSlice('api/attendance/by-course-student', { course_student_id });
-            console.log('fetchAttendanceByCourseStudent response', response);
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -81,7 +101,7 @@ export const fetchAttendanceByDateRange = createAsyncThunk<attendance[], { start
     }
 );
 
-export const createAttendance = createAsyncThunk<attendance, { course_student_id: number, day: number, date: string, attendance_status_id: number, comments?: string }>(
+export const createAttendance = createAsyncThunk<attendance, attendanceCreatePayload>(
     'attendance/createAttendance',
     async (attendanceData, { rejectWithValue }) => {
         try {
@@ -93,7 +113,7 @@ export const createAttendance = createAsyncThunk<attendance, { course_student_id
     }
 );
 
-export const updateAttendance = createAsyncThunk<attendance, { id: number, course_student_id?: number, day?: number, date?: string, attendance_status_id?: number, comments?: string }>(
+export const updateAttendance = createAsyncThunk<attendance, attendanceUpdatePayload>(
     'attendance/updateAttendance',
     async (attendanceData, { rejectWithValue }) => {
         try {

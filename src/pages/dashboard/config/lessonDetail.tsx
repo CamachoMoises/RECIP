@@ -20,7 +20,7 @@ import { useState } from 'react';
 
 const LessonDetail = ({
 	SL,
-	days,
+	ordinals,
 	subjectLessonDays,
 	// maxOrderLessonSelected,
 	handleChangeStatusDay,
@@ -29,7 +29,7 @@ const LessonDetail = ({
 	SL: subjectLesson;
 	subjectLessonDays: subjectLessonDays[];
 	maxOrderLessonSelected: number | null;
-	days: {
+	ordinals: {
 		id: number;
 		name: string;
 	}[];
@@ -122,17 +122,17 @@ const LessonDetail = ({
 					</div>
 				) : (
 					<>
-						{days.map((day) => {
+						{ordinals.map((ordinal) => {
 							let SLD: subjectLessonDays | undefined = undefined;
 							SLD = subjectLessonDays.find(
-								(sld) => sld.day === day.id + 1
+								(sld) => sld.day === ordinal.id + 1
 							);
 							return (
 								<div
 									className="flex flex-col gap-1"
-									key={`day-${day.id}`}
+									key={`ordinal-${ordinal.id}`}
 								>
-									<label>{day.name}</label>
+									<label>{ordinal.name}</label>
 									<Switch
 										className="h-full w-full checked:bg-[#134475]"
 										containerProps={{
@@ -145,7 +145,7 @@ const LessonDetail = ({
 										onChange={(event) => {
 											handleChangeStatusDay(
 												event,
-												day,
+												ordinal,
 												SL.id,
 												SLD?.id ? SLD.id : -1
 											);

@@ -15,6 +15,7 @@ import { AppDispatch, RootState } from '../../../store';
 import { fetchSuggestions } from '../../../features/userSlice';
 import { Mailbox, ChevronDown, ChevronUp } from 'lucide-react';
 import EmailHistoryPanel from './EmailHistoryPanel';
+import TestReportsPanel from './TestReportsPanel';
 
 const breadCrumbs = [
 	{ name: 'Dashboard', href: '/dashboard' },
@@ -228,6 +229,12 @@ const Reports = () => {
 							</Collapse>
 						</CardBody>
 					</Card>
+				</div>
+			)}
+
+			{isAdmin && (
+				<div className="mt-6">
+					<TestReportsPanel />
 				</div>
 			)}
 

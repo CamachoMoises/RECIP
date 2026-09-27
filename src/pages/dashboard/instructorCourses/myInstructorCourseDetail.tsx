@@ -27,6 +27,10 @@ import InstructorGroupsTab from './tabs/InstructorGroupsTab';
 import InstructorAttendanceTab from './tabs/InstructorAttendanceTab';
 import InstructorAssessmentTab from './tabs/InstructorAssessmentTab';
 import InstructorTestsTab from './tabs/InstructorTestsTab';
+import {
+	ordinalNounPlural,
+	programSize,
+} from '../../../utils/programSize';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -189,7 +193,7 @@ const MyInstructorCourseDetail = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Horas / Días
+										Horas / {ordinalNounPlural(courseSelected)}
 									</Typography>
 									<Typography
 										variant="h6"
@@ -198,7 +202,7 @@ const MyInstructorCourseDetail = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{courseSelected.hours}h / {courseSelected.days}d
+										{courseSelected.hours}h / {programSize(courseSelected)}d
 									</Typography>
 								</div>
 							</div>
@@ -233,6 +237,7 @@ const MyInstructorCourseDetail = () => {
 						<InstructorScheduleTab
 							instructor_id={instructor_id}
 							course_id={courseId}
+							course={courseSelected}
 						/>
 					)}
 					{activeTab === 'groups' && (
@@ -245,6 +250,7 @@ const MyInstructorCourseDetail = () => {
 						<InstructorAttendanceTab
 							instructor_id={instructor_id}
 							course_id={courseId}
+							course={courseSelected}
 						/>
 					)}
 					{activeTab === 'assessment' && (

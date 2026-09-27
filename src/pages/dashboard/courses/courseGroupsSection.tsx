@@ -29,11 +29,19 @@ import {
 	toggleCourseGroupStatus,
 } from '../../../features/courseGroupSlice';
 import {
+	course,
 	courseGroup,
 	courseStudent,
 	courseGroupSignature,
 	courseGroupReportCourseStudent,
 } from '../../../types/utilities';
+import {
+	ordinalLabel,
+	ordinalNoun,
+	ordinalNounPlural,
+	programSize,
+	usesSessions,
+} from '../../../utils/programSize';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import SignatureCanvas from 'react-signature-canvas';
 
@@ -206,11 +214,10 @@ const CourseGroupsSection = ({
 	const handleDeleteSignature = async (
 		groupId: number,
 		signatureId: number,
-		dayNumber: number,
+		ordinal: number,
+		noun: string,
 	) => {
-		if (
-			!confirm(`¿Eliminar firma ${signatureId} del día ${dayNumber}?`)
-		)
+		if (!confirm(`¿Eliminar firma ${signatureId} de la ${noun.toLowerCase()} ${ordinal}?`))
 			return;
 		try {
 			await dispatch(
@@ -228,8 +235,9 @@ const CourseGroupsSection = ({
 	const handleSaveSignature = async (
 		canvasKey: string,
 		groupId: number,
-		dayNumber: number,
+		ordinal: number,
 		canvas: SignatureCanvas,
+		groupCourse: course | null | undefined,
 	) => {
 		if (canvas.isEmpty()) {
 			toast.error('Dibuja una firma primero');
@@ -240,7 +248,10 @@ const CourseGroupsSection = ({
 			await dispatch(
 				saveCourseGroupSignature({
 					course_group_id: groupId,
-					day_number: dayNumber,
+					// El nombre del campo del ordinal depende del modo del curso.
+					...(usesSessions(groupCourse)
+						? { session_number: ordinal }
+						: { day_number: ordinal }),
 					signature: canvas.toDataURL(),
 				}),
 			).unwrap();
@@ -742,11 +753,11 @@ const CourseGroupsSection = ({
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														Firmas del instructor por día
+															Firmas del instructor por {ordinalNounPlural(group.course).toLowerCase()}
 													</Typography>
 													<div className="flex flex-col gap-1 max-w-md mx-auto">
 														{Array.from(
-															{ length: group.course?.days || 1 },
+															{ length: programSize(group.course) || 1 },
 															(_, i) => i + 1,
 														).map((day) => {
 															const dayKey = `${group.id}-${day}`;
@@ -782,7 +793,7 @@ const CourseGroupsSection = ({
 																				size={14}
 																				className={`transition-transform ${isOpen ? 'rotate-180' : ''} ${fullDay ? 'text-green-500' : 'text-gray-400'}`}
 																			/>
-																			Día {day}
+																			{ordinalLabel(group.course, day)}
 																			{fullDay && (
 																				<span className="text-xs text-green-600 font-normal">
 																					✓ completo
@@ -820,7 +831,7 @@ const CourseGroupsSection = ({
 																						{canDeleteSignature && (
 																							<IconButton
 																								size="sm"
-																								title={`Eliminar firma ${sig.signature_number} del día ${day}`}
+																								title={`Eliminar firma ${sig.signature_number} de la ${ordinalNoun(group.course).toLowerCase()} ${day}`}
 																								variant="text"
 																								color="red"
 																								onClick={() =>
@@ -828,6 +839,9 @@ const CourseGroupsSection = ({
 																										group.id,
 																										sig.id,
 																										day,
+																										ordinalNoun(
+																											group.course,
+																										),
 																									)
 																								}
 																								placeholder={
@@ -846,7 +860,7 @@ const CourseGroupsSection = ({
 																					</div>
 																					<img
 																						src={sig.signature_url}
-																						alt={`Firma ${sig.signature_number} día ${day}`}
+																						alt={`Firma ${sig.signature_number} ${ordinalNoun(group.course).toLowerCase()} ${day}`}
 																						className="max-w-xs h-auto border rounded"
 																					/>
 																				</div>
@@ -891,13 +905,14 @@ const CourseGroupsSection = ({
 																									sigCanvasRefs.current.get(
 																										key,
 																									);
-																								if (canvas)
-																									handleSaveSignature(
-																										key,
-																										group.id,
-																										day,
-																										canvas,
-																									);
+																						if (canvas)
+																							handleSaveSignature(
+																								key,
+																								group.id,
+																								day,
+																								canvas,
+																								group.course,
+																							);
 																							}}
 																							disabled={
 																								savingSignatureKey ===

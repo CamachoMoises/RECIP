@@ -9,10 +9,13 @@ import { Calendar, Clock, User } from 'lucide-react';
 import moment from 'moment';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
+import { course } from '../../../../types/utilities';
+import { ordinalLabel } from '../../../../utils/programSize';
 
 type Props = {
 	instructor_id: number;
 	course_id: number;
+	course?: course | null;
 };
 
 type ScheduleItem = {
@@ -35,7 +38,7 @@ type ScheduleItem = {
 	};
 };
 
-const InstructorScheduleTab = ({ instructor_id, course_id }: Props) => {
+const InstructorScheduleTab = ({ instructor_id, course_id, course }: Props) => {
 	const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -132,7 +135,7 @@ const InstructorScheduleTab = ({ instructor_id, course_id }: Props) => {
 									onPointerLeaveCapture={undefined}
 								>
 									<Calendar size={16} />
-									Día {day}
+									{ordinalLabel(course, day)}
 								</Typography>
 								<div className="flex flex-col gap-2 ml-6">
 									{groupedByDay[day]

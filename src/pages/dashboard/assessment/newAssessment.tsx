@@ -13,6 +13,7 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import moment from 'moment';
+import { programOrdinals } from '../../../utils/programSize';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -60,12 +61,7 @@ const NewAssessment = () => {
 	// 	contentRef: componentRef,
 	// 	documentTitle: `Evaluacion-${course.courseStudent?.code}`,
 	// });
-	const days = course.courseSelected
-		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
-				id: i,
-				name: `Día ${i + 1}`,
-			}))
-		: [];
+	const days = programOrdinals(course.courseSelected);
 	useEffect(() => {
 		const setStudentFunc = (value: number) => {
 			const studentSelected = user.studentList.find(

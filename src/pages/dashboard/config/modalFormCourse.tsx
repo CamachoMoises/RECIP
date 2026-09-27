@@ -28,11 +28,30 @@ type Inputs = {
 	description: string;
 	code: string;
 	days: string;
+	sessions: string;
+	uses_sessions: boolean;
 	hours: number;
 	plane_model: string;
 	course_type: string;
 	course_level: string;
 };
+
+const MAX_DAYS = 15;
+const MAX_SESSIONS = 30;
+
+const buildCountOptions = (max: number, singular: string, plural: string) =>
+	Array.from({ length: max }, (_, i) => ({
+		value: `${i + 1}`,
+		label: i + 1 === 1 ? `1 ${singular}` : `${i + 1} ${plural}`,
+	}));
+
+const course_days = buildCountOptions(MAX_DAYS, 'día', 'días');
+const course_sessions = buildCountOptions(
+	MAX_SESSIONS,
+	'sesión',
+	'sesiones',
+);
+
 const ModalFormCourse = ({
 	courseSelected,
 	openNewCourse,
@@ -46,24 +65,6 @@ const ModalFormCourse = ({
 	courseTypes: courseType[];
 	courseLevel: courseLevel[];
 }) => {
-	const course_days = [
-		{ value: '1', label: '1 día' },
-		{ value: '2', label: '2 días' },
-		{ value: '3', label: '3 días' },
-		{ value: '4', label: '4 días' },
-		{ value: '5', label: '5 días' },
-		{ value: '6', label: '6 días' },
-		{ value: '7', label: '7 días' },
-		{ value: '8', label: '8 días' },
-		{ value: '9', label: '9 días' },
-		{ value: '10', label: '10 días' },
-		{ value: '11', label: '11 días' },
-		{ value: '12', label: '12 días' },
-		{ value: '13', label: '13 días' },
-		{ value: '14', label: '14 días' },
-		{ value: '15', label: '15 días' },
-	];
-
 	// Implementación del modal para el formulario de nuevo curso o edición de un curso
 	const [isActive, setIsActive] = useState(
 		courseSelected ? courseSelected?.status : true,
@@ -75,6 +76,7 @@ const ModalFormCourse = ({
 		register,
 		handleSubmit,
 		control,
+		watch,
 		formState: { errors },
 	} = useForm<Inputs>({
 		defaultValues: {
@@ -89,9 +91,16 @@ const ModalFormCourse = ({
 			course_level: courseSelected?.course_level.id
 				? `${courseSelected.course_level.id}`
 				: '',
-			days: courseSelected?.course_level.id === 1 ? `6` : '3',
+			days: courseSelected ? `${courseSelected.days}` : '3',
+			sessions: `${
+				courseSelected?.sessions ?? courseSelected?.days ?? 3
+			}`,
+			uses_sessions: courseSelected?.uses_sessions ?? false,
 		},
 	});
+
+	const usesSessions = watch('uses_sessions');
+
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		const newCourseType: courseType | undefined = courseTypes.find(
 			(course) => course.id === parseInt(data.course_type),
@@ -107,10 +116,12 @@ const ModalFormCourse = ({
 				code: data.code,
 				hours: data.hours,
 				days: parseInt(data.days),
+				uses_sessions: data.uses_sessions,
+				sessions: parseInt(data.sessions),
 				type: parseInt(data.course_type),
 				level: parseInt(data.course_level),
-plane_model: data.plane_model,
-			status: isActive,
+				plane_model: data.plane_model,
+				status: isActive,
 				course_type: newCourseType,
 				course_level: newCourseLevel,
 			};
@@ -277,7 +288,59 @@ plane_model: data.plane_model,
 								)}
 							</div>
 
-							<div className="">
+						<div className="">
+							<label
+								htmlFor="programa_por_sesiones"
+								className="text-sx text-black"
+							>
+								Programa por sesiones
+							</label>
+							<br />
+							<Controller
+								name="uses_sessions"
+								control={control}
+								render={({ field }) => (
+									<Switch
+										id="programa_por_sesiones"
+										checked={field.value}
+										onChange={(event) =>
+											field.onChange(event.target.checked)
+										}
+										crossOrigin={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									/>
+								)}
+							/>
+						</div>
+						<div className="">
+							{usesSessions ? (
+								<Controller
+									name="sessions"
+									control={control}
+									rules={{
+										required: true,
+									}}
+									render={({ field }) => (
+										<Select
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											{...field}
+											label="Número de sesiones"
+										>
+											{course_sessions.map((option) => (
+												<Option
+													key={option.value}
+													value={option.value}
+												>
+													{option.label}
+												</Option>
+											))}
+										</Select>
+									)}
+								/>
+							) : (
 								<Controller
 									name="days"
 									control={control}
@@ -292,23 +355,30 @@ plane_model: data.plane_model,
 											{...field}
 											label="Número de días"
 										>
-											{course_days.map((courseDay) => (
+											{course_days.map((option) => (
 												<Option
-													key={courseDay.value}
-													value={`${courseDay.value}`}
+													key={option.value}
+													value={option.value}
 												>
-													{courseDay.label}
+													{option.label}
 												</Option>
 											))}
 										</Select>
 									)}
 								/>
-								{errors.days && (
-									<span className="text-red-500">
-										El número de días es requerido
-									</span>
-								)}
-							</div>
+							)}
+							{errors.days && !usesSessions && (
+								<span className="text-red-500">
+									El número de días es requerido
+								</span>
+							)}
+							{errors.sessions && usesSessions && (
+								<span className="text-red-500">
+									El número de sesiones es requerido
+								</span>
+							)}
+						</div>
+
 							<div className="">
 								<Input
 									onPointerEnterCapture={undefined}

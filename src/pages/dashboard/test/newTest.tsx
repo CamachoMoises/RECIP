@@ -485,11 +485,21 @@ const NewTest = () => {
 		if (course.courseStudent.schedules?.length === 0) {
 			navigate('../test');
 		} else {
-			dateTest = course.courseStudent.schedules
-				? moment(
-						`${course.courseStudent.schedules[0].date}  ${course.courseStudent.schedules[0].hour}`,
-					)
-				: null;
+			// En cursos por días solo hay un schedule, pero en modo sesiones varias
+			// sesiones pueden compartir fecha. Anclar en el primer schedule haría que
+			// el examen se cerrara al terminar la sesión 1. Se toma el schedule más
+			// reciente que ya empezó y, si todos están por delante, el primero.
+			const scheduleMoments = (course.courseStudent.schedules ?? [])
+				.filter((s) => s.date)
+				.map((s) => moment(`${s.date}  ${s.hour}`))
+				.filter((m) => m.isValid())
+				.sort((a, b) => a.diff(b));
+			const started = scheduleMoments.filter((m) =>
+				m.isSameOrBefore(moment()),
+			);
+			dateTest = started.length
+				? started[started.length - 1]
+				: (scheduleMoments[0] ?? null);
 		}
 
 		if (dateTest) {

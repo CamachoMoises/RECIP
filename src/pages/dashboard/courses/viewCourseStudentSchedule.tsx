@@ -52,6 +52,30 @@ import {
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
+import {
+	ordinalLabel,
+	ordinalNoun,
+	ordinalNounPlural,
+	programOrdinals,
+	programSize,
+	usesSessions,
+} from '../../../utils/programSize';
+
+const DEFAULT_ATTENDANCE_STATUS = 1;
+
+/**
+ * Cada card de asistencia tiene su propio borrador. Con N sesiones en la misma fecha
+ * hay N cards, y un estado compartido haría que escribir en una escribiera en todas.
+ */
+type AttendanceDraft = {
+	attendance_status_id: number;
+	comments: string;
+};
+
+const emptyDraft = (): AttendanceDraft => ({
+	attendance_status_id: DEFAULT_ATTENDANCE_STATUS,
+	comments: '',
+});
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -143,13 +167,8 @@ const ViewCourseStudentSchedule = () => {
 	const canEditAttendance = PermissionsValidate(['staff']);
 	const [openAccordions, setOpenAccordions] = useState<number[]>([1]);
 	const [dataLoaded, setDataLoaded] = useState(false);
-	const [selectedAttendanceStatus, setSelectedAttendanceStatus] =
-		useState<number>(1);
-	const [attendanceComments, setAttendanceComments] =
-		useState<string>('');
-	const [editingAttendanceId, setEditingAttendanceId] = useState<
-		number | null
-	>(null);
+	const [drafts, setDrafts] = useState<Record<string, AttendanceDraft>>({});
+	const [editingKey, setEditingKey] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
 	const [savingSignatureId, setSavingSignatureId] = useState<
 		number | null
@@ -280,13 +299,41 @@ const ViewCourseStudentSchedule = () => {
 		return subjectDay?.day;
 	};
 
-	const getAttendanceForDate = (date: string) => {
+	/**
+	 * El ordinal del horario (día o sesión) vive en `attendance.day`, y varias
+	 * asistencias pueden compartir fecha. Buscar solo por fecha devolvía siempre la
+	 * sesión 1, así que guardar la sesión 3 pisaba la fila de la sesión 1.
+	 */
+	const getAttendanceForSession = (
+		date: string,
+		session: number | undefined,
+	) => {
 		const dateStr = moment(date).format('YYYY-MM-DD');
 		const attendanceRecord = attendance.attendanceList?.find(
-			(a) => moment(a.date).format('YYYY-MM-DD') === dateStr,
+			(a) =>
+				a.course_student_id === course.courseStudent?.id &&
+				moment(a.date).format('YYYY-MM-DD') === dateStr &&
+				(session === undefined ? true : a.day === session),
 		);
 		return attendanceRecord;
 	};
+
+	const getDraft = (draftKey: string): AttendanceDraft =>
+		drafts[draftKey] ?? emptyDraft();
+
+	const setDraft = (draftKey: string, patch: Partial<AttendanceDraft>) =>
+		setDrafts((prev) => ({
+			...prev,
+			[draftKey]: { ...(prev[draftKey] ?? emptyDraft()), ...patch },
+		}));
+
+	const clearDraft = (draftKey: string) =>
+		setDrafts((prev) => {
+			if (!(draftKey in prev)) return prev;
+			const next = { ...prev };
+			delete next[draftKey];
+			return next;
+		});
 
 	const getAttendanceStatusLabel = (statusId: number | undefined) => {
 		const status = attendance.attendanceStatusList.find(
@@ -313,18 +360,36 @@ const ViewCourseStudentSchedule = () => {
 		}
 	};
 
+	/**
+	 * El nombre del campo del ordinal depende del modo del curso: `day` en legacy,
+	 * `session_number` cuando `uses_sessions`. El backend guarda el valor en
+	 * `attendance.day` en ambos casos.
+	 */
+	const ordinalPayload = (
+		day: number,
+	): { day: number; session_number?: never } | {
+		session_number: number;
+		day?: never;
+	} => (usesSessions(course.courseSelected) ? { session_number: day } : { day });
+
 	const handleSaveAttendance = async (
 		scheduleDate: string,
 		day: number | undefined,
+		draftKey: string,
 	) => {
 		if (!course.courseStudent?.id) return;
-		if (!day) {
-			toast.error('No se pudo determinar el día del curso');
+		if (day === undefined) {
+			toast.error(
+				`No se pudo determinar el ${ordinalNoun(
+					course.courseSelected,
+				).toLowerCase()} del curso`,
+			);
 			return;
 		}
 
 		setIsSaving(true);
-		const existingAttendance = getAttendanceForDate(scheduleDate);
+		const existingAttendance = getAttendanceForSession(scheduleDate, day);
+		const draft = getDraft(draftKey);
 
 		try {
 			if (existingAttendance) {
@@ -332,10 +397,10 @@ const ViewCourseStudentSchedule = () => {
 					updateAttendance({
 						id: existingAttendance.id,
 						course_student_id: course.courseStudent.id,
-						day,
 						date: scheduleDate,
-						attendance_status_id: selectedAttendanceStatus,
-						comments: attendanceComments,
+						attendance_status_id: draft.attendance_status_id,
+						comments: draft.comments,
+						...ordinalPayload(day),
 					}),
 				).unwrap();
 				toast.success('Asistencia actualizada');
@@ -343,10 +408,10 @@ const ViewCourseStudentSchedule = () => {
 				await dispatch(
 					createAttendance({
 						course_student_id: course.courseStudent.id,
-						day,
 						date: scheduleDate,
-						attendance_status_id: selectedAttendanceStatus,
-						comments: attendanceComments,
+						attendance_status_id: draft.attendance_status_id,
+						comments: draft.comments,
+						...ordinalPayload(day),
 					}),
 				).unwrap();
 				toast.success('Asistencia guardada');
@@ -358,9 +423,8 @@ const ViewCourseStudentSchedule = () => {
 				);
 			}
 
-			setEditingAttendanceId(null);
-			setSelectedAttendanceStatus(1);
-			setAttendanceComments('');
+			setEditingKey(null);
+			clearDraft(draftKey);
 		} catch (error: any) {
 			toast.error(error?.message || 'Error al guardar asistencia');
 		} finally {
@@ -368,18 +432,20 @@ const ViewCourseStudentSchedule = () => {
 		}
 	};
 
-	const handleEditAttendance = (attendanceRecord: attendance) => {
-		setEditingAttendanceId(attendanceRecord.id);
-		setSelectedAttendanceStatus(
-			attendanceRecord.attendance_status_id,
-		);
-		setAttendanceComments(attendanceRecord.comments || '');
+	const handleEditAttendance = (
+		attendanceRecord: attendance,
+		draftKey: string,
+	) => {
+		setEditingKey(draftKey);
+		setDraft(draftKey, {
+			attendance_status_id: attendanceRecord.attendance_status_id,
+			comments: attendanceRecord.comments || '',
+		});
 	};
 
-	const handleCancelEdit = () => {
-		setEditingAttendanceId(null);
-		setSelectedAttendanceStatus(1);
-		setAttendanceComments('');
+	const handleCancelEdit = (draftKey: string) => {
+		setEditingKey(null);
+		clearDraft(draftKey);
 	};
 
 	const handleSaveSignature = async (
@@ -429,23 +495,27 @@ const ViewCourseStudentSchedule = () => {
 		}
 	};
 
-	const days = course.courseSelected
-		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
-				id: i,
-				name: `Día ${i + 1}`,
-			}))
-		: [];
+	const days = programOrdinals(course.courseSelected);
 
-	// Agrupar schedules por fecha
-	const schedulesByDate = course.scheduleList.reduce<
+	/**
+	 * Varias sesiones pueden compartir fecha, así que la clave es (fecha, ordinal).
+	 * Con solo la fecha, las sesiones se colaban en la misma card y solo se
+	 * guardaba la primera.
+	 */
+	const sessionKeyOf = (schedule: (typeof course.scheduleList)[number]) =>
+		`${moment(schedule.date).format('YYYY-MM-DD')}#${getDayForSchedule(schedule) ?? 0}`;
+
+	// Agrupar schedules por fecha + ordinal. El backend ya devuelve date/hour ASC,
+	// así que no se reordena acá.
+	const schedulesBySession = course.scheduleList.reduce<
 		Record<string, typeof course.scheduleList>
 	>((acc, schedule) => {
-		const dateKey = moment(schedule.date).format('YYYY-MM-DD');
-		if (!acc[dateKey]) acc[dateKey] = [];
-		acc[dateKey].push(schedule);
+		const key = sessionKeyOf(schedule);
+		if (!acc[key]) acc[key] = [];
+		acc[key].push(schedule);
 		return acc;
 	}, {});
-	console.log('data', schedulesByDate, attendance);
+
 	if (course.status === 'loading' || !dataLoaded)
 		return <LoadingPage />;
 	if (course.status === 'failed')
@@ -945,7 +1015,7 @@ const ViewCourseStudentSchedule = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Total de Días
+											Total de {ordinalNounPlural(course.courseSelected)}
 										</Typography>
 										<Typography
 											variant="h5"
@@ -953,7 +1023,10 @@ const ViewCourseStudentSchedule = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{course.courseSelected?.days || 0} días
+											{programSize(course.courseSelected)}{' '}
+											{ordinalNounPlural(
+												course.courseSelected,
+											).toLowerCase()}
 										</Typography>
 									</div>
 								</div>
@@ -994,59 +1067,68 @@ const ViewCourseStudentSchedule = () => {
 										))}
 									</div>
 
-									{Object.keys(schedulesByDate).length > 0 ? (
-										Object.entries(schedulesByDate).map(
-											([dateKey, schedules]) => {
-												const firstSchedule = schedules[0];
-												const existingAttendance =
-													getAttendanceForDate(firstSchedule.date);
-												const isEditing =
-													editingAttendanceId ===
-													existingAttendance?.id;
-												console.log(
-													'FINAL',
-													JSON.stringify(existingAttendance),
+								{Object.keys(schedulesBySession).length > 0 ? (
+									Object.entries(schedulesBySession).map(
+										([draftKey, schedules]) => {
+											const cardSchedule = schedules[0];
+											const ordinal = getDayForSchedule(
+												cardSchedule,
+											);
+											const existingAttendance =
+												getAttendanceForSession(
+													cardSchedule.date,
+													ordinal,
 												);
-												return (
-													<Card
-														key={dateKey}
+											const isEditing = editingKey === draftKey;
+											return (
+												<Card
+													key={draftKey}
+													placeholder={undefined}
+													onPointerEnterCapture={
+														undefined
+													}
+													onPointerLeaveCapture={
+														undefined
+													}
+													className={
+														existingAttendance
+															? 'border-l-4 border-l-green-500'
+															: ''
+													}
+												>
+													<CardBody
 														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-														className={
-															existingAttendance
-																? 'border-l-4 border-l-green-500'
-																: ''
+														onPointerEnterCapture={
+															undefined
+														}
+														onPointerLeaveCapture={
+															undefined
 														}
 													>
-														<CardBody
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															<div className="flex flex-col gap-3">
-																{/* Cabecera: fecha + estado */}
-																<div className="flex items-center justify-between flex-wrap gap-2">
-																	<div className="flex items-center gap-3 flex-wrap">
-																		<Calendar className="w-5 h-5 text-blue-500" />
-																		<Typography
-																			variant="h6"
-																			className="text-sm"
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			{moment(
-																				firstSchedule.date,
-																			).format('DD/MM/YYYY')}
-																		</Typography>
-																		<Clock className="w-4 h-4 text-orange-500" />
+														<div className="flex flex-col gap-3">
+															{/* Cabecera: fecha + estado */}
+															<div className="flex items-center justify-between flex-wrap gap-2">
+																<div className="flex items-center gap-3 flex-wrap">
+																	<Calendar className="w-5 h-5 text-blue-500" />
+																	<Typography
+																		variant="h6"
+																		className="text-sm"
+																		placeholder={undefined}
+																		onPointerEnterCapture={
+																			undefined
+																		}
+																		onPointerLeaveCapture={
+																			undefined
+																		}
+																	>
+																		{moment(
+																			cardSchedule.date,
+																		).format('DD/MM/YYYY')}
+																	</Typography>
+																	{ordinal !== undefined && (
 																		<Typography
 																			variant="small"
+																			className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium"
 																			placeholder={undefined}
 																			onPointerEnterCapture={
 																				undefined
@@ -1055,7 +1137,24 @@ const ViewCourseStudentSchedule = () => {
 																				undefined
 																			}
 																		>
-																			{firstSchedule.hour || ''}
+																			{ordinalLabel(
+																				course.courseSelected,
+																				ordinal,
+																			)}
+																		</Typography>
+																	)}
+																	<Clock className="w-4 h-4 text-orange-500" />
+																	<Typography
+																		variant="small"
+																			placeholder={undefined}
+																			onPointerEnterCapture={
+																				undefined
+																			}
+																			onPointerLeaveCapture={
+																				undefined
+																			}
+																		>
+																			{cardSchedule.hour || ''}
 																		</Typography>
 																	</div>
 																	{existingAttendance &&
@@ -1070,9 +1169,9 @@ const ViewCourseStudentSchedule = () => {
 																		)}
 																</div>
 
-																{/* Materias del día como chips */}
+																{/* Materias del ordinal como chips */}
 																<div className="flex flex-wrap gap-2">
-																	{schedules.map((s) => {
+																	{schedules.map((s, chipIndex) => {
 																		const name =
 																			subject.subjectList.find(
 																				(sub) =>
@@ -1080,7 +1179,10 @@ const ViewCourseStudentSchedule = () => {
 																			)?.name;
 																		return name ? (
 																			<span
-																				key={s.id}
+																				key={
+																					s.id ??
+																					`${draftKey}-chip-${chipIndex}`
+																				}
 																				className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
 																			>
 																				{name}
@@ -1110,14 +1212,17 @@ const ViewCourseStudentSchedule = () => {
 																						>
 																							Estado
 																						</Typography>
-																						<Select
-																							value={selectedAttendanceStatus.toString()}
-																							onChange={(val) =>
-																								val &&
-																								setSelectedAttendanceStatus(
+																					<Select
+																						value={getDraft(
+																							draftKey,
+																						).attendance_status_id.toString()}
+																						onChange={(val) =>
+																							val &&
+																							setDraft(draftKey, {
+																								attendance_status_id:
 																									parseInt(val),
-																								)
-																							}
+																							})
+																						}
 																							placeholder={undefined}
 																							onPointerEnterCapture={
 																								undefined
@@ -1162,11 +1267,11 @@ const ViewCourseStudentSchedule = () => {
 																						Comentarios
 																					</Typography>
 																					<Textarea
-																						value={attendanceComments}
+																						value={getDraft(draftKey).comments}
 																						onChange={(e) =>
-																							setAttendanceComments(
-																								e.target.value,
-																							)
+																							setDraft(draftKey, {
+																								comments: e.target.value,
+																							})
 																						}
 																						rows={2}
 																						placeholder={undefined}
@@ -1191,10 +1296,9 @@ const ViewCourseStudentSchedule = () => {
 																						color="green"
 																						onClick={() =>
 																							handleSaveAttendance(
-																								firstSchedule.date,
-																								getDayForSchedule(
-																									firstSchedule,
-																								),
+																								cardSchedule.date,
+																								ordinal,
+																								draftKey,
 																							)
 																						}
 																						disabled={isSaving}
@@ -1218,8 +1322,10 @@ const ViewCourseStudentSchedule = () => {
 																						<Button
 																							size="sm"
 																							color="gray"
-																							onClick={
-																								handleCancelEdit
+																							onClick={() =>
+																								handleCancelEdit(
+																									draftKey,
+																								)
 																							}
 																							placeholder={undefined}
 																							onPointerEnterCapture={
@@ -1268,6 +1374,7 @@ const ViewCourseStudentSchedule = () => {
 																					onClick={() =>
 																						handleEditAttendance(
 																							existingAttendance,
+																							draftKey,
 																						)
 																					}
 																					placeholder={undefined}
@@ -1352,14 +1459,14 @@ const ViewCourseStudentSchedule = () => {
 																					savingSignatureId ===
 																					existingAttendance.id
 																				}
-																				disabled={
-																					// !moment(
-																					// 	firstSchedule.date,
-																					// ).isSame(moment(), 'day') &&
-																					auth.user?.id !==
-																					course.courseStudent
-																						?.student?.user_id
-																				}
+																			disabled={
+																				// !moment(
+																				// 	cardSchedule.date,
+																				// ).isSame(moment(), 'day') &&
+																				auth.user?.id !==
+																				course.courseStudent
+																					?.student?.user_id
+																			}
 																			/>
 																		)}
 																	</div>

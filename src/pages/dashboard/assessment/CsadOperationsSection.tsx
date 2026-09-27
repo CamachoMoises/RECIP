@@ -12,21 +12,37 @@ import {
 import { CsadFieldConfig, CsadInputs } from '../../../types/utilities';
 import { proficiencyLabel } from '../../../lib/utils';
 
-const countFields = (prefix: 'takeoff' | 'landing'): CsadFieldConfig[] => [
-	{ name: prefix, label: 'Total' },
-	{
-		name: `${prefix}_day`,
-		label: 'Diurnos',
-		valueAsNumber: true,
-		min: 0,
-	},
-	{
-		name: `${prefix}_night`,
-		label: 'Nocturnos',
-		valueAsNumber: true,
-		min: 0,
-	},
-];
+/**
+ * Rótulos de los contadores por sesión/día, alineados con la tabla RESUMEN del
+ * PDF de evaluación. Los nombres de campo NO cambian (`takeoff*` / `landing*` en la
+ * BD): solo se renombran las etiquetas visibles.
+ */
+const COUNT_LABELS: Record<
+	'takeoff' | 'landing',
+	{ total: string; day: string; night: string }
+> = {
+	takeoff: { total: 'Precisión', day: 'No precisión', night: 'GPS' },
+	landing: { total: 'Circuito', day: 'Visual', night: 'Total' },
+};
+
+const countFields = (prefix: 'takeoff' | 'landing'): CsadFieldConfig[] => {
+	const labels = COUNT_LABELS[prefix];
+	return [
+		{ name: prefix, label: labels.total },
+		{
+			name: `${prefix}_day`,
+			label: labels.day,
+			valueAsNumber: true,
+			min: 0,
+		},
+		{
+			name: `${prefix}_night`,
+			label: labels.night,
+			valueAsNumber: true,
+			min: 0,
+		},
+	];
+};
 
 const TIME_FIELDS: CsadFieldConfig[] = [
 	{
@@ -125,7 +141,7 @@ const CsadOperationsSection = ({
 				</div>
 			</div>
 			<div className="grid grid-cols-1 gap-6 my-6">
-				<CardSection title="Despegues">
+				<CardSection title="Aterrizajes Global">
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 						{countFields('takeoff').map((field) => (
 							<Input
@@ -151,7 +167,7 @@ const CsadOperationsSection = ({
 						))}
 					</div>
 				</CardSection>
-				<CardSection title="Aterrizajes">
+				<CardSection title="-------">
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 						{countFields('landing').map((field) => (
 							<Input

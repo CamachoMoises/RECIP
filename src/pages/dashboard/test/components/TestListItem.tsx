@@ -63,12 +63,24 @@ const TestListItem = ({
 		lastTest = CL.course_student_tests?.slice(-1)[0];
 	}
 
+	// Igual que en newTest: con varias sesiones por día hay que anclar en el
+	// schedule más reciente que ya empezó, no en el primero de la lista.
+	const sortedSchedules = (CL.schedules ?? [])
+		.filter((s) => s.date)
+		.map((s) => ({ schedule: s, at: moment(`${s.date} ${s.hour}`) }))
+		.filter((x) => x.at.isValid())
+		.sort((a, b) => a.at.diff(b.at));
+	const startedSchedules = sortedSchedules.filter((x) =>
+		x.at.isSameOrBefore(moment(now)),
+	);
+	const anchor = startedSchedules.length
+		? startedSchedules[startedSchedules.length - 1]
+		: (sortedSchedules[0] ?? null);
+
 	if (CL.schedules?.length === 0) {
 		active = false;
 	} else {
-		dateTest = CL.schedules
-			? moment(`${CL.schedules[0].date} ${CL.schedules[0].hour}`)
-			: null;
+		dateTest = anchor?.at ?? null;
 	}
 
 	const selfUser = authUserId === CL.student?.user?.id;
@@ -78,8 +90,8 @@ const TestListItem = ({
 		active = false;
 	}
 
-	if (CL.schedules && CL.schedules[0]) {
-		instructor = CL.schedules[0].instructor;
+	if (anchor) {
+		instructor = anchor.schedule.instructor;
 		selfInstructor = instructor?.user?.id === authUserId;
 	}
 

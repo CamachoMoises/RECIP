@@ -121,9 +121,17 @@ export const assignStudentsToGroup = createAsyncThunk<courseStudent[], { groupId
     }
 );
 
+/**
+ * El ordinal del horario se manda como `day_number` o `session_number` según el modo
+ * del curso. El backend mapea los dos a la columna `day_number`.
+ */
+type courseGroupSignatureOrdinalPayload =
+    | { day_number: number; session_number?: never }
+    | { session_number: number; day_number?: never };
+
 export const saveCourseGroupSignature = createAsyncThunk<
     { success: boolean; data: { signatureUrl: string; signature_number: number } },
-    { course_group_id: number; day_number: number; signature: string }
+    { course_group_id: number; signature: string } & courseGroupSignatureOrdinalPayload
 >(
     'courseGroup/saveCourseGroupSignature',
     async (data, { rejectWithValue }) => {

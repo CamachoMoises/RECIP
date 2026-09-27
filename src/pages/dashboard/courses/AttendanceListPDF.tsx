@@ -12,6 +12,11 @@ import {
 	courseGroupReportItem,
 	courseGroupSignature,
 } from '../../../types/utilities';
+import {
+	ordinalLabel,
+	programSize,
+	usesSessions,
+} from '../../../utils/programSize';
 
 const styles = StyleSheet.create({
 	page: {
@@ -226,7 +231,7 @@ const AttendanceListPDF = ({
 	logoBase64,
 }: Props) => {
 	const course = group.course || null;
-	const totalDays = course?.days || 1;
+	const totalDays = programSize(course) || 1;
 	const groupDate = group.date || students[0]?.date || null;
 
 	const getAttendanceForDay = (
@@ -279,6 +284,25 @@ const AttendanceListPDF = ({
 			.sort((a, b) => a.signature_number - b.signature_number);
 	};
 
+	/**
+	 * Última fecha realmente registrada en el grupo: cualquier alumno, cualquier
+	 * ordinal, asistencia o schedule. Es el dato más reciente que existe sin
+	 * adivinar, así que es el fallback correcto en modo sesiones.
+	 */
+	const latestRealDate = (): string | null => {
+		const dates: string[] = [];
+		for (const cs of students) {
+			for (const att of cs.attendances || []) {
+				if (att.date) dates.push(att.date);
+			}
+			for (const sch of cs.schedules || []) {
+				if (sch.date) dates.push(sch.date);
+			}
+		}
+		if (!dates.length) return null;
+		return dates.sort().pop() ?? null;
+	};
+
 	const getDayDate = (day: number): string | null => {
 		for (const cs of students) {
 			const att = (cs.attendances || []).find((a) => a.day === day);
@@ -290,10 +314,23 @@ const AttendanceListPDF = ({
 			);
 			if (sch?.date) return sch.date;
 		}
+		// Modo legacy: el ordinal es un día de calendario, así que el offset desde la
+		// fecha del grupo aproxima la fecha de ese día.
+		if (usesSessions(course)) return latestRealDate();
 		return groupDate ? addDays(groupDate, day - 1) : null;
 	};
 
 	const days = Array.from({ length: totalDays }, (_, i) => i + 1);
+
+	// "Finalización" del encabezado: la fecha real del último ordinal y, si no
+	// existe, la última fecha real conocida. El offset por cantidad de ordinales solo
+	// aplica a legacy.
+	const completionDate = (() => {
+		const lastOrdinalDate = getDayDate(totalDays);
+		if (lastOrdinalDate) return lastOrdinalDate;
+		if (usesSessions(course)) return latestRealDate();
+		return addDays(groupDate, totalDays - 1);
+	})();
 
 	return (
 		<Document>
@@ -345,18 +382,15 @@ const AttendanceListPDF = ({
 								<Text style={styles.infoValueCell}>
 									{formatDate(dayDate)}
 								</Text>
-								<Text style={styles.infoValueCell}>
-									{formatDate(
-										getDayDate(totalDays) ||
-											addDays(groupDate, totalDays - 1),
-									)}
-								</Text>
+							<Text style={styles.infoValueCell}>
+								{formatDate(completionDate)}
+							</Text>
 							</View>
 						</View>
 
 						{totalDays > 1 && (
 							<Text style={styles.dayHeader}>
-								Día {day} - {formatDate(dayDate)}
+								{ordinalLabel(course, day)} - {formatDate(dayDate)}
 							</Text>
 						)}
 

@@ -14,7 +14,7 @@ import {
 	TabsHeader,
 	Typography,
 } from '@material-tailwind/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { breadCrumbsItems, user } from '../../../types/utilities';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -32,6 +32,13 @@ import toast from 'react-hot-toast';
 
 import { pdf } from '@react-pdf/renderer';
 import { getLogoBase64 } from '../../../utils/logoBase64';
+import {
+	ordinalLabel,
+	ordinalNounPlural,
+	programOrdinals,
+	programSize,
+	usesSessions,
+} from '../../../utils/programSize';
 import PDFCourseScheduleDocument from './PDFCourseScheduleDocument';
 import SearchableParticipantSelect from './SearchableParticipantSelect';
 import SendEmailModal from '../../../components/SendEmailModal';
@@ -231,12 +238,41 @@ const NewCourseStudentSchedule = () => {
 	}, [course.courseStudent, user.studentList]);
 
 	// Derived data
-	const days = course.courseSelected
-		? Array.from({ length: course.courseSelected.days }, (_, i) => ({
-				id: i,
-				name: `Día ${i + 1}`,
-			}))
-		: [];
+	const days = programOrdinals(course.courseSelected);
+
+	/**
+	 * En modo legacy cada sesión ocupa un día de calendario, así que la fecha por
+	 * defecto es `fecha_inicio + (ordinal - 1)`. En modo sesiones varias sesiones
+	 * comparten fecha, y ese offset amontonaría todas las fechas; en su lugar se
+	 * encadena con la fecha de la última sesión ya agendada, o la fecha de inicio
+	 * del curso si todavía no hay nada agendado.
+	 *
+	 * `null` = el hijo aplica el offset legacy.
+	 */
+	const sessionDateFallback = useMemo(() => {
+		if (!usesSessions(course.courseSelected)) return null;
+		const scheduled = course.scheduleList.filter((s) => s.subject_day?.day);
+		if (scheduled.length === 0) {
+			return course.courseStudent?.date
+				? moment(course.courseStudent.date, 'YYYY-MM-DD').format(
+						'YYYY-MM-DD',
+					)
+				: null;
+		}
+		const maxOrdinal = Math.max(
+			...scheduled.map((s) => s.subject_day?.day ?? 0),
+		);
+		const latest = scheduled
+			.filter((s) => s.subject_day?.day === maxOrdinal)
+			.map((s) => s.date)
+			.filter(Boolean)
+			.sort()
+			.pop();
+		return latest
+			? moment(latest, 'YYYY-MM-DD').format('YYYY-MM-DD')
+			: null;
+	}, [course.courseSelected, course.scheduleList, course.courseStudent]);
+
 
 	// Loading and error states
 	if (course.status === 'loading') return <LoadingPage />;
@@ -731,7 +767,7 @@ const NewCourseStudentSchedule = () => {
 						</AccordionHeader>
 						<AccordionBody>
 							<Tabs
-								value={`Día ${course.day}`}
+								value={ordinalLabel(course.courseSelected, course.day)}
 								orientation="vertical"
 							>
 								<TabsHeader
@@ -801,6 +837,9 @@ const NewCourseStudentSchedule = () => {
 																			?.id || -1
 																	}
 																	canViewContent={canViewContent}
+																	dateFallback={
+																		sessionDateFallback
+																	}
 																/>
 															</div>
 														);
@@ -883,12 +922,18 @@ const NewCourseStudentSchedule = () => {
 											</Typography>
 											<Input
 												type="date"
-												value={moment(course.courseStudent.date)
-													.add(
-														course.courseSelected?.days || -1,
-														'days',
-													)
-													.format('YYYY-MM-DD')}
+												value={
+													sessionDateFallback
+														? sessionDateFallback
+														: moment(course.courseStudent.date)
+																.add(
+																	programSize(
+																		course.courseSelected,
+																	),
+																	'days',
+																)
+																.format('YYYY-MM-DD')
+												}
 												crossOrigin={undefined}
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
@@ -950,14 +995,14 @@ const NewCourseStudentSchedule = () => {
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													Total de días de clase:
+													Total de {ordinalNounPlural(course.courseSelected).toLowerCase()} de clase:
 												</Typography>
 												<Input
 													type="number"
 													inputMode="numeric"
-													label="Días"
+													label={ordinalNounPlural(course.courseSelected)}
 													className="[&::-webkit-inner-spin-button]:appearance-none"
-													value={course.courseSelected?.days || -1}
+													value={programSize(course.courseSelected) || -1}
 													crossOrigin={undefined}
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}

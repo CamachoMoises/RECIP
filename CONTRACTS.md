@@ -29,7 +29,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 | Student | `id, user_id, status` |
 | Instructor | `id, user_id, status` |
 | UserDocType | `id, name, symbol` |
-| Course | `id, name, description, code, hours, plane_model, days, status, course_type_id, course_level_id` |
+| Course | `id, name, description, code, hours, plane_model, days, uses_sessions, sessions, status, course_type_id, course_level_id` |
 | CourseType | `id, name` |
 | CourseLevel | `id, name` |
 | CourseStudent | `id, course_id, date, score, approve, student_id, code, type_trip, license, regulation, status, max_attempts, instructor_code, client` |
@@ -51,7 +51,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 | Answer | `id, value, course_id, question_id, test_id, is_correct, status` |
 | CourseStudentTestQuestion | `id, course_id, test_id, course_student_id, course_student_test_id, question_id, Answered, status` |
 | CourseStudentTestAnswer | `id, course_id, test_id, course_student_id, resp, course_student_test_id, course_student_test_question_id, question_id, score, status` |
-| Attendance | `id, course_student_id, day, date, attendance_status_id, comments` |
+| Attendance | `id, course_student_id, day, date, attendance_status_id, comments` — `day` es el **número de sesión** cuando el curso tiene `uses_sessions = 1`, y el número de día cuando `uses_sessions = 0` |
 | AttendanceStatus | `id, name, description` |
 | AttendanceSignature | `id, attendance_id, signature_url` |
 | Module | `id, name` |
@@ -60,6 +60,41 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 | Rating | `id, instructor_id, student_id, subject_days_id, subject_id, course_student_id, value` |
 | UserSuggestion | `id, user_id, title, description` |
 | EmailHistory | `id, email, user_id, nombre_archivo, fecha, tipo, descripcion, modulo` |
+
+---
+
+## Días vs. Sesiones
+
+Un curso programado puede trabajar en dos modos, discriminados por `course.uses_sessions`.
+Las filas existentes nunca se reinterpretan: todo curso con `uses_sessions = 0` se comporta
+exactamente como antes de esta funcionalidad.
+
+| | `uses_sessions = 0` (legacy, default) | `uses_sessions = 1` |
+|---|---|---|
+| Significado del ordinal (`subject_days.day`, `attendance.day`, `course_group_signature.day_number`) | número de **día** | número de **sesión** |
+| Techo del programa | `course.days` | `course.sessions` |
+| Relación ordinal ↔ fecha calendario | 1 sesión por día | **N sesiones pueden compartir fecha** |
+| Validación de `POST /api/attendance` | `day` requerido, `day <= course.days` | `session_number` requerido, `session_number <= course.sessions` |
+| Validación de `POST /api/course_groups/signature` | `day_number` contra `course.days` | `session_number` contra `course.sessions` |
+| Validación de `POST /api/subjects/subjects_days` | sin bound check | `day <= course.sessions` |
+
+Claves de la implementación:
+
+- **No hay columnas `session_number` en la base.** El ordinal vive en las columnas `day` /
+  `day_number` que ya existían. `session_number` es un **alias de entrada/salida** que el
+  backend mapea a `day` / `day_number`, para que la API hable de sesiones sin duplicar el dato.
+- `course.sessions` se rellena con `course.days` en todos los cursos existentes y en los cursos
+  nuevos que no lo envíen, así que nunca es `NULL`. El discriminador es el **flag**, no el `NULL`.
+- La unicidad de asistencia es `(course_student_id, date, day)`: dos sesiones de la misma fecha
+  se distinguen por su número de sesión. Antes era `(course_student_id, date)`.
+- `schedule` nunca tuvo restricción de unicidad, por lo que varias sesiones en la misma fecha
+  ya eran aceptables; el bloqueo era solo del cliente.
+- Fuente de verdad del techo: `getCourseProgramSizeByCourseStudent()` en
+  `src/database/repositories/course.js`, que devuelve `{ uses_sessions, days, sessions, total }`.
+
+Migraciones: `20260927000000-add-sessions-to-course.cjs`, `20260927000001-relax-attendance-unique-date.cjs`.
+Al ser columnas nuevas, la app requiere que se corran **antes** de desplegar (el `sync` de
+arranque usa `alter: false` y no las crea).
 
 ---
 
@@ -144,12 +179,14 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### GET /
 - Query: `name`, `description`, `course_type_id`, `course_level_id` (todos opcionales)
-- `200` → array de Course con alias `course_type`, `course_level`
+- `200` → array de Course con alias `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
 
 ### POST /
 - Body (Joi; `type`→`course_type_id`, `level`→`course_level_id`): `name`, `description`, `code`,
   `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status` (opcionales)
-- `201` → Course con `course_type`, `course_level`
+- `uses_sessions` (bool, default `false`) y `sessions` (int ≥ 1) son opcionales — ver
+  [Días vs. Sesiones](#días-vs-sesiones). Si `sessions` no viene, se persiste `sessions = days`.
+- `201` → Course con `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
 
 ### PUT /
 - Body (Joi, mismo que POST + `id` requerido; se ignora `hours`)
@@ -171,8 +208,8 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 - `200` → `{ data: CourseStudent[], totalItems, currentPage, pageSize, totalPages }`
   Cada fila: claves de CourseStudent + `highest_score` (calculado) + alias
   `student` (con `user`), `course_group`, `course` (con `course_type`, `course_level`),
-  `course_student_tests`, `course_student_assessment`, `schedules` (cada uno con `subject`
-  e `instructor` con `user`)
+  `course_student_tests`, `course_student_assessment`, `schedules` (cada uno con `subject`,
+  `instructor` con `user` y **`subject_day`**)
 - Nota: cuando `instructor_id` está presente, filtra solo los CourseStudent cuyos schedules
   pertenecen al instructor indicado. Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
 
@@ -210,11 +247,16 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 - Params: `id` (course_student_id)
 - `200` → array de Schedule (order date/hora) con `student` (con `user`), `instructor` (con `user`),
   `course_student`, `subject_day`, `subject`
+- Varias sesiones pueden compartir la misma `date`: el endpoint no las agrupa, las devuelve
+  ordenadas por `date` y `hour`.
 
 ### POST /schedule
 - Body: `instructor_id`, `course_id`, `subject_days_id`, `student_id`, `subject_id`,
   `course_student_id`, `date`, `hour`, `classTime`
 - `200` → Schedule (mismo shape que GET /schedule/:id)
+- Nota: `course_id` no es una columna de `schedule`; se ignora. El curso se deduce de
+  `course_student.course_id`. El ordinal (día o sesión) del schedule se deduce de
+  `subject_days_id → subject_day.day`.
 
 ### PUT /schedule
 - Auth: **no**
@@ -273,10 +315,13 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 - `404` JSON `{ success: false, error: 'Firma no encontrada.' }`
 
 ### POST /signature
-- Body (Joi): `course_group_id` (requerido), `day_number` (int ≥1, requerido), `signature`
-  (base64, requerido)
+- Body (Joi): `course_group_id` (requerido), `signature` (base64, requerido) y **exactamente uno**
+  de `day_number` / `session_number` (int ≥1) — `session_number` es el alias del número de
+  sesión y tiene prioridad sobre `day_number`
 - `200` → `{ success: true, message: 'Firma guardada correctamente.', data: { signatureUrl, signature_number, record } }`
 - `404`/`400` JSON `{ success: false, error: <msg> }`
+- El ordinal se persiste en `course_group_signature.day_number` (columna `NOT NULL`).
+  Con `uses_sessions = 1` el techo validado es `course.sessions`; con `uses_sessions = 0`, `course.days`.
 
 ### GET /report/attendance
 - Query: `course_group_id`, `course_id` (opcionales), `pageSize`, `currentPage`
@@ -330,13 +375,15 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 ### POST /subjects_days
 - Body: `subject_id`, `course_id`, `day`, `status` (upsert de SubjectDays + recalcula horas)
 - `201` → texto plano `OK`
-- `400` `Input Validation Error <msg>`
+- `400` `Input Validation Error <msg>` | `day (X) excede las sesiones del curso (Y).`
+- `day` es el **número de sesión** cuando el curso tiene `uses_sessions = 1`. El techo solo se
+  valida en ese modo; con `uses_sessions = 0` no hay bound check (comportamiento previo).
 
 ### POST /subjects_lesson_days
 - Body: `subject_id`, `subject_lesson_id`, `subject_lesson_days_id`, `course_id`, `day`,
   `status_lesson` (opcional; upsert de SubjectDays + SubjectLessonDays)
 - `201` → texto plano `OK`
-- `400` `Input Validation Error <msg>`
+- `400` `Input Validation Error <msg>` | `day (X) excede las sesiones del curso (Y).`
 
 ---
 
@@ -539,13 +586,141 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ---
 
+### Reportes de examen — `/api/test/reports`
+
+> Endpoints **de solo lectura** para inspeccionar un examen: preguntas, respuestas, la
+> respuesta correcta y las respuestas de un alumno. **Nunca recalculan ni escriben scores**;
+> el veredicto por pregunta se deriva del `score` ya almacenado en
+> `course_student_test_answer`.
+>
+> Equivalente ORM de las consultas SQL de `consulta_examen.sql` (este archivo —`CONTRACTS.md`—
+> es la fuente de verdad del shape).
+>
+> Las respuestas son **anidadas por pregunta**, no planas: una pregunta trae sus `answers`
+> dentro, y la correcta se expone a la vez como `correct_answer_ids` (ids) y `correct_answers`
+> (id + texto), derivados de `answer.is_correct = 1`. Puede haber **varias** correctas por
+> pregunta (tipos 2, 4 y 5).
+>
+> **Parámetro `status`** (común a los que aceptan preguntas):
+> - ausente → **todos** los registros, activos e inactivos
+> - `true` → solo los activos
+> - `false` → solo los inactivos
+>
+> Gobierna **la entidad principal** del endpoint: `test.status` en `/reports/tests`, y
+> `question.status` en el resto. Las `answers` de una pregunta se devuelven **siempre
+> completas** (cada una con su `status`), así el filtro nunca deja preguntas a medias.
+> `test_question_type.status` y `course_student_test.status` **no** se filtran.
+>
+> Los reportes por intento **no** exigen `test.status = 1`: un examen desactivado debe seguir
+> consultable. Si `:course_student_test_id` no pertenece al `:test_id` de la ruta → `404`.
+>
+> Tabla de errores común: `400 { error: 'Parámetro <name> inválido' }` para ids/query no
+> numéricos o `finished` distinto de `true`/`false`; `404 { error: 'Test not found' }`;
+> `404 { error: 'CourseStudentTest not found' }`; `500 { error: 'Error interno del servidor' }`.
+
+#### GET /reports/tests
+- Auth: sí
+- Query: `status` (opcional), `course_id` (opcional)
+- `200` → array de Test con alias `course` (`{ id, name, code }`) + `question_count` +
+  `attempt_count` (enteros, siempre presentes). Sin paginación.
+
+#### GET /reports/tests/:test_id/questions
+- Auth: sí
+- Params: `test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → `{ test, question_types, total_questions, questions }`
+  - `test` = Test (`id, course_id, code, duration, min_score, status`). **No** incluye
+    `test_question_types`: el blueprint va solo en `question_types`, para no duplicarlo.
+  - `question_types` = array de TestQuestionType (`id, question_type_id, amount, value, status`)
+    con alias `question_type` (`id, name, max_answer, value`), orden por `question_type_id`
+  - Cada `questions[]`: `id, header, test_id, question_type_id, question_type`,
+    `test_question_type_id`, `points` (= `test_question_type.value`; **`null`** si el
+    blueprint no existe), `status`, `answers[]` (`id, value, is_correct, status`, la correcta
+    primero y luego por `id`), `correct_answer_ids[]`, `correct_answers[]` (`{ id, value }`)
+- Test inexistente → `404`. Test sin preguntas → `200` con `questions: []`
+
+#### GET /reports/tests/:test_id/correct-answers
+- Auth: sí
+- Params: `test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → **mismo shape** que el anterior, pero solo preguntas con ≥1 `is_correct = 1` y con
+  `answers[]` reducido a las correctas
+- Test inexistente → `404`
+
+#### GET /reports/tests/:test_id/attempts/:course_student_test_id
+- Auth: sí
+- Params: `test_id`, `course_student_test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → CourseStudentTest (`id, course_id, test_id, student_id, course_student_id, code,
+  attempts, date, score, approve, status, finished`) con alias `student` (que trae `user`:
+  `id, name, last_name, email`) y `test`, más `total_questions` y `questions[]`
+- Cada `questions[]`: las claves de la pregunta del reporte anterior, más
+  `course_student_test_question_id`, `answered` (bool) y `course_student_test_answer`
+  (`{ id, question_id, resp, score, status }` o `null` si el alumno no respondió).
+  `resp` aquí viene **crudo**, tal como está en la BD
+
+#### GET /reports/tests/:test_id/attempts/:course_student_test_id/answers
+- Auth: sí
+- Params: `test_id`, `course_student_test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → mismo encabezado que el anterior + `total_questions` y `questions[]` con la
+  respuesta del alumno **deserializada**:
+  - `student_response` — texto plano. Para tipos 1/2/3 es el texto de la(s) opción(es)
+    marcadas (unidas con `" | "`); para tipos 4/5 es el texto que escribió el alumno.
+    Cadena vacía si no respondió.
+  - `student_selected_ids[]` — `answer.id` marcados. **Ojo**: para tipos 4 y 5 `resp` es texto
+    libre sin ids, así que aquí van los ids de las *respuestas correctas que el alumno
+    coincidió* (comparación `cleanString`: trim + lowercase + sin espacios).
+  - `student_response_raw` — el `resp` crudo sin procesar
+  - `correct_answers_text` — las correctas unidas con `" | "`
+  - `result` — `CORRECTA` | `PARCIAL` | `INCORRECTA` | `SIN_RESPUESTA`.
+    Tipos 1/3: `CORRECTA` si el id coincide con alguna correcta. Tipo 2: `CORRECTA` solo si
+    marcó exactamente el conjunto correcto; si no, `PARCIAL` cuando `score > 0`. Tipos 4/5:
+    `CORRECTA` si `score >= points`, `PARCIAL` si `score > 0`.
+  - `points_possible` (= `test_question_type.value`; `null` si el blueprint no existe),
+    `points_scored` (= `course_student_test_answer.score`; `null` si no respondió)
+- `resp` con JSON inválido o vacío **no** provoca `500`: se degrada a respuesta vacía
+  (a diferencia de `evaluateAnswers`, que sí necesita abortar para fijar score 0)
+
+#### GET /reports/tests/:test_id/attempts/:course_student_test_id/questions
+- Auth: sí
+- Params: `test_id`, `course_student_test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → **mismo shape** que `/attempts/:course_student_test_id`
+- Solo incluye las preguntas que efectivamente le tocaron en el sorteo de ese intento
+  (`course_student_test_question`), no todo el banco del test
+
+#### GET /reports/tests/:test_id/results
+- Auth: sí
+- Params: `test_id`; Query: `student_id`, `finished` (ambos opcionales), `pageSize`
+  (default 10), `currentPage` (default 1)
+- `200` → `{ data, totalItems, currentPage, pageSize, totalPages }`, ordenado por
+  `score DESC, id DESC`
+  - Cada `data[]`: `attempt_id, attempt_code, test_id, attempts, date, finished, approve,
+    status, student` (con `user`), `course_student_id`, y **tres puntajes distintos**:
+    - `score` — `course_student_test.score`, el valor **autoritativo** congelado al finalizar
+      el intento
+    - `score_computed` — `SUM(course_student_test_answer.score)` en vivo. Puede divergir de
+      `score` si se editaron respuestas después de cerrar el intento.
+    - `total_possible` — `SUM(test_question_type.value)` de lo sorteado. Puede quedar
+      desactualizado si cambió el `value` de un tipo de pregunta después del intento.
+  - Además `min_score` (de `test`, o `null`).
+- **Paginación**: con `pageSize=-1` se omiten `limit`/`offset` y se devuelven **todos** los
+  intentos con `currentPage: 1`, `pageSize: -1`, `totalPages: 1`. En cualquier otro caso
+  `totalPages = ceil(totalItems / pageSize)`. Si no hay resultados, `totalItems: 0` y
+  `totalPages: 0` (sea cual sea el `pageSize`). Un `currentPage` fuera de rango devuelve
+  `data: []` con `totalItems` y `totalPages` correctos.
+- `finished` acepta solo `true`/`false`; otro valor → `400`.
+  `pageSize` acepta `-1` o un entero `>= 1`; `currentPage` un entero `>= 1`. Valores como `0`,
+  `-2` o `-1` en `currentPage` → `400` (evitan un `LIMIT`/`OFFSET` negativo, que MySQL rechaza
+  con error de sintaxis).
+
+---
+
 ## Attendance — `/api/attendance`
 
 ### GET /
-- Query: `course_student_id`, `day`, `attendance_status_id`, `date_from`, `date_to`, `instructor_id` (opcionales),
+- Query: `course_student_id`, `day`, `session_number`, `attendance_status_id`, `date_from`, `date_to`, `instructor_id` (opcionales),
   `pageSize` (default 10), `currentPage` (default 1)
 - `200` → `{ data: Attendance[], totalItems, currentPage, pageSize, totalPages }`
   Cada fila con `course_student`, `attendance_status`, `attendance_signature`
+- Orden: `date` DESC, `day` ASC (desempata varias sesiones de la misma fecha)
+- Nota: `day` y `session_number` filtran la misma columna `day`; `session_number` tiene prioridad
 - Nota: cuando `instructor_id` está presente, filtra asistencias de los CourseStudent
   del instructor indicado. Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
 
@@ -556,7 +731,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### GET /by-course-student
 - Query: `course_student_id` (requerido)
-- `200` → array de Attendance con `attendance_status`, `attendance_signature`
+- `200` → array de Attendance con `attendance_status`, `attendance_signature` (orden `date` DESC, `day` ASC)
 - `400` texto plano `course_student_id is required`
 
 ### GET /by-date-range
@@ -566,14 +741,23 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 
 ### POST /
 - Body (Joi): `course_student_id` (req), `day` (int ≥1, req), `date` (req), `attendance_status_id`
-  (req), `comments`
+  (req), `comments`, `session_number` (int ≥1, opcional)
 - `201` → Attendance con includes
 - `400` texto plano `Input Validation Error <msg>` | `day (X) excede los días del curso (Y).`
+  | `session_number es requerido para cursos programados por sesiones.`
+  | `session_number (X) excede las sesiones del curso (Y).`
+- Regla de validación (ver [Días vs. Sesiones](#días-vs-sesiones)): con `uses_sessions = 0` valida
+  `day <= course.days`; con `uses_sessions = 1` exige `session_number` y valida
+  `session_number <= course.sessions`. En ambos casos el ordinal se guarda en `attendance.day`.
+- Varias asistencias del mismo `course_student` pueden compartir `date`: la unicidad es
+  `(course_student_id, date, day)`.
 
 ### PUT /
-- Body: `id` (req), `course_student_id`, `day`, `date`, `attendance_status_id`, `comments`
+- Body: `id` (req), `course_student_id`, `day`, `session_number`, `date`, `attendance_status_id`, `comments`
 - `200` → Attendance con includes
 - `404` texto plano `Attendance not found`
+- La validación de `day`/`session_number` es idéntica a `POST /` y solo corre si se envía alguno
+  de los dos.
 
 ### DELETE /:id
 - Params: `id`

@@ -37,7 +37,8 @@ const ModalFormSubject = ({
 	maxOrderSubject,
 	maxOrderLessonSelected,
 	courseType,
-	days,
+	ordinals,
+	ordinalNoun,
 }: {
 	subjectSelected: subject | null;
 	openNewSubject: boolean;
@@ -45,10 +46,11 @@ const ModalFormSubject = ({
 	maxOrderSubject: number | null;
 	maxOrderLessonSelected: number | null;
 	courseType: number;
-	days: {
+	ordinals: {
 		id: number;
 		name: string;
 	}[];
+	ordinalNoun: string;
 }) => {
 	const [openNewSubjectLesson, setOpenNewSubjectLesson] =
 		useState(false);
@@ -398,7 +400,7 @@ const ModalFormSubject = ({
 													onPointerLeaveCapture={undefined}
 													className="text-center"
 												>
-													Días impartidos
+													{ordinalNoun} impartidos
 												</Typography>
 												<List
 													placeholder={undefined}
@@ -422,7 +424,7 @@ const ModalFormSubject = ({
 															>
 																<LessonDetail
 																	SL={SL}
-																	days={days}
+																	ordinals={ordinals}
 																	maxOrderLessonSelected={
 																		maxOrderLessonSelected
 																	}

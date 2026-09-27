@@ -8,6 +8,11 @@ import {
 } from '@react-pdf/renderer';
 import moment from 'moment';
 import { CourseState, user } from '../../../types/utilities'; // ajusta el path
+import {
+	ordinalNounPlural,
+	programSize,
+	usesSessions,
+} from '../../../utils/programSize';
 
 const styles = StyleSheet.create({
 	page: {
@@ -286,6 +291,25 @@ const PDFCourseScheduleDocument = ({
 			? data[data.length - 1]?.instructor?.user
 			: undefined;
 
+	// Fecha de completado. La fecha real manda: el último schedule agendado es el
+	// único dato disponible sin adivinar.
+	const latestScheduleDate = data
+		.map((s) => s.date)
+		.filter(Boolean)
+		.sort()
+		.pop();
+	const courseStartDate = course.courseStudent?.date;
+	let completionDate = '';
+	if (latestScheduleDate) {
+		completionDate = moment(latestScheduleDate).format('DD-MM-YYYY');
+	} else if (!usesSessions(course.courseSelected) && courseStartDate) {
+		// Legacy sin schedules: cada ordinal es un día de calendario, así que sumar
+		// el tamaño del programa al inicio aproxima la fecha de completado.
+		completionDate = moment(courseStartDate)
+			.add(programSize(course.courseSelected) - 1, 'days')
+			.format('DD-MM-YYYY');
+	}
+
 	return (
 		<Document>
 			<Page size="LETTER" style={styles.page}>
@@ -400,10 +424,7 @@ const PDFCourseScheduleDocument = ({
 									Corregido el: 100%
 								</Text>
 								<Text style={styles.resultsCell}>
-									Fecha de completado:{' '}
-									{moment(course.courseStudent.date)
-										.add(course.courseSelected?.days ?? -1, 'days')
-										.format('DD-MM-YYYY')}
+									Fecha de completado: {completionDate}
 								</Text>
 							</View>
 							<View style={styles.resultsRow}>
@@ -418,7 +439,7 @@ const PDFCourseScheduleDocument = ({
 								<Text style={styles.resultsCell}>
 									Total de horas: {course.courseSelected?.hours}
 									{'\n'}
-									Total de días: {course.courseSelected?.days}
+									Total de {ordinalNounPlural(course.courseSelected).toLowerCase()}: {programSize(course.courseSelected)}
 								</Text>
 							</View>
 							<View style={styles.resultsRow}>

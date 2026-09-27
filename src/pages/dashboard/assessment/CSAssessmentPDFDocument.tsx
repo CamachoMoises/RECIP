@@ -8,10 +8,37 @@ import {
 } from '@react-pdf/renderer';
 import moment from 'moment';
 import {
+	ordinalLabel,
+	ordinalNoun,
+	usesSessions,
+} from '../../../utils/programSize';
+import {
 	assessmentState,
 	courseStudentAssessmentDay,
 	schedule,
 } from '../../../types/utilities';
+
+/**
+ * Máximo de columnas de ordinal por bloque de tabla.
+ *
+ * Las tablas de "columna por ordinal" reparte el ancho de la página con `flex: 1` en
+ * cada celda y `wrap={false}` en la fila, así que sin tope cada columna encoge a
+ * `1 / (2 + total)` del ancho. Con muchas sesiones las etiquetas ("Entrenamiento",
+ * "Sin tipo") dejan de entrar y la fila no puede partirse entre páginas.
+ *
+ * Con 8 ningún curso existente cambia el PDF: el máximo real de `days` hoy es 7. El
+ * chunking solo entra en juego a partir del noveno ordinal, que es justamente el caso
+ * de un curso programado por sesiones.
+ */
+const MAX_ORDINAL_COLUMNS = 8;
+
+const chunk = <T,>(items: T[], size: number): T[][] => {
+	const out: T[][] = [];
+	for (let i = 0; i < items.length; i += size) {
+		out.push(items.slice(i, i + size));
+	}
+	return out;
+};
 
 const styles = StyleSheet.create({
 	page: {
@@ -124,6 +151,7 @@ const CSAssessmentPDFDocument = ({
 }) => {
 	moment.locale('es');
 	const CSA = assessment.courseStudentAssessmentSelected;
+	const programCourse = CSA?.course;
 	const assessmentDays = CSA?.CourseStudentAssessmentDays ?? [];
 	const findDay = (dayNum: number) =>
 		assessmentDays.find((CSAD) => Number(CSAD.day) === dayNum);
@@ -152,8 +180,12 @@ const CSAssessmentPDFDocument = ({
 		.sort((a, b) => Number(a.day) - Number(b.day));
 	const days = evaluatedDays.map((CSAD) => ({
 		id: Number(CSAD.day) - 1,
-		name: `Día ${Number(CSAD.day)}`,
+		name: ordinalLabel(programCourse, Number(CSAD.day)),
 	}));
+
+	// Bloques de columnas para las tablas de "columna por ordinal". Con un solo
+	// bloque (programa legacy) el render es idéntico al de siempre.
+	const dayChunks = chunk(days, MAX_ORDINAL_COLUMNS);
 
 	let sumLanding = 0;
 	let sumTakeOff = 0;
@@ -255,26 +287,42 @@ const CSAssessmentPDFDocument = ({
 			}
 		}),
 	);
-	const scheduleDayDate: Record<number, string> = {};
+	// Un ordinal puede tener varias fechas (varias sesiones el mismo día), por
+	// lo que se acumulan todas y se muestran separadas por " / ".
+	const scheduleDayDates: Record<number, string[]> = {};
 	const scheduleDayInstructor: Record<number, string> = {};
 	(schedules ?? []).forEach((s) => {
 		const dayNum =
 			s.subject_day?.day ??
 			subjectDaysById[Number(s.subject_days_id)];
-		if (!dayNum || scheduleDayDate[dayNum]) return;
-		scheduleDayDate[dayNum] = s.date;
+		if (!dayNum) return;
+		if (!scheduleDayDates[dayNum]) scheduleDayDates[dayNum] = [];
+		if (s.date && !scheduleDayDates[dayNum].includes(s.date)) {
+			scheduleDayDates[dayNum].push(s.date);
+		}
 		const inst = s.instructor?.user;
-		if (inst) {
+		if (inst && !scheduleDayInstructor[dayNum]) {
 			scheduleDayInstructor[dayNum] =
 				`${inst.name} ${inst.last_name}`;
 		}
 	});
 	const getDayDate = (dayItemId: number) => {
 		const dayNum = dayItemId + 1;
-		const scheduleDate = scheduleDayDate[dayNum];
-		return scheduleDate
-			? moment(scheduleDate).format(dateFormat)
-			: getEvaluationDate(CSA?.date, dayItemId).format(dateFormat);
+		const scheduleDates = scheduleDayDates[dayNum];
+		if (scheduleDates?.length) {
+			return scheduleDates
+				.map((d) => moment(d).format(dateFormat))
+				.join(' / ');
+		}
+		// Modo legacy: cada ordinal es un día de calendario, así que estimar contando
+		// días hábiles desde la fecha base es una aproximación razonable.
+		if (!usesSessions(programCourse)) {
+			return getEvaluationDate(CSA?.date, dayItemId).format(dateFormat);
+		}
+		// Modo sesiones: el ordinal NO es un día de calendario, así que estimar un
+		// offset daría una fecha inventada. Se usa la última fecha realmente agendada
+		// y, si no hay ninguna, se deja la celda vacía en vez de mentir.
+		return lastScheduleDate ? moment(lastScheduleDate).format(dateFormat) : '';
 	};
 	const getInstructorInitials = (dayItemId: number) => {
 		const name = scheduleDayInstructor[dayItemId + 1];
@@ -421,285 +469,286 @@ const CSAssessmentPDFDocument = ({
 						</View>
 					</View>
 
-					{days.length > 0 && (
-						<>
-							{/* Evaluación Tipo */}
-							<View style={styles.table}>
-								<View style={styles.row} wrap={false}>
-									<Text
-										style={[
-											styles.cell,
-											styles.cellHeader,
-											{ flex: 2 },
-										]}
-									>
-										Día
-									</Text>
-									{days.map((dayItem, index) => (
+					{days.length > 0 &&
+						dayChunks.map((chunkDays, chunkIndex) => (
+							<View key={`days-chunk-${chunkIndex}`} break={chunkIndex > 0}>
+								{/* Evaluación Tipo */}
+								<View style={styles.table}>
+									<View style={styles.row} wrap={false}>
 										<Text
-											key={`type-h-${index}`}
 											style={[
 												styles.cell,
 												styles.cellHeader,
-												{ flex: 1, textAlign: 'center' },
+												{ flex: 2 },
 											]}
 										>
-											{dayItem.id + 1}
+											{ordinalNoun(programCourse)}
 										</Text>
-									))}
-								</View>
-								<View style={styles.row} wrap={false}>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, fontWeight: 'bold' },
-										]}
-									>
-										Evaluación Tipo
-									</Text>
-									{days.map((dayItem, index) => {
-										const dayType = findDay(dayItem.id + 1);
-										return (
+										{chunkDays.map((dayItem, index) => (
 											<Text
-												key={`type-v-${index}`}
+												key={`type-h-${index}`}
 												style={[
 													styles.cell,
+													styles.cellHeader,
 													{ flex: 1, textAlign: 'center' },
 												]}
 											>
-												{dayType?.type && typeLabelMap[dayType.type]
-													? typeLabelMap[dayType.type]
-													: 'Sin tipo'}
-											</Text>
-										);
-									})}
-								</View>
-								<View style={styles.row} wrap={false}>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, fontWeight: 'bold' },
-										]}
-									>
-										Evaluación en el FFS / Proficiencia:
-									</Text>
-									<Text style={[styles.cell, { flex: 4 }]}>
-										(1) Insatisfactorio. (2) Por Debajo de los
-										Estándares. (3) Satisfactorio. (4) Excelente
-									</Text>
-								</View>
-							</View>
-
-							{/* Periodo de Entrenamiento */}
-							<View style={styles.table}>
-								<View style={styles.row}>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, fontWeight: 'bold' },
-										]}
-									>
-										Periodo de Entrenamiento
-									</Text>
-									<Text style={[styles.cell, { flex: 4 }]}>
-										<Text style={styles.cellBold}>Fecha:</Text>{' '}
-										{days.map((dayItem, index) => (
-											<Text key={index}>
-												{getDayDate(dayItem.id)}
-												{index < days.length - 1 ? ' / ' : ''}
+												{dayItem.id + 1}
 											</Text>
 										))}
-									</Text>
-								</View>
-							</View>
-
-							{/* Periodo de formación */}
-							<View style={styles.table}>
-								<View style={styles.row} fixed>
-									<Text
-										style={[
-											styles.cell,
-											styles.cellGreen,
-											{ flex: 2, fontSize: 7 },
-										]}
-									>
-										Día
-									</Text>
-									{days.map((dayItem, index) => (
+									</View>
+									<View style={styles.row} wrap={false}>
 										<Text
-											key={`pf-h-${index}`}
 											style={[
 												styles.cell,
-												styles.cellGreen,
-												{ flex: 1, textAlign: 'center' },
+												{ flex: 2, fontWeight: 'bold' },
 											]}
 										>
-											{dayItem.id + 1}
+											Evaluación Tipo
 										</Text>
-									))}
-								</View>
-								<View style={styles.row} wrap={false}>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, fontWeight: 'bold' },
-										]}
-									>
-										Fecha:
-									</Text>
-									{days.map((dayItem, index) => (
-										<Text
-											key={`pf-f-${index}`}
-											style={[
-												styles.cell,
-												{ flex: 1, textAlign: 'center' },
-											]}
-										>
-											{getDayDate(dayItem.id)}
-										</Text>
-									))}
-								</View>
-								<View style={styles.row} wrap={false}>
-									<Text
-										style={[
-											styles.cell,
-											{ flex: 2, fontWeight: 'bold' },
-										]}
-									>
-										Iniciales de instructor
-									</Text>
-									{days.map((dayItem, index) => (
-										<Text
-											key={`pf-i-${index}`}
-											style={[
-												styles.cell,
-												{ flex: 1, textAlign: 'center' },
-											]}
-										>
-											{getInstructorInitials(dayItem.id)}
-										</Text>
-									))}
-								</View>
-
-								{assessment.daysSubjectList?.map((sub, index) => (
-									<View key={`subject-${index}`}>
-										<View style={styles.row}>
-											<Text
-												style={[
-													styles.cell,
-													styles.cellGreen,
-													{ flex: 2 },
-												]}
-											>
-												{sub.name}
-											</Text>
-											{days.map((dayItem, dIndex) => (
+										{chunkDays.map((dayItem, index) => {
+											const dayType = findDay(dayItem.id + 1);
+											return (
 												<Text
-													key={`s-${index}-h-${dIndex}`}
+													key={`type-v-${index}`}
 													style={[
 														styles.cell,
-														styles.cellGreen,
 														{ flex: 1, textAlign: 'center' },
 													]}
 												>
-													{dayItem.id + 1}
+													{dayType?.type && typeLabelMap[dayType.type]
+														? typeLabelMap[dayType.type]
+														: 'Sin tipo'}
+												</Text>
+											);
+										})}
+									</View>
+									<View style={styles.row} wrap={false}>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, fontWeight: 'bold' },
+											]}
+										>
+											Evaluación en el FFS / Proficiencia:
+										</Text>
+										<Text style={[styles.cell, { flex: 4 }]}>
+											(1) Insatisfactorio. (2) Por Debajo de los
+											Estándares. (3) Satisfactorio. (4) Excelente
+										</Text>
+									</View>
+								</View>
+
+								{/* Periodo de Entrenamiento */}
+								<View style={styles.table}>
+									<View style={styles.row}>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, fontWeight: 'bold' },
+											]}
+										>
+											Periodo de Entrenamiento
+										</Text>
+										<Text style={[styles.cell, { flex: 4 }]}>
+											<Text style={styles.cellBold}>Fecha:</Text>{' '}
+											{chunkDays.map((dayItem, index) => (
+												<Text key={index}>
+													{getDayDate(dayItem.id)}
+													{index < chunkDays.length - 1 ? ' / ' : ''}
 												</Text>
 											))}
-										</View>
-										{sub.subject_lessons?.map((SL, slIndex) => (
-											<View
-												key={`SL-${index}-${slIndex}`}
-												style={styles.row}
-												wrap={false}
+										</Text>
+									</View>
+								</View>
+
+								{/* Periodo de formación */}
+								<View style={styles.table}>
+									<View style={styles.row} fixed>
+										<Text
+											style={[
+												styles.cell,
+												styles.cellGreen,
+												{ flex: 2, fontSize: 7 },
+											]}
+										>
+											{ordinalNoun(programCourse)}
+										</Text>
+										{chunkDays.map((dayItem, index) => (
+											<Text
+												key={`pf-h-${index}`}
+												style={[
+													styles.cell,
+													styles.cellGreen,
+													{ flex: 1, textAlign: 'center' },
+												]}
 											>
-												<Text
-													style={[
-														styles.cell,
-														{ flex: 2, fontWeight: 'bold' },
-													]}
-												>
-													{SL.name}
-												</Text>
-												{days.map((dayItem, dIndex) => {
-													const dayActive =
-														SL.subject_lesson_days?.find(
-															(SLD) => SLD.day === dayItem.id + 1,
-														);
-													const CSALD =
-														dayActive?.course_student_assessment_lesson_days;
-													const tryCount =
-														CSALD && CSALD.length > 0
-															? CSALD[0]
-															: null;
-													const score = tryCount?.score ?? '';
-													const score2 =
-														tryCount?.score_2 && tryCount.score <= 2
-															? ` / ${tryCount.score_2}`
-															: '';
-													const score3 =
-														tryCount?.score_3 &&
-														tryCount.score_2 &&
-														tryCount.score_2 <= 2
-															? ` / ${tryCount.score_3}`
-															: '';
-													return (
-														<Text
-															key={`s-${index}-${dIndex}`}
-															style={[
-																styles.cell,
-																{
-																	flex: 1,
-																	textAlign: 'center',
-																},
-																...(dayActive
-																	? [styles.cellGray]
-																	: []),
-															]}
-														>
-															{score}
-															{score2}
-															{score3}
-														</Text>
-													);
-												})}
-											</View>
+												{dayItem.id + 1}
+											</Text>
 										))}
 									</View>
-								))}
-							</View>
-
-							{/* Resumen de Evaluación/Proficiencia por día */}
-							<View style={styles.table}>
-								<View style={styles.row}>
-									<Text
-										style={[
-											styles.cell,
-											styles.cellHeader,
-											{ flex: 2 },
-										]}
-									>
-										Resumen de Evaluación/Proficiencia por día
-									</Text>
-									{days.map((dayItem, index) => {
-										const dayAverage = findDay(
-											dayItem.id + 1,
-										)?.score_average;
-										return (
+									<View style={styles.row} wrap={false}>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, fontWeight: 'bold' },
+											]}
+										>
+											Fecha:
+										</Text>
+										{chunkDays.map((dayItem, index) => (
 											<Text
-												key={`avg-${index}`}
+												key={`pf-f-${index}`}
 												style={[
 													styles.cell,
 													{ flex: 1, textAlign: 'center' },
 												]}
 											>
-												{dayAverage != null ? dayAverage : ''}
+												{getDayDate(dayItem.id)}
 											</Text>
-										);
+										))}
+									</View>
+									<View style={styles.row} wrap={false}>
+										<Text
+											style={[
+												styles.cell,
+												{ flex: 2, fontWeight: 'bold' },
+											]}
+										>
+											Iniciales de instructor
+										</Text>
+										{chunkDays.map((dayItem, index) => (
+											<Text
+												key={`pf-i-${index}`}
+												style={[
+													styles.cell,
+													{ flex: 1, textAlign: 'center' },
+												]}
+											>
+												{getInstructorInitials(dayItem.id)}
+											</Text>
+										))}
+									</View>
+
+									{assessment.daysSubjectList?.map((sub, index) => (
+										<View key={`subject-${index}`}>
+											<View style={styles.row}>
+												<Text
+													style={[
+														styles.cell,
+														styles.cellGreen,
+														{ flex: 2 },
+													]}
+												>
+													{sub.name}
+												</Text>
+												{chunkDays.map((dayItem, dIndex) => (
+													<Text
+														key={`s-${index}-h-${dIndex}`}
+														style={[
+															styles.cell,
+															styles.cellGreen,
+															{ flex: 1, textAlign: 'center' },
+														]}
+													>
+														{dayItem.id + 1}
+													</Text>
+												))}
+											</View>
+											{sub.subject_lessons?.map((SL, slIndex) => (
+												<View
+													key={`SL-${index}-${slIndex}`}
+													style={styles.row}
+													wrap={false}
+												>
+													<Text
+														style={[
+															styles.cell,
+															{ flex: 2, fontWeight: 'bold' },
+														]}
+													>
+														{SL.name}
+													</Text>
+													{chunkDays.map((dayItem, dIndex) => {
+														const dayActive =
+															SL.subject_lesson_days?.find(
+																(SLD) => SLD.day === dayItem.id + 1,
+															);
+														const CSALD =
+															dayActive?.course_student_assessment_lesson_days;
+														const tryCount =
+															CSALD && CSALD.length > 0
+																? CSALD[0]
+																: null;
+														const score = tryCount?.score ?? '';
+														const score2 =
+															tryCount?.score_2 && tryCount.score <= 2
+																? ` / ${tryCount.score_2}`
+																: '';
+														const score3 =
+															tryCount?.score_3 &&
+															tryCount.score_2 &&
+															tryCount.score_2 <= 2
+																? ` / ${tryCount.score_3}`
+																: '';
+														return (
+															<Text
+																key={`s-${index}-${dIndex}`}
+																style={[
+																	styles.cell,
+																	{
+																		flex: 1,
+																		textAlign: 'center',
+																	},
+																	...(dayActive
+																		? [styles.cellGray]
+																		: []),
+																]}
+															>
+																{score}
+																{score2}
+																{score3}
+															</Text>
+														);
+													})}
+												</View>
+											))}
+										</View>
+									))}
+								</View>
+
+								{/* Resumen de Evaluación/Proficiencia por día */}
+								<View style={styles.table}>
+									<View style={styles.row}>
+										<Text
+											style={[
+												styles.cell,
+												styles.cellHeader,
+												{ flex: 2 },
+											]}
+										>
+											Resumen de Evaluación/Proficiencia por día
+										</Text>
+										{chunkDays.map((dayItem, index) => {
+											const dayAverage = findDay(
+												dayItem.id + 1,
+											)?.score_average;
+											return (
+												<Text
+													key={`avg-${index}`}
+													style={[
+														styles.cell,
+														{ flex: 1, textAlign: 'center' },
+													]}
+												>
+													{dayAverage != null ? dayAverage : ''}
+												</Text>
+											);
 									})}
 								</View>
 							</View>
-						</>
-					)}
+						</View>
+					))}
 					{/* Resumen de despegues y aterrizajes */}
 					<View style={styles.table} break>
 						<View style={styles.row} wrap={false}>
@@ -710,12 +759,12 @@ const CSAssessmentPDFDocument = ({
 									{ flex: 6, textAlign: 'center' },
 								]}
 							>
-								RESUMEN DE DESPEGUES Y ATERRIZAJES
+								ATERRIZAJES GLOBAL
 							</Text>
 						</View>
 						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								DESPEGUES DIURNOS
+								No precisión
 							</Text>
 							<Text
 								style={[
@@ -726,7 +775,7 @@ const CSAssessmentPDFDocument = ({
 								{sumTakeoffDay}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								DESPEGUES NOCTURNOS
+								GPS
 							</Text>
 							<Text
 								style={[
@@ -737,7 +786,7 @@ const CSAssessmentPDFDocument = ({
 								{sumTakeoffNight}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								DESPEGUES
+								Precisión
 							</Text>
 							<Text
 								style={[
@@ -750,7 +799,7 @@ const CSAssessmentPDFDocument = ({
 						</View>
 						<View style={styles.row} wrap={false}>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								ATERRIZAJES DIURNOS
+								Visual
 							</Text>
 							<Text
 								style={[
@@ -761,7 +810,7 @@ const CSAssessmentPDFDocument = ({
 								{sumLandingDay}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								ATERRIZAJES NOCTURNOS
+								Total
 							</Text>
 							<Text
 								style={[
@@ -772,7 +821,7 @@ const CSAssessmentPDFDocument = ({
 								{sumLandingNight}
 							</Text>
 							<Text style={[styles.cell, { flex: 2 }]}>
-								ATERRIZAJES
+								Circuito
 							</Text>
 							<Text
 								style={[
@@ -888,7 +937,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 1, textAlign: 'center' },
 										]}
 									>
-										Día
+										{ordinalNoun(programCourse)}
 									</Text>
 									<Text
 										style={[
@@ -1062,7 +1111,7 @@ const CSAssessmentPDFDocument = ({
 											{ flex: 1 },
 										]}
 									>
-										Día
+										{ordinalNoun(programCourse)}
 									</Text>
 									<Text
 										style={[

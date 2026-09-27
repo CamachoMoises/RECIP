@@ -199,6 +199,8 @@ export type course = {
     code: string;
     hours: number;
     days: number;
+    uses_sessions?: boolean;
+    sessions?: number;
     type?: number;
     level?: number;
     status: boolean;
@@ -671,6 +673,26 @@ export type attendance = {
     updatedAt?: string;
 }
 
+type attendanceOrdinalBase = {
+    course_student_id: number;
+    date: string;
+    attendance_status_id: number;
+    comments?: string;
+}
+
+/**
+ * El ordinal del horario va en la columna `day`, pero el nombre del campo de entrada
+ * depende del modo del curso: `day` en legacy, `session_number` cuando `uses_sessions`.
+ * `session_number` es solo alias de entrada; el backend nunca lo devuelve en respuestas.
+ */
+export type attendanceOrdinalPayload =
+    | ({ day: number; session_number?: never } & attendanceOrdinalBase)
+    | ({ session_number: number; day?: never } & attendanceOrdinalBase);
+
+export type attendanceCreatePayload = attendanceOrdinalPayload;
+
+export type attendanceUpdatePayload = attendanceOrdinalPayload & { id: number };
+
 export type courseGroupReportCourse = {
     id: number;
     name: string;
@@ -678,6 +700,8 @@ export type courseGroupReportCourse = {
     code: string;
     hours: number;
     days: number;
+    uses_sessions?: boolean;
+    sessions?: number;
     plane_model?: string | null;
     status: boolean;
     course_type: courseType;
@@ -793,4 +817,138 @@ export interface EmailHistoryState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
 }
+
+export type testReportResult = 'CORRECTA' | 'PARCIAL' | 'INCORRECTA' | 'SIN_RESPUESTA';
+
+export type testReportCorrectAnswer = {
+    id: number;
+    value: string;
+}
+
+export type testReportQuestionAnswer = {
+    id: number;
+    value: string;
+    is_correct: boolean;
+    status: boolean;
+}
+
+export type testReportQuestion = {
+    id: number;
+    header: string;
+    test_id: number;
+    question_type_id: number;
+    question_type?: questionType | null;
+    test_question_type_id: number;
+    points: number | null;
+    status: boolean;
+    answers: testReportQuestionAnswer[];
+    correct_answer_ids: number[];
+    correct_answers: testReportCorrectAnswer[];
+}
+
+export type testReportQuestionType = {
+    id: number;
+    question_type_id: number;
+    amount: number;
+    value: number;
+    status: boolean;
+    question_type?: questionType | null;
+}
+
+export type testReportQuestions = {
+    test: test;
+    question_types: testReportQuestionType[];
+    total_questions: number;
+    questions: testReportQuestion[];
+}
+
+export type testReportAttemptAnswer = {
+    id: number;
+    question_id: number;
+    resp: string;
+    score: number | null;
+    status: boolean;
+}
+
+export type testReportAttemptQuestion = testReportQuestion & {
+    course_student_test_question_id: number;
+    answered: boolean;
+    course_student_test_answer: testReportAttemptAnswer | null;
+}
+
+export type testReportAnsweredQuestion = testReportAttemptQuestion & {
+    student_response: string;
+    student_selected_ids: number[];
+    student_response_raw: string;
+    correct_answers_text: string;
+    result: testReportResult;
+    points_possible: number | null;
+    points_scored: number | null;
+}
+
+export type testReportAttempt = courseStudentTest & {
+    student?: student | null;
+    test?: test | null;
+    total_questions: number;
+    questions: testReportAttemptQuestion[];
+}
+
+export type testReportAttemptAnswers = Omit<testReportAttempt, 'questions'> & {
+    questions: testReportAnsweredQuestion[];
+}
+
+export type testReportRow = {
+    id: number;
+    course_id: number;
+    code: string;
+    duration: number;
+    min_score: number;
+    status: boolean;
+    course?: {
+        id: number;
+        name: string;
+        code: string;
+    } | null;
+    question_count: number;
+    attempt_count: number;
+}
+
+export type testReportResultRow = {
+    attempt_id: number;
+    attempt_code: string;
+    test_id: number;
+    attempts: number;
+    date: string;
+    finished: boolean;
+    approve: boolean;
+    status: boolean;
+    student?: student | null;
+    course_student_id: number;
+    score: number | null;
+    score_computed: number | null;
+    total_possible: number | null;
+}
+
+export type testReportResults = {
+    data: testReportResultRow[];
+    totalItems: number;
+    currentPage: number;
+    pageSize: number;
+    totalPages: number;
+    min_score: number | null;
+}
+
+export interface TestReportState {
+    testList: testReportRow[];
+    questions: testReportQuestions | null;
+    attempt: testReportAttemptAnswers | null;
+    results: testReportResults | null;
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
+}
+
 

@@ -4,6 +4,7 @@ import { AppDispatch } from '../../../store';
 import { List, ListItem, Typography } from '@material-tailwind/react';
 import { courseStudentAssessmentLessonDay } from '../../../types/utilities';
 import { changeCourseStudentAssessmentLessonDay } from '../../../features/assessmentSlice';
+import { ordinalLabel } from '../../../utils/programSize';
 import ScoreDetail from './scoreDetail';
 
 const LessonDetails = ({
@@ -80,7 +81,7 @@ const LessonDetails = ({
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				Día {day}
+				{ordinalLabel(assessment.courseStudentAssessmentSelected?.course, day)}
 			</Typography>
 			<div className="flex flex-col gap-2 py-2">
 				{assessment.subjectList?.map((SL, index) => {

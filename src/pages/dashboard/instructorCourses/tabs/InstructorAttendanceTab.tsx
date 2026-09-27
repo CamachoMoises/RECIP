@@ -10,10 +10,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
+import { course } from '../../../../types/utilities';
+import { ordinalLabel, ordinalNoun } from '../../../../utils/programSize';
 
 type Props = {
 	instructor_id: number;
 	course_id: number;
+	course?: course | null;
 };
 
 type AttendanceItem = {
@@ -57,7 +60,7 @@ const getStatusColor = (statusName: string | undefined) => {
 	}
 };
 
-const InstructorAttendanceTab = ({ instructor_id, course_id }: Props) => {
+const InstructorAttendanceTab = ({ instructor_id, course_id, course }: Props) => {
 	const [attendance, setAttendance] = useState<AttendanceItem[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -162,7 +165,7 @@ const InstructorAttendanceTab = ({ instructor_id, course_id }: Props) => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											Día
+											{ordinalNoun(course)}
 										</Typography>
 									</th>
 									<th className="border-b border-blue-gray-100 bg-blue-gray-50 py-3 px-4 text-left">
@@ -225,7 +228,7 @@ const InstructorAttendanceTab = ({ instructor_id, course_id }: Props) => {
 											{moment(a.date).format('DD/MM/YYYY')}
 										</td>
 										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm font-medium">
-											Día {a.day}
+											{ordinalLabel(course, a.day)}
 										</td>
 										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm">
 											{a.course_student?.student?.user

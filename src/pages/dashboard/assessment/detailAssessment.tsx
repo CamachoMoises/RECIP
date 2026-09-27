@@ -43,6 +43,7 @@ import { createEmailHistory } from '../../../features/emailSlice';
 import CSAssessmentPDFDocument from './CSAssessmentPDFDocument';
 import SendEmailModal from '../../../components/SendEmailModal';
 import { getCloudinaryPngBase64 } from '../../../utils/imageBase64';
+import { ordinalNoun, programOrdinals } from '../../../utils/programSize';
 
 type DaySignatures = {
 	student?: string;
@@ -142,19 +143,9 @@ const DetailAssessment = () => {
 		?.course_student_id
 		? assessment.courseStudentAssessmentSelected.course_student_id
 		: -1;
-	const days = assessment.courseStudentAssessmentSelected?.course
-		?.days
-		? Array.from(
-				{
-					length:
-						assessment.courseStudentAssessmentSelected?.course?.days,
-				},
-				(_, i) => ({
-					id: i,
-					name: `Día ${i + 1}`,
-				}),
-			)
-		: [];
+	const programCourse = assessment.courseStudentAssessmentSelected?.course;
+	const days = programOrdinals(programCourse);
+	const ordinal = ordinalNoun(programCourse);
 	useEffect(() => {
 		if (course_student_id !== -1) {
 			dispatch(fetchSchedule(course_student_id));
@@ -714,7 +705,7 @@ const DetailAssessment = () => {
 								disabled={isFirstStep}
 								placeholder={undefined}
 							>
-								{isFirstStep ? 'x' : `Día ${activeStep}`}
+								{isFirstStep ? 'x' : `${ordinal} ${activeStep}`}
 							</Button>
 
 							<Button
@@ -724,7 +715,7 @@ const DetailAssessment = () => {
 								disabled={isLastStep}
 								placeholder={undefined}
 							>
-								{isLastStep ? 'x' : `Día ${activeStep + 2}`}
+								{isLastStep ? 'x' : `${ordinal} ${activeStep + 2}`}
 							</Button>
 						</div>
 					</CardFooter>

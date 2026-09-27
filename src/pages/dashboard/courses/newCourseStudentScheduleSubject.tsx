@@ -38,6 +38,7 @@ const NewCourseSubject = ({
 	schedule,
 	approve,
 	canViewContent,
+	dateFallback,
 }: {
 	hours: number;
 	subjectItem: subject;
@@ -48,15 +49,18 @@ const NewCourseSubject = ({
 	SD: subjectDays | undefined;
 	schedule: schedule | undefined;
 	canViewContent: boolean;
+	dateFallback: string | null;
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
 
 	// Calculate initial date
 	let initialDate = schedule?.date || course_student?.date;
 	if (initialDate && !schedule?.date && SD?.day) {
-		initialDate = moment(initialDate, 'YYYY-MM-DD')
-			.add(SD.day - 1, 'days')
-			.format('YYYY-MM-DD');
+		initialDate = dateFallback
+			? moment(dateFallback, 'YYYY-MM-DD').format('YYYY-MM-DD')
+			: moment(initialDate, 'YYYY-MM-DD')
+					.add(SD.day - 1, 'days')
+					.format('YYYY-MM-DD');
 	}
 
 	// Calculate start time

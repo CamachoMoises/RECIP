@@ -25,6 +25,13 @@ import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import { axiosPostDefault } from '../../../services/axios';
 import { fetchCourse } from '../../../features/courseSlice';
+import {
+	ordinalLabel,
+	ordinalNoun,
+	ordinalNounPlural,
+	programOrdinals,
+} from '../../../utils/programSize';
+import toast from 'react-hot-toast';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -124,6 +131,11 @@ const CourseDetail = () => {
 				}),
 			);
 		};
+		/**
+		 * El endpoint sigue llamándose `day` en ambos modos; el backend lo valida
+		 * contra `course.sessions` cuando el curso usa sesiones y responde 400 si
+		 * el ordinal excede el tope.
+		 */
 		const handleChangeStatusDay = async (
 			event: React.ChangeEvent<HTMLInputElement>,
 			day: { id: number; name: string },
@@ -137,7 +149,21 @@ const CourseDetail = () => {
 					course_id: selectedCourse.id,
 				};
 
-				await axiosPostDefault('api/subjects/subjects_days', req);
+				try {
+					await axiosPostDefault('api/subjects/subjects_days', req);
+					toast.success(
+						`${ordinalLabel(selectedCourse, day.id + 1)} actualizado`,
+					);
+				} catch (error: any) {
+					toast.error(
+						error?.response?.data?.message ||
+							error?.message ||
+							`Error al actualizar ${ordinalLabel(
+								selectedCourse,
+								day.id + 1,
+							).toLowerCase()}`,
+					);
+				}
 			}
 		};
 		if (status === 'loading') {
@@ -156,12 +182,9 @@ const CourseDetail = () => {
 		}
 
 		if (selectedCourse) {
-			const days = Array.from(
-				{ length: selectedCourse.days },
-				(_, i) => ({ id: i, name: `Día ${i + 1}` }),
-			);
+			const ordinals = programOrdinals(selectedCourse);
 
-			const hoursByDays = subject.subjectList.flatMap((sub) => {
+			const hoursByOrdinals = subject.subjectList.flatMap((sub) => {
 				const daysActive =
 					sub.subject_days?.filter((SD) => SD.status) || [];
 				return daysActive.map((SD) => ({
@@ -237,29 +260,30 @@ const CourseDetail = () => {
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{days.map((day, index) => {
+											{ordinals.map((ordinal, index) => {
 												let hours = 0;
-												const hoursDay = hoursByDays.filter(
-													(HbD) => HbD.day === day.id + 1,
-												);
+												const hoursForOrdinal =
+													hoursByOrdinals.filter(
+														(HbD) => HbD.day === ordinal.id + 1,
+													);
 
-												hours = hoursDay.reduce(
+												hours = hoursForOrdinal.reduce(
 													(sum, SD) => sum + SD.hours,
 													0,
 												);
 
 												return (
 													<div
-														key={`day-${index}`}
+														key={`ordinal-${index}`}
 														className="flex flex-col gap-2"
 													>
 														<span
-															key={`dayDetails-${index}`}
+															key={`ordinalDetails-${index}`}
 															className={
 																hours > 8 ? 'text-red-700' : ''
 															}
 														>
-															{day.name}: {hours} horas de instruccion
+															{ordinal.name}: {hours} horas de instruccion
 														</span>
 													</div>
 												);
@@ -309,7 +333,7 @@ const CourseDetail = () => {
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												Días impartidos
+												{ordinalNounPlural(selectedCourse)} impartidos
 											</Typography>
 											<div className="flex w-dvh lg:w-full">
 												<List
@@ -389,25 +413,26 @@ const CourseDetail = () => {
 																</div>
 
 																<div className="flex w-max gap-3">
-																	{days.map((day) => {
-																		let check = false;
-																		check = subjectDays.some(
-																			(sd) =>
-																				sd.day === day.id + 1 &&
-																				sd.status,
-																		);
-																		const labelView =
-																			course.courseSelected
-																				?.course_type.id != 2 ||
-																			check;
-																		return (
-																			<div
-																				className="flex flex-col gap-1"
-																				key={`day-${day.id}`}
-																			>
-																				{labelView && (
-																					<label>{day.name}</label>
-																				)}
+																{ordinals.map((ordinal) => {
+																	let check = false;
+																	check = subjectDays.some(
+																		(sd) =>
+																			sd.day === ordinal.id + 1 &&
+																			sd.status,
+																	);
+																	const labelView =
+																		course.courseSelected
+																			?.course_type.id != 2 ||
+																		check;
+																	return (
+																		<div
+																			className="flex flex-col gap-1"
+																			key={`ordinal-${ordinal.id}`}
+																		>
+																			{labelView && (
+																				<label>{ordinal.name}</label>
+																			)}
+
 
 																				{course.courseSelected
 																					?.course_type.id != 2 && (
@@ -428,7 +453,7 @@ const CourseDetail = () => {
 																							onChange={(event) => {
 																								handleChangeStatusDay(
 																									event,
-																									day,
+																									ordinal,
 																									subject.id,
 																								);
 																							}}
@@ -524,7 +549,8 @@ const CourseDetail = () => {
 							maxOrderSubject={maxOrderSubject}
 							maxOrderLessonSelected={maxOrderLessonSelected}
 							courseType={course.courseSelected.course_type.id}
-							days={days}
+							ordinals={ordinals}
+						ordinalNoun={ordinalNoun(selectedCourse)}
 						/>
 					)}
 				</>
