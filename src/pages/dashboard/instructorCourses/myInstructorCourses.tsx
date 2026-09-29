@@ -2,6 +2,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import {
 	breadCrumbsItems,
+	course,
+	courseGroup,
 	courseStudent,
 } from '../../../types/utilities';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +11,9 @@ import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import PageTitle from '../../../components/PageTitle';
 import {
+	Accordion,
+	AccordionBody,
+	AccordionHeader,
 	Card,
 	CardBody,
 	CardHeader,
@@ -22,7 +27,11 @@ import {
 	fetchCourse,
 } from '../../../features/courseSlice';
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Eye, PenLine, Users } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { axiosGetDefault } from '../../../services/axios';
+import { PermissionsValidate } from '../../../services/permissionsValidate';
+import InstructorSignaturesPanel from './InstructorSignaturesPanel';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -39,6 +48,7 @@ const MyInstructorCourses = () => {
 
 	const {
 		courseStudentList,
+		courseList,
 		status,
 		error,
 		currentPage,
@@ -56,6 +66,9 @@ const MyInstructorCourses = () => {
 	const [courseFilter, setCourseFilter] = useState<string | undefined>(
 		undefined,
 	);
+	const [groups, setGroups] = useState<courseGroup[]>([]);
+	const [openGroup, setOpenGroup] = useState<number | null>(null);
+	const canDeleteSignature = PermissionsValidate(['staff']);
 
 	const fetchWithFilter = (page: number = 1) => {
 		if (instructor_id <= 0) return;
@@ -75,6 +88,29 @@ const MyInstructorCourses = () => {
 			fetchWithFilter(1);
 		}
 	}, [dispatch, instructor_id]);
+
+	const loadGroups = async () => {
+		if (instructor_id <= 0) {
+			setGroups([]);
+			return;
+		}
+		try {
+			const { resp, status: resStatus } = await axiosGetDefault(
+				'api/course_groups',
+				{ instructor_id, status: true },
+			);
+			if (resStatus >= 200 && resStatus < 400) {
+				const data = resp.data || resp || [];
+				setGroups(Array.isArray(data) ? data : []);
+			}
+		} catch {
+			toast.error('Error al cargar los grupos');
+		}
+	};
+
+	useEffect(() => {
+		loadGroups();
+	}, [instructor_id]);
 
 	useEffect(() => {
 		setActive(currentPage);
@@ -105,6 +141,19 @@ const MyInstructorCourses = () => {
 				(cs) => cs.course_id === parseInt(courseFilter),
 			)
 		: courseStudentList;
+
+	const resolveGroupCourse = (group: courseGroup): course | null =>
+		group.course ??
+		courseList?.find((c) => c.id === group.course_id) ??
+		null;
+
+	// Los grupos se firman fuera del listado de pilotos, por eso no se usan los
+	// alumnos: solo los grupos del instructor que el panel puede dibujar.
+	const visibleGroups = (
+		courseFilter
+			? groups.filter((g) => g.course_id === parseInt(courseFilter))
+			: groups
+	).filter((g) => resolveGroupCourse(g)?.course_type?.id !== 2);
 
 	const uniqueCourses = courseStudentList?.reduce<
 		{ id: number; name: string }[]
@@ -461,6 +510,165 @@ const MyInstructorCourses = () => {
 						</div>
 					</div>
 				)}
+
+				<Card
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<CardHeader
+						floated={false}
+						shadow={false}
+						color="transparent"
+						className="m-0 p-4 md:p-6 border-b"
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						<div className="flex items-center gap-2">
+							<PenLine size={18} className="text-blue-500" />
+							<Typography
+								variant="h5"
+								color="blue-gray"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Firmas del instructor
+							</Typography>
+						</div>
+						<Typography
+							variant="small"
+							color="gray"
+							className="mt-1"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							{visibleGroups.length}{' '}
+							{visibleGroups.length === 1
+								? 'grupo disponible'
+								: 'grupos disponibles'}
+						</Typography>
+					</CardHeader>
+
+					<CardBody
+						className="p-4 md:p-6"
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						{visibleGroups.length === 0 ? (
+							<Typography
+								color="gray"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								No hay grupos disponibles para firmar
+							</Typography>
+						) : (
+							<div className="flex flex-col gap-2">
+								{visibleGroups.map((group) => {
+									const groupCourse =
+										resolveGroupCourse(group);
+									return (
+										<Accordion
+											key={group.id}
+											open={openGroup === group.id}
+											className="border border-blue-gray-100 rounded-lg"
+											placeholder={undefined}
+											onPointerEnterCapture={
+												undefined
+											}
+											onPointerLeaveCapture={
+												undefined
+											}
+										>
+											<AccordionHeader
+												onClick={() =>
+													setOpenGroup(
+														openGroup === group.id
+															? null
+															: group.id,
+													)
+												}
+												className="px-4 py-3"
+												placeholder={undefined}
+												onPointerEnterCapture={
+													undefined
+												}
+												onPointerLeaveCapture={
+													undefined
+												}
+											>
+												<div className="flex items-center justify-between w-full pr-2">
+													<div className="flex items-center gap-3">
+														<Users
+															size={18}
+															className="text-blue-500"
+														/>
+														<div className="text-left">
+															<Typography
+																variant="h6"
+																color="blue-gray"
+																className="text-sm"
+																placeholder={
+																	undefined
+																}
+																onPointerEnterCapture={
+																	undefined
+																}
+																onPointerLeaveCapture={
+																	undefined
+																}
+															>
+																{group.title} - (
+																{group.code})
+															</Typography>
+															<Typography
+																variant="small"
+																color="gray"
+																placeholder={
+																	undefined
+																}
+																onPointerEnterCapture={
+																	undefined
+																}
+																onPointerLeaveCapture={
+																	undefined
+																}
+															>
+																{groupCourse?.name ?? '-'}
+															</Typography>
+														</div>
+													</div>
+													<ChevronDown
+														size={18}
+														className={`transition-transform ${
+															openGroup === group.id
+																? 'rotate-180'
+																: ''
+														}`}
+													/>
+												</div>
+											</AccordionHeader>
+											<AccordionBody className="px-4 py-2">
+												<InstructorSignaturesPanel
+													groupId={group.id}
+													course={groupCourse}
+													canDelete={
+														canDeleteSignature
+													}
+												/>
+											</AccordionBody>
+										</Accordion>
+									);
+								})}
+							</div>
+						)}
+					</CardBody>
+				</Card>
 			</div>
 		</>
 	);

@@ -6,6 +6,7 @@ import {
 	Text,
 	View,
 } from '@react-pdf/renderer';
+import { Fragment } from 'react';
 import moment from 'moment';
 import {
 	ordinalLabel,
@@ -183,18 +184,16 @@ const CSAssessmentPDFDocument = ({
 		name: ordinalLabel(programCourse, Number(CSAD.day)),
 	}));
 
+	// El chequeador/inspector solo firma el último día: `buildSignatures` no trae
+	// `signature_3_*` para los demás. Se usa el mismo criterio (máximo `day` de
+	// todos los CSAD, no solo los evaluados) para que coincidan las dos listas.
+	const lastAssessedDayNum = assessmentDays.length
+		? Math.max(...assessmentDays.map((CSAD) => Number(CSAD.day)))
+		: 0;
+
 	// Bloques de columnas para las tablas de "columna por ordinal". Con un solo
 	// bloque (programa legacy) el render es idéntico al de siempre.
 	const dayChunks = chunk(days, MAX_ORDINAL_COLUMNS);
-
-	let sumLanding = 0;
-	let sumTakeOff = 0;
-	for (const key in assessmentDays) {
-		const landing = assessmentDays[parseInt(key)].landing;
-		const takeoff = assessmentDays[parseInt(key)].takeoff;
-		sumLanding += landing ? landing : 0;
-		sumTakeOff += takeoff ? takeoff : 0;
-	}
 
 	const formatHours = (value: number) => {
 		if (!value) return '0';
@@ -257,22 +256,48 @@ const CSAssessmentPDFDocument = ({
 	};
 	let sumTakeoffDay = 0;
 	let sumTakeoffNight = 0;
+	let sumTakeOff = 0;
 	let sumLandingDay = 0;
 	let sumLandingNight = 0;
+	let sumLanding = 0;
+	let sumLandingPrecision = 0;
+	let sumLandingNonPrecision = 0;
+	let sumLandingGps = 0;
+	let sumLandingCircuit = 0;
+	let sumLandingVisual = 0;
 	let sumTrainingTime = 0;
 	let sumCheckTime = 0;
 	let sumIfrTime = 0;
 	let sumVfrTime = 0;
+	// Un único paso de acumulación: cada total del RESUMEN se calcula aquí desde
+	// su campo homónimo del CSAD, y las celdas del PDF solo lo renderizan.
+	// Los contadores de despegues/aterrizajes vienen como `INTEGER` nullable de
+	// la BD, por eso pasan por `Number(...)` en vez de sumar directo.
 	assessmentDays.forEach((CSAD) => {
 		sumTakeoffDay += CSAD.takeoff_day || 0;
 		sumTakeoffNight += CSAD.takeoff_night || 0;
+		sumTakeOff += CSAD.takeoff || 0;
 		sumLandingDay += CSAD.landing_day || 0;
 		sumLandingNight += CSAD.landing_night || 0;
+		sumLanding += CSAD.landing || 0;
+		sumLandingPrecision += CSAD.landing_precision || 0;
+		sumLandingNonPrecision += CSAD.landing_non_precision || 0;
+		sumLandingGps += CSAD.landing_gps || 0;
+		sumLandingCircuit += CSAD.landing_circuit || 0;
+		sumLandingVisual += CSAD.landing_visual || 0;
 		sumTrainingTime += Number(CSAD.training_time) || 0;
 		sumCheckTime += Number(CSAD.check_time) || 0;
 		sumIfrTime += Number(CSAD.ifr_time) || 0;
 		sumVfrTime += Number(CSAD.vfr_time) || 0;
 	});
+
+	const landingTypeSums: { label: string; value: number }[] = [
+		{ label: 'Precisión', value: sumLandingPrecision },
+		{ label: 'No precisión', value: sumLandingNonPrecision },
+		{ label: 'GPS', value: sumLandingGps },
+		{ label: 'Circuito', value: sumLandingCircuit },
+		{ label: 'Visual', value: sumLandingVisual },
+	];
 
 	const dateFormat = 'DD-MM-YYYY';
 	const courseDate = CSA?.course_student?.date
@@ -551,7 +576,7 @@ const CSAssessmentPDFDocument = ({
 											Periodo de Entrenamiento
 										</Text>
 										<Text style={[styles.cell, { flex: 4 }]}>
-											<Text style={styles.cellBold}>Fecha:</Text>{' '}
+											<Text style={styles.cellBold}>Fecha de la sesión:</Text>{' '}
 											{chunkDays.map((dayItem, index) => (
 												<Text key={index}>
 													{getDayDate(dayItem.id)}
@@ -759,12 +784,14 @@ const CSAssessmentPDFDocument = ({
 									{ flex: 6, textAlign: 'center' },
 								]}
 							>
-								ATERRIZAJES GLOBAL
+								DESPEGUES
 							</Text>
 						</View>
 						<View style={styles.row} wrap={false}>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								No precisión
+							<Text
+								style={[styles.cell, styles.cellBold, { flex: 2 }]}
+							>
+								Diurnos
 							</Text>
 							<Text
 								style={[
@@ -774,8 +801,10 @@ const CSAssessmentPDFDocument = ({
 							>
 								{sumTakeoffDay}
 							</Text>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								GPS
+							<Text
+								style={[styles.cell, styles.cellBold, { flex: 2 }]}
+							>
+								Nocturnos
 							</Text>
 							<Text
 								style={[
@@ -785,8 +814,10 @@ const CSAssessmentPDFDocument = ({
 							>
 								{sumTakeoffNight}
 							</Text>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								Precisión
+							<Text
+								style={[styles.cell, styles.cellBold, { flex: 2 }]}
+							>
+								Total
 							</Text>
 							<Text
 								style={[
@@ -798,8 +829,21 @@ const CSAssessmentPDFDocument = ({
 							</Text>
 						</View>
 						<View style={styles.row} wrap={false}>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								Visual
+							<Text
+								style={[
+									styles.cell,
+									styles.cellPeach,
+									{ flex: 6, textAlign: 'center' },
+								]}
+							>
+								ATERRIZAJES
+							</Text>
+						</View>
+						<View style={styles.row} wrap={false}>
+							<Text
+								style={[styles.cell, styles.cellBold, { flex: 2 }]}
+							>
+								Diurnos
 							</Text>
 							<Text
 								style={[
@@ -809,8 +853,10 @@ const CSAssessmentPDFDocument = ({
 							>
 								{sumLandingDay}
 							</Text>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								Total
+							<Text
+								style={[styles.cell, styles.cellBold, { flex: 2 }]}
+							>
+								Nocturnos
 							</Text>
 							<Text
 								style={[
@@ -820,8 +866,10 @@ const CSAssessmentPDFDocument = ({
 							>
 								{sumLandingNight}
 							</Text>
-							<Text style={[styles.cell, { flex: 2 }]}>
-								Circuito
+							<Text
+								style={[styles.cell, styles.cellBold, { flex: 2 }]}
+							>
+								Total
 							</Text>
 							<Text
 								style={[
@@ -831,6 +879,40 @@ const CSAssessmentPDFDocument = ({
 							>
 								{sumLanding}
 							</Text>
+						</View>
+						<View style={styles.row} wrap={false}>
+							<Text
+								style={[
+									styles.cell,
+									styles.cellPeach,
+									{ flex: 6, textAlign: 'center' },
+								]}
+							>
+								ATERRIZAJES POR TIPO
+							</Text>
+						</View>
+						<View style={styles.row} wrap={false}>
+							{landingTypeSums.map((item, index) => (
+								<Fragment key={`landing-type-${index}`}>
+									<Text
+										style={[
+											styles.cell,
+											styles.cellBold,
+											{ flex: 2 },
+										]}
+									>
+										{item.label}
+									</Text>
+									<Text
+										style={[
+											styles.cell,
+											{ flex: 1, textAlign: 'center' },
+										]}
+									>
+										{item.value}
+									</Text>
+								</Fragment>
+							))}
 						</View>
 						<View style={styles.row} wrap={false}>
 							<Text
@@ -1206,14 +1288,18 @@ const CSAssessmentPDFDocument = ({
 													},
 												]}
 											>
-												{daySigs.fcaa ? (
-													<Image
-														style={styles.sigImage}
-														src={daySigs.fcaa}
-													/>
-												) : (
-													<Text style={styles.noSignature}>—</Text>
-												)}
+											{daySigs.fcaa ? (
+												<Image
+													style={styles.sigImage}
+													src={daySigs.fcaa}
+												/>
+											) : dayNum === lastAssessedDayNum ? (
+												<Text style={styles.noSignature}>—</Text>
+											) : (
+												<Text style={styles.noSignature}>
+													No aplica
+												</Text>
+											)}
 											</View>
 										</View>
 									);

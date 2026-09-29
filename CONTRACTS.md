@@ -42,7 +42,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 | SubjectLesson | `id, subject_id, course_id, name, order, status` |
 | SubjectLessonDays | `id, course_id, subject_id, subject_lesson_id, subject_days_id, day, classTime, status` |
 | CourseStudentAssessment | `id, course_id, student_id, course_student_id, score, approve, date, code, status, finished, comments` |
-| CourseStudentAssessmentDay | `id, course_id, student_id, course_student_id, course_student_assessment_id, day, airport, airstrip, elevation, meteorology, temperature, qnh, wind, weight, flaps, power, seat, takeoff, landing, comments, takeoff_day, takeoff_night, landing_day, landing_night, training_time, check_time, ifr_time, vfr_time, type` — `training_time`/`check_time`/`ifr_time`/`vfr_time` son `FLOAT` (horas decimales, ej. `1.5` = 1h30m) |
+| CourseStudentAssessmentDay | `id, course_id, student_id, course_student_id, course_student_assessment_id, day, airport, airstrip, elevation, meteorology, temperature, qnh, wind, weight, flaps, power, seat, takeoff, landing, comments, takeoff_day, takeoff_night, landing_day, landing_night, landing_precision, landing_non_precision, landing_gps, landing_circuit, landing_visual, training_time, check_time, ifr_time, vfr_time, type` — `training_time`/`check_time`/`ifr_time`/`vfr_time` son `FLOAT` (horas decimales, ej. `1.5` = 1h30m) — `landing_precision`/`landing_non_precision`/`landing_gps`/`landing_circuit`/`landing_visual` son `INTEGER` (contadores de aterrizajes por tipo, nullable) |
 | CourseStudentAssessmentLessonDetail | `id, course_id, student_id, course_student_id, course_student_assessment_id, course_student_assessment_day_id, subject_id, subject_lesson_id, subject_days_id, subject_lesson_days_id, item, score, score_2, score_3` |
 | Test | `id, course_id, min_score, duration, code, status` |
 | QuestionType | `id, value, max_answer, name` |
@@ -415,10 +415,19 @@ arranque usa `alter: false` y no las crea).
 
 ### GET /courseStudentAssessmentDay
 - Query: `CSA_id`, `day`, `course_id`, `student_id`, `course_student_id`, `takeoff_day`,
-  `takeoff_night`, `landing_day`, `landing_night`, `training_time`, `check_time`, `ifr_time`,
+  `takeoff_night`, `landing_day`, `landing_night`, `landing_precision`, `landing_non_precision`,
+  `landing_gps`, `landing_circuit`, `landing_visual`, `training_time`, `check_time`, `ifr_time`,
   `vfr_time`, `type`
-  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas)
-- `200` → CourseStudentAssessmentDay (si no existe el día, lo crea y lo devuelve)
+  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas;
+  `landing_precision`/`landing_non_precision`/`landing_gps`/`landing_circuit`/`landing_visual`:
+  contadores `INTEGER` de aterrizajes por tipo)
+- `200` → CourseStudentAssessmentDay. **Upsert por `(course_student_assessment_id, day)`**:
+  - si el día **no** existe → lo crea con los campos opcionales enviados;
+  - si el día **sí** existe → aplica como **update parcial** únicamente los campos opcionales
+    que vienen en el query; si no viene ninguno, no escribe nada y solo devuelve el registro.
+- Solo se aceptan los campos opcionales listados arriba; cualquier otro query param se ignora.
+- Un valor **string vacío** (`?landing_gps=`) se normaliza a `null` (limpia la columna) en lugar
+  de mandarse a la BD. `0` sí se escribe.
 
 ### POST /createCourseStudentAssessment
 - Body: `course_id` (requerido), `student_id` (requerido), `course_student_id` (requerido)
@@ -432,10 +441,16 @@ arranque usa `alter: false` y no las crea).
 ### PUT /updateCourseStudentAssessmentDay
 - Body: `id` (requerido), `airport`, `airstrip`, `elevation`, `meteorology`, `temperature`, `qnh`,
   `wind`, `weight`, `flaps`, `power`, `seat`, `takeoff`, `landing`, `comments`, `takeoff_day`,
-  `takeoff_night`, `landing_day`, `landing_night`, `training_time`, `check_time`, `ifr_time`,
+  `takeoff_night`, `landing_day`, `landing_night`, `landing_precision`, `landing_non_precision`,
+  `landing_gps`, `landing_circuit`, `landing_visual`, `training_time`, `check_time`, `ifr_time`,
   `vfr_time`, `type`
-  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas)
+  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas;
+  `landing_precision`/`landing_non_precision`/`landing_gps`/`landing_circuit`/`landing_visual`:
+  contadores `INTEGER` de aterrizajes por tipo)
 - `200` → CourseStudentAssessmentDay
+- Update **parcial**: los campos ausentes en el body no se tocan. String vacío → `null`.
+  Si el `id` no existe el repo lanza `Course Student Assessment Day not found` y el controller
+  responde `500` con `'Internal Server Error'`.
 
 ### GET /fetchSubjectAssessment
 - Query: `day`, `course_id`, `course_student_assessment_day_id`

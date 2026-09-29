@@ -9,7 +9,8 @@ import {
 	Controller,
 	UseFormRegister,
 } from 'react-hook-form';
-import { CsadFieldConfig, CsadInputs } from '../../../types/utilities';
+import { CsadFieldConfig, CsadInputs, course } from '../../../types/utilities';
+import { ordinalNounArticle } from '../../../utils/programSize';
 import { proficiencyLabel } from '../../../lib/utils';
 
 /**
@@ -21,8 +22,8 @@ const COUNT_LABELS: Record<
 	'takeoff' | 'landing',
 	{ total: string; day: string; night: string }
 > = {
-	takeoff: { total: 'Precisión', day: 'No precisión', night: 'GPS' },
-	landing: { total: 'Circuito', day: 'Visual', night: 'Total' },
+	takeoff: { total: 'Total', day: 'Diurnos', night: 'Nocturnos' },
+	landing: { total: 'Total', day: 'Diurnos', night: 'Nocturnos' },
 };
 
 const countFields = (prefix: 'takeoff' | 'landing'): CsadFieldConfig[] => {
@@ -43,6 +44,33 @@ const countFields = (prefix: 'takeoff' | 'landing'): CsadFieldConfig[] => {
 		},
 	];
 };
+
+/**
+ * Contadores de aterrizajes por tipo. Los nombres de campo (`landing_*`) son los
+ * de la BD; solo cambia la etiqueta visible.
+ */
+const LANDING_TYPE_FIELDS: CsadFieldConfig[] = [
+	{
+		name: 'landing_precision',
+		label: 'Precisión',
+		valueAsNumber: true,
+		min: 0,
+	},
+	{
+		name: 'landing_non_precision',
+		label: 'No precisión',
+		valueAsNumber: true,
+		min: 0,
+	},
+	{ name: 'landing_gps', label: 'GPS', valueAsNumber: true, min: 0 },
+	{
+		name: 'landing_circuit',
+		label: 'Circuito',
+		valueAsNumber: true,
+		min: 0,
+	},
+	{ name: 'landing_visual', label: 'Visual', valueAsNumber: true, min: 0 },
+];
 
 const TIME_FIELDS: CsadFieldConfig[] = [
 	{
@@ -82,6 +110,7 @@ type Props = {
 	lockedClass: string;
 	lockedLabelClass: string;
 	courseScoreAverage: number | null | undefined;
+	programCourse?: course;
 };
 
 const CardSection = ({
@@ -112,6 +141,7 @@ const CsadOperationsSection = ({
 	lockedClass,
 	lockedLabelClass,
 	courseScoreAverage,
+	programCourse,
 }: Props) => {
 	return (
 		<>
@@ -124,7 +154,7 @@ const CsadOperationsSection = ({
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						Promedio del curso
+						Promedio {ordinalNounArticle(programCourse)}
 					</Typography>
 					<Typography
 						variant="h6"
@@ -141,7 +171,7 @@ const CsadOperationsSection = ({
 				</div>
 			</div>
 			<div className="grid grid-cols-1 gap-6 my-6">
-				<CardSection title="Aterrizajes Global">
+				<CardSection title="Despegues">
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 						{countFields('takeoff').map((field) => (
 							<Input
@@ -167,9 +197,35 @@ const CsadOperationsSection = ({
 						))}
 					</div>
 				</CardSection>
-				<CardSection title="-------">
+				<CardSection title="Aterrizajes">
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 						{countFields('landing').map((field) => (
+							<Input
+								key={field.name}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+								type="number"
+								label={field.label}
+								placeholder={field.label}
+								min={field.min}
+								maxLength={20}
+								className={`${lockedClass} rounded-md p-2 w-full block text-slate-900`}
+								crossOrigin={undefined}
+								shrink={isFormDisabled}
+								labelProps={{ className: lockedLabelClass }}
+								{...register(
+									field.name,
+									field.valueAsNumber
+										? { valueAsNumber: true }
+										: {},
+								)}
+							/>
+						))}
+					</div>
+				</CardSection>
+				<CardSection title="Aterrizajes por tipo">
+					<div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+						{LANDING_TYPE_FIELDS.map((field) => (
 							<Input
 								key={field.name}
 								onPointerEnterCapture={undefined}

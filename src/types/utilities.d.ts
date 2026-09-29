@@ -415,6 +415,11 @@ export type CsadInputs = {
 	takeoff_night: number;
 	landing_day: number;
 	landing_night: number;
+	landing_precision: number;
+	landing_non_precision: number;
+	landing_gps: number;
+	landing_circuit: number;
+	landing_visual: number;
 	training_time: number;
 	check_time: number;
 	ifr_time: number;
@@ -472,6 +477,11 @@ export type courseStudentAssessmentDay = {
     takeoff_night?: number;
     landing_day?: number;
     landing_night?: number;
+    landing_precision?: number;
+    landing_non_precision?: number;
+    landing_gps?: number;
+    landing_circuit?: number;
+    landing_visual?: number;
     training_time?: number;
     check_time?: number;
     ifr_time?: number;

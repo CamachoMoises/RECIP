@@ -21,6 +21,13 @@ export const ordinalField = (
 export const ordinalNoun = (course?: ProgramCourse | null): string =>
 	usesSessions(course) ? 'Sesión' : 'Día';
 
+/**
+ * El artículo varía con el género ("de la sesión" / "del día"), así que no se
+ * puede componer con `ordinalNoun()` + `.toLowerCase()`.
+ */
+export const ordinalNounArticle = (course?: ProgramCourse | null): string =>
+	usesSessions(course) ? 'de la sesión' : 'del día';
+
 export const ordinalNounPlural = (course?: ProgramCourse | null): string =>
 	usesSessions(course) ? 'Sesiones' : 'Días';
 

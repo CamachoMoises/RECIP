@@ -151,6 +151,16 @@ const CSAD_form = ({
 				assessment.courseStudentAssessmentDaySelected?.landing_day,
 			landing_night:
 				assessment.courseStudentAssessmentDaySelected?.landing_night,
+			landing_precision:
+				assessment.courseStudentAssessmentDaySelected?.landing_precision,
+			landing_non_precision:
+				assessment.courseStudentAssessmentDaySelected?.landing_non_precision,
+			landing_gps:
+				assessment.courseStudentAssessmentDaySelected?.landing_gps,
+			landing_circuit:
+				assessment.courseStudentAssessmentDaySelected?.landing_circuit,
+			landing_visual:
+				assessment.courseStudentAssessmentDaySelected?.landing_visual,
 			training_time:
 				assessment.courseStudentAssessmentDaySelected?.training_time,
 			check_time:
@@ -184,6 +194,21 @@ const CSAD_form = ({
 			landing_night: Number.isNaN(data.landing_night)
 				? undefined
 				: Number(data.landing_night),
+			landing_precision: Number.isNaN(data.landing_precision)
+				? undefined
+				: Number(data.landing_precision),
+			landing_non_precision: Number.isNaN(data.landing_non_precision)
+				? undefined
+				: Number(data.landing_non_precision),
+			landing_gps: Number.isNaN(data.landing_gps)
+				? undefined
+				: Number(data.landing_gps),
+			landing_circuit: Number.isNaN(data.landing_circuit)
+				? undefined
+				: Number(data.landing_circuit),
+			landing_visual: Number.isNaN(data.landing_visual)
+				? undefined
+				: Number(data.landing_visual),
 			training_time: Number.isNaN(data.training_time)
 				? undefined
 				: Number(data.training_time),
@@ -293,6 +318,8 @@ const CSAD_form = ({
 
 	const courseScoreAverage =
 		assessment.courseStudentAssessmentSelected?.course_score_average;
+	const programCourse =
+		assessment.courseStudentAssessmentSelected?.course;
 
 	return (
 		<div className="content-center">
@@ -321,6 +348,7 @@ const CSAD_form = ({
 								lockedClass={lockedClass}
 								lockedLabelClass={lockedLabelClass}
 								courseScoreAverage={courseScoreAverage}
+								programCourse={programCourse}
 							/>
 							<div className="flex flex-col py-2">
 								<Textarea
