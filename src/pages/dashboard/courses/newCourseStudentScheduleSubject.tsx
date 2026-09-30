@@ -1,5 +1,9 @@
 import {
 	Button,
+	Dialog,
+	DialogBody,
+	DialogFooter,
+	DialogHeader,
 	Input,
 	Typography,
 } from '@material-tailwind/react';
@@ -12,14 +16,17 @@ import {
 } from '../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
+import { useState } from 'react';
 import { AppDispatch } from '../../../store';
 import {
 	createSchedule,
+	deleteSchedule,
 	setDay,
 	updateSchedule,
 } from '../../../features/courseSlice';
 import moment from 'moment';
-import { Save } from 'lucide-react';
+import { Save, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 type FormInputs = {
 	date: string;
@@ -39,6 +46,7 @@ const NewCourseSubject = ({
 	approve,
 	canViewContent,
 	dateFallback,
+	ordinalName,
 }: {
 	hours: number;
 	subjectItem: subject;
@@ -50,8 +58,12 @@ const NewCourseSubject = ({
 	schedule: schedule | undefined;
 	canViewContent: boolean;
 	dateFallback: string | null;
+	ordinalName: string;
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
+	const [scheduleToDelete, setScheduleToDelete] = useState<schedule | null>(
+		null,
+	);
 
 	// Calculate initial date
 	let initialDate = schedule?.date || course_student?.date;
@@ -117,6 +129,28 @@ const NewCourseSubject = ({
 		if (!SD || student_id < 0) return 'bg-gray-300';
 		if (schedule && SD && student_id > 0) return 'bg-green-100';
 		return '';
+	};
+
+	const handleDeleteSchedule = async () => {
+		if (!scheduleToDelete?.id) return;
+		try {
+			const result = await dispatch(
+				deleteSchedule(scheduleToDelete.id),
+			).unwrap();
+			const attendanceDeleted = result.deleted_attendance_count > 0;
+			const signatureDeleted = result.deleted_signature_count > 0;
+			toast.success(
+				attendanceDeleted
+					? `Horario eliminado. También se eliminó la asistencia de esa sesión${
+							signatureDeleted ? ' y su firma' : ''
+						}.`
+					: 'Horario eliminado',
+			);
+		} catch (error: any) {
+			toast.error(error?.message || 'Error al eliminar el horario');
+		} finally {
+			setScheduleToDelete(null);
+		}
 	};
 
 	return (
@@ -299,24 +333,97 @@ const NewCourseSubject = ({
 								</Typography>
 							)}
 						</div>
-						<div className="flex justify-center align-bottom py-6 px-2 ">
-							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+					<div className="flex justify-center align-end gap-2 py-6 px-2 ">
+						<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+							variant="gradient"
+							color="green"
+							type="submit"
+							disabled={approve || !canViewContent}
+							placeholder={undefined}
+						>
+							<Save size={18} />
+						</Button>
+						{schedule?.id ? (
+							<Button
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
 								variant="gradient"
-								color="green"
-								type="submit"
+								color="red"
+								type="button"
 								disabled={approve || !canViewContent}
 								placeholder={undefined}
+								title="Eliminar horario"
+								onClick={() => setScheduleToDelete(schedule)}
 							>
-								<Save size={18} />
+								<Trash2 size={18} />
 							</Button>
-						</div>
+						) : null}
 					</div>
+				</div>
 
-					<input type="submit" hidden />
-				</form>
-			)}
-		</div>
+				<input type="submit" hidden />
+			</form>
+		)}
+
+		<Dialog
+			open={!!scheduleToDelete}
+			handler={() => setScheduleToDelete(null)}
+			placeholder={undefined}
+			onPointerEnterCapture={undefined}
+			onPointerLeaveCapture={undefined}
+		>
+			<DialogHeader
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				Confirmar eliminación
+			</DialogHeader>
+			<DialogBody
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				¿Está seguro de eliminar el horario de{' '}
+				<strong>{subjectItem.name}</strong> ({ordinalName}) del{' '}
+				<strong>
+					{scheduleToDelete?.date
+						? moment(scheduleToDelete.date).format('DD/MM/YYYY')
+						: '-'}
+				</strong>
+				? También se eliminará la asistencia de esa sesión y su firma, si existen.
+				Esta acción no se puede deshacer.
+			</DialogBody>
+			<DialogFooter
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<Button
+					variant="text"
+					color="gray"
+					onClick={() => setScheduleToDelete(null)}
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+					className="mr-2"
+				>
+					Cancelar
+				</Button>
+				<Button
+					color="red"
+					onClick={handleDeleteSchedule}
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Eliminar
+				</Button>
+			</DialogFooter>
+		</Dialog>
+	</div>
 	);
 };
+
 
 export default NewCourseSubject;

@@ -13,9 +13,14 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
   salvo que se indique lo contrario.
 - **convertTypes**: los strings `"true"`/`"false"`/numéricos del body se convierten a boolean/number.
 - **Keys de respuesta**: son **exactas**. Las claves de modelos anidados corresponden al alias de la
-  asociación Sequelize. Si la asociación NO define `as:`, la clave es el alias por defecto
-  (plural snake_case del nombre del modelo, p. ej. `course_student_assessment_days`). **Preferir
-  siempre `as:` explícito y documentarlo aquí** (ver lección del bug de `CourseStudentAssessmentDays`).
+  asociación Sequelize. Si la asociación NO define `as:`, la clave es el alias por defecto, y ese
+  alias depende del tipo de asociación —**no** es siempre el plural:
+  - `belongsTo` → nombre del modelo en **singular** snake_case (p. ej. `Schedule.belongsTo(SubjectDays)`
+    → **`subject_day`**, no `subject_days` ni `SubjectDays`; `Schedule.belongsTo(Subject)` → `subject`).
+  - `hasMany` → **plural** snake_case (p. ej. `CourseStudent.hasMany(Schedule)` → `schedules`,
+    `hasMany(Attendance)` → `attendances`).
+  - **Preferir siempre `as:` explícito y documentarlo aquí** (ver lección del bug de
+    `CourseStudentAssessmentDays`, que además es singular/plural y casing distinto).
 - **Errores**: salvo que el contrato indique otro formato, los errores son texto plano
   `Internal Server Error` con status `500`. El patrón `res.status(code).json({ message, error })`
   solo se usa donde el contrato lo indica.
@@ -262,6 +267,26 @@ arranque usa `alter: false` y no las crea).
 - Auth: **no**
 - Body: `id` (requerido), `instructor_id`, `date`, `hour`, `classTime`
 - `200` → Schedule (mismo shape que GET /schedule/:id)
+
+### DELETE /schedule/:id
+- Params: `id` (**`schedule.id`**, no `course_student_id`)
+- Auth: sí
+- `200` →
+  ```json
+  { "message": "1 schedule(s) deleted", "deleted_count": 1,
+    "deleted_attendance_count": 1, "deleted_signature_count": 0 }
+  ```
+- `400` JSON `{ error: 'Parámetro id inválido' }`; `404` texto plano `Schedule not found`;
+  `500` texto plano `Internal Server Error ...`
+- **Cascada**: borra el `attendance` de esa sesión y su `attendance_signature` (FK
+  `attendance_signature.attendance_id`, se borra primero para no violar la FK). Todo en una única
+  transacción.
+- El match del attendance es `course_student_id` + `date` del schedule + `day` =
+  `subject_days.day` de `schedule.subject_days_id` (el ordinal día/sesión). **No** se borra por
+  fecha sola: en cursos con `uses_sessions = 1` varias sesiones comparten `date` y solo se
+  elimina la asistencia de la sesión borrada. Si el schedule no tiene `date` o su
+  `subject_days_id` no resuelve, la cascada se omite y ambos contadores quedan en `0`.
+- Sin effects colaterales en otras tablas: ninguna tabla tiene FK a `schedule`.
 
 ---
 
@@ -810,12 +835,17 @@ arranque usa `alter: false` y no las crea).
 
 > Endpoints para el dashboard del instructor. Filtran datos por `instructor_id` a través
 > de la tabla `Schedule` (Instructor → Schedule → CourseStudent → datos).
+>
+> Consecuencia: `DELETE /api/courses/schedule/:id` cambia estos resultados. Si se borra el
+> último schedule de un `course_student`, ese alumno deja de aparecer en los filtros por
+> `instructor_id` de `/api/instructor/*`, `GET /api/courses/coursesStudents`,
+> `/api/course_groups/report/attendance` y `/api/assessment`.
 
 ### GET /schedule/:instructor_id
 - Params: `instructor_id` (requerido)
 - Auth: sí
 - `200` → array de Schedule (order date/hora ASC) con `student` (con `user`), `instructor` (con `user`),
-  `course_student`, `subject_days`, `subject`
+  `course_student`, **`subject_day`**, `subject`
 - `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
 
 ### GET /assessments

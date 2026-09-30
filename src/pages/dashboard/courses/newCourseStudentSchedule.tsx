@@ -840,6 +840,7 @@ const NewCourseStudentSchedule = () => {
 																	dateFallback={
 																		sessionDateFallback
 																	}
+																	ordinalName={day.name}
 																/>
 															</div>
 														);

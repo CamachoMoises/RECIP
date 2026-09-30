@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course, courseStudent, schedule } from '../types/utilities';
-import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
+import { CourseState, course, courseStudent, schedule, scheduleDeleteResult } from '../types/utilities';
+import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 
 const initialState: CourseState = {
@@ -263,6 +263,18 @@ export const updateSchedule = createAsyncThunk<schedule, schedule>(
         try {
             const response = await axiosPutSlice(`api/courses/schedule`, scheduleData);
             return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+// Acción para eliminar una actividad (cascada: attendance + attendance_signature de esa sesión)
+export const deleteSchedule = createAsyncThunk<scheduleDeleteResult, number>(
+    'course/deleteSchedule',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axiosDeleteSlice(`api/courses/schedule/${id}`);
+            return { id, ...response };
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -542,6 +554,19 @@ const courseSlice = createSlice({
                 }
             })
             .addCase(updateSchedule.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción deleteSchedule
+            .addCase(deleteSchedule.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteSchedule.fulfilled, (state, action: PayloadAction<scheduleDeleteResult>) => {
+                state.status = 'succeeded';
+                state.scheduleList = state.scheduleList.filter((schedule) => schedule.id !== action.payload.id);
+            })
+            .addCase(deleteSchedule.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

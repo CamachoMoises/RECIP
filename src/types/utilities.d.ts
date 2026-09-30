@@ -230,6 +230,14 @@ export type schedule = {
     updatedAt?: string;
 }
 
+export type scheduleDeleteResult = {
+    id: number;
+    message: string;
+    deleted_count: number;
+    deleted_attendance_count: number;
+    deleted_signature_count: number;
+}
+
 export interface breadCrumbsItems {
     name: string;
     href: string;
