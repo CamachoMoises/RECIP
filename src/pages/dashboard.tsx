@@ -73,14 +73,14 @@ const Dashboard = () => {
 							<Routes>
 								<Route path="/" element={<RouteGuard><Icons /></RouteGuard>} />
 								<Route path="users" element={<RouteGuard roles={['staff']}><UsersTable /></RouteGuard>} />
-								<Route path="courses" element={<RouteGuard roles={['staff', 'instructor']}><GeneralCourses /></RouteGuard>} />
-								<Route path="my-courses" element={<RouteGuard roles={['student']}><StudentCourses /></RouteGuard>} />
-								<Route path="students" element={<RouteGuard roles={['staff']}><TableStudents /></RouteGuard>} />
-								<Route path="config" element={<RouteGuard roles={['staff']}><GeneralConfig /></RouteGuard>} />
-								<Route
-									path="instructors"
-									element={<RouteGuard roles={['instructor', 'staff']}><TableInstructors /></RouteGuard>}
-								/>
+							<Route path="courses" element={<RouteGuard roles={['staff']}><GeneralCourses /></RouteGuard>} />
+							<Route path="my-courses" element={<RouteGuard roles={['student']}><StudentCourses /></RouteGuard>} />
+							<Route path="students" element={<RouteGuard roles={['staff']}><TableStudents /></RouteGuard>} />
+							<Route path="config" element={<RouteGuard roles={['staff']}><GeneralConfig /></RouteGuard>} />
+							<Route
+								path="instructors"
+								element={<RouteGuard roles={['staff']}><TableInstructors /></RouteGuard>}
+							/>
 								<Route
 									path="assessment"
 									element={<RouteGuard roles={['instructor']}><GeneralAssessment /></RouteGuard>}
@@ -99,10 +99,10 @@ const Dashboard = () => {
 									path="config/testQuestion/:course_id/:test_id/:question_type_id/:test_question_type_id"
 									element={<RouteGuard roles={['staff']}><QuestionTestList /></RouteGuard>}
 								/>
-								<Route
-									path="new_course/:id/:course_id"
-									element={<RouteGuard roles={['staff', 'instructor']}><NewCourse /></RouteGuard>}
-								/>
+							<Route
+								path="new_course/:id/:course_id"
+								element={<RouteGuard roles={['staff']}><NewCourse /></RouteGuard>}
+							/>
 								<Route
 									path="view_course/:id/:course_id"
 									element={<RouteGuard roles={['staff', 'instructor', 'student']}><ViewCourseStudentSchedule /></RouteGuard>}

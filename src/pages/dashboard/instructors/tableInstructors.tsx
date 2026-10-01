@@ -47,7 +47,10 @@ const TableInstructors = () => {
 		(state: RootState) => state.users,
 	);
 
-	const validated = PermissionsValidate(['instructor', 'staff']);
+	// La gestión de instructores es solo de staff; el RouteGuard de
+	// /dashboard/instructors ya lo exige, esto evita que los controles
+	// internes queden habilitados si la página se renderiza por otra vía.
+	const validated = PermissionsValidate(['staff']);
 
 	const filteredInstructors = instructorList?.filter(
 		(instructor) =>

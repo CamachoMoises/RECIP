@@ -53,10 +53,10 @@ src/
 | `/` | Icons | all |
 | `users` | UsersTable | staff |
 | `register` | Register | any |
-| `courses` | GeneralCourses | staff, instructor |
+| `courses` | GeneralCourses | staff |
 | `my-courses` | StudentCourses | student |
 | `students` | TableStudents | staff |
-| `instructors` | TableInstructors | instructor, staff |
+| `instructors` | TableInstructors | staff |
 | `config` | GeneralConfig | staff |
 | `config/course/:id` | CourseDetail | staff |
 | `config/test/:id` | TestList | staff |
@@ -65,7 +65,7 @@ src/
 | `test` | GeneralTest | student, instructor |
 | `new_test/:id/:course_id/:test_id` | NewTest | student, instructor |
 | `review_test/:CST_id/:test_id/:course_id/:CS_id/:user_id` | ReviewTest | student, instructor |
-| `new_course/:id/:course_id` | NewCourse | staff, instructor |
+| `new_course/:id/:course_id` | NewCourse | staff |
 | `view_course/:id/:course_id` | ViewCourseStudentSchedule | staff, instructor, student |
 | `my-instructor-courses` | MyInstructorCourses | instructor |
 | `my-instructor-course/:course_id` | MyInstructorCourseDetail | instructor |

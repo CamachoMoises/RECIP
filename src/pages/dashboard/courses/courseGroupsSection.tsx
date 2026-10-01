@@ -80,7 +80,8 @@ const CourseGroupsSection = ({
 		status,
 		error,
 	} = useSelector((state: RootState) => state.courseGroups);
-	const canManage = PermissionsValidate(['staff', 'instructor']);
+	// Los grupos son parte de la gestión de cursos, que es solo de staff.
+	const canManage = PermissionsValidate(['staff']);
 	const canDeleteSignature = PermissionsValidate(['staff']);
 
 	const [openAccordion, setOpenAccordion] = useState<number | null>(

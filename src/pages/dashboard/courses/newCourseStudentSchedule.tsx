@@ -63,7 +63,8 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 
 const NewCourseStudentSchedule = () => {
-	const canViewContent = PermissionsValidate(['staff', 'instructor']);
+	// Editor de horarios: solo staff (la ruta /dashboard/new_course ya lo exige).
+	const canViewContent = PermissionsValidate(['staff']);
 	const dispatch = useDispatch<AppDispatch>();
 	const { course, subject, user, authUser } = useSelector(
 		(state: RootState) => ({

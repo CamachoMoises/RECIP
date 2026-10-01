@@ -82,7 +82,10 @@ const GeneralCourses = () => {
 			return !cur;
 		});
 	};
-	const canViewContent = PermissionsValidate(['staff', 'instructor']);
+	// La gestión de cursos es solo de staff; el RouteGuard de /dashboard/courses
+	// ya lo exige, esto evita que los controles internos (crear curso, asignar
+	// participantes, editar horarios) queden habilitados por otra vía de render.
+	const canViewContent = PermissionsValidate(['staff']);
 
 	const fetchWithFilter = (page: number = 1) => {
 		dispatch(
