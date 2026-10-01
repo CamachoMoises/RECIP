@@ -105,3 +105,10 @@ src/
 - State: `courseGroupSignatures: courseGroupSignature[]` in `courseGroupSlice`
 - API: `POST /api/course_groups/signature` (`{ course_group_id, day_number, signature }`), `GET /api/course_groups/:id/signatures`
 - UI: Collapsible day dropdowns in accordion body; `savedDays` local Set tracks saved state independently of backend
+
+## Schedule Deletion
+
+- Individual: `deleteSchedule(scheduleId)` → `DELETE /api/courses/schedule/:id` (`schedule.id`, not `course_student_id`)
+- Bulk: `deleteAllCourseStudentSchedules(courseStudentId)` → `DELETE /api/courses/schedule/course-student/:course_student_id`
+- Both cascade to `attendance` + `attendance_signature` of each `(date, day)` pair that had a schedule; the response carries `deleted_count`, `deleted_attendance_count`, `deleted_signature_count`
+- UI: per-session `Trash2` in `newCourseStudentScheduleSubject.tsx`; bulk "Eliminar horarios" in `newCourseStudentSchedule.tsx` (next to Imprimir), both behind a confirm dialog

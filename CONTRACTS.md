@@ -288,6 +288,23 @@ arranque usa `alter: false` y no las crea).
   `subject_days_id` no resuelve, la cascada se omite y ambos contadores quedan en `0`.
 - Sin effects colaterales en otras tablas: ninguna tabla tiene FK a `schedule`.
 
+### DELETE /schedule/course-student/:course_student_id
+- Params: `course_student_id`
+- Auth: sí
+- `200` → mismo shape que `DELETE /schedule/:id`, con `deleted_count` = número de schedules
+  borrados (`0` si el `course_student` existía pero no tenía ninguno programado)
+- `400` JSON `{ error: 'Parámetro course_student_id inválido' }`; `404` texto plano
+  `CourseStudent not found`; `500` texto plano `Internal Server Error ...`
+- Borra **todos** los schedules del `course_student`. Borrado masivo e **irreversible**: el
+  frontend debe pedir confirmación.
+- **Cascada**: misma regla que el endpoint individual, pero aplicada al conjunto. Se borra el
+  `attendance` de **cada par `(date, day)` que tenía schedule** y sus `attendance_signature`, en
+  una única transacción. Los pares se deduplican (`schedule` no tiene constraint de unicidad).
+- **No** se borra el attendance de los días que el alumno asistió pero que nunca estuvo
+  programado: la cascada solo cubre los pares derivados de los schedules existentes.
+- Efecto colateral relevante: este endpoint deja al `course_student` **sin ningún schedule**, así
+  que desaparece de los filtros por `instructor_id` (ver [Instructor](#instructor--apiinstructor)).
+
 ---
 
 ## Course Groups — `/api/course_groups`
@@ -836,9 +853,11 @@ arranque usa `alter: false` y no las crea).
 > Endpoints para el dashboard del instructor. Filtran datos por `instructor_id` a través
 > de la tabla `Schedule` (Instructor → Schedule → CourseStudent → datos).
 >
-> Consecuencia: `DELETE /api/courses/schedule/:id` cambia estos resultados. Si se borra el
-> último schedule de un `course_student`, ese alumno deja de aparecer en los filtros por
-> `instructor_id` de `/api/instructor/*`, `GET /api/courses/coursesStudents`,
+> Consecuencia: `DELETE /api/courses/schedule/:id` y
+> `DELETE /api/courses/schedule/course-student/:course_student_id` cambian estos resultados.
+> Si un `course_student` se queda **sin ningún schedule** —porque se borró el último o porque se
+> borraron todos— ese alumno deja de aparecer en los filtros por `instructor_id` de
+> `/api/instructor/*`, `GET /api/courses/coursesStudents`,
 > `/api/course_groups/report/attendance` y `/api/assessment`.
 
 ### GET /schedule/:instructor_id

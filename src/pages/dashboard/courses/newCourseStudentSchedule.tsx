@@ -5,6 +5,10 @@ import {
 	Button,
 	Card,
 	CardBody,
+	Dialog,
+	DialogBody,
+	DialogFooter,
+	DialogHeader,
 	Input,
 	Radio,
 	Tab,
@@ -23,10 +27,14 @@ import PageTitle from '../../../components/PageTitle';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import moment from 'moment';
-import { Mail, Printer } from 'lucide-react';
+import { Mail, Printer, Trash2 } from 'lucide-react';
 import NewCourseSubject from './newCourseStudentScheduleSubject';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
-import { sendCourseScheduleEmail } from '../../../features/courseSlice';
+import {
+	deleteAllCourseStudentSchedules,
+	sendCourseScheduleEmail,
+} from '../../../features/courseSlice';
+import { fetchAttendanceByCourseStudent } from '../../../features/attendanceSlice';
 import { createEmailHistory } from '../../../features/emailSlice';
 import toast from 'react-hot-toast';
 
@@ -89,8 +97,38 @@ const NewCourseStudentSchedule = () => {
 		null,
 	);
 	const [open, setOpen] = useState<number>(0);
+	const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
 
 	// Handlers
+	const handleDeleteAllSchedules = async () => {
+		const courseStudentId = course.courseStudent?.id;
+		if (!courseStudentId) return;
+		try {
+			const result = await dispatch(
+				deleteAllCourseStudentSchedules(courseStudentId),
+			).unwrap();
+			// El endpoint también borra la asistencia de las sesiones
+			// programadas, así que se refresca para no dejar el store con
+			// asistencias de sesiones que ya no existen.
+			await dispatch(fetchAttendanceByCourseStudent(courseStudentId));
+			const attendanceDeleted = result.deleted_attendance_count > 0;
+			const signatureDeleted = result.deleted_signature_count > 0;
+			toast.success(
+				`${result.deleted_count} horario(s) eliminado(s).${
+					attendanceDeleted
+						? ` También se eliminó la asistencia de ${
+								result.deleted_attendance_count
+							} sesión(es)${signatureDeleted ? ' y sus firmas' : ''}.`
+						: ''
+				}`,
+			);
+		} catch (error: any) {
+			toast.error(error || 'Error al eliminar los horarios');
+		} finally {
+			setConfirmBulkDelete(false);
+		}
+	};
+
 	const handlePrint = async () => {
 		try {
 			const logoBase64 = await getLogoBase64();
@@ -713,9 +751,26 @@ const NewCourseStudentSchedule = () => {
 							</div>
 						</div>
 
-						{/* Action Buttons */}
-						<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 col-span-full justify-end">
-							{canViewContent && (
+{/* Action Buttons */}
+					<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 col-span-full justify-end">
+						{canViewContent && (course.scheduleList?.length ?? 0) > 0 && (
+							<Button
+								size="sm"
+								variant="gradient"
+								color="red"
+								className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+								disabled={course.courseStudent?.approve}
+								onClick={() => setConfirmBulkDelete(true)}
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+								title="Eliminar todos los horarios del alumno"
+							>
+								<Trash2 size={14} />{' '}
+								<span className="hidden sm:inline">Eliminar horarios</span>
+							</Button>
+						)}
+						{canViewContent && (
 								<Button
 									size="sm"
 									className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
@@ -1040,6 +1095,66 @@ const NewCourseStudentSchedule = () => {
 				sending={mailsended}
 				onSend={sendEmail}
 			/>
+			<Dialog
+				open={confirmBulkDelete}
+				handler={() => setConfirmBulkDelete(false)}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Confirmar eliminación
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se eliminarán los{' '}
+					<strong>{course.scheduleList?.length ?? 0}</strong>{' '}
+					horarios de{' '}
+					<strong>
+						{studentSelect
+							? `${studentSelect.name} ${studentSelect.last_name}`
+							: 'este alumno'}
+					</strong>{' '}
+					(course {course.courseStudent?.code}). También se eliminará la
+					asistencia de las sesiones programadas y sus firmas, si existen.
+					La asistencia de días que nunca estuvieron programados se conserva.
+					El alumno dejará de aparecer en los filtros por instructor y en
+					los reportes de asistencia. Esta acción no se puede deshacer.
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						onClick={() => setConfirmBulkDelete(false)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						color="red"
+						onClick={handleDeleteAllSchedules}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						Eliminar
+					</Button>
+				</DialogFooter>
+			</Dialog>
 		</div>
 	);
 };

@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course, courseStudent, schedule, scheduleDeleteResult } from '../types/utilities';
+import { CourseState, course, courseStudent, courseStudentScheduleDeleteResult, schedule, scheduleDeleteResult } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 
@@ -277,6 +277,30 @@ export const deleteSchedule = createAsyncThunk<scheduleDeleteResult, number>(
             return { id, ...response };
         } catch (error: any) {
             return rejectWithValue(error.message);
+        }
+    }
+);
+// Acción para eliminar TODOS los schedules de un course_student.
+// Borrado masivo e irreversible, con cascada a attendance + attendance_signature
+// de cada par (date, day) que tenía schedule. El backend responde con el mismo
+// shape que el borrado individual, así que se ecoa el course_student_id para
+// poder limpiar el store.
+export const deleteAllCourseStudentSchedules = createAsyncThunk<courseStudentScheduleDeleteResult, number>(
+    'course/deleteAllCourseStudentSchedules',
+    async (course_student_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosDeleteSlice(`api/courses/schedule/course-student/${course_student_id}`);
+            return { course_student_id, ...response };
+        } catch (error: any) {
+            // axiosDeleteSlice lanza el AxiosError crudo: `error.message` solo dice
+            // "Request failed with status code 4xx". El backend devuelve el motivo
+            // en el body (p. ej. 'CourseStudent not found'), que es lo útil.
+            const data = error?.response?.data;
+            const message =
+                (typeof data === 'string' ? data : data?.error || data?.message) ||
+                error?.message ||
+                'Error al eliminar los horarios';
+            return rejectWithValue(message);
         }
     }
 );
@@ -567,6 +591,21 @@ const courseSlice = createSlice({
                 state.scheduleList = state.scheduleList.filter((schedule) => schedule.id !== action.payload.id);
             })
             .addCase(deleteSchedule.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción deleteAllCourseStudentSchedules
+            .addCase(deleteAllCourseStudentSchedules.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteAllCourseStudentSchedules.fulfilled, (state, action: PayloadAction<courseStudentScheduleDeleteResult>) => {
+                state.status = 'succeeded';
+                state.scheduleList = state.scheduleList.filter(
+                    (schedule) => schedule.course_student_id !== action.payload.course_student_id
+                );
+            })
+            .addCase(deleteAllCourseStudentSchedules.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

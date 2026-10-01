@@ -238,6 +238,17 @@ export type scheduleDeleteResult = {
     deleted_signature_count: number;
 }
 
+// Borrado masivo de todos los schedules de un course_student.
+// El endpoint no devuelve el id de un schedule, así que se ecoa el
+// course_student_id para poder limpiar el store.
+export type courseStudentScheduleDeleteResult = {
+    course_student_id: number;
+    message: string;
+    deleted_count: number;
+    deleted_attendance_count: number;
+    deleted_signature_count: number;
+}
+
 export interface breadCrumbsItems {
     name: string;
     href: string;
