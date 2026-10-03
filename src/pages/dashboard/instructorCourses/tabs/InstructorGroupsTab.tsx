@@ -12,36 +12,22 @@ import {
 import { ChevronDown, Users, User } from 'lucide-react';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
+import { courseGroup } from '../../../../types/utilities';
+import { GROUPS_PAGE_SIZE } from './instructorShared';
 
+/**
+ * Los grupos se piden **solo por `instructor_id`**: `api/course_groups` ignora
+ * `course_id` cuando viene `instructor_id` (el repository reemplaza el filtro
+ * por la lista de cursos del instructor), así que el recorte por curso se
+ * aplica en cliente.
+ */
 type Props = {
 	instructor_id: number;
-	course_id: number;
+	courseId?: number | null;
 };
 
-type GroupStudent = {
-	id: number;
-	student?: {
-		id: number;
-		user?: {
-			name: string;
-			last_name: string;
-			email: string;
-		};
-	};
-	code: string;
-	status?: boolean;
-};
-
-type GroupItem = {
-	id: number;
-	title: string;
-	code: string;
-	status: boolean;
-	course_students?: GroupStudent[];
-};
-
-const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
-	const [groups, setGroups] = useState<GroupItem[]>([]);
+const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
+	const [groups, setGroups] = useState<courseGroup[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [openAccordion, setOpenAccordion] = useState<number | null>(null);
@@ -53,18 +39,19 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 				return;
 			}
 			setLoading(true);
+			setError(null);
 			try {
-				const params: Record<string, any> = {
-					instructor_id,
-					status: true,
-				};
-				if (course_id) params.course_id = course_id;
 				const { resp, status } = await axiosGetDefault(
 					'api/course_groups',
-					params,
+					{
+						instructor_id,
+						status: true,
+						pageSize: GROUPS_PAGE_SIZE,
+					},
 				);
 				if (status >= 200 && status < 400) {
-					setGroups(resp.data || resp || []);
+					const data = resp.data || resp || [];
+					setGroups(Array.isArray(data) ? data : []);
 				} else {
 					setError('Error al cargar los grupos');
 				}
@@ -75,10 +62,14 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 			}
 		};
 		loadGroups();
-	}, [instructor_id, course_id]);
+	}, [instructor_id]);
 
 	if (loading) return <LoadingPage />;
 	if (error) return <ErrorPage error={error} />;
+
+	const visible = courseId
+		? groups.filter((g) => g.course_id === courseId)
+		: groups;
 
 	return (
 		<Card
@@ -100,10 +91,10 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					Grupos del Curso
+					Grupos
 				</Typography>
 
-				{groups.length === 0 ? (
+				{visible.length === 0 ? (
 					<Typography
 						color="gray"
 						placeholder={undefined}
@@ -114,7 +105,7 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 					</Typography>
 				) : (
 					<div className="flex flex-col gap-2">
-						{groups.map((group) => (
+						{visible.map((group) => (
 							<Accordion
 								key={group.id}
 								open={openAccordion === group.id}
@@ -148,8 +139,12 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 													color="blue-gray"
 													className="text-sm"
 													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
+													onPointerEnterCapture={
+														undefined
+													}
+													onPointerLeaveCapture={
+														undefined
+													}
 												>
 													{group.title}
 												</Typography>
@@ -157,10 +152,17 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 													variant="small"
 													color="gray"
 													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
+													onPointerEnterCapture={
+														undefined
+													}
+													onPointerLeaveCapture={
+														undefined
+													}
 												>
 													Código: {group.code}
+													{group.course?.name
+														? ` · ${group.course.name}`
+														: ''}
 												</Typography>
 											</div>
 										</div>
@@ -189,8 +191,12 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 											color="gray"
 											variant="small"
 											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
+											onPointerEnterCapture={
+												undefined
+											}
+											onPointerLeaveCapture={
+												undefined
+											}
 										>
 											Sin alumnos asignados
 										</Typography>
@@ -201,9 +207,6 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 													<tr>
 														<th className="py-2 px-3 text-left text-xs font-semibold text-gray-500 border-b border-blue-gray-50">
 															Alumno
-														</th>
-														<th className="py-2 px-3 text-left text-xs font-semibold text-gray-500 border-b border-blue-gray-50">
-															Correo
 														</th>
 														<th className="py-2 px-3 text-left text-xs font-semibold text-gray-500 border-b border-blue-gray-50">
 															Código
@@ -225,15 +228,13 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 																		size={14}
 																		className="text-gray-400"
 																	/>
-																	{cs.student?.user
+																	{cs.student
+																		?.user
 																		? `${cs.student.user.name} ${cs.student.user.last_name}`
 																		: '-'}
 																</div>
 															</td>
 															<td className="py-2 px-3 text-sm text-gray-500 border-b border-blue-gray-50">
-																{cs.student?.user?.email ?? '-'}
-															</td>
-															<td className="py-2 px-3 text-sm border-b border-blue-gray-50">
 																{cs.code}
 															</td>
 															<td className="py-2 px-3 text-center border-b border-blue-gray-50">
@@ -241,10 +242,14 @@ const InstructorGroupsTab = ({ instructor_id, course_id }: Props) => {
 																	size="sm"
 																	variant="ghost"
 																	color={
-																		cs.status ? 'green' : 'red'
+																		cs.status
+																			? 'green'
+																			: 'red'
 																	}
 																	value={
-																		cs.status ? 'Activo' : 'Inactivo'
+																		cs.status
+																			? 'Activo'
+																			: 'Inactivo'
 																	}
 																/>
 															</td>

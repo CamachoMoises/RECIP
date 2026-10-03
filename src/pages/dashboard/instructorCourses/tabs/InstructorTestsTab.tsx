@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { axiosGetDefault } from '../../../../services/axios';
 import {
@@ -18,10 +18,18 @@ import {
 } from 'lucide-react';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
+import { course } from '../../../../types/utilities';
+import { buildCourseCatalog } from './instructorShared';
 
+/**
+ * `GET /api/instructor/tests` se consulta **solo por `instructor_id`**: devuelve
+ * los exámenes de todas sus apariciones. `courseId` es un recorte de pantalla
+ * aplicado en cliente.
+ */
 type Props = {
 	instructor_id: number;
-	course_id: number;
+	courses?: course[] | null;
+	courseId?: number | null;
 };
 
 type TestQuestionAnswer = {
@@ -60,6 +68,7 @@ type TestItem = {
 	course_student?: {
 		id: number;
 		code: string;
+		course_id?: number;
 		student?: {
 			id: number;
 			user?: {
@@ -69,7 +78,7 @@ type TestItem = {
 			};
 		};
 		course?: {
-			id: number;
+			id?: number;
 			name: string;
 			course_level?: { name: string };
 			course_type?: { name: string };
@@ -78,7 +87,13 @@ type TestItem = {
 	course_student_test_questions?: TestQuestion[];
 };
 
-const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
+const PAGE_SIZE = 10;
+
+const InstructorTestsTab = ({
+	instructor_id,
+	courses,
+	courseId,
+}: Props) => {
 	const navigate = useNavigate();
 	const [tests, setTests] = useState<TestItem[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -87,49 +102,59 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalItems, setTotalItems] = useState(0);
 	const [expandedId, setExpandedId] = useState<number | null>(null);
-	const pageSize = 10;
 
-	const loadTests = async (page: number = 1) => {
-		if (instructor_id <= 0) {
-			setLoading(false);
-			return;
-		}
-		setLoading(true);
-		try {
-			const params: Record<string, any> = {
-				instructor_id,
-				currentPage: page,
-				pageSize,
-			};
-			if (course_id) params.course_id = course_id;
-			const { resp, status } = await axiosGetDefault(
-				'api/instructor/tests',
-				params,
-			);
-			if (status >= 200 && status < 400) {
-				setTests(resp.data || []);
-				setTotalPages(resp.totalPages || 1);
-				setTotalItems(resp.totalItems || 0);
-				setCurrentPage(resp.currentPage || page);
-			} else {
-				setError('Error al cargar exámenes');
+	const catalog = buildCourseCatalog(courses);
+
+	const loadTests = useCallback(
+		async (page: number = 1) => {
+			if (instructor_id <= 0) {
+				setLoading(false);
+				return;
 			}
-		} catch {
-			setError('Error al conectar con el servidor');
-		} finally {
-			setLoading(false);
-		}
-	};
+			setLoading(true);
+			try {
+				const { resp, status } = await axiosGetDefault(
+					'api/instructor/tests',
+					{
+						instructor_id,
+						currentPage: page,
+						pageSize: PAGE_SIZE,
+					},
+				);
+				if (status >= 200 && status < 400) {
+					setTests((resp.data || []) as TestItem[]);
+					setTotalPages(resp.totalPages || 1);
+					setTotalItems(resp.totalItems || 0);
+					setCurrentPage(resp.currentPage || page);
+				} else {
+					setError('Error al cargar exámenes');
+				}
+			} catch {
+				setError('Error al conectar con el servidor');
+			} finally {
+				setLoading(false);
+			}
+		},
+		[instructor_id],
+	);
 
 	useEffect(() => {
 		loadTests(1);
-	}, [instructor_id, course_id]);
+	}, [loadTests]);
+
+	const courseIdOfItem = (item: TestItem) =>
+		item.course_student?.course_id ?? item.course_student?.course?.id;
+
+	const courseOfItem = (item: TestItem) => {
+		const id = courseIdOfItem(item);
+		return id != null ? catalog.get(id) : undefined;
+	};
 
 	const handleNavigateReview = (item: TestItem) => {
 		const cs = item.course_student;
 		if (!cs || !item.test) return;
 		navigate(
-			`../review_test/${item.id}/${item.test.id}/${cs.course?.id}/${cs.id}/${cs.student?.user?.id}`,
+			`../review_test/${item.id}/${item.test.id}/${courseIdOfItem(item)}/${cs.id}/${cs.student?.user?.id}`,
 		);
 	};
 
@@ -164,6 +189,10 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 	if (loading && tests.length === 0) return <LoadingPage />;
 	if (error) return <ErrorPage error={error} />;
 
+	const visible = courseId
+		? tests.filter((item) => courseIdOfItem(item) === courseId)
+		: tests;
+
 	return (
 		<Card
 			placeholder={undefined}
@@ -187,7 +216,7 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 					Exámenes
 				</Typography>
 
-				{tests.length === 0 ? (
+				{visible.length === 0 ? (
 					<Typography
 						color="gray"
 						placeholder={undefined}
@@ -198,10 +227,13 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 					</Typography>
 				) : (
 					<div className="flex flex-col gap-3">
-						{tests.map((item) => {
+						{visible.map((item) => {
 							const summary = getQuestionSummary(item);
 							const isExpanded = expandedId === item.id;
-							const approved = item.approve ?? item.score >= (item.test?.min_score ?? 0);
+							const approved =
+								item.approve ??
+								item.score >= (item.test?.min_score ?? 0);
+							const courseData = courseOfItem(item);
 
 							return (
 								<div
@@ -239,7 +271,10 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 												</span>
 												<span>
 													<strong>Curso:</strong>{' '}
-													{item.course_student?.course?.name ?? '-'}
+													{item.course_student?.course
+														?.name ??
+														courseData?.name ??
+														'-'}
 												</span>
 												<span>
 													<strong>Fecha:</strong> {item.date}
@@ -331,8 +366,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="small"
 															color="gray"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															Total
 														</Typography>
@@ -340,8 +379,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="h6"
 															color="blue-gray"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															{summary.total}
 														</Typography>
@@ -351,8 +394,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="small"
 															color="gray"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															Respondidas
 														</Typography>
@@ -360,8 +407,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="h6"
 															color="blue-gray"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															{summary.answered}
 														</Typography>
@@ -371,8 +422,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="small"
 															color="gray"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															Correctas
 														</Typography>
@@ -380,8 +435,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="h6"
 															className="text-green-700"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															{summary.correct}
 														</Typography>
@@ -391,8 +450,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="small"
 															color="gray"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															Incorrectas
 														</Typography>
@@ -400,8 +463,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															variant="h6"
 															className="text-red-600"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															{summary.answered -
 																summary.correct}
@@ -417,8 +484,12 @@ const InstructorTestsTab = ({ instructor_id, course_id }: Props) => {
 															color="blue-gray"
 															className="font-semibold mb-2"
 															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
+															onPointerEnterCapture={
+																undefined
+															}
+															onPointerLeaveCapture={
+																undefined
+															}
 														>
 															Por tipo de pregunta
 														</Typography>

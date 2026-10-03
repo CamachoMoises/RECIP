@@ -22,11 +22,6 @@ import {
 	NotebookText,
 	BookOpenCheck,
 } from 'lucide-react';
-import InstructorScheduleTab from './tabs/InstructorScheduleTab';
-import InstructorGroupsTab from './tabs/InstructorGroupsTab';
-import InstructorAttendanceTab from './tabs/InstructorAttendanceTab';
-import InstructorAssessmentTab from './tabs/InstructorAssessmentTab';
-import InstructorTestsTab from './tabs/InstructorTestsTab';
 import {
 	ordinalNounPlural,
 	programSize,
@@ -78,8 +73,6 @@ const MyInstructorCourseDetail = () => {
 	if (status === 'failed') {
 		return <ErrorPage error={error ? error : 'Indefinido'} />;
 	}
-
-	const courseId = parseInt(course_id || '-1');
 
 	const tabs = [
 		{
@@ -150,26 +143,7 @@ const MyInstructorCourseDetail = () => {
 										{courseSelected.name}
 									</Typography>
 								</div>
-								<div>
-									<Typography
-										variant="small"
-										color="gray"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										Código
-									</Typography>
-									<Typography
-										variant="h6"
-										color="blue-gray"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										{courseSelected.code}
-									</Typography>
-								</div>
+
 								<div>
 									<Typography
 										variant="small"
@@ -243,40 +217,6 @@ const MyInstructorCourseDetail = () => {
 						))}
 					</TabsHeader>
 				</Tabs>
-				<div className="mt-4">
-					{activeTab === 'schedule' && (
-						<InstructorScheduleTab
-							instructor_id={instructor_id}
-							course_id={courseId}
-							course={courseSelected}
-						/>
-					)}
-					{activeTab === 'groups' && (
-						<InstructorGroupsTab
-							instructor_id={instructor_id}
-							course_id={courseId}
-						/>
-					)}
-					{activeTab === 'attendance' && (
-						<InstructorAttendanceTab
-							instructor_id={instructor_id}
-							course_id={courseId}
-							course={courseSelected}
-						/>
-					)}
-					{activeTab === 'assessment' && (
-						<InstructorAssessmentTab
-							instructor_id={instructor_id}
-							course_id={courseId}
-						/>
-					)}
-					{activeTab === 'tests' && (
-						<InstructorTestsTab
-							instructor_id={instructor_id}
-							course_id={courseId}
-						/>
-					)}
-				</div>
 			</div>
 		</>
 	);

@@ -1,12 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../store';
 import { useNavigate } from 'react-router-dom';
 import { axiosGetDefault } from '../../../../services/axios';
-import {
-	fetchAssessmentData,
-	createCourseStudentAssessment,
-} from '../../../../features/assessmentSlice';
 import {
 	Button,
 	Card,
@@ -18,30 +14,44 @@ import { ChevronLeft, ChevronRight, NotebookText, Eye } from 'lucide-react';
 import LoadingPage from '../../../../components/LoadingPage';
 import ErrorPage from '../../../../components/ErrorPage';
 import toast from 'react-hot-toast';
+import {
+	fetchAssessmentData,
+	createCourseStudentAssessment,
+} from '../../../../features/assessmentSlice';
+import { buildCourseCatalog } from './instructorShared';
+import { course } from '../../../../types/utilities';
 
+/**
+ * `GET /api/instructor/assessments` se consulta **solo por `instructor_id`**:
+ * devuelve las evaluaciones de todas sus apariciones. `courseId` es un recorte de
+ * pantalla aplicado en cliente.
+ */
 type Props = {
 	instructor_id: number;
-	course_id: number;
+	courses?: course[] | null;
+	courseId?: number | null;
 };
 
 type AssessmentItem = {
-	id: number;
-	score: number;
-	approve: boolean;
+	id?: number;
+	score?: number;
+	approve?: boolean;
 	date: string;
 	code: string;
-	finished: boolean;
+	finished?: boolean;
 	course_student?: {
 		id: number;
+		course_id?: number;
 		student?: {
 			id: number;
 			user?: {
+				id?: number;
 				name: string;
 				last_name: string;
 			};
 		};
 		course?: {
-			id: number;
+			id?: number;
 			name: string;
 			course_level?: { name: string };
 			course_type?: { name: string };
@@ -49,7 +59,13 @@ type AssessmentItem = {
 	};
 };
 
-const InstructorAssessmentTab = ({ instructor_id, course_id }: Props) => {
+const PAGE_SIZE = 10;
+
+const InstructorAssessmentTab = ({
+	instructor_id,
+	courses,
+	courseId,
+}: Props) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const [assessments, setAssessments] = useState<AssessmentItem[]>([]);
@@ -58,66 +74,72 @@ const InstructorAssessmentTab = ({ instructor_id, course_id }: Props) => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalItems, setTotalItems] = useState(0);
-	const pageSize = 10;
 
-	const loadAssessments = async (page: number = 1) => {
-		if (instructor_id <= 0) {
-			setLoading(false);
-			return;
-		}
-		setLoading(true);
-		try {
-			const params: Record<string, any> = {
-				instructor_id,
-				currentPage: page,
-				pageSize,
-			};
-			if (course_id) params.course_id = course_id;
-			const { resp, status } = await axiosGetDefault(
-				'api/instructor/assessments',
-				params,
-			);
-			if (status >= 200 && status < 400) {
-				setAssessments(resp.data || []);
-				setTotalPages(resp.totalPages || 1);
-				setTotalItems(resp.totalItems || 0);
-				setCurrentPage(resp.currentPage || page);
-			} else {
-				setError('Error al cargar evaluaciones');
+	const catalog = buildCourseCatalog(courses);
+
+	const loadAssessments = useCallback(
+		async (page: number = 1) => {
+			if (instructor_id <= 0) {
+				setLoading(false);
+				return;
 			}
-		} catch {
-			setError('Error al conectar con el servidor');
-		} finally {
-			setLoading(false);
-		}
-	};
+			setLoading(true);
+			try {
+				const { resp, status } = await axiosGetDefault(
+					'api/instructor/assessments',
+					{
+						instructor_id,
+						currentPage: page,
+						pageSize: PAGE_SIZE,
+					},
+				);
+				if (status >= 200 && status < 400) {
+					setAssessments((resp.data || []) as AssessmentItem[]);
+					setTotalPages(resp.totalPages || 1);
+					setTotalItems(resp.totalItems || 0);
+					setCurrentPage(resp.currentPage || page);
+				} else {
+					setError('Error al cargar evaluaciones');
+				}
+			} catch {
+				setError('Error al conectar con el servidor');
+			} finally {
+				setLoading(false);
+			}
+		},
+		[instructor_id],
+	);
 
 	useEffect(() => {
 		loadAssessments(1);
-	}, [instructor_id, course_id]);
+	}, [loadAssessments]);
+
+	const courseOf = (item: AssessmentItem) => {
+		const id = item.course_student?.course_id ?? item.course_student?.course?.id;
+		return id != null ? catalog.get(id) : undefined;
+	};
 
 	const handleViewAssessment = async (item: AssessmentItem) => {
 		const cs = item.course_student;
 		if (!cs) return;
+		const courseIdOfItem = cs.course_id ?? cs.course?.id;
 
 		if (item.id) {
 			toast.loading('Cargando evaluación', { id: 'loadAssessment' });
 			try {
 				await dispatch(fetchAssessmentData(item.id)).unwrap();
 				toast.dismiss('loadAssessment');
-				navigate(
-					`../course_assessment/${cs.id}/${cs.course?.id}`,
-				);
+				navigate(`../course_assessment/${cs.id}/${courseIdOfItem}`);
 			} catch {
 				toast.dismiss('loadAssessment');
 				toast.error('Error al cargar la evaluación');
 			}
-		} else if (cs.student?.id && cs.id && cs.course?.id) {
+		} else if (cs.student?.id && cs.id && courseIdOfItem) {
 			toast.loading('Creando evaluación', { id: 'createAssessment' });
 			try {
 				const result = await dispatch(
 					createCourseStudentAssessment({
-						course_id: cs.course.id,
+						course_id: courseIdOfItem,
 						student_id: cs.student.id,
 						course_student_id: cs.id,
 					}),
@@ -126,9 +148,7 @@ const InstructorAssessmentTab = ({ instructor_id, course_id }: Props) => {
 					await dispatch(fetchAssessmentData(result.id)).unwrap();
 				}
 				toast.dismiss('createAssessment');
-				navigate(
-					`../course_assessment/${cs.id}/${cs.course?.id}`,
-				);
+				navigate(`../course_assessment/${cs.id}/${courseIdOfItem}`);
 			} catch {
 				toast.dismiss('createAssessment');
 				toast.error('Error al crear la evaluación');
@@ -138,6 +158,14 @@ const InstructorAssessmentTab = ({ instructor_id, course_id }: Props) => {
 
 	if (loading && assessments.length === 0) return <LoadingPage />;
 	if (error) return <ErrorPage error={error} />;
+
+	const visible = courseId
+		? assessments.filter(
+				(item) =>
+					(item.course_student?.course_id ??
+						item.course_student?.course?.id) === courseId,
+			)
+		: assessments;
 
 	return (
 		<Card
@@ -162,7 +190,7 @@ const InstructorAssessmentTab = ({ instructor_id, course_id }: Props) => {
 					Evaluaciones FSTD / ATD
 				</Typography>
 
-				{assessments.length === 0 ? (
+				{visible.length === 0 ? (
 					<Typography
 						color="gray"
 						placeholder={undefined}
@@ -263,66 +291,71 @@ const InstructorAssessmentTab = ({ instructor_id, course_id }: Props) => {
 								</tr>
 							</thead>
 							<tbody>
-								{assessments.map((item) => (
-									<tr
-										key={item.id}
-										className="hover:bg-blue-gray-50/50 transition-colors"
-									>
-										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm font-medium">
-											{item.course_student?.student?.user
-												? `${item.course_student.student.user.name} ${item.course_student.student.user.last_name}`
-												: '-'}
-										</td>
-										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm">
-											{item.course_student?.course?.name ?? '-'}
-										</td>
-										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm">
-											{item.code}
-										</td>
-										<td className="py-3 px-4 border-b border-blue-gray-50 text-center text-sm font-medium">
-											{item.score?.toFixed(1) ?? '-'}
-										</td>
-										<td className="py-3 px-4 border-b border-blue-gray-50 text-center">
-											<span
-												className={`px-2 py-1 rounded-full text-xs font-medium ${
-													item.approve
-														? 'bg-green-100 text-green-700'
-														: item.finished
-															? 'bg-red-100 text-red-700'
-															: 'bg-yellow-100 text-yellow-700'
-												}`}
-											>
-												{item.finished
-													? item.approve
-														? 'Aprobado'
-														: 'Reprobado'
-													: 'En progreso'}
-											</span>
-										</td>
-										<td className="py-3 px-4 border-b border-blue-gray-50 text-sm text-gray-500">
-											{item.date}
-										</td>
-										<td className="py-3 px-4 border-b border-blue-gray-50 text-center">
-											<IconButton
-												variant="text"
-												color="blue"
-												size="sm"
-												onClick={() =>
-													handleViewAssessment(item)
-												}
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												{item.id ? (
-													<Eye size={18} />
-												) : (
-													<NotebookText size={18} />
-												)}
-											</IconButton>
-										</td>
-									</tr>
-								))}
+								{visible.map((item) => {
+									const courseData = courseOf(item);
+									return (
+										<tr
+											key={item.id ?? item.code}
+											className="hover:bg-blue-gray-50/50 transition-colors"
+										>
+											<td className="py-3 px-4 border-b border-blue-gray-50 text-sm font-medium">
+												{item.course_student?.student?.user
+													? `${item.course_student.student.user.name} ${item.course_student.student.user.last_name}`
+													: '-'}
+											</td>
+											<td className="py-3 px-4 border-b border-blue-gray-50 text-sm">
+												{item.course_student?.course?.name ??
+													courseData?.name ??
+													'-'}
+											</td>
+											<td className="py-3 px-4 border-b border-blue-gray-50 text-sm">
+												{item.code}
+											</td>
+											<td className="py-3 px-4 border-b border-blue-gray-50 text-center text-sm font-medium">
+												{item.score?.toFixed(1) ?? '-'}
+											</td>
+											<td className="py-3 px-4 border-b border-blue-gray-50 text-center">
+												<span
+													className={`px-2 py-1 rounded-full text-xs font-medium ${
+														item.approve
+															? 'bg-green-100 text-green-700'
+															: item.finished
+																? 'bg-red-100 text-red-700'
+																: 'bg-yellow-100 text-yellow-700'
+													}`}
+												>
+													{item.finished
+														? item.approve
+															? 'Aprobado'
+															: 'Reprobado'
+														: 'En progreso'}
+												</span>
+											</td>
+											<td className="py-3 px-4 border-b border-blue-gray-50 text-sm text-gray-500">
+												{item.date}
+											</td>
+											<td className="py-3 px-4 border-b border-blue-gray-50 text-center">
+												<IconButton
+													variant="text"
+													color="blue"
+													size="sm"
+													onClick={() =>
+														handleViewAssessment(item)
+													}
+													placeholder={undefined}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+												>
+													{item.id ? (
+														<Eye size={18} />
+													) : (
+														<NotebookText size={18} />
+													)}
+												</IconButton>
+											</td>
+										</tr>
+									);
+								})}
 							</tbody>
 						</table>
 					</div>

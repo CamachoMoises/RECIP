@@ -3,20 +3,20 @@ import { AppDispatch, RootState } from '../../../store';
 import {
 	breadCrumbsItems,
 	course,
-	courseGroup,
 	courseStudent,
 } from '../../../types/utilities';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import PageTitle from '../../../components/PageTitle';
+import { axiosGetDefault } from '../../../services/axios';
 import {
-	Accordion,
-	AccordionBody,
-	AccordionHeader,
 	Card,
 	CardBody,
 	CardHeader,
+	Tab,
+	Tabs,
+	TabsHeader,
 	Typography,
 	Button,
 	IconButton,
@@ -24,14 +24,24 @@ import {
 import {
 	fetchCoursesStudentsByInstructor,
 	fetchCourses,
-	fetchCourse,
 } from '../../../features/courseSlice';
-import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Eye, PenLine, Users } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { axiosGetDefault } from '../../../services/axios';
-import { PermissionsValidate } from '../../../services/permissionsValidate';
-import InstructorSignaturesPanel from './InstructorSignaturesPanel';
+import {
+	BookOpenCheck,
+	Calendar,
+	ChevronLeft,
+	ChevronRight,
+	ClipboardCheck,
+	Eye,
+	NotebookText,
+	PenLine,
+	Users,
+} from 'lucide-react';
+import InstructorScheduleTab from './tabs/InstructorScheduleTab';
+import InstructorGroupsTab from './tabs/InstructorGroupsTab';
+import InstructorAttendanceTab from './tabs/InstructorAttendanceTab';
+import InstructorAssessmentTab from './tabs/InstructorAssessmentTab';
+import InstructorTestsTab from './tabs/InstructorTestsTab';
+import InstructorSignaturesTab from './tabs/InstructorSignaturesTab';
 
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -41,10 +51,50 @@ const breadCrumbs: breadCrumbsItems[] = [
 ];
 
 const fixedPageSize = 10;
+const COURSE_OPTIONS_PAGE_SIZE = 500;
+
+/**
+ * Tablas del panel del instructor. Todas las consultas van orientadas al
+ * `instructor_id` del usuario logueado: cada endpoint (`/api/instructor/*`,
+ * `/api/course_groups`, `/api/attendance`) resuelve las apariciones del
+ * instructor a través de sus schedules, así que el corte por curso es solo de
+ * pantalla.
+ */
+const tabs = [
+	{
+		label: 'Cronograma',
+		value: 'schedule',
+		icon: Calendar,
+	},
+	{
+		label: 'Grupos',
+		value: 'groups',
+		icon: Users,
+	},
+	{
+		label: 'Asistencia',
+		value: 'attendance',
+		icon: ClipboardCheck,
+	},
+	{
+		label: 'Evaluaciones',
+		value: 'assessment',
+		icon: NotebookText,
+	},
+	{
+		label: 'Exámenes',
+		value: 'tests',
+		icon: BookOpenCheck,
+	},
+	{
+		label: 'Firmas',
+		value: 'signatures',
+		icon: PenLine,
+	},
+];
 
 const MyInstructorCourses = () => {
 	const dispatch = useDispatch<AppDispatch>();
-	const navigate = useNavigate();
 
 	const {
 		courseStudentList,
@@ -63,12 +113,14 @@ const MyInstructorCourses = () => {
 	const instructor_id = userLogged?.instructor?.id ?? -1;
 
 	const [active, setActive] = useState(currentPage);
-	const [courseFilter, setCourseFilter] = useState<string | undefined>(
-		undefined,
-	);
-	const [groups, setGroups] = useState<courseGroup[]>([]);
-	const [openGroup, setOpenGroup] = useState<number | null>(null);
-	const canDeleteSignature = PermissionsValidate(['staff']);
+	const [courseFilter, setCourseFilter] = useState<
+		string | undefined
+	>(undefined);
+	const [activeTab, setActiveTab] = useState('schedule');
+	const [courseOptions, setCourseOptions] = useState<
+		{ id: number; name: string }[]
+	>([]);
+	const tabsRef = useRef<HTMLDivElement>(null);
 
 	const fetchWithFilter = (page: number = 1) => {
 		if (instructor_id <= 0) return;
@@ -82,35 +134,48 @@ const MyInstructorCourses = () => {
 		);
 	};
 
+	/**
+	 * El listado se pagina en el servidor, así que el selector de cursos se
+	 * arma con una consulta aparte de todas las apariciones: si se armara con la
+	 * página visible, al cambiar de página desaparecerían cursos del filtro.
+	 */
+	useEffect(() => {
+		if (instructor_id <= 0) {
+			setCourseOptions([]);
+			return;
+		}
+		let cancelled = false;
+		const loadOptions = async () => {
+			const { resp, status } = await axiosGetDefault(
+				'api/courses/coursesStudents',
+				{ instructor_id, pageSize: COURSE_OPTIONS_PAGE_SIZE },
+			);
+			if (cancelled) return;
+			if (status < 200 || status >= 400) return;
+			const rows: courseStudent[] = resp.data || [];
+			const options: { id: number; name: string }[] = [];
+			rows.forEach((cs) => {
+				const name = cs.course?.name;
+				if (!name || options.some((o) => o.id === cs.course_id))
+					return;
+				options.push({ id: cs.course_id, name });
+			});
+			setCourseOptions(
+				options.sort((a, b) => a.name.localeCompare(b.name)),
+			);
+		};
+		loadOptions().catch(() => undefined);
+		return () => {
+			cancelled = true;
+		};
+	}, [instructor_id]);
+
 	useEffect(() => {
 		dispatch(fetchCourses());
 		if (instructor_id > 0) {
 			fetchWithFilter(1);
 		}
 	}, [dispatch, instructor_id]);
-
-	const loadGroups = async () => {
-		if (instructor_id <= 0) {
-			setGroups([]);
-			return;
-		}
-		try {
-			const { resp, status: resStatus } = await axiosGetDefault(
-				'api/course_groups',
-				{ instructor_id, status: true },
-			);
-			if (resStatus >= 200 && resStatus < 400) {
-				const data = resp.data || resp || [];
-				setGroups(Array.isArray(data) ? data : []);
-			}
-		} catch {
-			toast.error('Error al cargar los grupos');
-		}
-	};
-
-	useEffect(() => {
-		loadGroups();
-	}, [instructor_id]);
 
 	useEffect(() => {
 		setActive(currentPage);
@@ -130,10 +195,22 @@ const MyInstructorCourses = () => {
 		fetchWithFilter(prevPage);
 	};
 
-	const navigateViewCourse = async (CS: courseStudent) => {
-		const courseId = CS.course_id ?? -1;
-		await dispatch(fetchCourse(courseId));
-		navigate(`../my-instructor-course/${courseId}`);
+	const selectedCourseId = courseFilter
+		? parseInt(courseFilter)
+		: null;
+
+	/**
+	 * Antes las tabs vivían en una página aparte por curso; ahora se filtran desde
+	 * acá y se baja el scroll al panel para no perder el contexto del listado.
+	 */
+	const selectCourse = (cs: courseStudent) => {
+		setCourseFilter(String(cs.course_id));
+		setActive(1);
+		setActiveTab('schedule');
+		tabsRef.current?.scrollIntoView({
+			behavior: 'smooth',
+			block: 'start',
+		});
 	};
 
 	const filteredList = courseFilter
@@ -142,27 +219,32 @@ const MyInstructorCourses = () => {
 			)
 		: courseStudentList;
 
-	const resolveGroupCourse = (group: courseGroup): course | null =>
-		group.course ??
-		courseList?.find((c) => c.id === group.course_id) ??
-		null;
+	// `GET /api/courses/` trae el catálogo completo (con `course_type`,
+	// `course_level`, `days`/`sessions`), que es de donde las tabs resuelven el
+	// programa de cada curso sin depender de la página visible del listado.
+	const coursesForTabs = useMemo(
+		() => (courseList ?? []) as course[],
+		[courseList],
+	);
 
-	// Los grupos se firman fuera del listado de pilotos, por eso no se usan los
-	// alumnos: solo los grupos del instructor que el panel puede dibujar.
-	const visibleGroups = (
-		courseFilter
-			? groups.filter((g) => g.course_id === parseInt(courseFilter))
-			: groups
-	).filter((g) => resolveGroupCourse(g)?.course_type?.id !== 2);
-
-	const uniqueCourses = courseStudentList?.reduce<
-		{ id: number; name: string }[]
-	>((acc, cs) => {
-		if (cs.course && !acc.find((c) => c.id === cs.course_id)) {
-			acc.push({ id: cs.course_id, name: cs.course.name });
-		}
-		return acc;
-	}, []);
+	/**
+	 * Si la consulta de opciones todavía no respondió (o falló) se cae al listado
+	 * visible para que el filtro nunca quede vacío sin motivo.
+	 */
+	const uniqueCourses = useMemo(() => {
+		if (courseOptions.length > 0) return courseOptions;
+		return (
+			courseStudentList?.reduce<{ id: number; name: string }[]>(
+				(acc, cs) => {
+					if (cs.course && !acc.find((c) => c.id === cs.course_id)) {
+						acc.push({ id: cs.course_id, name: cs.course.name });
+					}
+					return acc;
+				},
+				[],
+			) ?? []
+		);
+	}, [courseOptions, courseStudentList]);
 
 	if (status === 'loading' && !courseStudentList) {
 		return <LoadingPage />;
@@ -175,10 +257,7 @@ const MyInstructorCourses = () => {
 	if (instructor_id <= 0) {
 		return (
 			<>
-				<PageTitle
-					title="Mis Cursos"
-					breadCrumbs={breadCrumbs}
-				/>
+				<PageTitle title="Mis Cursos" breadCrumbs={breadCrumbs} />
 				<div className="flex flex-col gap-4">
 					<Card
 						placeholder={undefined}
@@ -209,10 +288,7 @@ const MyInstructorCourses = () => {
 
 	return (
 		<>
-			<PageTitle
-				title="Mis Cursos"
-				breadCrumbs={breadCrumbs}
-			/>
+			<PageTitle title="Mis Cursos" breadCrumbs={breadCrumbs} />
 
 			<div className="flex flex-col gap-4">
 				<Card
@@ -227,34 +303,44 @@ const MyInstructorCourses = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-							<Typography
-								variant="h4"
-								color="blue-gray"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Mis Cursos Asignados
-							</Typography>
+							<div>
+								<Typography
+									variant="h4"
+									color="blue-gray"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Mis Cursos Asignados
+								</Typography>
+								<Typography
+									variant="small"
+									color="gray"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{totalItems} apariciones en {uniqueCourses.length}{' '}
+									{uniqueCourses.length === 1 ? 'curso' : 'cursos'}
+								</Typography>
+							</div>
 
-							<div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-								<div className="relative flex w-full md:w-64">
-									<select
-										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-										value={courseFilter ?? ''}
-										onChange={(e) => {
-											setCourseFilter(e.target.value || undefined);
-											setActive(1);
-										}}
-									>
-										<option value="">Todos los cursos</option>
-										{uniqueCourses?.map((c) => (
-											<option key={c.id} value={String(c.id)}>
-												{c.name}
-											</option>
-										))}
-									</select>
-								</div>
+							<div className="relative flex w-full md:w-64">
+								<select
+									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+									value={courseFilter ?? ''}
+									onChange={(e) => {
+										setCourseFilter(e.target.value || undefined);
+										setActive(1);
+									}}
+								>
+									<option value="">Todos los cursos</option>
+									{uniqueCourses?.map((c) => (
+										<option key={c.id} value={String(c.id)}>
+											{c.name}
+										</option>
+									))}
+								</select>
 							</div>
 						</div>
 					</CardBody>
@@ -330,18 +416,7 @@ const MyInstructorCourses = () => {
 												Piloto
 											</Typography>
 										</th>
-										<th className="border-b border-blue-gray-100 bg-blue-gray-50 py-3 px-4 text-left">
-											<Typography
-												variant="small"
-												color="blue-gray"
-												className="font-bold"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Código
-											</Typography>
-										</th>
+
 										<th className="border-b border-blue-gray-100 bg-blue-gray-50 py-3 px-4 text-left">
 											<Typography
 												variant="small"
@@ -412,18 +487,7 @@ const MyInstructorCourses = () => {
 															: 'Sin Piloto'}
 													</Typography>
 												</td>
-												<td className="py-3 px-4 border-b border-blue-gray-50">
-													<Typography
-														variant="small"
-														color="blue-gray"
-														className="font-medium"
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														{cs.code}
-													</Typography>
-												</td>
+
 												<td className="py-3 px-4 border-b border-blue-gray-50">
 													<span
 														className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -437,10 +501,12 @@ const MyInstructorCourses = () => {
 												</td>
 												<td className="py-3 px-4 border-b border-blue-gray-50 text-center">
 													<IconButton
+														disabled
 														variant="text"
 														color="blue"
 														size="sm"
-														onClick={() => navigateViewCourse(cs)}
+														title="Ver el curso en el panel"
+														onClick={() => selectCourse(cs)}
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
@@ -487,7 +553,9 @@ const MyInstructorCourses = () => {
 							registros)
 						</Typography>
 						<div className="flex items-center gap-2">
-							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+							<Button
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
 								variant="text"
 								className="flex items-center gap-2 rounded-full"
 								onClick={prev}
@@ -497,7 +565,9 @@ const MyInstructorCourses = () => {
 								<ChevronLeft strokeWidth={2} className="h-4 w-4" />
 								Prev
 							</Button>
-							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+							<Button
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
 								variant="text"
 								className="flex items-center gap-2 rounded-full"
 								onClick={next}
@@ -511,164 +581,120 @@ const MyInstructorCourses = () => {
 					</div>
 				)}
 
-				<Card
-					placeholder={undefined}
-					onPointerEnterCapture={undefined}
-					onPointerLeaveCapture={undefined}
+				<div
+					ref={tabsRef}
+					className="flex flex-col gap-4 scroll-mt-4"
 				>
-					<CardHeader
-						floated={false}
-						shadow={false}
-						color="transparent"
-						className="m-0 p-4 md:p-6 border-b"
+					<Card
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
 					>
-						<div className="flex items-center gap-2">
-							<PenLine size={18} className="text-blue-500" />
-							<Typography
-								variant="h5"
-								color="blue-gray"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Firmas del instructor
-							</Typography>
-						</div>
-						<Typography
-							variant="small"
-							color="gray"
-							className="mt-1"
+						<CardBody
+							className="p-4 md:p-6"
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							{visibleGroups.length}{' '}
-							{visibleGroups.length === 1
-								? 'grupo disponible'
-								: 'grupos disponibles'}
-						</Typography>
-					</CardHeader>
-
-					<CardBody
-						className="p-4 md:p-6"
-						placeholder={undefined}
-						onPointerEnterCapture={undefined}
-						onPointerLeaveCapture={undefined}
-					>
-						{visibleGroups.length === 0 ? (
-							<Typography
-								color="gray"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								No hay grupos disponibles para firmar
-							</Typography>
-						) : (
-							<div className="flex flex-col gap-2">
-								{visibleGroups.map((group) => {
-									const groupCourse =
-										resolveGroupCourse(group);
-									return (
-										<Accordion
-											key={group.id}
-											open={openGroup === group.id}
-											className="border border-blue-gray-100 rounded-lg"
-											placeholder={undefined}
-											onPointerEnterCapture={
-												undefined
-											}
-											onPointerLeaveCapture={
-												undefined
-											}
-										>
-											<AccordionHeader
-												onClick={() =>
-													setOpenGroup(
-														openGroup === group.id
-															? null
-															: group.id,
-													)
-												}
-												className="px-4 py-3"
-												placeholder={undefined}
-												onPointerEnterCapture={
-													undefined
-												}
-												onPointerLeaveCapture={
-													undefined
-												}
-											>
-												<div className="flex items-center justify-between w-full pr-2">
-													<div className="flex items-center gap-3">
-														<Users
-															size={18}
-															className="text-blue-500"
-														/>
-														<div className="text-left">
-															<Typography
-																variant="h6"
-																color="blue-gray"
-																className="text-sm"
-																placeholder={
-																	undefined
-																}
-																onPointerEnterCapture={
-																	undefined
-																}
-																onPointerLeaveCapture={
-																	undefined
-																}
-															>
-																{group.title} - (
-																{group.code})
-															</Typography>
-															<Typography
-																variant="small"
-																color="gray"
-																placeholder={
-																	undefined
-																}
-																onPointerEnterCapture={
-																	undefined
-																}
-																onPointerLeaveCapture={
-																	undefined
-																}
-															>
-																{groupCourse?.name ?? '-'}
-															</Typography>
-														</div>
-													</div>
-													<ChevronDown
-														size={18}
-														className={`transition-transform ${
-															openGroup === group.id
-																? 'rotate-180'
-																: ''
-														}`}
-													/>
-												</div>
-											</AccordionHeader>
-											<AccordionBody className="px-4 py-2">
-												<InstructorSignaturesPanel
-													groupId={group.id}
-													course={groupCourse}
-													canDelete={
-														canDeleteSignature
-													}
-												/>
-											</AccordionBody>
-										</Accordion>
-									);
-								})}
+							<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+								<Typography
+									variant="h4"
+									color="blue-gray"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									{selectedCourseId
+										? (coursesForTabs.find(
+												(c) => c.id === selectedCourseId,
+											)?.name ?? 'Curso')
+										: 'Todos mis cursos'}
+								</Typography>
+								<Typography
+									variant="small"
+									color="gray"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Las tablas se consultan por instructor; el filtro de
+									curso solo recorta la vista
+								</Typography>
 							</div>
+						</CardBody>
+					</Card>
+
+					{/* `Tabs` de MT v2 no expone onChange (lo reparte al div como handler
+					    DOM). El estado activo real lo cambia el click en cada `Tab`, así
+					    que el onClick de cada tab es lo que mueve `activeTab`. */}
+					<Tabs value={activeTab}>
+						<TabsHeader
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							{tabs.map(({ label, value, icon: Icon }) => (
+								<Tab
+									key={value}
+									value={value}
+									onClick={() => setActiveTab(value)}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									<div className="flex items-center gap-2">
+										<Icon size={16} />
+										<span className="hidden sm:inline">{label}</span>
+									</div>
+								</Tab>
+							))}
+						</TabsHeader>
+					</Tabs>
+
+					<div className="mt-4">
+						{activeTab === 'schedule' && (
+							<InstructorScheduleTab
+								instructor_id={instructor_id}
+								courses={coursesForTabs}
+								courseId={selectedCourseId}
+							/>
 						)}
-					</CardBody>
-				</Card>
+						{activeTab === 'groups' && (
+							<InstructorGroupsTab
+								instructor_id={instructor_id}
+								courseId={selectedCourseId}
+							/>
+						)}
+						{activeTab === 'attendance' && (
+							<InstructorAttendanceTab
+								instructor_id={instructor_id}
+								courses={coursesForTabs}
+								courseId={selectedCourseId}
+							/>
+						)}
+						{activeTab === 'assessment' && (
+							<InstructorAssessmentTab
+								instructor_id={instructor_id}
+								courses={coursesForTabs}
+								courseId={selectedCourseId}
+							/>
+						)}
+						{activeTab === 'tests' && (
+							<InstructorTestsTab
+								instructor_id={instructor_id}
+								courses={coursesForTabs}
+								courseId={selectedCourseId}
+							/>
+						)}
+						{activeTab === 'signatures' && (
+							<InstructorSignaturesTab
+								instructor_id={instructor_id}
+								courses={coursesForTabs}
+								courseId={selectedCourseId}
+							/>
+						)}
+					</div>
+				</div>
 			</div>
 		</>
 	);

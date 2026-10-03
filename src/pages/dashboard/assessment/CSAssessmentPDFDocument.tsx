@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
 	},
 	// --- Firmas ---
 	sigImage: {
-		width: 60,
-		height: 26,
+		width: 72,
+		height: 31.2,
 		objectFit: 'contain',
 	},
 	noSignature: {
@@ -133,6 +133,32 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 });
+
+// --- Utilidad: detectar firmas base64 repetidas ---
+// Retorna un array con las firmas únicas (elimina duplicados exactos por string)
+const getUniqueSignatures = (sigs: {
+	student?: string;
+	instructor?: string;
+	fcaa?: string;
+}): { student?: string; instructor?: string; fcaa?: string } => {
+	const values: string[] = [];
+	const result: typeof sigs = {};
+
+	if (sigs.student && !values.includes(sigs.student)) {
+		values.push(sigs.student);
+		result.student = sigs.student;
+	}
+	if (sigs.instructor && !values.includes(sigs.instructor)) {
+		values.push(sigs.instructor);
+		result.instructor = sigs.instructor;
+	}
+	if (sigs.fcaa && !values.includes(sigs.fcaa)) {
+		values.push(sigs.fcaa);
+		result.fcaa = sigs.fcaa;
+	}
+
+	return result;
+};
 
 const CSAssessmentPDFDocument = ({
 	assessment,
@@ -342,12 +368,16 @@ const CSAssessmentPDFDocument = ({
 		// Modo legacy: cada ordinal es un día de calendario, así que estimar contando
 		// días hábiles desde la fecha base es una aproximación razonable.
 		if (!usesSessions(programCourse)) {
-			return getEvaluationDate(CSA?.date, dayItemId).format(dateFormat);
+			return getEvaluationDate(CSA?.date, dayItemId).format(
+				dateFormat,
+			);
 		}
 		// Modo sesiones: el ordinal NO es un día de calendario, así que estimar un
 		// offset daría una fecha inventada. Se usa la última fecha realmente agendada
 		// y, si no hay ninguna, se deja la celda vacía en vez de mentir.
-		return lastScheduleDate ? moment(lastScheduleDate).format(dateFormat) : '';
+		return lastScheduleDate
+			? moment(lastScheduleDate).format(dateFormat)
+			: '';
 	};
 	const getInstructorInitials = (dayItemId: number) => {
 		const name = scheduleDayInstructor[dayItemId + 1];
@@ -496,7 +526,10 @@ const CSAssessmentPDFDocument = ({
 
 					{days.length > 0 &&
 						dayChunks.map((chunkDays, chunkIndex) => (
-							<View key={`days-chunk-${chunkIndex}`} break={chunkIndex > 0}>
+							<View
+								key={`days-chunk-${chunkIndex}`}
+								break={chunkIndex > 0}
+							>
 								{/* Evaluación Tipo */}
 								<View style={styles.table}>
 									<View style={styles.row} wrap={false}>
@@ -576,7 +609,9 @@ const CSAssessmentPDFDocument = ({
 											Periodo de Entrenamiento
 										</Text>
 										<Text style={[styles.cell, { flex: 4 }]}>
-											<Text style={styles.cellBold}>Fecha de la sesión:</Text>{' '}
+											<Text style={styles.cellBold}>
+												Fecha de la sesión:
+											</Text>{' '}
 											{chunkDays.map((dayItem, index) => (
 												<Text key={index}>
 													{getDayDate(dayItem.id)}
@@ -769,11 +804,11 @@ const CSAssessmentPDFDocument = ({
 													{dayAverage != null ? dayAverage : ''}
 												</Text>
 											);
-									})}
+										})}
+									</View>
 								</View>
 							</View>
-						</View>
-					))}
+						))}
 					{/* Resumen de despegues y aterrizajes */}
 					<View style={styles.table} break>
 						<View style={styles.row} wrap={false}>
@@ -781,7 +816,11 @@ const CSAssessmentPDFDocument = ({
 								style={[
 									styles.cell,
 									styles.cellPeach,
-									{ flex: 6, textAlign: 'center' },
+									{
+										flex: 6,
+										textAlign: 'center',
+										backgroundColor: '#c6d9f1',
+									},
 								]}
 							>
 								DESPEGUES
@@ -885,10 +924,14 @@ const CSAssessmentPDFDocument = ({
 								style={[
 									styles.cell,
 									styles.cellPeach,
-									{ flex: 6, textAlign: 'center' },
+									{
+										flex: 6,
+										textAlign: 'center',
+										backgroundColor: '#c4bd97',
+									},
 								]}
 							>
-								ATERRIZAJES POR TIPO
+								TIPOS DE APROXIMACIÓN
 							</Text>
 						</View>
 						<View style={styles.row} wrap={false}>
@@ -978,7 +1021,7 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellPeach,
+									styles.cellHeader,
 									{ flex: 2, textAlign: 'center' },
 								]}
 							>
@@ -987,7 +1030,7 @@ const CSAssessmentPDFDocument = ({
 							<Text
 								style={[
 									styles.cell,
-									styles.cellPeach,
+									styles.cellHeader,
 									{ flex: 1, textAlign: 'center' },
 								]}
 							>
@@ -1225,7 +1268,25 @@ const CSAssessmentPDFDocument = ({
 								</View>
 								{evaluatedDays.map((csad, index) => {
 									const dayNum = Number(csad.day);
-									const daySigs = signatures?.[dayNum] ?? {};
+									const daySigs = getUniqueSignatures(
+										signatures?.[dayNum] ?? {},
+									);
+									(
+										['student', 'instructor', 'fcaa'] as const
+									).forEach((role) => {
+										const data = daySigs[role];
+										if (!data) return;
+										const img = new window.Image();
+										img.onload = () =>
+											console.log(
+												`day ${dayNum} - ${role}`,
+												img.naturalWidth,
+												img.naturalHeight,
+												data.slice(0, 30),
+											);
+										img.src = data;
+									});
+									console.log(daySigs);
 									return (
 										<View
 											key={`firmas-${index}`}
@@ -1288,18 +1349,18 @@ const CSAssessmentPDFDocument = ({
 													},
 												]}
 											>
-											{daySigs.fcaa ? (
-												<Image
-													style={styles.sigImage}
-													src={daySigs.fcaa}
-												/>
-											) : dayNum === lastAssessedDayNum ? (
-												<Text style={styles.noSignature}>—</Text>
-											) : (
-												<Text style={styles.noSignature}>
-													No aplica
-												</Text>
-											)}
+												{daySigs.fcaa ? (
+													<Image
+														style={styles.sigImage}
+														src={daySigs.fcaa}
+													/>
+												) : dayNum === lastAssessedDayNum ? (
+													<Text style={styles.noSignature}>—</Text>
+												) : (
+													<Text style={styles.noSignature}>
+														No aplica
+													</Text>
+												)}
 											</View>
 										</View>
 									);

@@ -68,7 +68,6 @@ src/
 | `new_course/:id/:course_id` | NewCourse | staff |
 | `view_course/:id/:course_id` | ViewCourseStudentSchedule | staff, instructor, student |
 | `my-instructor-courses` | MyInstructorCourses | instructor |
-| `my-instructor-course/:course_id` | MyInstructorCourseDetail | instructor |
 | `reports` | Reports | super_user |
 
 ## Key Patterns
@@ -113,12 +112,27 @@ src/
 - Both cascade to `attendance` + `attendance_signature` of each `(date, day)` pair that had a schedule; the response carries `deleted_count`, `deleted_attendance_count`, `deleted_signature_count`
 - UI: per-session `Trash2` in `newCourseStudentScheduleSubject.tsx`; bulk "Eliminar horarios" in `newCourseStudentSchedule.tsx` (next to Imprimir), both behind a confirm dialog
 
+## Instructor Dashboard (`my-instructor-courses`)
+
+Single general page for the instructor. There is **no** per-course detail route anymore: the tabs live inside `myInstructorCourses.tsx` and every request is oriented to the logged-in instructor, not to a `course_id`:
+
+- `tabs/instructorShared.ts` — shared types/helpers (`courseIdOfSchedule`, `hasRealSession`, `buildSessions`, `buildRoster`, `buildCourseCatalog`, `draftKeyOf`, `sessionKey`, `isTheoreticalCourse`, `GROUPS_PAGE_SIZE`)
+- Every tab takes `{ instructor_id, courses?, courseId? }`. `instructor_id` is the only thing sent to the API; `courseId` is a **client-side screen filter** coming from the course selector at the top. `courses` is the full catalog (`GET /api/courses/` from `fetchCourses()`) used to resolve each row's program (`days`/`sessions`) and `course_type`
+- `InstructorScheduleTab` → `GET /api/instructor/schedule/:instructor_id`, grouped by course and then by `subject_day.day`
+- `InstructorGroupsTab` / `InstructorSignaturesTab` → `GET /api/course_groups?instructor_id` (`pageSize: 500`). Never send `course_id` together with `instructor_id`: the repository replaces the filter with the instructor's course list
+- `InstructorAttendanceTab` → builds one `InstructorAttendanceCourseSection` per course (see below)
+- `InstructorAssessmentTab` → `GET /api/instructor/assessments?instructor_id`
+- `InstructorTestsTab` → `GET /api/instructor/tests?instructor_id`
+- The table row action (`Eye`) does not navigate: it selects that course in the filter and switches to the "Cronograma" tab
+
 ## Instructor Attendance Marking
 
-- `tabs/InstructorAttendanceTab.tsx` (route `my-instructor-course/:course_id`, tab "Asistencia") lets instructors mark attendance for every student scheduled in the course; the student signature is **not** managed here (that flow lives in `courses/viewCourseStudentSchedule.tsx`)
-- Roster: derived from `GET api/instructor/schedule/:instructor_id` filtered **strictly** by `course_student.course_id === course_id` (the endpoint returns the instructor's whole schedule and always includes `course_student`, so rows without `course_id` are dropped). Do **not** use `api/course_groups?instructor_id&course_id`: the repository overwrites the `course_id` filter with the instructor's course list, which leaks other courses' students. There are no group/day filters
-- Sessions: same schedule payload, grouped by `YYYY-MM-DD#day`; the ordinal comes from `subject_day.day` with a fallback lookup on `subject_days_id` via `fetchSubjects`. Only rows with a **real session** reach the accordion, the roster or the history: `subject_day.status && subject.status` must be true and the ordinal must fall inside the program (`isWithinProgram` → `1..days`, or `1..sessions`). This mirrors `viewCourseStudentSchedule.tsx` and hides two kinds of phantom days that exist in the data: `subject_days` rows deactivated (`status = 0`) and `subject_days.day` greater than the course size (e.g. day 7 on a 6-day course)
+- `tabs/InstructorAttendanceTab.tsx` (tab "Asistencia") loads everything by `instructor_id` and renders one `InstructorAttendanceCourseSection` per course, since the ordinal (día/sesión), the program size and the roster are per course; mixing them in one grid would mark the wrong session
+- Roster: derived from `GET api/instructor/schedule/:instructor_id` and split by course. The course of a row comes from `course_student.course_id`, with `subject_day.course_id` / `subject.course_id` as fallback. Do **not** use `api/course_groups?instructor_id&course_id`: the repository overwrites the `course_id` filter with the instructor's course list, which leaks other courses' students
+- Subjects: `fetchSubjects` is dispatched once per **distinct** course in the schedule (`GET /api/subjects/course/:id` is per course) so the `subject_days_id` fallback can resolve the ordinal
+- Sessions: grouped by `courseId#YYYY-MM-DD#day`; the ordinal comes from `subject_day.day` with a fallback lookup on `subject_days_id`. Only rows with a **real session** reach the accordion, the roster or the history: `subject_day.status && subject.status` must be true and the ordinal must fall inside the program (`isWithinProgram` → `1..days`, or `1..sessions`). This mirrors `viewCourseStudentSchedule.tsx` and hides two kinds of phantom days that exist in the data: `subject_days` rows deactivated (`status = 0`) and `subject_days.day` greater than the course size (e.g. day 7 on a 6-day course)
 - Existing records: `GET api/attendance?instructor_id` returns the attendance of **all** the instructor's courses, so every page is fetched (`pageSize: 500`, max 20 pages) and both the marking grid and the read-only "Registro de Asistencia" accordion are filtered client-side by the roster's `course_student_id`, with the accordion paginating client-side. The list response has no nested `student`/`course`, so name/code are resolved from the local roster map
-- Draft key is `course_student_id#YYYY-MM-DD#day` (date alone collides when several sessions share a date)
+- Draft key is `course_student_id#YYYY-MM-DD#day` (date alone collides when several sessions share a date); session keys carry the `courseId` prefix because the same day/session repeats across courses
+- `attendances` is state in the tab but **not** an effect dependency: the sections read it from props and refresh through `onSaved={loadAttendances}`, otherwise the effect would re-trigger itself on every save
 - Writes reuse `createAttendance`/`updateAttendance` with `usesSessions(course) ? { day, session_number: day } : { day }`: the backend validates `day` as required and resolves `session_number ?? day`, so both keys must be sent for session-based courses
-- Courses with `course_type.id === 2` (theoretical) do not show the editor, same rule as `viewCourseStudentSchedule.tsx`
+- Courses with `course_type.id === 2` (theoretical) are dropped entirely, same rule as `viewCourseStudentSchedule.tsx`
