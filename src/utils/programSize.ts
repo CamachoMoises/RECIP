@@ -36,6 +36,20 @@ export const ordinalLabel = (
 	n: number,
 ): string => `${ordinalNoun(course)} ${n}`;
 
+/**
+ * El ordinal tiene que caber en el programa del curso (`days`, o `sessions`
+ * cuando el curso es por sesiones).
+ */
+export const isWithinProgram = (
+	course: ProgramCourse | null | undefined,
+	n: number,
+): boolean => {
+	const size = programSize(course);
+	// Sin programa conocido no se descarta nada: el filtro no debe ocultar todo.
+	if (size <= 0) return true;
+	return n >= 1 && n <= size;
+};
+
 export const programOrdinals = (course: ProgramCourse | null | undefined) =>
 	Array.from({ length: programSize(course) }, (_, i) => ({
 		id: i,

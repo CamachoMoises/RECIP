@@ -710,13 +710,15 @@ type attendanceOrdinalBase = {
 }
 
 /**
- * El ordinal del horario va en la columna `day`, pero el nombre del campo de entrada
- * depende del modo del curso: `day` en legacy, `session_number` cuando `uses_sessions`.
+ * El ordinal del horario va siempre en la columna `day`, y el backend exige `day`
+ * en el alta (Joi `required`). Cuando el curso usa `uses_sessions` se manda además
+ * `session_number` como alias, porque el repositorio resuelve `session_number ?? day`.
  * `session_number` es solo alias de entrada; el backend nunca lo devuelve en respuestas.
  */
-export type attendanceOrdinalPayload =
-    | ({ day: number; session_number?: never } & attendanceOrdinalBase)
-    | ({ session_number: number; day?: never } & attendanceOrdinalBase);
+export type attendanceOrdinalPayload = {
+    day: number;
+    session_number?: number;
+} & attendanceOrdinalBase;
 
 export type attendanceCreatePayload = attendanceOrdinalPayload;
 

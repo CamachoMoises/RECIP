@@ -361,16 +361,14 @@ const ViewCourseStudentSchedule = () => {
 	};
 
 	/**
-	 * El nombre del campo del ordinal depende del modo del curso: `day` en legacy,
-	 * `session_number` cuando `uses_sessions`. El backend guarda el valor en
-	 * `attendance.day` en ambos casos.
+	 * `day` es obligatorio en el alta (el backend lo valida), y con cursos por
+	 * sesiones se manda además `session_number` como alias: el repositorio
+	 * resuelve `session_number ?? day` y guarda el ordinal en `attendance.day`.
 	 */
-	const ordinalPayload = (
-		day: number,
-	): { day: number; session_number?: never } | {
-		session_number: number;
-		day?: never;
-	} => (usesSessions(course.courseSelected) ? { session_number: day } : { day });
+	const ordinalPayload = (day: number): { day: number; session_number?: number } =>
+		usesSessions(course.courseSelected)
+			? { day, session_number: day }
+			: { day };
 
 	const handleSaveAttendance = async (
 		scheduleDate: string,

@@ -57,6 +57,12 @@ const MyInstructorCourseDetail = () => {
 	);
 
 	const instructor_id = userLogged?.instructor?.id ?? -1;
+	console.log(
+		'instructor ID',
+		instructor_id,
+		'course selected',
+		courseSelected,
+	);
 
 	useEffect(() => {
 		const id = parseInt(course_id || '-1');
@@ -202,7 +208,8 @@ const MyInstructorCourseDetail = () => {
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										{courseSelected.hours}h / {programSize(courseSelected)}d
+										{courseSelected.hours}h /{' '}
+										{programSize(courseSelected)}d
 									</Typography>
 								</div>
 							</div>
@@ -210,7 +217,10 @@ const MyInstructorCourseDetail = () => {
 					</Card>
 				)}
 
-				<Tabs value={activeTab} onChange={(val: string | number) => setActiveTab(String(val))}>
+				{/* `Tabs` de MT v2 no expone onChange (lo reparte al div como handler
+				    DOM). El estado activo real lo cambia el click en cada `Tab`, así
+				    que el onClick de cada tab es lo que mueve `activeTab`. */}
+				<Tabs value={activeTab}>
 					<TabsHeader
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
@@ -220,6 +230,7 @@ const MyInstructorCourseDetail = () => {
 							<Tab
 								key={value}
 								value={value}
+								onClick={() => setActiveTab(value)}
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -230,7 +241,7 @@ const MyInstructorCourseDetail = () => {
 								</div>
 							</Tab>
 						))}
-				</TabsHeader>
+					</TabsHeader>
 				</Tabs>
 				<div className="mt-4">
 					{activeTab === 'schedule' && (
