@@ -7,7 +7,7 @@ import { breadCrumbsItems, courseStudent } from '../../../types/utilities';
 import PageTitle from '../../../components/PageTitle';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { fetchMyCoursesStudents } from '../../../features/courseSlice';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
@@ -48,24 +48,27 @@ const StudentCourses = () => {
 	const [active, setActive] = useState(1);
 	const fixedPageSize = 5;
 
-	const fetchWithFilter = (page: number = 1) => {
-		if (student_id) {
-			dispatch(
-				fetchMyCoursesStudents({
-					currentPage: page,
-					pageSize: fixedPageSize,
-					student_id,
-					status: true,
-				}),
-			);
-		}
-	};
+	const fetchWithFilter = useCallback(
+		(page: number = 1) => {
+			if (student_id) {
+				dispatch(
+					fetchMyCoursesStudents({
+						currentPage: page,
+						pageSize: fixedPageSize,
+						student_id,
+						status: true,
+					}),
+				);
+			}
+		},
+		[dispatch, student_id],
+	);
 
 	useEffect(() => {
 		if (student_id) {
 			fetchWithFilter(1);
 		}
-	}, [dispatch, student_id]);
+	}, [fetchWithFilter, student_id]);
 
 	useEffect(() => {
 		setActive(currentPage);

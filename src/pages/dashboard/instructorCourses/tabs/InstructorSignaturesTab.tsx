@@ -29,21 +29,21 @@ import {
 type Props = {
 	instructor_id: number;
 	courses?: course[] | null;
-	courseId?: number | null;
 };
 
 const InstructorSignaturesTab = ({
 	instructor_id,
 	courses,
-	courseId,
 }: Props) => {
-	const [groups, setGroups] = useState<{
-		id: number;
-		title: string;
-		code: string;
-		course_id: number | null;
-		course?: course | null;
-	}[]>([]);
+	const [groups, setGroups] = useState<
+		{
+			id: number;
+			title: string;
+			code: string;
+			course_id: number | null;
+			course?: course | null;
+		}[]
+	>([]);
 	const [openGroup, setOpenGroup] = useState<number | null>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -57,11 +57,14 @@ const InstructorSignaturesTab = ({
 			return;
 		}
 		try {
-			const { resp, status } = await axiosGetDefault('api/course_groups', {
-				instructor_id,
-				status: true,
-				pageSize: GROUPS_PAGE_SIZE,
-			});
+			const { resp, status } = await axiosGetDefault(
+				'api/course_groups',
+				{
+					instructor_id,
+					status: true,
+					pageSize: GROUPS_PAGE_SIZE,
+				},
+			);
 			if (status >= 200 && status < 400) {
 				const data = resp.data || resp || [];
 				setGroups(Array.isArray(data) ? data : []);
@@ -86,9 +89,9 @@ const InstructorSignaturesTab = ({
 
 	// Los grupos se firman fuera del listado de pilotos, por eso no se usan los
 	// alumnos: solo los grupos del instructor que el panel puede dibujar.
-	const visibleGroups = groups
-		.filter((g) => (courseId ? g.course_id === courseId : true))
-		.filter((g) => !isTheoreticalCourse(resolveGroupCourse(g)));
+	const visibleGroups = groups.filter(
+		(g) => !isTheoreticalCourse(resolveGroupCourse(g)),
+	);
 
 	return (
 		<Card
@@ -163,22 +166,15 @@ const InstructorSignaturesTab = ({
 									>
 										<div className="flex items-center justify-between w-full pr-2">
 											<div className="flex items-center gap-3">
-												<Users
-													size={18}
-													className="text-blue-500"
-												/>
+												<Users size={18} className="text-blue-500" />
 												<div className="text-left">
 													<Typography
 														variant="h6"
 														color="blue-gray"
 														className="text-sm"
 														placeholder={undefined}
-														onPointerEnterCapture={
-															undefined
-														}
-														onPointerLeaveCapture={
-															undefined
-														}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
 													>
 														{group.title} - ({group.code})
 													</Typography>
@@ -186,12 +182,8 @@ const InstructorSignaturesTab = ({
 														variant="small"
 														color="gray"
 														placeholder={undefined}
-														onPointerEnterCapture={
-															undefined
-														}
-														onPointerLeaveCapture={
-															undefined
-														}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
 													>
 														{groupCourse?.name ?? '-'}
 													</Typography>
@@ -200,9 +192,7 @@ const InstructorSignaturesTab = ({
 											<ChevronDown
 												size={18}
 												className={`transition-transform ${
-													openGroup === group.id
-														? 'rotate-180'
-														: ''
+													openGroup === group.id ? 'rotate-180' : ''
 												}`}
 											/>
 										</div>

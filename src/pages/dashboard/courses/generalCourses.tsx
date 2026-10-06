@@ -13,7 +13,7 @@ import {
 import PageTitle from '../../../components/PageTitle';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
 	createCourseStudent,
 	fetchCourse,
@@ -87,28 +87,31 @@ const GeneralCourses = () => {
 	// participantes, editar horarios) queden habilitados por otra vía de render.
 	const canViewContent = PermissionsValidate(['staff']);
 
-	const fetchWithFilter = (page: number = 1) => {
-		dispatch(
-			fetchCoursesStudents({
-				currentPage: page,
-				pageSize: fixedPageSize,
-				status: statusFilter,
-				course_id: courseFilter ? parseInt(courseFilter) : undefined,
-			}),
-		);
-	};
+	const fixedPageSize = 5;
+	const [active, setActive] = useState(1);
+
+	const fetchWithFilter = useCallback(
+		(page: number = 1) => {
+			dispatch(
+				fetchCoursesStudents({
+					currentPage: page,
+					pageSize: fixedPageSize,
+					status: statusFilter,
+					course_id: courseFilter ? parseInt(courseFilter) : undefined,
+				}),
+			);
+		},
+		[dispatch, statusFilter, courseFilter, fixedPageSize],
+	);
 
 	useEffect(() => {
 		dispatch(fetchCourses());
 		fetchWithFilter(1);
-	}, [dispatch, statusFilter, courseFilter]);
-	const [active, setActive] = useState(1);
+	}, [dispatch, fetchWithFilter]);
 
 	useEffect(() => {
 		setActive(currentPage);
 	}, [currentPage]);
-
-	const fixedPageSize = 5;
 	const getItemProps = (index: number) =>
 		({
 			variant: active === index ? 'filled' : 'text',

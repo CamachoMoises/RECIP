@@ -27,7 +27,11 @@ import {
 import moment from 'moment';
 import toast from 'react-hot-toast';
 import { course } from '../../../../types/utilities';
-import { ordinalLabel, ordinalNoun, usesSessions } from '../../../../utils/programSize';
+import {
+	ordinalLabel,
+	ordinalNoun,
+	usesSessions,
+} from '../../../../utils/programSize';
 import {
 	createAttendance,
 	updateAttendance,
@@ -83,11 +87,6 @@ const statusColorById = (
 	statusId: number | undefined,
 ) => getStatusColor(statusList.find((s) => s.id === statusId)?.name);
 
-/**
- * Cada curso del instructor se dibuja como una sección independiente: el
- * ordinal (día o sesión), el programa y el roster son por curso, así que una
- * sola tabla mezclando cursos marcaría la sesión equivocada.
- */
 const InstructorAttendanceCourseSection = ({
 	courseId,
 	course,
@@ -99,10 +98,13 @@ const InstructorAttendanceCourseSection = ({
 	const dispatch = useDispatch<AppDispatch>();
 	const canEditAttendance = PermissionsValidate(['instructor']);
 	const statusList = useSelector(
-		(state: RootState) => state.attendance.attendanceStatusList as AttendanceStatus[],
+		(state: RootState) =>
+			state.attendance.attendanceStatusList as AttendanceStatus[],
 	);
 
-	const [drafts, setDrafts] = useState<Record<string, AttendanceDraft>>({});
+	const [drafts, setDrafts] = useState<
+		Record<string, AttendanceDraft>
+	>({});
 	const [editingKey, setEditingKey] = useState<string | null>(null);
 	const [savingKey, setSavingKey] = useState<string | null>(null);
 	const [historyPage, setHistoryPage] = useState(1);
@@ -110,7 +112,8 @@ const InstructorAttendanceCourseSection = ({
 	const presenteStatus = statusList.find(
 		(s) => s.name.trim().toLowerCase() === 'presente',
 	);
-	const presenteStatusId = presenteStatus?.id ?? DEFAULT_ATTENDANCE_STATUS;
+	const presenteStatusId =
+		presenteStatus?.id ?? DEFAULT_ATTENDANCE_STATUS;
 	const presenteStatusName = presenteStatus?.name ?? 'Presente';
 
 	const rosterIds = useMemo(
@@ -142,7 +145,10 @@ const InstructorAttendanceCourseSection = ({
 	}, [rosterAttendances, historyPage]);
 
 	const historyTotal = rosterAttendances.length;
-	const historyPages = Math.max(1, Math.ceil(historyTotal / HISTORY_PAGE_SIZE));
+	const historyPages = Math.max(
+		1,
+		Math.ceil(historyTotal / HISTORY_PAGE_SIZE),
+	);
 
 	useEffect(() => {
 		if (historyPage > historyPages) setHistoryPage(historyPages);
@@ -166,7 +172,10 @@ const InstructorAttendanceCourseSection = ({
 	);
 
 	const getDraft = (key: string): AttendanceDraft =>
-		drafts[key] ?? { attendance_status_id: presenteStatusId, comments: '' };
+		drafts[key] ?? {
+			attendance_status_id: presenteStatusId,
+			comments: '',
+		};
 
 	const setDraft = (key: string, patch: Partial<AttendanceDraft>) =>
 		setDrafts((prev) => ({
@@ -197,8 +206,9 @@ const InstructorAttendanceCourseSection = ({
 	const [openSessions, setOpenSessions] = useState<string[]>(() => {
 		const today = moment().format('YYYY-MM-DD');
 		const preferred =
-			sessions.find((s) => moment(s.date).format('YYYY-MM-DD') === today) ??
-			sessions[0];
+			sessions.find(
+				(s) => moment(s.date).format('YYYY-MM-DD') === today,
+			) ?? sessions[0];
 		return preferred ? [preferred.key] : [];
 	});
 
@@ -330,7 +340,10 @@ const InstructorAttendanceCourseSection = ({
 		});
 	};
 
-	const handleEdit = (key: string, record: InstructorAttendanceItem) => {
+	const handleEdit = (
+		key: string,
+		record: InstructorAttendanceItem,
+	) => {
 		setEditingKey(key);
 		setDraft(key, {
 			attendance_status_id:
@@ -374,8 +387,10 @@ const InstructorAttendanceCourseSection = ({
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					{roster.length} alumnos · {sessions.length}{' '}
-					{sessions.length === 1 ? 'sesión programada' : 'sesiones programadas'}
+					{roster.length} pilotos · {sessions.length}{' '}
+					{sessions.length === 1
+						? 'sesión programada'
+						: 'sesiones programadas'}
 				</Typography>
 
 				{sessions.length === 0 ? (
@@ -436,12 +451,8 @@ const InstructorAttendanceCourseSection = ({
 														color="blue-gray"
 														className="text-sm"
 														placeholder={undefined}
-														onPointerEnterCapture={
-															undefined
-														}
-														onPointerLeaveCapture={
-															undefined
-														}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
 													>
 														{moment(session.date).format(
 															'DD/MM/YYYY',
@@ -456,12 +467,8 @@ const InstructorAttendanceCourseSection = ({
 															<Typography
 																variant="small"
 																placeholder={undefined}
-																onPointerEnterCapture={
-																	undefined
-																}
-																onPointerLeaveCapture={
-																	undefined
-																}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
 															>
 																{session.hours.join(' - ')}
 															</Typography>
@@ -472,12 +479,8 @@ const InstructorAttendanceCourseSection = ({
 													variant="small"
 													color="gray"
 													placeholder={undefined}
-													onPointerEnterCapture={
-														undefined
-													}
-													onPointerLeaveCapture={
-														undefined
-													}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
 												>
 													{
 														roster.filter(
@@ -546,7 +549,9 @@ const InstructorAttendanceCourseSection = ({
 															const isRowSaving = savingKey === key;
 															const showForm =
 																canEditAttendance &&
-																(!record || isEditing || hasDraft(key));
+																(!record ||
+																	isEditing ||
+																	hasDraft(key));
 															const draft = getDraft(key);
 
 															return (
@@ -579,26 +584,21 @@ const InstructorAttendanceCourseSection = ({
 																					undefined
 																				}
 																				labelProps={{
-																					placeholder:
-																						undefined,
+																					placeholder: undefined,
 																					onPointerEnterCapture:
 																						undefined,
 																					onPointerLeaveCapture:
 																						undefined,
 																				}}
 																			>
-																				{statusList.map(
-																					(status) => (
-																						<Option
-																							key={
-																								status.id
-																							}
-																							value={status.id.toString()}
-																						>
-																							{status.name}
-																						</Option>
-																					),
-																				)}
+																				{statusList.map((status) => (
+																					<Option
+																						key={status.id}
+																						value={status.id.toString()}
+																					>
+																						{status.name}
+																					</Option>
+																				))}
 																			</Select>
 																		) : (
 																			record && (
@@ -608,13 +608,11 @@ const InstructorAttendanceCourseSection = ({
 																						record.attendance_status_id,
 																					)}`}
 																				>
-																					{
-																						statusList.find(
-																							(s) =>
-																								s.id ===
-																								record.attendance_status_id,
-																						)?.name ?? '-'
-																					}
+																					{statusList.find(
+																						(s) =>
+																							s.id ===
+																							record.attendance_status_id,
+																					)?.name ?? '-'}
 																				</span>
 																			)
 																		)}
@@ -625,8 +623,7 @@ const InstructorAttendanceCourseSection = ({
 																				value={draft.comments}
 																				onChange={(e) =>
 																					setDraft(key, {
-																						comments:
-																							e.target.value,
+																						comments: e.target.value,
 																					})
 																				}
 																				rows={2}
@@ -638,8 +635,7 @@ const InstructorAttendanceCourseSection = ({
 																					undefined
 																				}
 																				labelProps={{
-																					placeholder:
-																						undefined,
+																					placeholder: undefined,
 																					onPointerEnterCapture:
 																						undefined,
 																					onPointerLeaveCapture:
@@ -704,7 +700,9 @@ const InstructorAttendanceCourseSection = ({
 																								onClick={() =>
 																									handleCancel(key)
 																								}
-																								placeholder={undefined}
+																								placeholder={
+																									undefined
+																								}
 																								onPointerEnterCapture={
 																									undefined
 																								}
@@ -713,7 +711,8 @@ const InstructorAttendanceCourseSection = ({
 																								}
 																								className="flex items-center gap-2"
 																							>
-																								<X className="w-4 h-4" /> Cancelar
+																								<X className="w-4 h-4" />{' '}
+																								Cancelar
 																							</Button>
 																						)}
 																					</>
@@ -725,7 +724,10 @@ const InstructorAttendanceCourseSection = ({
 																							variant="text"
 																							title="Editar asistencia"
 																							onClick={() =>
-																								handleEdit(key, record)
+																								handleEdit(
+																									key,
+																									record,
+																								)
 																							}
 																							placeholder={undefined}
 																							onPointerEnterCapture={
@@ -761,12 +763,8 @@ const InstructorAttendanceCourseSection = ({
 														}
 														disabled={isSessionSaving}
 														placeholder={undefined}
-														onPointerEnterCapture={
-															undefined
-														}
-														onPointerLeaveCapture={
-															undefined
-														}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
 														className="flex items-center gap-2"
 													>
 														<CheckCheck className="w-4 h-4" />
@@ -775,17 +773,11 @@ const InstructorAttendanceCourseSection = ({
 													<Button
 														size="sm"
 														color="green"
-														onClick={() =>
-															handleSaveSession(session)
-														}
+														onClick={() => handleSaveSession(session)}
 														disabled={isSessionSaving}
 														placeholder={undefined}
-														onPointerEnterCapture={
-															undefined
-														}
-														onPointerLeaveCapture={
-															undefined
-														}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
 														className="flex items-center gap-2"
 													>
 														<Save className="w-4 h-4" />
@@ -841,12 +833,8 @@ const InstructorAttendanceCourseSection = ({
 												color="blue-gray"
 												className="font-bold"
 												placeholder={undefined}
-												onPointerEnterCapture={
-													undefined
-												}
-												onPointerLeaveCapture={
-													undefined
-												}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
 											>
 												Fecha
 											</Typography>
@@ -857,12 +845,8 @@ const InstructorAttendanceCourseSection = ({
 												color="blue-gray"
 												className="font-bold"
 												placeholder={undefined}
-												onPointerEnterCapture={
-													undefined
-												}
-												onPointerLeaveCapture={
-													undefined
-												}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
 											>
 												{ordinalNoun(course)}
 											</Typography>
@@ -873,12 +857,8 @@ const InstructorAttendanceCourseSection = ({
 												color="blue-gray"
 												className="font-bold"
 												placeholder={undefined}
-												onPointerEnterCapture={
-													undefined
-												}
-												onPointerLeaveCapture={
-													undefined
-												}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
 											>
 												Alumno
 											</Typography>
@@ -889,12 +869,8 @@ const InstructorAttendanceCourseSection = ({
 												color="blue-gray"
 												className="font-bold"
 												placeholder={undefined}
-												onPointerEnterCapture={
-													undefined
-												}
-												onPointerLeaveCapture={
-													undefined
-												}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
 											>
 												Código
 											</Typography>
@@ -905,12 +881,8 @@ const InstructorAttendanceCourseSection = ({
 												color="blue-gray"
 												className="font-bold"
 												placeholder={undefined}
-												onPointerEnterCapture={
-													undefined
-												}
-												onPointerLeaveCapture={
-													undefined
-												}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
 											>
 												Estado
 											</Typography>
@@ -921,12 +893,8 @@ const InstructorAttendanceCourseSection = ({
 												color="blue-gray"
 												className="font-bold"
 												placeholder={undefined}
-												onPointerEnterCapture={
-													undefined
-												}
-												onPointerLeaveCapture={
-													undefined
-												}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
 											>
 												Comentarios
 											</Typography>
@@ -944,9 +912,7 @@ const InstructorAttendanceCourseSection = ({
 												className="hover:bg-blue-gray-50/50 transition-colors"
 											>
 												<td className="py-3 px-4 border-b border-blue-gray-50 text-sm">
-													{moment(a.date).format(
-														'DD/MM/YYYY',
-													)}
+													{moment(a.date).format('DD/MM/YYYY')}
 												</td>
 												<td className="py-3 px-4 border-b border-blue-gray-50 text-sm font-medium">
 													{ordinalLabel(course, a.day ?? 0)}
@@ -965,8 +931,7 @@ const InstructorAttendanceCourseSection = ({
 															a.attendance_status?.name,
 														)}`}
 													>
-														{a.attendance_status
-															?.name ?? '-'}
+														{a.attendance_status?.name ?? '-'}
 													</span>
 												</td>
 												<td className="py-3 px-4 border-b border-blue-gray-50 text-sm text-gray-500 max-w-[200px] truncate">
@@ -989,8 +954,8 @@ const InstructorAttendanceCourseSection = ({
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								Página {historyPage} de {historyPages} (
-								{historyTotal} registros)
+								Página {historyPage} de {historyPages} ({historyTotal}{' '}
+								registros)
 							</Typography>
 							<div className="flex items-center gap-2">
 								<Button

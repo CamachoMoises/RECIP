@@ -122,8 +122,9 @@ const styles = StyleSheet.create({
 	},
 	// --- Firmas ---
 	sigImage: {
-		width: 72,
+		width: '100%',
 		height: 31.2,
+		maxWidth: 72,
 		objectFit: 'contain',
 	},
 	noSignature: {
@@ -1214,6 +1215,7 @@ const CSAssessmentPDFDocument = ({
 										flex: 1,
 										alignItems: 'center',
 										justifyContent: 'center',
+										overflow: 'hidden',
 									},
 								]}
 							>
@@ -1271,22 +1273,6 @@ const CSAssessmentPDFDocument = ({
 									const daySigs = getUniqueSignatures(
 										signatures?.[dayNum] ?? {},
 									);
-									(
-										['student', 'instructor', 'fcaa'] as const
-									).forEach((role) => {
-										const data = daySigs[role];
-										if (!data) return;
-										const img = new window.Image();
-										img.onload = () =>
-											console.log(
-												`day ${dayNum} - ${role}`,
-												img.naturalWidth,
-												img.naturalHeight,
-												data.slice(0, 30),
-											);
-										img.src = data;
-									});
-									console.log(daySigs);
 									return (
 										<View
 											key={`firmas-${index}`}
@@ -1308,6 +1294,7 @@ const CSAssessmentPDFDocument = ({
 														flex: 1,
 														alignItems: 'center',
 														justifyContent: 'center',
+														overflow: 'hidden',
 													},
 												]}
 											>
@@ -1327,6 +1314,7 @@ const CSAssessmentPDFDocument = ({
 														flex: 1,
 														alignItems: 'center',
 														justifyContent: 'center',
+														overflow: 'hidden',
 													},
 												]}
 											>
@@ -1346,6 +1334,7 @@ const CSAssessmentPDFDocument = ({
 														flex: 1,
 														alignItems: 'center',
 														justifyContent: 'center',
+														overflow: 'hidden',
 													},
 												]}
 											>

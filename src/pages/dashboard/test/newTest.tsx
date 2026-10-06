@@ -76,7 +76,7 @@ const NewTest = () => {
 		if (theme !== 'light') {
 			document.documentElement.setAttribute('data-theme', 'light');
 		}
-	}, []);
+	}, [theme]);
 
 	const handleEndTest = async (course_student_test_id: number) => {
 		toast('Finalizando examen...', {

@@ -23,14 +23,15 @@ import { GROUPS_PAGE_SIZE } from './instructorShared';
  */
 type Props = {
 	instructor_id: number;
-	courseId?: number | null;
 };
 
-const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
+const InstructorGroupsTab = ({ instructor_id }: Props) => {
 	const [groups, setGroups] = useState<courseGroup[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [openAccordion, setOpenAccordion] = useState<number | null>(null);
+	const [openAccordion, setOpenAccordion] = useState<number | null>(
+		null,
+	);
 
 	useEffect(() => {
 		const loadGroups = async () => {
@@ -67,9 +68,13 @@ const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
 	if (loading) return <LoadingPage />;
 	if (error) return <ErrorPage error={error} />;
 
-	const visible = courseId
-		? groups.filter((g) => g.course_id === courseId)
-		: groups;
+	const visible = groups
+		.filter((g) => g.course?.id != null)
+		.sort((a, b) => {
+			const nameA = a.course?.name ?? '';
+			const nameB = b.course?.name ?? '';
+			return nameA.localeCompare(nameB);
+		});
 
 	return (
 		<Card
@@ -117,9 +122,7 @@ const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
 								<AccordionHeader
 									onClick={() =>
 										setOpenAccordion(
-											openAccordion === group.id
-												? null
-												: group.id,
+											openAccordion === group.id ? null : group.id,
 										)
 									}
 									className="px-4 py-3"
@@ -129,22 +132,15 @@ const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
 								>
 									<div className="flex items-center justify-between w-full pr-2">
 										<div className="flex items-center gap-3">
-											<Users
-												size={18}
-												className="text-blue-500"
-											/>
+											<Users size={18} className="text-blue-500" />
 											<div className="text-left">
 												<Typography
 													variant="h6"
 													color="blue-gray"
 													className="text-sm"
 													placeholder={undefined}
-													onPointerEnterCapture={
-														undefined
-													}
-													onPointerLeaveCapture={
-														undefined
-													}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
 												>
 													{group.title}
 												</Typography>
@@ -152,12 +148,8 @@ const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
 													variant="small"
 													color="gray"
 													placeholder={undefined}
-													onPointerEnterCapture={
-														undefined
-													}
-													onPointerLeaveCapture={
-														undefined
-													}
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
 												>
 													Código: {group.code}
 													{group.course?.name
@@ -191,12 +183,8 @@ const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
 											color="gray"
 											variant="small"
 											placeholder={undefined}
-											onPointerEnterCapture={
-												undefined
-											}
-											onPointerLeaveCapture={
-												undefined
-											}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
 										>
 											Sin alumnos asignados
 										</Typography>
@@ -228,8 +216,7 @@ const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
 																		size={14}
 																		className="text-gray-400"
 																	/>
-																	{cs.student
-																		?.user
+																	{cs.student?.user
 																		? `${cs.student.user.name} ${cs.student.user.last_name}`
 																		: '-'}
 																</div>
@@ -241,15 +228,9 @@ const InstructorGroupsTab = ({ instructor_id, courseId }: Props) => {
 																<Chip
 																	size="sm"
 																	variant="ghost"
-																	color={
-																		cs.status
-																			? 'green'
-																			: 'red'
-																	}
+																	color={cs.status ? 'green' : 'red'}
 																	value={
-																		cs.status
-																			? 'Activo'
-																			: 'Inactivo'
+																		cs.status ? 'Activo' : 'Inactivo'
 																	}
 																/>
 															</td>

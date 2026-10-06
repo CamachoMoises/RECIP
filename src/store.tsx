@@ -13,6 +13,7 @@ import attendanceSlice from './features/attendanceSlice';
 import courseGroupReducer from './features/courseGroupSlice';
 import emailReducer from './features/emailSlice';
 import testReportReducer from './features/testReportSlice';
+import instructorReducer from './features/instructorSlice';
 
 const persistConfig = {
 	key: 'root',
@@ -35,6 +36,7 @@ const store = configureStore({
 		courseGroups: courseGroupReducer,
 		emailHistory: emailReducer,
 		testReports: testReportReducer,
+		instructor: instructorReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

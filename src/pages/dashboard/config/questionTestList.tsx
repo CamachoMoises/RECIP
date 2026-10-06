@@ -59,7 +59,7 @@ const QuestionTestList = () => {
 			}),
 		);
 		dispatch(fetchQuestionTypes());
-	}, [dispatch, test_id, question_type_id]);
+	}, [dispatch, test_id, question_type_id, test_question_type_id]);
 	const questionType = test.questionTypes.find(
 		(QT) =>
 			QT.id === parseInt(question_type_id ? question_type_id : '-1'),

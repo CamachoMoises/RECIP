@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	Button,
 	IconButton,
@@ -44,7 +44,7 @@ const InstructorSignaturesPanel = ({
 	const [savingKey, setSavingKey] = useState<string | null>(null);
 	const sigCanvasRefs = useRef<Map<string, SignatureCanvas>>(new Map());
 
-	const loadSignatures = async () => {
+	const loadSignatures = useCallback(async () => {
 		try {
 			const { resp, status } = await axiosGetDefault(
 				`api/course_groups/${groupId}/signatures`,
@@ -56,11 +56,11 @@ const InstructorSignaturesPanel = ({
 		} catch {
 			toast.error('Error al cargar las firmas');
 		}
-	};
+	}, [groupId]);
 
 	useEffect(() => {
 		loadSignatures();
-	}, [groupId]);
+	}, [loadSignatures]);
 
 	const handleToggleDay = (day: number) => {
 		setOpenDays((prev) => {

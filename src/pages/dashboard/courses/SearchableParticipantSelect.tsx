@@ -30,7 +30,7 @@ const SearchableParticipantSelect = ({
 	useEffect(() => {
 		if (value) setQuery(value.name);
 		else setQuery('');
-	}, [value?.student_id]);
+	}, [value]);
 
 	useEffect(() => {
 		if (!open || disabled) return;

@@ -249,7 +249,9 @@ export const buildCourseCatalog = (
 export const courseTitle = (
 	courseId: number,
 	catalog: Map<number, course>,
-	fallback?: course | null,
+	// Los endpoints agrupados traen el `course` recortado (sin `description`,
+	// `hours` ni `status`), así que el fallback solo necesita nombre y código.
+	fallback?: Pick<course, 'name' | 'code'> | null,
 ): string => {
 	const found = fallback ?? catalog.get(courseId);
 	if (!found) return `Curso #${courseId}`;
@@ -263,3 +265,51 @@ export const courseTitle = (
 export const isTheoreticalCourse = (
 	candidate?: course | null,
 ): boolean => candidate?.course_type?.id === 2;
+
+type NamedUser = {
+	name?: string | null;
+	last_name?: string | null;
+};
+
+type NameCarrier = {
+	/**
+	 * Nombre completo ya formateado. `schedule/grouped` y `attendance/grouped`
+	 * lo exponen explícitamente y es la fuente más confiable: no depende de
+	 * que el include anidado haya sobrevivido a la agregación.
+	 */
+	pilot_name?: string | null;
+	student?: { user?: NamedUser | null } | null;
+	course_student?: { student?: { user?: NamedUser | null } | null } | null;
+	CSA?: {
+		student?: { user?: NamedUser | null } | null;
+		user?: NamedUser | null;
+	} | null;
+	user?: NamedUser | null;
+};
+
+/**
+ * Resuelve el nombre del piloto tolerando las ramas que exponen los distintos
+ * endpoints agrupados. `evaluations/grouped` y `tests/with-participation` no
+ * documentan `pilot_name`, así que para esos se arma desde `name` + `last_name`.
+ * Gana la primera rama con dato, para que una tarjeta no caiga al fallback si el
+ * nombre llegó por otro camino.
+ */
+export const pilotName = (carrier: NameCarrier | null | undefined): string => {
+	const ready = carrier?.pilot_name?.trim();
+	if (ready) return ready;
+
+	const candidates: (NamedUser | null | undefined)[] = [
+		carrier?.student?.user,
+		carrier?.user,
+		carrier?.course_student?.student?.user,
+		carrier?.CSA?.student?.user,
+		carrier?.CSA?.user,
+	];
+
+	for (const user of candidates) {
+		const name = `${user?.name ?? ''} ${user?.last_name ?? ''}`.trim();
+		if (name) return name;
+	}
+
+	return '';
+};

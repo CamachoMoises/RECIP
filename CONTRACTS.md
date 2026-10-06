@@ -867,6 +867,50 @@ arranque usa `alter: false` y no las crea).
   `course_student`, **`subject_day`**, `subject`
 - `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
 
+### GET /schedule/grouped/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array agrupado por `course_student_id` con la estructura:
+  ```json
+  [
+    {
+      "course_student_id": 1,
+      "student_id": 1,
+      "student": { "user": {"id": 1, "name": "Juan", "last_name": "Pérez", "email": "...", ...}, "status": true },
+      "user": {"id": 1, "name": "Juan", "last_name": "Pérez", "email": "..."},
+      "pilot_name": "Juan Pérez",
+      "course_id": 10,
+      "course_name": "PPL(A)",
+      "course_code": "CP-001",
+      "course": { "id": 10, "name": "PPL(A)", "code": "CP-001", ... },
+      "schedules": [
+        {
+          "id": ...,
+          "date": "...",
+          "hour": "...",
+          "classTime": ...,
+          "subject_day": { "day": 1, "classTime": "08:00" },
+          "subject_id": 5,
+          "subject": { "name": "Vuelo 1", "order": 1 },
+          "subject_name": "Vuelo 1",
+          "subject_lesson": { "name": "Despegue", "order": 1 },
+          "subject_lesson_days": {
+            "id": 1,
+            "day": 1,
+            "classTime": "08:00"
+          }
+        }
+      ]
+    }
+  ]
+  ```
+  - **Ordenamiento:** Primero por `course_student_id`, luego por `subject_lesson.order`, luego por `subject_lesson_days.day`, y finalmente por `schedule.date`.
+  - Cada schedule incluye `subject_lesson` y `subject_lesson_days` para el ordenamiento por días/secciones.
+  - `pilot_name` es el nombre completo del estudiante (formateado).
+  - `user.name` y `user.last_name` están disponibles explícitamente.
+  - `course_name` y `course_code` identifican el curso.
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
 ### GET /assessments
 - Query: `instructor_id` (requerido), `course_id` (opcional), `pageSize` (default 10),
   `currentPage` (default 1)
@@ -875,13 +919,75 @@ arranque usa `alter: false` y no las crea).
   Cada fila con `course_student` (con `student.user`) y `course` (con `course_type`, `course_level`)
 - `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
 
-### GET /tests
-- Query: `instructor_id` (requerido), `course_id` (opcional), `finished` (opcional),
-  `pageSize` (default 10), `currentPage` (default 1)
+### GET /tests/with-participation/:instructor_id
+- Params: `instructor_id` (requerido)
 - Auth: sí
 - `200` → `{ data: CourseStudentTest[], totalItems, currentPage, pageSize, totalPages }`
   Cada fila con `test`, `course_student` (con `student.user`), y `course_student_test_questions`
-  (cada uno con `course_student_test_answer`)
+  (cada uno con `course_student_test_answer`).
+  - Solo incluye tests de courseStudents que tienen schedules asignados al instructor indicado.
+  - Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /attendance/grouped/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array agrupado por `course_student_id` con la estructura:
+  ```json
+  [
+    {
+      "course_student_id": 1,
+      "student_id": 1,
+      "student": { "user": {"id": 1, "name": "María", "last_name": "González", "email": "..."} },
+      "user": {"id": 1, "name": "María", "last_name": "González", "email": "..."},
+      "pilot_name": "María González",
+      "course_id": 10,
+      "course_name": "PPL(A)",
+      "course_code": "CP-001",
+      "course": { "id": 10, "name": "PPL(A)", "code": "CP-001", ... },
+      "schedulesDates": ["2024-01-15", "2024-01-22"],
+      "attendances": [
+        {
+          "id": 50,
+          "attendance_id": 50,
+          "date": "2024-01-15",
+          "day": 1,
+          "attendance_status": { "name": "Presente", "description": null },
+          "attendance_signature": { "signature_url": "https://cloudinary/..." },
+          "subject_id": 5,
+          "subject": { "name": "Vuelo 1" },
+          "subject_name": "Vuelo 1",
+          "subject_day": 1,
+          "hour": "08:00",
+          "classTime": 1.5
+        }
+      ]
+    }
+  ]
+  ```
+  - **Orden:** `date` DESC, `day` ASC (mismo que GET /attendance).
+  - Agrupado por courseStudent, respetando el criterio de días/secciones.
+  - `pilot_name` es el nombre completo del estudiante (formateado).
+  - `user.name` y `user.last_name` están disponibles explícitamente.
+  - `course_name` y `course_code` identifican el curso.
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /evaluations/grouped/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array agrupado por `course_student_id` con la estructura:
+  ```json
+  [
+    {
+      "course_student_id": 1,
+      "course_student": { "student": { "user": {...} }, "status": ... },
+      "course": { ... },
+      "CSA": CourseStudentAssessment (con `course`, `course_level`, `course_type`, `student`, `user`, `course_student`),
+      "created_at": "..."
+    }
+  ]
+  ```
+  - Agrupado por courseStudent, listado por `date` DESC.
 - `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
 
 ---

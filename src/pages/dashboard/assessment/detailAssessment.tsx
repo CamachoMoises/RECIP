@@ -43,13 +43,45 @@ import { createEmailHistory } from '../../../features/emailSlice';
 import CSAssessmentPDFDocument from './CSAssessmentPDFDocument';
 import SendEmailModal from '../../../components/SendEmailModal';
 import { getCloudinaryPngBase64 } from '../../../utils/imageBase64';
-import { ordinalNoun, programOrdinals } from '../../../utils/programSize';
+import {
+	ordinalNoun,
+	programOrdinals,
+} from '../../../utils/programSize';
 
 type DaySignatures = {
 	student?: string;
 	instructor?: string;
 	fcaa?: string;
 };
+
+const normalizeSignature = (
+	src: string,
+	w = 288,
+	h = 125,
+): Promise<string> =>
+	new Promise((resolve) => {
+		const img = new window.Image();
+		img.onload = () => {
+			const canvas = document.createElement('canvas');
+			canvas.width = w;
+			canvas.height = h;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return resolve(src);
+			ctx.fillStyle = '#fff';
+			ctx.fillRect(0, 0, w, h);
+			const scale = Math.min(
+				w / img.naturalWidth,
+				h / img.naturalHeight,
+			);
+			const dw = img.naturalWidth * scale;
+			const dh = img.naturalHeight * scale;
+			ctx.imageSmoothingQuality = 'high';
+			ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+			resolve(canvas.toDataURL('image/png'));
+		};
+		img.onerror = () => resolve(src);
+		img.src = src;
+	});
 
 const buildSignatures = async (
 	days: courseStudentAssessmentDay[],
@@ -143,7 +175,8 @@ const DetailAssessment = () => {
 		?.course_student_id
 		? assessment.courseStudentAssessmentSelected.course_student_id
 		: -1;
-	const programCourse = assessment.courseStudentAssessmentSelected?.course;
+	const programCourse =
+		assessment.courseStudentAssessmentSelected?.course;
 	const days = programOrdinals(programCourse);
 	const ordinal = ordinalNoun(programCourse);
 	useEffect(() => {
@@ -215,11 +248,61 @@ const DetailAssessment = () => {
 			courseStudentAssessmentSelected: fresh.CSA,
 			daysSubjectList: fresh.CASD,
 		};
-		const [logoBase64, signatures, firmaBase64] = await Promise.all([
-			getLogoBase64(),
-			buildSignatures(fresh.CSA?.CourseStudentAssessmentDays ?? []),
-			getFirmaDirectorBase64(),
-		]);
+		const [logoBase64, rawSignatures, firmaBase64] =
+			await Promise.all([
+				getLogoBase64(),
+				buildSignatures(fresh.CSA?.CourseStudentAssessmentDays ?? []),
+				getFirmaDirectorBase64(),
+			]);
+
+		const signatures: Record<number, DaySignatures> =
+			Object.fromEntries(
+				await Promise.all(
+					Object.entries(
+						rawSignatures ?? ({} as Record<number, DaySignatures>),
+					).map(async ([day, s]) => [
+						day,
+						{
+							student: s.student
+								? await normalizeSignature(s.student)
+								: undefined,
+							instructor: s.instructor
+								? await normalizeSignature(s.instructor)
+								: undefined,
+							fcaa: s.fcaa
+								? await normalizeSignature(s.fcaa)
+								: undefined,
+						},
+					]),
+				),
+			);
+		// console.log(
+		// 	'[debug firmas] días:',
+		// 	Object.keys(signatures ?? {}),
+		// 	signatures,
+		// );
+
+		// const panel = document.createElement('div');
+		// panel.style.cssText =
+		// 	'position:fixed;top:0;left:0;right:0;max-height:50vh;overflow:auto;z-index:2147483647;background:#fff;border-bottom:3px solid red;padding:6px;font:12px sans-serif';
+		// panel.innerHTML =
+		// 	'<b>DEBUG firmas</b> (clic aquí para cerrar)<br/>';
+		// panel.onclick = () => panel.remove();
+
+		// Object.entries(signatures ?? {}).forEach(([day, sigs]) => {
+		// 	Object.entries(sigs).forEach(([role, src]) => {
+		// 		if (!src) return;
+		// 		const item = document.createElement('div');
+		// 		item.textContent = `día ${day} - ${role}: `;
+		// 		const img = document.createElement('img');
+		// 		img.src = src as string;
+		// 		img.style.cssText = 'height:60px;border:1px solid #ccc';
+		// 		item.appendChild(img);
+		// 		panel.appendChild(item);
+		// 	});
+		// });
+
+		// document.body.appendChild(panel);
 		const pdfBlob = await pdf(
 			<CSAssessmentPDFDocument
 				assessment={freshAssessment}

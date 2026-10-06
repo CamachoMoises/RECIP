@@ -64,6 +64,9 @@ const ModalFormCourseGroup = ({
 		mode: 'onChange',
 	});
 
+	const titleValue = watch('title');
+	const courseIdValue = watch('course_id');
+
 	useEffect(() => {
 		if (open) {
 			dispatch(fetchCourses());
@@ -95,12 +98,7 @@ const ModalFormCourseGroup = ({
 		if (!courseGroupSelected) {
 			trigger();
 		}
-	}, [
-		watch('title'),
-		watch('course_id'),
-		courseGroupSelected,
-		trigger,
-	]);
+	}, [courseGroupSelected, trigger, titleValue, courseIdValue]);
 
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		if (!courseGroupSelected && !data.course_id) {
