@@ -859,6 +859,14 @@ arranque usa `alter: false` y no las crea).
 > borraron todos— ese alumno deja de aparecer en los filtros por `instructor_id` de
 > `/api/instructor/*`, `GET /api/courses/coursesStudents`,
 > `/api/course_groups/report/attendance` y `/api/assessment`.
+>
+> **Filtro de alumnos activos:** todos los endpoints de esta sección exigen
+> `course_student.status = 1` (columna `TINYINT`, valores `0`/`1`). Un `course_student`
+> inactivo se excluye por completo — sus `schedule`, `attendance`, tests y evaluaciones
+> no aparecen, aunque el `instructor_id` tenga filas asociadas. El filtro se aplica en el
+> `include` de `CourseStudent` con `required: true, where: { status: true }`, por lo que
+> también actúa sobre `getCourseIdsByInstructor` (usada para poblar el filtro de cursos)
+> y sobre `GET /api/instructor/schedule/:instructor_id`.
 
 ### GET /schedule/:instructor_id
 - Params: `instructor_id` (requerido)
@@ -991,6 +999,1022 @@ arranque usa `alter: false` y no las crea).
 - `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
 
 ---
+
+### GET /signature_groups/:instructor_id
+- Params: instructor_id (requerido)
+- Auth: sí
+- 200 → { data: [...] } array de grupos de curso (solo course_type_id === 1) con días y firmas
+- Filtra grupos donde course.course_type_id === 1 y status: true
+- days son días/sesiones con programación para esos alumnos (filtrados dentro del techo del programa)
+- Si no hay grupos, retorna { data: [] }
+- 400 JSON { error: 'Parámetro instructor_id inválido' }
+- 500 texto plano Internal Server Error
+
+---
+ido/expirado → `403` con el error JWT serializado.
+- **Body**: los métodos de escritura (`POST`/`PUT`) usan `multipart/form-data` (`upload.none()`)
+  salvo que se indique lo contrario.
+- **convertTypes**: los strings `"true"`/`"false"`/numéricos del body se convierten a boolean/number.
+- **Keys de respuesta**: son **exactas**. Las claves de modelos anidados corresponden al alias de la
+  asociación Sequelize. Si la asociación NO define `as:`, la clave es el alias por defecto, y ese
+  alias depende del tipo de asociación —**no** es siempre el plural:
+  - `belongsTo` → nombre del modelo en **singular** snake_case (p. ej. `Schedule.belongsTo(SubjectDays)`
+    → **`subject_day`**, no `subject_days` ni `SubjectDays`; `Schedule.belongsTo(Subject)` → `subject`).
+  - `hasMany` → **plural** snake_case (p. ej. `CourseStudent.hasMany(Schedule)` → `schedules`,
+    `hasMany(Attendance)` → `attendances`).
+  - **Preferir siempre `as:` explícito y documentarlo aquí** (ver lección del bug de
+    `CourseStudentAssessmentDays`, que además es singular/plural y casing distinto).
+- **Errores**: salvo que el contrato indique otro formato, los errores son texto plano
+  `Internal Server Error` con status `500`. El patrón `res.status(code).json({ message, error })`
+  solo se usa donde el contrato lo indica.
+- **Timestamps**: todos los modelos incluyen `createdAt` / `updatedAt` (no repetidos en cada contrato).
+
+## Modelos de referencia
+
+| Modelo | Claves |
+|---|---|
+| User | `id, uuid, name, doc_number, user_doc_type_id, flag, country_name, phone, last_name, password, email, rank, is_superuser, is_staff, is_active` |
+| Student | `id, user_id, status` |
+| Instructor | `id, user_id, status` |
+| UserDocType | `id, name, symbol` |
+| Course | `id, name, description, code, hours, plane_model, days, uses_sessions, sessions, status, course_type_id, course_level_id` |
+| CourseType | `id, name` |
+| CourseLevel | `id, name` |
+| CourseStudent | `id, course_id, date, score, approve, student_id, code, type_trip, license, regulation, status, max_attempts, instructor_code, client` |
+| CourseGroup | `id, title, code, user_code, date, course_id, status` |
+| CourseGroupSignature | `id, course_group_id, day_number, signature_number, signature_url` |
+| CourseStudentTest | `id, course_id, score, approve, test_id, attempts, course_student_id, date, student_id, code, status, finished` |
+| Schedule | `id, instructor_id, student_id, subject_days_id, subject_id, course_student_id, date, hour, classTime` |
+| Subject | `id, order, name, hours, is_schedulable, status, course_id` |
+| SubjectDays | `id, subject_id, course_id, day, classTime, status` |
+| SubjectLesson | `id, subject_id, course_id, name, order, status` |
+| SubjectLessonDays | `id, course_id, subject_id, subject_lesson_id, subject_days_id, day, classTime, status` |
+| CourseStudentAssessment | `id, course_id, student_id, course_student_id, score, approve, date, code, status, finished, comments` |
+| CourseStudentAssessmentDay | `id, course_id, student_id, course_student_id, course_student_assessment_id, day, airport, airstrip, elevation, meteorology, temperature, qnh, wind, weight, flaps, power, seat, takeoff, landing, comments, takeoff_day, takeoff_night, landing_day, landing_night, landing_precision, landing_non_precision, landing_gps, landing_circuit, landing_visual, training_time, check_time, ifr_time, vfr_time, type` — `training_time`/`check_time`/`ifr_time`/`vfr_time` son `FLOAT` (horas decimales, ej. `1.5` = 1h30m) — `landing_precision`/`landing_non_precision`/`landing_gps`/`landing_circuit`/`landing_visual` son `INTEGER` (contadores de aterrizajes por tipo, nullable) |
+| CourseStudentAssessmentLessonDetail | `id, course_id, student_id, course_student_id, course_student_assessment_id, course_student_assessment_day_id, subject_id, subject_lesson_id, subject_days_id, subject_lesson_days_id, item, score, score_2, score_3` |
+| Test | `id, course_id, min_score, duration, code, status` |
+| QuestionType | `id, value, max_answer, name` |
+| TestQuestionType | `id, amount, value, course_id, question_type_id, test_id, status` |
+| Question | `id, header, course_id, question_type_id, test_question_type_id, test_id, status` |
+| Answer | `id, value, course_id, question_id, test_id, is_correct, status` |
+| CourseStudentTestQuestion | `id, course_id, test_id, course_student_id, course_student_test_id, question_id, Answered, status` |
+| CourseStudentTestAnswer | `id, course_id, test_id, course_student_id, resp, course_student_test_id, course_student_test_question_id, question_id, score, status` |
+| Attendance | `id, course_student_id, day, date, attendance_status_id, comments` — `day` es el **número de sesión** cuando el curso tiene `uses_sessions = 1`, y el número de día cuando `uses_sessions = 0` |
+| AttendanceStatus | `id, name, description` |
+| AttendanceSignature | `id, attendance_id, signature_url` |
+| Module | `id, name` |
+| Permission | `id, name, module_id, status` |
+| Group | `id, name, is_active` |
+| Rating | `id, instructor_id, student_id, subject_days_id, subject_id, course_student_id, value` |
+| UserSuggestion | `id, user_id, title, description` |
+| EmailHistory | `id, email, user_id, nombre_archivo, fecha, tipo, descripcion, modulo` |
+
+---
+
+## Días vs. Sesiones
+
+Un curso programado puede trabajar en dos modos, discriminados por `course.uses_sessions`.
+Las filas existentes nunca se reinterpretan: todo curso con `uses_sessions = 0` se comporta
+exactamente como antes de esta funcionalidad.
+
+| | `uses_sessions = 0` (legacy, default) | `uses_sessions = 1` |
+|---|---|---|
+| Significado del ordinal (`subject_days.day`, `attendance.day`, `course_group_signature.day_number`) | número de **día** | número de **sesión** |
+| Techo del programa | `course.days` | `course.sessions` |
+| Relación ordinal ↔ fecha calendario | 1 sesión por día | **N sesiones pueden compartir fecha** |
+| Validación de `POST /api/attendance` | `day` requerido, `day <= course.days` | `session_number` requerido, `session_number <= course.sessions` |
+| Validación de `POST /api/course_groups/signature` | `day_number` contra `course.days` | `session_number` contra `course.sessions` |
+| Validación de `POST /api/subjects/subjects_days` | sin bound check | `day <= course.sessions` |
+
+Claves de la implementación:
+
+- **No hay columnas `session_number` en la base.** El ordinal vive en las columnas `day` /
+  `day_number` que ya existían. `session_number` es un **alias de entrada/salida** que el
+  backend mapea a `day` / `day_number`, para que la API hable de sesiones sin duplicar el dato.
+- `course.sessions` se rellena con `course.days` en todos los cursos existentes y en los cursos
+  nuevos que no lo envíen, así que nunca es `NULL`. El discriminador es el **flag**, no el `NULL`.
+- La unicidad de asistencia es `(course_student_id, date, day)`: dos sesiones de la misma fecha
+  se distinguen por su número de sesión. Antes era `(course_student_id, date)`.
+- `schedule` nunca tuvo restricción de unicidad, por lo que varias sesiones en la misma fecha
+  ya eran aceptables; el bloqueo era solo del cliente.
+- Fuente de verdad del techo: `getCourseProgramSizeByCourseStudent()` en
+  `src/database/repositories/course.js`, que devuelve `{ uses_sessions, days, sessions, total }`.
+
+Migraciones: `20260927000000-add-sessions-to-course.cjs`, `20260927000001-relax-attendance-unique-date.cjs`.
+Al ser columnas nuevas, la app requiere que se corran **antes** de desplegar (el `sync` de
+arranque usa `alter: false` y no las crea).
+
+---
+
+## Auth — `/auth`
+
+### POST /auth
+- Auth: no
+- Body: `email` (string), `password` (string)
+- `200` → `{ email, user, token }` (JWT, payload `{ id }`, expira en 1h). `user` trae los alias
+  `student` e `instructor` (NO trae `user_doc_type`). Ojo: incluye `password` (hash bcrypt).
+- `401` texto plano: `Invalid User` | `Invalid Password` | `User is inactive`
+- `500` `Internal Server Error`
+
+---
+
+## Users — `/api/users`
+
+> Nota: las respuestas de User incluyen el campo `password` (hash bcrypt) en todos los endpoints.
+
+### GET /api/users/
+- Auth: sí
+- `200` → array de User con alias `student`, `instructor`, `user_doc_type`
+
+### GET /api/users/me
+- Auth: sí (usa el `id` del token)
+- `200` → User con `student`, `instructor`, `user_doc_type`
+- `401` JSON `{ message: 'No autenticado' }`; `404` JSON `{ message: 'Usuario no encontrado' }`
+
+### GET /api/users/user/:user_id
+- Params: `user_id`
+- `200` → User con `student`, `instructor`, `user_doc_type`
+
+### GET /api/users/userEmailValidate/:email
+- Params: `email`
+- `200` → `{ exist: boolean }`
+
+### GET /api/users/userDocType
+- `200` → array de UserDocType
+
+### GET /api/users/student
+- Query: `status` (`"true"`/`"false"`, opcional)
+- `200` → array de User que tienen Student, con `student`, `user_doc_type`
+
+### GET /api/users/instructor
+- Query: `status` (`"true"`/`"false"`, opcional)
+- `200` → array de User que tienen Instructor, con `instructor`, `user_doc_type`
+
+### GET /api/users/student/search
+- Query: `search` (string, requerido)
+- `200` → `{ data: [{ student_id, name, email }] }`
+- `400` JSON `{ message: 'Search query is required' }`
+
+### POST /api/users/
+- Body (Joi): `doc_number` (requerido), `email` (requerido, TLD .com/.net), `name`, `last_name`,
+  `country_name`, `flag`, `phone`, `rank` (TEXT, opcional), `password`, `user_doc_type_id`, `is_superuser`, `is_staff`, `is_active`
+- `201` → User (sin includes)
+- `400` texto plano `Input Validation Error <msg>`
+
+### POST /api/users/student
+- Body: `user_id` (requerido)
+- `201` → User con `student`, `instructor`, `user_doc_type`
+
+### POST /api/users/instructor
+- Body: `user_id` (requerido)
+- `201` → User con `student`, `instructor`, `user_doc_type`
+
+### PUT /api/users/
+- Body (Joi): `id` (requerido), `doc_number` (requerido), `email` (requerido), `uuid` (requerido de
+  facto, busca al usuario por uuid), `name`, `last_name`, `country_name`, `flag`, `phone`,
+  `rank` (TEXT, opcional), `password`, `user_doc_type_id`, `is_superuser`, `is_staff`, `is_active`, `createdAt`, `updatedAt`
+- `201` → User con `student`, `instructor`, `user_doc_type`
+- `404` texto plano `User not found`; `400` `Input Validation Error <msg>`
+
+### PUT /api/users/disable-role
+- Body: `user_id` (requerido), `role` (`"student"` | `"instructor"`)
+- `200` → User con `student`, `instructor`, `user_doc_type`
+- `400` texto plano `Invalid role`
+
+---
+
+## Courses — `/api/courses`
+
+### GET /
+- Query: `name`, `description`, `course_type_id`, `course_level_id` (todos opcionales)
+- `200` → array de Course con alias `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
+
+### POST /
+- Body (Joi; `type`→`course_type_id`, `level`→`course_level_id`): `name`, `description`, `code`,
+  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status` (opcionales)
+- `uses_sessions` (bool, default `false`) y `sessions` (int ≥ 1) son opcionales — ver
+  [Días vs. Sesiones](#días-vs-sesiones). Si `sessions` no viene, se persiste `sessions = days`.
+- `201` → Course con `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
+
+### PUT /
+- Body (Joi, mismo que POST + `id` requerido; se ignora `hours`)
+- `200` → Course con `course_type`, `course_level`
+
+### GET /courseTypes
+- `200` → array de CourseType
+
+### GET /courseLevel
+- `200` → array de CourseLevel
+
+### GET /course/:id
+- Params: `id`
+- `200` → Course con `course_type`, `course_level`
+
+### GET /coursesStudents
+- Query: `course_type_id`, `status`, `course_group_id`, `course_id`, `student_id`, `instructor_id` (opcionales),
+  `pageSize` (default 10), `currentPage` (default 1)
+- `200` → `{ data: CourseStudent[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila: claves de CourseStudent + `highest_score` (calculado) + alias
+  `student` (con `user`), `course_group`, `course` (con `course_type`, `course_level`),
+  `course_student_tests`, `course_student_assessment`, `schedules` (cada uno con `subject`,
+  `instructor` con `user` y **`subject_day`**)
+- Nota: cuando `instructor_id` está presente, filtra solo los CourseStudent cuyos schedules
+  pertenecen al instructor indicado. Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
+
+### GET /courseStudent/:id
+- Params: `id`
+- `200` → CourseStudent con `student`, `course_group`, `course` (con `course_type`, `course_level`,
+  `tests`), `course_student_tests`, `schedules` (solo subjects con nombre LIKE '%examen%', cada uno con `subject`)
+
+### POST /courseStudent/:course_id
+- Params: `course_id`; Body: ninguno (genera `code` `CP-########`)
+- `200` → CourseStudent (sin includes)
+- `404` texto plano `Curso no encontrado`; `400` `Input Validation Error <msg>`
+
+### PUT /courseStudent/:course_id
+- Params: `course_id` (ignorado); Body: `course_student_id` (requerido), `date`, `student_id`,
+  `typeTrip`, `license`, `regulation`, `instructorCode`, `courseGroupId`, `client`
+- `200` → CourseStudent (sin includes)
+- `400` texto plano `course_student_id is required`
+
+### PUT /courseStudent/:course_student_id/status
+- Params: `course_student_id`; Body: `status` (boolean, default false)
+- `200` → CourseStudent (sin includes)
+
+### PUT /courseStudentMaxAttempts
+- Body: `course_student_id` (requerido), `max_attempts` (requerido)
+- `200` → CourseStudent (sin includes)
+- `400` JSON `{ error: 'Parámetro course_student_id inválido' | 'Parámetro max_attempts inválido' | <msg> }`
+
+### PUT /status
+- Body: `user_id` (requerido), `status` (requerido)
+- `200` → Instructor (sin includes)
+- `400` texto plano `user_id and status are required`; `404` `Instructor not found for this user`
+
+### GET /schedule/:id
+- Params: `id` (course_student_id)
+- `200` → array de Schedule (order date/hora) con `student` (con `user`), `instructor` (con `user`),
+  `course_student`, `subject_day`, `subject`
+- Varias sesiones pueden compartir la misma `date`: el endpoint no las agrupa, las devuelve
+  ordenadas por `date` y `hour`.
+
+### POST /schedule
+- Body: `instructor_id`, `course_id`, `subject_days_id`, `student_id`, `subject_id`,
+  `course_student_id`, `date`, `hour`, `classTime`
+- `200` → Schedule (mismo shape que GET /schedule/:id)
+- Nota: `course_id` no es una columna de `schedule`; se ignora. El curso se deduce de
+  `course_student.course_id`. El ordinal (día o sesión) del schedule se deduce de
+  `subject_days_id → subject_day.day`.
+
+### PUT /schedule
+- Auth: **no**
+- Body: `id` (requerido), `instructor_id`, `date`, `hour`, `classTime`
+- `200` → Schedule (mismo shape que GET /schedule/:id)
+
+### DELETE /schedule/:id
+- Params: `id` (**`schedule.id`**, no `course_student_id`)
+- Auth: sí
+- `200` →
+  ```json
+  { "message": "1 schedule(s) deleted", "deleted_count": 1,
+    "deleted_attendance_count": 1, "deleted_signature_count": 0 }
+  ```
+- `400` JSON `{ error: 'Parámetro id inválido' }`; `404` texto plano `Schedule not found`;
+  `500` texto plano `Internal Server Error ...`
+- **Cascada**: borra el `attendance` de esa sesión y su `attendance_signature` (FK
+  `attendance_signature.attendance_id`, se borra primero para no violar la FK). Todo en una única
+  transacción.
+- El match del attendance es `course_student_id` + `date` del schedule + `day` =
+  `subject_days.day` de `schedule.subject_days_id` (el ordinal día/sesión). **No** se borra por
+  fecha sola: en cursos con `uses_sessions = 1` varias sesiones comparten `date` y solo se
+  elimina la asistencia de la sesión borrada. Si el schedule no tiene `date` o su
+  `subject_days_id` no resuelve, la cascada se omite y ambos contadores quedan en `0`.
+- Sin effects colaterales en otras tablas: ninguna tabla tiene FK a `schedule`.
+
+### DELETE /schedule/course-student/:course_student_id
+- Params: `course_student_id`
+- Auth: sí
+- `200` → mismo shape que `DELETE /schedule/:id`, con `deleted_count` = número de schedules
+  borrados (`0` si el `course_student` existía pero no tenía ninguno programado)
+- `400` JSON `{ error: 'Parámetro course_student_id inválido' }`; `404` texto plano
+  `CourseStudent not found`; `500` texto plano `Internal Server Error ...`
+- Borra **todos** los schedules del `course_student`. Borrado masivo e **irreversible**: el
+  frontend debe pedir confirmación.
+- **Cascada**: misma regla que el endpoint individual, pero aplicada al conjunto. Se borra el
+  `attendance` de **cada par `(date, day)` que tenía schedule** y sus `attendance_signature`, en
+  una única transacción. Los pares se deduplican (`schedule` no tiene constraint de unicidad).
+- **No** se borra el attendance de los días que el alumno asistió pero que nunca estuvo
+  programado: la cascada solo cubre los pares derivados de los schedules existentes.
+- Efecto colateral relevante: este endpoint deja al `course_student` **sin ningún schedule**, así
+  que desaparece de los filtros por `instructor_id` (ver [Instructor](#instructor--apiinstructor)).
+
+---
+
+## Course Groups — `/api/course_groups`
+
+### GET /
+- Query: `title`, `course_id`, `user_code`, `status`, `instructor_id` (opcionales), `pageSize` (default 10),
+  `currentPage` (default 1)
+- `200` → `{ data: CourseGroup[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila con `course` (con `course_type`, `course_level`)
+- Nota: cuando `instructor_id` está presente, filtra grupos por los cursos del instructor
+  y cada grupo incluye `course_students[]` con `student.user` anidados.
+  Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
+
+### GET /:id
+- Params: `id`
+- `200` → CourseGroup con `course` (con `course_students`) y `course_group_signatures`
+- `404` texto plano `CourseGroup not found`
+
+### POST /
+- Body (Joi): `title` (requerido), `course_id` (requerido), `user_code`, `date`, `status`
+- `201` → CourseGroup (shape de GET /:id)
+- `400` `Input Validation Error <msg>`
+
+### PUT /
+- Body (Joi): `id` (requerido), `title`, `user_code`, `date`, `status`
+- `200` → CourseGroup (sin includes)
+- `404` texto plano `CourseGroup not found`; `400` `Input Validation Error <msg>`
+
+### DELETE /:id
+- Params: `id`
+- `204` vacío; `404` texto plano `CourseGroup not found`
+
+### GET /:id/students
+- Params: `id`; Query: `pageSize`, `currentPage`
+- `200` → `{ data: CourseStudent[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila con `student` (con `user`) y `course`
+
+### DELETE /:id/students
+- Params: `id`; Query: `course_student_ids` (CSV, requerido)
+- `200` → `{ message: '<n> student(s) removed from group', removed_count }`
+- `400`/`404` JSON `{ error: <msg> }`
+
+### GET /:id/signatures
+- Params: `id`
+- `200` → array de CourseGroupSignature (order day/signature)
+
+### DELETE /:id/signatures/:signatureId
+- Params: `signatureId`
+- `200` → `{ success: true, message: 'Firma eliminada correctamente.' }`
+- `404` JSON `{ success: false, error: 'Firma no encontrada.' }`
+
+### POST /signature
+- Body (Joi): `course_group_id` (requerido), `signature` (base64, requerido) y **exactamente uno**
+  de `day_number` / `session_number` (int ≥1) — `session_number` es el alias del número de
+  sesión y tiene prioridad sobre `day_number`
+- `200` → `{ success: true, message: 'Firma guardada correctamente.', data: { signatureUrl, signature_number, record } }`
+- `404`/`400` JSON `{ success: false, error: <msg> }`
+- El ordinal se persiste en `course_group_signature.day_number` (columna `NOT NULL`).
+  Con `uses_sessions = 1` el techo validado es `course.sessions`; con `uses_sessions = 0`, `course.days`.
+
+### GET /report/attendance
+- Query: `course_group_id`, `course_id` (opcionales), `pageSize`, `currentPage`
+- `200` → `{ data: CourseGroup[], totalItems, currentPage, pageSize, totalPages }`
+  Cada grupo con `course`, `course_group_signatures` y `course_students[]` (cada uno con `student`
+  (con `user`), `course`, `schedules[]` (con `instructor`+`user`, `subject`, `subject_day`) y
+  `attendances[]` (con `attendance_status`, `attendance_signature`))
+- `500` JSON `{ error: 'Internal Server Error' }`
+
+---
+
+## Subjects — `/api/subjects`
+
+### GET /
+- `200` → array de Subject (sin includes)
+
+### POST /
+- Body (Joi): `name`, `hours` (requerido), `course_id` (requerido), `order`, `status`, `is_schedulable`
+- `201` → Subject (sin includes)
+- `400` `Input Validation Error <msg>`
+
+### PUT /
+- Body (Joi): `id` (requerido), `name`, `hours` (requerido), `course_id` (requerido), `order`,
+  `status`, `is_schedulable`. Recalcula horas totales del curso.
+- `201` → Subject (sin includes)
+- `400` `Input Validation Error <msg>`
+
+### GET /course/:id
+- Params: `id`; Query: `status`, `is_schedulable` (opcionales, `"true"`/`"false"`)
+- `200` → array de Subject (order ASC) con `subject_days`
+
+### GET /lesson/course/:id
+- Params: `id`
+- `200` → array de Subject (order ASC) con `subject_days`, `subject_lessons` (cada uno con `subject_lesson_days`)
+
+### GET /subject/:id
+- Params: `id`
+- `200` → Subject con `course`, `subject_lessons` (con `subject_lesson_days`), `subject_days`;
+  `null` si no existe
+
+### POST /lesson
+- Body: `course_id`, `subject_id`, `name`, `order`, `status` (sin Joi; repo fija `hours: 1`)
+- `201` → Subject (shape de GET /subject/:id)
+- `400` `Input Validation Error <msg>`
+
+### PUT /lesson
+- Body: `id`, `subject_id`, `name`, `order`, `status`
+- `201` → Subject (shape de GET /subject/:id)
+- `400` `Input Validation Error <msg>`
+
+### POST /subjects_days
+- Body: `subject_id`, `course_id`, `day`, `status` (upsert de SubjectDays + recalcula horas)
+- `201` → texto plano `OK`
+- `400` `Input Validation Error <msg>` | `day (X) excede las sesiones del curso (Y).`
+- `day` es el **número de sesión** cuando el curso tiene `uses_sessions = 1`. El techo solo se
+  valida en ese modo; con `uses_sessions = 0` no hay bound check (comportamiento previo).
+
+### POST /subjects_lesson_days
+- Body: `subject_id`, `subject_lesson_id`, `subject_lesson_days_id`, `course_id`, `day`,
+  `status_lesson` (opcional; upsert de SubjectDays + SubjectLessonDays)
+- `201` → texto plano `OK`
+- `400` `Input Validation Error <msg>` | `day (X) excede las sesiones del curso (Y).`
+
+---
+
+## Assessment — `/api/assessment`
+
+> **Lección importante**: la asociación
+> `CourseStudentAssessment.hasMany(CourseStudentAssessmentDay)` DEBE usar
+> `as: 'CourseStudentAssessmentDays'`. Sin alias explícito, Sequelize devuelve la key
+> `course_student_assessment_days` (snake_case) y el frontend/controlador que lee
+> `CourseStudentAssessmentDays` recibe `[]`/`undefined`. Cualquier include de este dominio debe
+> documentarse aquí con su alias exacto.
+
+### GET /fetchAssessmentData
+- Query: `CSA_id` (requerido)
+- `200` → `{ CSA, CASD }`
+  - `CSA` = CourseStudentAssessment (con `course`+`course_level`+`course_type`,
+    `student`+`user`+`user_doc_type`, `course_student`) más:
+    - `CourseStudentAssessmentDays`: array de CourseStudentAssessmentDay, cada uno con
+      `score_average` (número redondeado a 1 decimal o `null`)
+    - `course_score_average`: promedio global del CSA (o `null`)
+  - `CASD` = array de Subject (status=true, is_schedulable=false) con `subject_days` y
+    `subject_lessons` → `subject_lesson_days` → `course_student_assessment_lesson_days`
+    (los lesson details filtrados por `course_student_assessment_id = CSA_id`)
+
+### GET /courseStudentAssessment/:id
+- Params: `id` (CSA id)
+- `200` → CourseStudentAssessment (mismo shape de `CSA` en fetchAssessmentData, sin
+  `score_average`/`course_score_average`)
+
+### GET /courseStudentAssessmentDay
+- Query: `CSA_id`, `day`, `course_id`, `student_id`, `course_student_id`, `takeoff_day`,
+  `takeoff_night`, `landing_day`, `landing_night`, `landing_precision`, `landing_non_precision`,
+  `landing_gps`, `landing_circuit`, `landing_visual`, `training_time`, `check_time`, `ifr_time`,
+  `vfr_time`, `type`
+  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas;
+  `landing_precision`/`landing_non_precision`/`landing_gps`/`landing_circuit`/`landing_visual`:
+  contadores `INTEGER` de aterrizajes por tipo)
+- `200` → CourseStudentAssessmentDay. **Upsert por `(course_student_assessment_id, day)`**:
+  - si el día **no** existe → lo crea con los campos opcionales enviados;
+  - si el día **sí** existe → aplica como **update parcial** únicamente los campos opcionales
+    que vienen en el query; si no viene ninguno, no escribe nada y solo devuelve el registro.
+- Solo se aceptan los campos opcionales listados arriba; cualquier otro query param se ignora.
+- Un valor **string vacío** (`?landing_gps=`) se normaliza a `null` (limpia la columna) en lugar
+  de mandarse a la BD. `0` sí se escribe.
+
+### POST /createCourseStudentAssessment
+- Body: `course_id` (requerido), `student_id` (requerido), `course_student_id` (requerido)
+  (genera `code` `CSA-########`, `date` = hoy)
+- `201` → CourseStudentAssessment (shape de GET /courseStudentAssessment/:id)
+
+### POST /courseStudentAssessmentApprove
+- Body: `course_student_assessment_id` (requerido), `approve` (requerido)
+- `200` → CourseStudentAssessment (sin includes)
+
+### PUT /updateCourseStudentAssessmentDay
+- Body: `id` (requerido), `airport`, `airstrip`, `elevation`, `meteorology`, `temperature`, `qnh`,
+  `wind`, `weight`, `flaps`, `power`, `seat`, `takeoff`, `landing`, `comments`, `takeoff_day`,
+  `takeoff_night`, `landing_day`, `landing_night`, `landing_precision`, `landing_non_precision`,
+  `landing_gps`, `landing_circuit`, `landing_visual`, `training_time`, `check_time`, `ifr_time`,
+  `vfr_time`, `type`
+  (`training_time`/`check_time`/`ifr_time`/`vfr_time`: números decimales en horas;
+  `landing_precision`/`landing_non_precision`/`landing_gps`/`landing_circuit`/`landing_visual`:
+  contadores `INTEGER` de aterrizajes por tipo)
+- `200` → CourseStudentAssessmentDay
+- Update **parcial**: los campos ausentes en el body no se tocan. String vacío → `null`.
+  Si el `id` no existe el repo lanza `Course Student Assessment Day not found` y el controller
+  responde `500` con `'Internal Server Error'`.
+
+### GET /fetchSubjectAssessment
+- Query: `day`, `course_id`, `course_student_assessment_day_id`
+- `200` → array de Subject (status=true, is_schedulable=false) con `subject_days` (filter por `day`)
+  y `subject_lessons` → `subject_lesson_days` (filter por `day`) →
+  `course_student_assessment_lesson_days` (filter por `course_student_assessment_day_id`)
+
+### PUT /changeCourseStudentAssessmentLessonDay
+- Body: `id` (opcional; si llega actualiza, si no crea), `course_id`, `student_id`,
+  `course_student_id`, `course_student_assessment_id`, `course_student_assessment_day_id`,
+  `subject_id`, `subject_lesson_id`, `subject_days_id`, `subject_lesson_days_id`, `item`, `score`,
+  `score_2`, `score_3`, `day`
+- `200` → Subject (shape de `fetchSubjectAssessment` para ese subject/día)
+
+### POST /saveSignatures
+- Body: `CSAD_id` (requerido), `signature1`, `signature2`, `signature3` (base64, al menos una)
+- `200` → `{ success: true, message: 'Firmas procesadas correctamente.', data: { studentSignatureUrl?, instructorSignatureUrl?, fcaaSignatureUrl? } }`
+- `400` JSON `{ success: false, error: 'No se proporcionaron firmas para guardar.' }`
+
+### DELETE /signature
+- Query: `CSAD_id` (requerido), `type` (1|2|3, requerido)
+- `200` → `{ success: true, message: 'Firma eliminada correctamente.' }`
+- `400` JSON `{ success: false, error: 'CSAD_id y type son requeridos.' | 'type debe ser 1, 2 o 3.' }`
+
+---
+
+## Test — `/api/test`
+
+### GET /
+- `200` → array de Test (sin includes)
+
+### GET /tests/:course_id
+- Params: `course_id`
+- `200` → array de Test con `test_question_types` (cada uno con `question_type`)
+
+### GET /test/:test_id
+- Params: `test_id`
+- `200` → Test con `test_question_types` (cada uno con `question_type`)
+
+### POST /test
+- Body: `course_id` (debe existir), `duration`, `min_score` (genera `code` `E-XXXX`, `status: false`)
+- `201` → Test con `test_question_types` (cada uno con `question_type`)
+
+### PUT /test
+- Body: `id`, `duration`, `min_score`, `status`
+- `201` → Test con `test_question_types`
+
+### GET /questions/by-test/:test_id
+- Params: `test_id`; Query: `question_type_id`, `test_question_type_id`, `course_id`, `status`
+- `200` → array de Question con `answers` y `question_type`
+- `400` JSON `{ error: 'Parámetro test_id inválido' }`
+
+### GET /questionTypes
+- `200` → array de QuestionType
+
+### PUT /questionTypes
+- Body: `id`, `value`
+- `201` → QuestionType (sin includes)
+
+### GET /answers/:id
+- Params: `id` (question id)
+- `200` → array de Answer (filter por `question_id`)
+
+### POST /questionTest
+- Body: `course_id`, `test_id`, `question_type_id`, `test_question_type_id`, `header`
+- `201` → Question con `answers` y `question_type`
+
+### PUT /questionTest
+- Body: `id`, `header`, `status`
+- `201` → Question con `answers` y `question_type`
+
+### POST /answerQuestionTest
+- Body: `course_id`, `test_id`, `question_type_id`, `question_id`, `value`
+- `201` → Question (getQuestionById del `question_id`)
+
+### PUT /answerQuestionTest/:question_id
+- Params: `question_id`; Body: `id`, `value`, `is_correct`, `status`
+- `201` → Question (getQuestionById del `question_id`)
+
+### PUT /testQuestionTypes
+- Body: `id` (si > 0 actualiza, si no crea), `course_id`, `amount`, `value`, `question_type_id`,
+  `status`, `test_id`
+- `201` → Test (getTestById) con `test_question_types`
+
+### GET /student/:student_id
+- Params: `student_id`; Query: `course_student_id` (opcional)
+- `200` → array de CourseStudentTest (order created DESC) con `test` y `course_student` (con `course`)
+- `400` JSON `{ error: 'Parámetro student_id inválido' }`
+
+### GET /courseStudentTest/:id
+- Auth: **no**
+- Params: `id` (course_student_test id)
+- `200` → CourseStudentTest con `course_student_test_questions` (cada uno con `question` (con
+  `question_type`, `answers`) y `course_student_test_answer`)
+- `400` texto plano `Error <msg>`
+
+### POST /courseStudentTest/:course_student_id
+- Params: `course_student_id`; Body: `date`
+- `200` → CourseStudentTest (shape de GET /courseStudentTest/:id; genera `code` `CST-XXXXXXXX` y
+  las preguntas aleatorias)
+- `400` texto plano `Error <msg>`
+
+### POST /courseStudentTestAnswer
+- Body: `courseStudentTestAnswer` (objeto) con `course_student_test_id`,
+  `course_student_test_question_id`, `course_student_id`, `question_id`, `student_id`, `resp`,
+  `test_id`, `course_id`
+- `200` → CourseStudentTestAnswer (creado o actualizado)
+- `400` texto plano `Error <msg>`
+
+### POST /courseStudentTestEnd
+- Body: `course_student_test_id`
+- `200` → `{ answers: [...], score }` (cada answer con `question` —con `answers` restringidas a
+  `is_correct=true`, `question_type`, `test_question_type`—)
+- `400` texto plano `Error <msg>`
+
+### PUT /updateCourseStudentTestScore
+- Body: `course_student_test_id`, `course_student_test_answer_id`, `score`
+- `200` → CourseStudentTest (shape de GET /courseStudentTest/:id)
+- `400` texto plano `Error <msg>`
+
+### POST /import-excel/:test_id
+- Auth: sí
+- Params: `test_id` (requerido); File: `excel_file` (`.xlsx`, máx 10MB)
+- Form (multipart): además del archivo, campos `course_id`, `question_type_id`,
+  `test_question_type_id` (usados cuando la fila es de plantilla en español; `question_type_id`
+  por defecto `1`).
+- Se soportan **dos plantillas** de columnas:
+  - **Español (frontend)**: `Pregunta`, `Respuesta1..RespuestaN`, `RespuestaCorrecta`
+    (índice 1-based o letra `a..e` de la respuesta correcta; selección única). Los metadatos
+    `course_id`, `question_type_id`, `test_question_type_id` se toman del body.
+  - **Inglés (legado)**: `course_id, question_type_id, test_question_type_id, header,
+    answer_1..answer_5, answer_1_correct..answer_5_correct`. Los flags `answer_*_correct`
+    se normalizan (acepta `true`/`1`/`'true'`/`'1'`/`'yes'`/`'si'`/`'sí'`/`'verdadero'`/
+    `'correcto'`); puede haber más de una respuesta correcta por pregunta.
+- Si falta metadata (o fila sin `Pregunta`/`header`), la fila se salta y suma a `skippedRows`.
+- `201` → `{ message: 'Excel import completed', questionsImported, answersImported, skippedRows }`
+- `400` JSON `{ error: 'test_id parameter is required and must be a valid number' }` | `{ error: 'Test not found' }`
+- `400` texto plano `No file uploaded`
+
+### POST /import-csv
+- Auth: **sí**
+- Query: `test_id` (requerido); File: `csv_file` (`.csv`, máx 10MB)
+- Igual que `import-excel` (mismas plantillas, metadatos `course_id`, `question_type_id`,
+  `test_question_type_id` en el body; headers con/ sin BOM, valores trim)
+- `201` → `{ message: 'CSV import completed', questionsImported, answersImported, skippedRows }`
+- `400` JSON `{ error: 'test_id query parameter is required and must be a valid number' }` | `{ error: 'Test not found' }`
+- `400` JSON `{ error: 'No file uploaded' }`
+
+---
+
+### Reportes de examen — `/api/test/reports`
+
+> Endpoints **de solo lectura** para inspeccionar un examen: preguntas, respuestas, la
+> respuesta correcta y las respuestas de un alumno. **Nunca recalculan ni escriben scores**;
+> el veredicto por pregunta se deriva del `score` ya almacenado en
+> `course_student_test_answer`.
+>
+> Equivalente ORM de las consultas SQL de `consulta_examen.sql` (este archivo —`CONTRACTS.md`—
+> es la fuente de verdad del shape).
+>
+> Las respuestas son **anidadas por pregunta**, no planas: una pregunta trae sus `answers`
+> dentro, y la correcta se expone a la vez como `correct_answer_ids` (ids) y `correct_answers`
+> (id + texto), derivados de `answer.is_correct = 1`. Puede haber **varias** correctas por
+> pregunta (tipos 2, 4 y 5).
+>
+> **Parámetro `status`** (común a los que aceptan preguntas):
+> - ausente → **todos** los registros, activos e inactivos
+> - `true` → solo los activos
+> - `false` → solo los inactivos
+>
+> Gobierna **la entidad principal** del endpoint: `test.status` en `/reports/tests`, y
+> `question.status` en el resto. Las `answers` de una pregunta se devuelven **siempre
+> completas** (cada una con su `status`), así el filtro nunca deja preguntas a medias.
+> `test_question_type.status` y `course_student_test.status` **no** se filtran.
+>
+> Los reportes por intento **no** exigen `test.status = 1`: un examen desactivado debe seguir
+> consultable. Si `:course_student_test_id` no pertenece al `:test_id` de la ruta → `404`.
+>
+> Tabla de errores común: `400 { error: 'Parámetro <name> inválido' }` para ids/query no
+> numéricos o `finished` distinto de `true`/`false`; `404 { error: 'Test not found' }`;
+> `404 { error: 'CourseStudentTest not found' }`; `500 { error: 'Error interno del servidor' }`.
+
+#### GET /reports/tests
+- Auth: sí
+- Query: `status` (opcional), `course_id` (opcional)
+- `200` → array de Test con alias `course` (`{ id, name, code }`) + `question_count` +
+  `attempt_count` (enteros, siempre presentes). Sin paginación.
+
+#### GET /reports/tests/:test_id/questions
+- Auth: sí
+- Params: `test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → `{ test, question_types, total_questions, questions }`
+  - `test` = Test (`id, course_id, code, duration, min_score, status`). **No** incluye
+    `test_question_types`: el blueprint va solo en `question_types`, para no duplicarlo.
+  - `question_types` = array de TestQuestionType (`id, question_type_id, amount, value, status`)
+    con alias `question_type` (`id, name, max_answer, value`), orden por `question_type_id`
+  - Cada `questions[]`: `id, header, test_id, question_type_id, question_type`,
+    `test_question_type_id`, `points` (= `test_question_type.value`; **`null`** si el
+    blueprint no existe), `status`, `answers[]` (`id, value, is_correct, status`, la correcta
+    primero y luego por `id`), `correct_answer_ids[]`, `correct_answers[]` (`{ id, value }`)
+- Test inexistente → `404`. Test sin preguntas → `200` con `questions: []`
+
+#### GET /reports/tests/:test_id/correct-answers
+- Auth: sí
+- Params: `test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → **mismo shape** que el anterior, pero solo preguntas con ≥1 `is_correct = 1` y con
+  `answers[]` reducido a las correctas
+- Test inexistente → `404`
+
+#### GET /reports/tests/:test_id/attempts/:course_student_test_id
+- Auth: sí
+- Params: `test_id`, `course_student_test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → CourseStudentTest (`id, course_id, test_id, student_id, course_student_id, code,
+  attempts, date, score, approve, status, finished`) con alias `student` (que trae `user`:
+  `id, name, last_name, email`) y `test`, más `total_questions` y `questions[]`
+- Cada `questions[]`: las claves de la pregunta del reporte anterior, más
+  `course_student_test_question_id`, `answered` (bool) y `course_student_test_answer`
+  (`{ id, question_id, resp, score, status }` o `null` si el alumno no respondió).
+  `resp` aquí viene **crudo**, tal como está en la BD
+
+#### GET /reports/tests/:test_id/attempts/:course_student_test_id/answers
+- Auth: sí
+- Params: `test_id`, `course_student_test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → mismo encabezado que el anterior + `total_questions` y `questions[]` con la
+  respuesta del alumno **deserializada**:
+  - `student_response` — texto plano. Para tipos 1/2/3 es el texto de la(s) opción(es)
+    marcadas (unidas con `" | "`); para tipos 4/5 es el texto que escribió el alumno.
+    Cadena vacía si no respondió.
+  - `student_selected_ids[]` — `answer.id` marcados. **Ojo**: para tipos 4 y 5 `resp` es texto
+    libre sin ids, así que aquí van los ids de las *respuestas correctas que el alumno
+    coincidió* (comparación `cleanString`: trim + lowercase + sin espacios).
+  - `student_response_raw` — el `resp` crudo sin procesar
+  - `correct_answers_text` — las correctas unidas con `" | "`
+  - `result` — `CORRECTA` | `PARCIAL` | `INCORRECTA` | `SIN_RESPUESTA`.
+    Tipos 1/3: `CORRECTA` si el id coincide con alguna correcta. Tipo 2: `CORRECTA` solo si
+    marcó exactamente el conjunto correcto; si no, `PARCIAL` cuando `score > 0`. Tipos 4/5:
+    `CORRECTA` si `score >= points`, `PARCIAL` si `score > 0`.
+  - `points_possible` (= `test_question_type.value`; `null` si el blueprint no existe),
+    `points_scored` (= `course_student_test_answer.score`; `null` si no respondió)
+- `resp` con JSON inválido o vacío **no** provoca `500`: se degrada a respuesta vacía
+  (a diferencia de `evaluateAnswers`, que sí necesita abortar para fijar score 0)
+
+#### GET /reports/tests/:test_id/attempts/:course_student_test_id/questions
+- Auth: sí
+- Params: `test_id`, `course_student_test_id`; Query: `status`, `question_type_id` (opcionales)
+- `200` → **mismo shape** que `/attempts/:course_student_test_id`
+- Solo incluye las preguntas que efectivamente le tocaron en el sorteo de ese intento
+  (`course_student_test_question`), no todo el banco del test
+
+#### GET /reports/tests/:test_id/results
+- Auth: sí
+- Params: `test_id`; Query: `student_id`, `finished` (ambos opcionales), `pageSize`
+  (default 10), `currentPage` (default 1)
+- `200` → `{ data, totalItems, currentPage, pageSize, totalPages }`, ordenado por
+  `score DESC, id DESC`
+  - Cada `data[]`: `attempt_id, attempt_code, test_id, attempts, date, finished, approve,
+    status, student` (con `user`), `course_student_id`, y **tres puntajes distintos**:
+    - `score` — `course_student_test.score`, el valor **autoritativo** congelado al finalizar
+      el intento
+    - `score_computed` — `SUM(course_student_test_answer.score)` en vivo. Puede divergir de
+      `score` si se editaron respuestas después de cerrar el intento.
+    - `total_possible` — `SUM(test_question_type.value)` de lo sorteado. Puede quedar
+      desactualizado si cambió el `value` de un tipo de pregunta después del intento.
+  - Además `min_score` (de `test`, o `null`).
+- **Paginación**: con `pageSize=-1` se omiten `limit`/`offset` y se devuelven **todos** los
+  intentos con `currentPage: 1`, `pageSize: -1`, `totalPages: 1`. En cualquier otro caso
+  `totalPages = ceil(totalItems / pageSize)`. Si no hay resultados, `totalItems: 0` y
+  `totalPages: 0` (sea cual sea el `pageSize`). Un `currentPage` fuera de rango devuelve
+  `data: []` con `totalItems` y `totalPages` correctos.
+- `finished` acepta solo `true`/`false`; otro valor → `400`.
+  `pageSize` acepta `-1` o un entero `>= 1`; `currentPage` un entero `>= 1`. Valores como `0`,
+  `-2` o `-1` en `currentPage` → `400` (evitan un `LIMIT`/`OFFSET` negativo, que MySQL rechaza
+  con error de sintaxis).
+
+---
+
+## Attendance — `/api/attendance`
+
+### GET /
+- Query: `course_student_id`, `day`, `session_number`, `attendance_status_id`, `date_from`, `date_to`, `instructor_id` (opcionales),
+  `pageSize` (default 10), `currentPage` (default 1)
+- `200` → `{ data: Attendance[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila con `course_student`, `attendance_status`, `attendance_signature`
+- Orden: `date` DESC, `day` ASC (desempata varias sesiones de la misma fecha)
+- Nota: `day` y `session_number` filtran la misma columna `day`; `session_number` tiene prioridad
+- Nota: cuando `instructor_id` está presente, filtra asistencias de los CourseStudent
+  del instructor indicado. Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
+
+### GET /:id
+- Params: `id`
+- `200` → Attendance con `course_student`, `attendance_status`, `attendance_signature`
+- `404` texto plano `Attendance not found`
+
+### GET /by-course-student
+- Query: `course_student_id` (requerido)
+- `200` → array de Attendance con `attendance_status`, `attendance_signature` (orden `date` DESC, `day` ASC)
+- `400` texto plano `course_student_id is required`
+
+### GET /by-date-range
+- Query: `start_date` (requerido), `end_date` (requerido)
+- `200` → array de Attendance con `course_student`, `attendance_status`, `attendance_signature`
+- `400` texto plano `start_date and end_date are required`
+
+### POST /
+- Body (Joi): `course_student_id` (req), `day` (int ≥1, req), `date` (req), `attendance_status_id`
+  (req), `comments`, `session_number` (int ≥1, opcional)
+- `201` → Attendance con includes
+- `400` texto plano `Input Validation Error <msg>` | `day (X) excede los días del curso (Y).`
+  | `session_number es requerido para cursos programados por sesiones.`
+  | `session_number (X) excede las sesiones del curso (Y).`
+- Regla de validación (ver [Días vs. Sesiones](#días-vs-sesiones)): con `uses_sessions = 0` valida
+  `day <= course.days`; con `uses_sessions = 1` exige `session_number` y valida
+  `session_number <= course.sessions`. En ambos casos el ordinal se guarda en `attendance.day`.
+- Varias asistencias del mismo `course_student` pueden compartir `date`: la unicidad es
+  `(course_student_id, date, day)`.
+
+### PUT /
+- Body: `id` (req), `course_student_id`, `day`, `session_number`, `date`, `attendance_status_id`, `comments`
+- `200` → Attendance con includes
+- `404` texto plano `Attendance not found`
+- La validación de `day`/`session_number` es idéntica a `POST /` y solo corre si se envía alguno
+  de los dos.
+
+### DELETE /:id
+- Params: `id`
+- `204` vacío; `404` texto plano `Attendance not found`
+
+### GET /statuses  |  GET /statuses/:id
+- `200` → array de AttendanceStatus (order name ASC; el param `:id` se ignora)
+
+### POST /statuses
+- Body (Joi): `name` (req), `description`
+- `201` → AttendanceStatus (sin includes)
+
+### PUT /statuses/:id
+- Params: `id`; Body: `name`, `description`
+- `200` → AttendanceStatus (sin includes)
+- `404` texto plano `Attendance Status not found`
+
+### DELETE /statuses/:id
+- Params: `id`
+- `204` vacío; `404` texto plano `Attendance Status not found`
+
+### POST /signature
+- Body: `attendance_id` (req), `signature` (base64, req)
+- `200` → `{ success: true, message: 'Firma guardada correctamente.', data: { signatureUrl, record } }`
+- `400` JSON `{ success: false, error: 'No se proporcionó la firma para guardar.' | 'El attendance_id es requerido.' }`
+
+### DELETE /:id/signature
+- Params: `id` (attendance_id)
+- `200` → `{ success: true, message: 'Firma eliminada correctamente.' }`
+- `404` JSON `{ success: false, error: 'Firma no encontrada.' }`
+
+---
+
+## Instructor — `/api/instructor`
+
+> Endpoints para el dashboard del instructor. Filtran datos por `instructor_id` a través
+> de la tabla `Schedule` (Instructor → Schedule → CourseStudent → datos).
+>
+> Consecuencia: `DELETE /api/courses/schedule/:id` y
+> `DELETE /api/courses/schedule/course-student/:course_student_id` cambian estos resultados.
+> Si un `course_student` se queda **sin ningún schedule** —porque se borró el último o porque se
+> borraron todos— ese alumno deja de aparecer en los filtros por `instructor_id` de
+> `/api/instructor/*`, `GET /api/courses/coursesStudents`,
+> `/api/course_groups/report/attendance` y `/api/assessment`.
+>
+> **Filtro de alumnos activos:** todos los endpoints de esta sección exigen
+> `course_student.status = 1` (columna `TINYINT`, valores `0`/`1`). Un `course_student`
+> inactivo se excluye por completo — sus `schedule`, `attendance`, tests y evaluaciones
+> no aparecen, aunque el `instructor_id` tenga filas asociadas. El filtro se aplica en el
+> `include` de `CourseStudent` con `required: true, where: { status: true }`, por lo que
+> también actúa sobre `getCourseIdsByInstructor` (usada para poblar el filtro de cursos)
+> y sobre `GET /api/instructor/schedule/:instructor_id`.
+
+### GET /schedule/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array de Schedule (order date/hora ASC) con `student` (con `user`), `instructor` (con `user`),
+  `course_student`, **`subject_day`**, `subject`
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /schedule/grouped/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array agrupado por `course_student_id` con la estructura:
+  ```json
+  [
+    {
+      "course_student_id": 1,
+      "student_id": 1,
+      "student": { "user": {"id": 1, "name": "Juan", "last_name": "Pérez", "email": "...", ...}, "status": true },
+      "user": {"id": 1, "name": "Juan", "last_name": "Pérez", "email": "..."},
+      "pilot_name": "Juan Pérez",
+      "course_id": 10,
+      "course_name": "PPL(A)",
+      "course_code": "CP-001",
+      "course": { "id": 10, "name": "PPL(A)", "code": "CP-001", ... },
+      "schedules": [
+        {
+          "id": ...,
+          "date": "...",
+          "hour": "...",
+          "classTime": ...,
+          "subject_day": { "day": 1, "classTime": "08:00" },
+          "subject_id": 5,
+          "subject": { "name": "Vuelo 1", "order": 1 },
+          "subject_name": "Vuelo 1",
+          "subject_lesson": { "name": "Despegue", "order": 1 },
+          "subject_lesson_days": {
+            "id": 1,
+            "day": 1,
+            "classTime": "08:00"
+          }
+        }
+      ]
+    }
+  ]
+  ```
+  - **Ordenamiento:** Primero por `course_student_id`, luego por `subject_lesson.order`, luego por `subject_lesson_days.day`, y finalmente por `schedule.date`.
+  - Cada schedule incluye `subject_lesson` y `subject_lesson_days` para el ordenamiento por días/secciones.
+  - `pilot_name` es el nombre completo del estudiante (formateado).
+  - `user.name` y `user.last_name` están disponibles explícitamente.
+  - `course_name` y `course_code` identifican el curso.
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /assessments
+- Query: `instructor_id` (requerido), `course_id` (opcional), `pageSize` (default 10),
+  `currentPage` (default 1)
+- Auth: sí
+- `200` → `{ data: CourseStudentAssessment[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila con `course_student` (con `student.user`) y `course` (con `course_type`, `course_level`)
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /tests/with-participation/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → `{ data: CourseStudentTest[], totalItems, currentPage, pageSize, totalPages }`
+  Cada fila con `test`, `course_student` (con `student.user`), y `course_student_test_questions`
+  (cada uno con `course_student_test_answer`).
+  - Solo incluye tests de courseStudents que tienen schedules asignados al instructor indicado.
+  - Si no hay resultados, retorna `{ data: [], totalItems: 0, ... }`
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /attendance/grouped/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array agrupado por `course_student_id` con la estructura:
+  ```json
+  [
+    {
+      "course_student_id": 1,
+      "student_id": 1,
+      "student": { "user": {"id": 1, "name": "María", "last_name": "González", "email": "..."} },
+      "user": {"id": 1, "name": "María", "last_name": "González", "email": "..."},
+      "pilot_name": "María González",
+      "course_id": 10,
+      "course_name": "PPL(A)",
+      "course_code": "CP-001",
+      "course": { "id": 10, "name": "PPL(A)", "code": "CP-001", ... },
+      "schedulesDates": ["2024-01-15", "2024-01-22"],
+      "attendances": [
+        {
+          "id": 50,
+          "attendance_id": 50,
+          "date": "2024-01-15",
+          "day": 1,
+          "attendance_status": { "name": "Presente", "description": null },
+          "attendance_signature": { "signature_url": "https://cloudinary/..." },
+          "subject_id": 5,
+          "subject": { "name": "Vuelo 1" },
+          "subject_name": "Vuelo 1",
+          "subject_day": 1,
+          "hour": "08:00",
+          "classTime": 1.5
+        }
+      ]
+    }
+  ]
+  ```
+  - **Orden:** `date` DESC, `day` ASC (mismo que GET /attendance).
+  - Agrupado por courseStudent, respetando el criterio de días/secciones.
+  - `pilot_name` es el nombre completo del estudiante (formateado).
+  - `user.name` y `user.last_name` están disponibles explícitamente.
+  - `course_name` y `course_code` identifican el curso.
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+### GET /evaluations/grouped/:instructor_id
+- Params: `instructor_id` (requerido)
+- Auth: sí
+- `200` → array agrupado por `course_student_id` con la estructura:
+  ```json
+  [
+    {
+      "course_student_id": 1,
+      "course_student": { "student": { "user": {...} }, "status": ... },
+      "course": { ... },
+      "CSA": CourseStudentAssessment (con `course`, `course_level`, `course_type`, `student`, `user`, `course_student`),
+      "created_at": "..."
+    }
+  ]
+  ```
+  - Agrupado por courseStudent, listado por `date` DESC.
+- `400` JSON `{ error: 'Parámetro instructor_id inválido' }`
+
+---
+
+### GET /signature_groups/:instructor_id
+- Params: instructor_id (requerido)
+- Auth: sí
+- 200 → { data: [...] } array de grupos de curso (solo course_type_id === 1) con días y firmas
+- Filtra grupos donde course.course_type_id === 1 y status: true
+- days son días/sesiones con programación para esos alumnos (filtrados dentro del techo del programa)
+- Si no hay grupos, retorna { data: [] }
+- 400 JSON { error: 'Parámetro instructor_id inválido' }
+- 500 texto plano Internal Server Error
+
+---
+
 
 ## Suggestions — `/api/suggestions`
 

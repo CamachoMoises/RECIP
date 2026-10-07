@@ -254,7 +254,7 @@ const MyInstructorCourses = () => {
 						{activeTab === 'signatures' && (
 							<InstructorSignaturesTab
 								instructor_id={instructor_id}
-								courses={coursesForTabs}
+								schedules={instructorState.schedulesGrouped}
 							/>
 						)}
 					</div>

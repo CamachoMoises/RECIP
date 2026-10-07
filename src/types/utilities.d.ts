@@ -304,6 +304,33 @@ export type courseGroup = {
     updatedAt?: string;
 }
 
+export type signatureGroupStudent = {
+    id: number;
+    code: string;
+    student: { name: string | null; last_name: string | null };
+}
+
+export type signatureGroupCourse = {
+    id: number;
+    name: string;
+    code: string;
+    uses_sessions?: boolean;
+    days?: number;
+    sessions?: number;
+    course_type?: { id: number; name: string } | null;
+    course_level?: string | null;
+}
+
+export type signatureGroup = {
+    course_group_id: number;
+    title: string;
+    code: string;
+    course: signatureGroupCourse | null;
+    course_students?: signatureGroupStudent[];
+    days: number[];
+    signatures?: courseGroupSignature[];
+}
+
 export type courseStudent = {
     id: number;
     course_group_id?: number | null;

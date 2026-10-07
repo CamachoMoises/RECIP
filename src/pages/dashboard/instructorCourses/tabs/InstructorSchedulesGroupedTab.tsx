@@ -60,6 +60,8 @@ const InstructorSchedulesGroupedTab = ({
 	const filtered = schedules.filter(
 		(item) => courseIdOfGrouped(item) != null,
 	);
+	console.log('Schedules:', schedules);
+	console.log('Filtered:', filtered);
 
 	const totalSessions = useMemo(
 		() =>

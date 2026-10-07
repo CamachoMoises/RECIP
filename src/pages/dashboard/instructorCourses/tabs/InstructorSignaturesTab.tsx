@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { axiosGetDefault } from '../../../../services/axios';
 import {
 	Accordion,
@@ -11,44 +11,65 @@ import {
 import { ChevronDown, PenLine, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingPage from '../../../../components/LoadingPage';
-import { course } from '../../../../types/utilities';
 import { PermissionsValidate } from '../../../../services/permissionsValidate';
+import { signatureGroup } from '../../../../types/utilities';
+import { ScheduleGroupedItem } from '../../../../features/instructorSlice';
+import { isWithinProgram } from '../../../../utils/programSize';
 import InstructorSignaturesPanel from '../InstructorSignaturesPanel';
-import {
-	buildCourseCatalog,
-	GROUPS_PAGE_SIZE,
-	isTheoreticalCourse,
-} from './instructorShared';
 
 /**
- * Las firmas de grupo se firman por curso, así que los grupos se piden **solo
- * por `instructor_id`**: `api/course_groups` reemplaza `course_id` por la lista
- * de cursos del instructor cuando el filtro es por instructor. `courseId` es un
- * recorte de pantalla.
+ * Las firmas de grupo se agrupan por grupo y llegan con sus firmas ya cacheadas
+ * del endpoint dedicado del instructor (`api/instructor/signature_groups/:instructor_id`).
+ * Los **días** a firmar NO vienen de `group.days` (el endpoint los filtra por
+ * `status` activo): se toman del cronograma del instructor (`schedules`), que ya
+ * se carga en el store, relacionándolos por `course_student_id`. Si 2 pilotos
+ * comparten `course_group_id` → 1 formulario (1 firma por grupo por día).
  */
 type Props = {
 	instructor_id: number;
-	courses?: course[] | null;
+	schedules?: ScheduleGroupedItem[];
 };
 
-const InstructorSignaturesTab = ({
-	instructor_id,
-	courses,
-}: Props) => {
-	const [groups, setGroups] = useState<
-		{
-			id: number;
-			title: string;
-			code: string;
-			course_id: number | null;
-			course?: course | null;
-		}[]
-	>([]);
+/** Ordinal (día o sesión) de un schedule del cronograma del instructor. */
+const dayOfSchedule = (item: ScheduleGroupedItem['schedules'][number]) =>
+	item.subject_day?.day ?? undefined;
+
+const InstructorSignaturesTab = ({ instructor_id, schedules }: Props) => {
+	const [groups, setGroups] = useState<signatureGroup[]>([]);
 	const [openGroup, setOpenGroup] = useState<number | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	const canDeleteSignature = PermissionsValidate(['staff']);
-	const catalog = buildCourseCatalog(courses);
+
+	/**
+	 * course_student_id → course_group_id, para bajar los días de cada grupo
+	 * desde el cronograma (los schedules vienen por alumno, no por grupo).
+	 */
+	const studentToGroup = useMemo(() => {
+		const map = new Map<number, number>();
+		groups.forEach((group) => {
+			(group.course_students ?? []).forEach((cs) => {
+				if (cs.id) map.set(cs.id, group.course_group_id);
+			});
+		});
+		return map;
+	}, [groups]);
+
+	/** Días de cada grupo: unión de los `subject_day.day` de sus alumnos. */
+	const daysByGroup = useMemo(() => {
+		const byGroup = new Map<number, Set<number>>();
+		(schedules ?? []).forEach((item) => {
+			const groupId = studentToGroup.get(item.course_student_id);
+			if (!groupId) return;
+			const daySet = byGroup.get(groupId) ?? new Set<number>();
+			item.schedules?.forEach((s) => {
+				const day = dayOfSchedule(s);
+				if (day !== undefined && day !== null) daySet.add(day);
+			});
+			byGroup.set(groupId, daySet);
+		});
+		return byGroup;
+	}, [schedules, studentToGroup]);
 
 	const loadGroups = useCallback(async () => {
 		if (instructor_id <= 0) {
@@ -58,18 +79,22 @@ const InstructorSignaturesTab = ({
 		}
 		try {
 			const { resp, status } = await axiosGetDefault(
-				'api/course_groups',
-				{
-					instructor_id,
-					status: true,
-					pageSize: GROUPS_PAGE_SIZE,
-				},
+				`api/instructor/signature_groups/${instructor_id}`,
 			);
 			if (status >= 200 && status < 400) {
 				const data = resp.data || resp || [];
-				setGroups(Array.isArray(data) ? data : []);
+				const parsed = Array.isArray(data) ? data : [];
+				console.log(
+					'[InstructorSignaturesTab] parsed groups:',
+					parsed,
+				);
+				setGroups(parsed);
 			}
-		} catch {
+		} catch (error) {
+			console.log(
+				'[InstructorSignaturesTab] error loading groups:',
+				error,
+			);
 			toast.error('Error al cargar los grupos');
 		} finally {
 			setLoading(false);
@@ -82,16 +107,29 @@ const InstructorSignaturesTab = ({
 
 	if (loading) return <LoadingPage />;
 
-	const resolveGroupCourse = (
-		group: (typeof groups)[number],
-	): course | null =>
-		group.course ?? catalog.get(group.course_id ?? -1) ?? null;
-
-	// Los grupos se firman fuera del listado de pilotos, por eso no se usan los
-	// alumnos: solo los grupos del instructor que el panel puede dibujar.
-	const visibleGroups = groups.filter(
-		(g) => !isTheoreticalCourse(resolveGroupCourse(g)),
+	console.log(
+		'[InstructorSignaturesTab] schedules:',
+		schedules,
+		'studentToGroup:',
+		studentToGroup,
+		'daysByGroup:',
+		daysByGroup,
 	);
+
+	const pilotNames = (group: signatureGroup) =>
+		(group.course_students ?? [])
+			.map((cs) =>
+				`${cs.student?.name ?? ''} ${cs.student?.last_name ?? ''}`.trim(),
+			)
+			.filter(Boolean);
+
+	const groupDays = (group: signatureGroup) => {
+		const daySet = daysByGroup.get(group.course_group_id);
+		if (!daySet || daySet.size === 0) return [];
+		return [...daySet]
+			.filter((day) => isWithinProgram(group.course, day))
+			.sort((a, b) => a - b);
+	};
 
 	return (
 		<Card
@@ -125,13 +163,13 @@ const InstructorSignaturesTab = ({
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
 				>
-					{visibleGroups.length}{' '}
-					{visibleGroups.length === 1
+					{groups.length}{' '}
+					{groups.length === 1
 						? 'grupo disponible'
 						: 'grupos disponibles'}
 				</Typography>
 
-				{visibleGroups.length === 0 ? (
+				{groups.length === 0 ? (
 					<Typography
 						color="gray"
 						placeholder={undefined}
@@ -142,12 +180,12 @@ const InstructorSignaturesTab = ({
 					</Typography>
 				) : (
 					<div className="flex flex-col gap-2">
-						{visibleGroups.map((group) => {
-							const groupCourse = resolveGroupCourse(group);
+						{groups.map((group) => {
+							const pilots = pilotNames(group);
 							return (
 								<Accordion
-									key={group.id}
-									open={openGroup === group.id}
+									key={group.course_group_id}
+									open={openGroup === group.course_group_id}
 									className="border border-blue-gray-100 rounded-lg"
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
@@ -156,7 +194,9 @@ const InstructorSignaturesTab = ({
 									<AccordionHeader
 										onClick={() =>
 											setOpenGroup(
-												openGroup === group.id ? null : group.id,
+												openGroup === group.course_group_id
+													? null
+													: group.course_group_id,
 											)
 										}
 										className="px-4 py-3"
@@ -185,23 +225,40 @@ const InstructorSignaturesTab = ({
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														{groupCourse?.name ?? '-'}
+														{group.course?.name ?? '-'}
 													</Typography>
+													{pilots.length > 0 && (
+														<Typography
+															variant="small"
+															color="blue-gray"
+															className="text-xs"
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															{pilots.join(', ')}
+														</Typography>
+													)}
 												</div>
 											</div>
 											<ChevronDown
 												size={18}
 												className={`transition-transform ${
-													openGroup === group.id ? 'rotate-180' : ''
+													openGroup === group.course_group_id
+														? 'rotate-180'
+														: ''
 												}`}
 											/>
 										</div>
 									</AccordionHeader>
 									<AccordionBody className="px-4 py-2">
 										<InstructorSignaturesPanel
-											groupId={group.id}
-											course={groupCourse}
+											groupId={group.course_group_id}
+											course={group.course}
+											days={groupDays(group)}
+											signatures={group.signatures ?? []}
 											canDelete={canDeleteSignature}
+											onChanged={loadGroups}
 										/>
 									</AccordionBody>
 								</Accordion>

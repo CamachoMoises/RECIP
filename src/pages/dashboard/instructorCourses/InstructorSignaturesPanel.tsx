@@ -1,66 +1,62 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
 	Button,
 	IconButton,
 	Typography,
 } from '@material-tailwind/react';
-import { ChevronDown, Save, Trash2 } from 'lucide-react';
+import {
+	CheckCircle2,
+	ChevronDown,
+	Save,
+	Trash2,
+} from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 import toast from 'react-hot-toast';
 import {
 	axiosDeleteSlice,
-	axiosGetDefault,
 	axiosPostDefault,
 } from '../../../services/axios';
 import {
-	course,
 	courseGroupSignature,
+	signatureGroupCourse,
 } from '../../../types/utilities';
 import {
 	ordinalLabel,
 	ordinalNoun,
+	ordinalNounArticle,
 	ordinalNounPlural,
-	programSize,
 	usesSessions,
 } from '../../../utils/programSize';
 
 type Props = {
 	groupId: number;
-	course?: course | null;
+	course?: signatureGroupCourse | null;
+	days: number[];
+	signatures: courseGroupSignature[];
 	canDelete?: boolean;
+	onChanged?: () => void;
 };
 
-const MAX_SIGNATURES_PER_DAY = 3;
+/**
+ * El form del instructor solo permite **1 firma por día**: los días se toman del
+ * cronograma (`days` del endpoint de firmas), no del programa completo del curso.
+ */
 
 const InstructorSignaturesPanel = ({
 	groupId,
 	course,
+	days,
+	signatures,
 	canDelete = false,
+	onChanged,
 }: Props) => {
-	const [signatures, setSignatures] = useState<courseGroupSignature[]>(
-		[],
-	);
 	const [openDays, setOpenDays] = useState<Set<number>>(new Set());
-	const [savingKey, setSavingKey] = useState<string | null>(null);
-	const sigCanvasRefs = useRef<Map<string, SignatureCanvas>>(new Map());
+	const [saving, setSaving] = useState<number | null>(null);
+	const sigCanvasRefs = useRef<Map<number, SignatureCanvas>>(
+		new Map(),
+	);
 
-	const loadSignatures = useCallback(async () => {
-		try {
-			const { resp, status } = await axiosGetDefault(
-				`api/course_groups/${groupId}/signatures`,
-			);
-			if (status >= 200 && status < 400) {
-				const data = resp.data || resp || [];
-				setSignatures(Array.isArray(data) ? data : []);
-			}
-		} catch {
-			toast.error('Error al cargar las firmas');
-		}
-	}, [groupId]);
-
-	useEffect(() => {
-		loadSignatures();
-	}, [loadSignatures]);
+	const orderedDays = [...days].sort((a, b) => a - b);
 
 	const handleToggleDay = (day: number) => {
 		setOpenDays((prev) => {
@@ -82,8 +78,7 @@ const InstructorSignaturesPanel = ({
 			toast.error('Dibuja una firma primero');
 			return;
 		}
-		const key = `${day}-${signatures.filter((s) => s.day_number === day).length + 1}`;
-		setSavingKey(key);
+		setSaving(day);
 		try {
 			await axiosPostDefault('api/course_groups/signature', {
 				course_group_id: groupId,
@@ -94,21 +89,18 @@ const InstructorSignaturesPanel = ({
 			});
 			toast.success('Firma guardada correctamente');
 			canvas.clear();
-			await loadSignatures();
+			onChanged?.();
 		} catch (error: any) {
 			toast.error(error?.message || 'Error al guardar la firma');
 		} finally {
-			setSavingKey(null);
+			setSaving(null);
 		}
 	};
 
-	const handleDeleteSignature = async (
-		sig: courseGroupSignature,
-		day: number,
-	) => {
+	const handleDeleteSignature = async (sig: courseGroupSignature) => {
 		if (
 			!confirm(
-				`¿Eliminar firma ${sig.signature_number} de la ${ordinalNoun(course).toLowerCase()} ${day}?`,
+				`¿Eliminar la firma ${ordinalNounArticle(course).toLowerCase()} ${sig.day_number}?`,
 			)
 		)
 			return;
@@ -117,13 +109,11 @@ const InstructorSignaturesPanel = ({
 				`api/course_groups/${groupId}/signatures/${sig.id}`,
 			);
 			toast.success('Firma eliminada');
-			await loadSignatures();
+			onChanged?.();
 		} catch (error: any) {
 			toast.error(error?.message || 'Error al eliminar firma');
 		}
 	};
-
-	if (course?.course_type?.id === 2) return null;
 
 	return (
 		<div>
@@ -137,192 +127,157 @@ const InstructorSignaturesPanel = ({
 				Firmas del instructor por{' '}
 				{ordinalNounPlural(course).toLowerCase()}
 			</Typography>
-			<div className="flex flex-col gap-1 max-w-md mx-auto">
-				{Array.from(
-					{ length: programSize(course) || 1 },
-					(_, i) => i + 1,
-				).map((day) => {
-					const isOpen = openDays.has(day);
-					const daySignatures = signatures
-						.filter((s) => s.day_number === day)
-						.sort((a, b) => a.signature_number - b.signature_number);
-					const sigCount = daySignatures.length;
-					const fullDay = sigCount >= MAX_SIGNATURES_PER_DAY;
-					const canvasKey = `${day}-${sigCount + 1}`;
-					return (
-						<div
-							key={day}
-							className="border border-gray-200 rounded"
-						>
-							<button
-								type="button"
-								onClick={() => handleToggleDay(day)}
-								className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-left transition-colors rounded ${fullDay ? 'bg-green-50 text-green-800 hover:bg-green-100' : 'text-blue-gray-700 hover:bg-gray-50'}`}
+			{orderedDays.length === 0 ? (
+				<Typography
+					variant="small"
+					color="gray"
+					className="text-center py-4"
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Este grupo no tiene programación en el cronograma.
+				</Typography>
+			) : (
+				<div className="flex flex-col gap-1 max-w-md mx-auto">
+					{orderedDays.map((day) => {
+						const isOpen = openDays.has(day);
+						const daySignature = signatures.find(
+							(s) => s.day_number === day,
+						);
+						const filled = Boolean(daySignature);
+						return (
+							<div
+								key={day}
+								className="border border-gray-200 rounded"
 							>
-								<span className="flex items-center gap-2">
-									<ChevronDown
-										size={14}
-										className={`transition-transform ${isOpen ? 'rotate-180' : ''} ${fullDay ? 'text-green-500' : 'text-gray-400'}`}
-									/>
-									{ordinalLabel(course, day)}
-									{fullDay && (
-										<span className="text-xs text-green-600 font-normal">
-											✓ completo
-										</span>
-									)}
-									{sigCount > 0 && !fullDay && (
-										<span className="text-xs text-blue-600 font-normal">
-											{sigCount}/{MAX_SIGNATURES_PER_DAY}{' '}
-											firmas
-										</span>
-									)}
-								</span>
-							</button>
-							{isOpen && (
-								<div className="px-3 pb-3 pt-1 flex flex-col items-center gap-3">
-									{daySignatures.map((sig) => (
-										<div
-											key={sig.id}
-											className="flex flex-col items-center gap-1 w-full"
-										>
-											<div className="flex items-center justify-between w-full max-w-xs">
-												<Typography
-													variant="small"
-													color="gray"
-													placeholder={undefined}
-													onPointerEnterCapture={
-														undefined
-													}
-													onPointerLeaveCapture={
-														undefined
-													}
-												>
-													Firma {sig.signature_number}
-												</Typography>
-												{canDelete && (
-													<IconButton
-														size="sm"
-														title={`Eliminar firma ${sig.signature_number} de la ${ordinalNoun(course).toLowerCase()} ${day}`}
-														variant="text"
-														color="red"
-														onClick={() =>
-															handleDeleteSignature(
-																sig,
-																day,
-															)
-														}
-														placeholder={
-															undefined
-														}
-														onPointerEnterCapture={
-															undefined
-														}
-														onPointerLeaveCapture={
-															undefined
-														}
+								<button
+									type="button"
+									onClick={() => handleToggleDay(day)}
+									className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-left transition-colors rounded ${filled ? 'bg-green-50 text-green-800 hover:bg-green-100' : 'text-blue-gray-700 hover:bg-gray-50'}`}
+								>
+									<span className="flex items-center gap-2">
+										<ChevronDown
+											size={14}
+											className={`transition-transform ${isOpen ? 'rotate-180' : ''} ${filled ? 'text-green-500' : 'text-gray-400'}`}
+										/>
+										{ordinalLabel(course, day)}
+										{filled && (
+											<span className="flex items-center gap-1 text-xs text-green-600 font-normal">
+												<CheckCircle2 size={12} />
+												firmado
+											</span>
+										)}
+									</span>
+								</button>
+								{isOpen && (
+									<div className="px-3 pb-3 pt-1 flex flex-col items-center gap-3">
+										{daySignature ? (
+											<div className="flex flex-col items-center gap-1 w-full">
+												<div className="flex items-center justify-between w-full max-w-xs">
+													<Typography
+														variant="small"
+														color="gray"
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
 													>
-														<Trash2 size={14} />
-													</IconButton>
-												)}
-											</div>
-											<img
-												src={sig.signature_url}
-												alt={`Firma ${sig.signature_number} ${ordinalNoun(course).toLowerCase()} ${day}`}
-												className="max-w-xs h-auto border rounded"
-											/>
-										</div>
-									))}
-									{!fullDay && (
-										<>
-											<div
-												className={`w-full overflow-hidden border border-gray-300 rounded ${savingKey === canvasKey ? 'pointer-events-none opacity-50' : ''}`}
-											>
-												<SignatureCanvas
-													ref={(el) => {
-														if (el)
-															sigCanvasRefs.current.set(
-																canvasKey,
-																el,
-															);
-														else
-															sigCanvasRefs.current.delete(
-																canvasKey,
-															);
-													}}
-													penColor="black"
-													canvasProps={{
-														width: 500,
-														height: 120,
-														style: {
-															width: '100%',
-															height: '120px',
-															display: 'block',
-														},
-													}}
+														Firma {daySignature.signature_number}
+													</Typography>
+													{canDelete && (
+														<IconButton
+															size="sm"
+															title={`Eliminar firma de la ${ordinalNoun(course).toLowerCase()} ${day}`}
+															variant="text"
+															color="red"
+															onClick={() =>
+																handleDeleteSignature(daySignature)
+															}
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															<Trash2 size={14} />
+														</IconButton>
+													)}
+												</div>
+												<img
+													src={daySignature.signature_url}
+													alt={`Firma de la ${ordinalNoun(course).toLowerCase()} ${day}`}
+													className="max-w-xs h-auto border rounded"
 												/>
 											</div>
-											<div className="flex items-center gap-2">
-												<Button
-													size="sm"
-													color="green"
-													onClick={() => {
-														const canvas =
-															sigCanvasRefs.current.get(
-																canvasKey,
-															);
-														if (canvas)
-															handleSaveSignature(
-																day,
-																canvas,
-															);
-													}}
-													disabled={savingKey === canvasKey}
-													placeholder={undefined}
-													onPointerEnterCapture={
-														undefined
-													}
-													onPointerLeaveCapture={
-														undefined
-													}
-													className="flex items-center gap-2"
+										) : (
+											<>
+												<div
+													className={`w-full overflow-hidden border border-gray-300 rounded ${saving === day ? 'pointer-events-none opacity-50' : ''}`}
 												>
-													<Save className="w-4 h-4" />
-													{savingKey === canvasKey
-														? 'Guardando...'
-														: `Guardar Firma ${sigCount + 1}`}
-												</Button>
-												<Button
-													size="sm"
-													color="red"
-													variant="outlined"
-													onClick={() => {
-														const canvas =
-															sigCanvasRefs.current.get(
-																canvasKey,
-															);
-														if (canvas) canvas.clear();
-													}}
-													disabled={savingKey === canvasKey}
-													placeholder={undefined}
-													onPointerEnterCapture={
-														undefined
-													}
-													onPointerLeaveCapture={
-														undefined
-													}
-													className="flex items-center gap-2"
-												>
-													Borrar
-												</Button>
-											</div>
-										</>
-									)}
-								</div>
-							)}
-						</div>
-					);
-				})}
-			</div>
+													<SignatureCanvas
+														ref={(el) => {
+															if (el)
+																sigCanvasRefs.current.set(day, el);
+															else sigCanvasRefs.current.delete(day);
+														}}
+														penColor="black"
+														canvasProps={{
+															width: 500,
+															height: 120,
+															style: {
+																width: '100%',
+																height: '120px',
+																display: 'block',
+															},
+														}}
+													/>
+												</div>
+												<div className="flex items-center gap-2">
+													<Button
+														size="sm"
+														color="green"
+														onClick={() => {
+															const canvas =
+																sigCanvasRefs.current.get(day);
+															if (canvas)
+																handleSaveSignature(day, canvas);
+														}}
+														disabled={saving === day}
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+														className="flex items-center gap-2"
+													>
+														<Save className="w-4 h-4" />
+														{saving === day
+															? 'Guardando...'
+															: 'Guardar Firma'}
+													</Button>
+													<Button
+														size="sm"
+														color="red"
+														variant="outlined"
+														onClick={() => {
+															const canvas =
+																sigCanvasRefs.current.get(day);
+															if (canvas) canvas.clear();
+														}}
+														disabled={saving === day}
+														placeholder={undefined}
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+														className="flex items-center gap-2"
+													>
+														Borrar
+													</Button>
+												</div>
+											</>
+										)}
+									</div>
+								)}
+							</div>
+						);
+					})}
+				</div>
+			)}
 		</div>
 	);
 };
