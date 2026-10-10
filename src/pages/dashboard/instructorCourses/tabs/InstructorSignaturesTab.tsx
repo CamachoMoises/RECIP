@@ -31,10 +31,14 @@ type Props = {
 };
 
 /** Ordinal (día o sesión) de un schedule del cronograma del instructor. */
-const dayOfSchedule = (item: ScheduleGroupedItem['schedules'][number]) =>
-	item.subject_day?.day ?? undefined;
+const dayOfSchedule = (
+	item: ScheduleGroupedItem['schedules'][number],
+) => item.subject_day?.day ?? undefined;
 
-const InstructorSignaturesTab = ({ instructor_id, schedules }: Props) => {
+const InstructorSignaturesTab = ({
+	instructor_id,
+	schedules,
+}: Props) => {
 	const [groups, setGroups] = useState<signatureGroup[]>([]);
 	const [openGroup, setOpenGroup] = useState<number | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -216,7 +220,7 @@ const InstructorSignaturesTab = ({ instructor_id, schedules }: Props) => {
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														{group.title} - ({group.code})
+														{group.title}
 													</Typography>
 													<Typography
 														variant="small"

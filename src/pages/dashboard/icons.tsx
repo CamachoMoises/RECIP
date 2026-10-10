@@ -53,7 +53,7 @@ const sections: { label: string; items: IconItem[] }[] = [
 		items: [
 			{
 				id: 'assessment',
-				title: 'Evaluaciones FSTD / ATD',
+				title: 'Evaluaciones FFS',
 				icon: NotebookPen,
 				permission: ['instructor'],
 				route: 'assessment',
