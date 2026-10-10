@@ -12,7 +12,7 @@ import {
 	Textarea,
 	Typography,
 } from '@material-tailwind/react';
-import { Calendar, CheckCheck, Clock, Save } from 'lucide-react';
+import { Calendar, Clock, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AppDispatch, RootState } from '../../../../store';
 import {
@@ -43,6 +43,18 @@ import {
 } from './instructorShared';
 
 const DEFAULT_ATTENDANCE_STATUS = 1;
+
+const formatDisplayDate = (date?: string) => {
+	if (!date) return '';
+	const [year, month, day] = date.split('-').map(Number);
+	if (!year || !month || !day) return date;
+	const parsed = new Date(year, month - 1, day);
+	return parsed.toLocaleDateString('es-ES', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+	});
+};
 
 type AttendanceDraft = {
 	attendance_status_id: number;
@@ -419,16 +431,6 @@ const InstructorAttendanceGroupedTab = ({
 		}
 	};
 
-	const handleMarkPresent = (key: string) => {
-		setDrafts((prev) => ({
-			...prev,
-			[key]: {
-				attendance_status_id: presenteStatusId,
-				comments: prev[key]?.comments ?? '',
-			},
-		}));
-	};
-
 	if (!filtered.length) {
 		return (
 			<Typography
@@ -528,7 +530,7 @@ const InstructorAttendanceGroupedTab = ({
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
 													>
-														{session.date}
+														{formatDisplayDate(session.date)}
 													</Typography>
 													<span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
 														{ordinalLabel(program, session.day)}
@@ -657,21 +659,6 @@ const InstructorAttendanceGroupedTab = ({
 
 											{canEditAttendance ? (
 												<div className="mt-3 flex flex-wrap justify-end gap-2">
-													<Button
-														size="sm"
-														variant="outlined"
-														color="blue-gray"
-														disabled={isSaving}
-														onClick={() =>
-															handleMarkPresent(session.key)
-														}
-														placeholder={undefined}
-														onPointerEnterCapture={undefined}
-														onPointerLeaveCapture={undefined}
-													>
-														<CheckCheck className="mr-1 h-4 w-4" />
-														Marcar presente
-													</Button>
 													<Button
 														size="sm"
 														color="blue"
