@@ -98,11 +98,11 @@ const TestCheck = ({
 				setEditHeader={setEditHeader}
 			/>
 
-			<div className="flex flex-row justify-center gap-3">
+			<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 justify-items-center">
 				{question?.answers?.map((answer, index) => {
 					const checked = checkboxes[index].check;
 					return (
-						<div key={answer.id} className="basis-1/4 justify-center">
+						<div key={answer.id} className="flex flex-col items-center w-full">
 							<Checkbox
 								color="red"
 								id={`check-${answer.id}`}

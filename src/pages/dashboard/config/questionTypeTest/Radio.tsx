@@ -61,9 +61,9 @@ const TestRadio = ({
 				editAnswer={editAnswer}
 				setEditHeader={setEditHeader}
 			/>
-			<div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+			<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 justify-items-center">
 				{question?.answers?.map((answer) => (
-					<div key={answer.id} className="flex flex-col items-center min-w-[80px] sm:basis-1/4">
+					<div key={answer.id} className="flex flex-col items-center w-full">
 						<Radio
 							disabled={editHeader || editAnswer}
 							name={`radio-${question?.id}`}
