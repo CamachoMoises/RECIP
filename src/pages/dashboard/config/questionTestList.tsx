@@ -3,11 +3,13 @@ import {
 	useParams,
 } from 'react-router-dom';
 import {
+	deleteQuestionTest,
+	deleteQuestionsByTest,
 	fetchQuestionTypes,
 	fetchQuestions,
 	fetchTest,
 } from '../../../features/testSlice';
-import { breadCrumbsItems } from '../../../types/utilities';
+import { breadCrumbsItems, question } from '../../../types/utilities';
 import PageTitle from '../../../components/PageTitle';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
@@ -18,14 +20,19 @@ import {
 	Button,
 	Card,
 	CardBody,
+	Dialog,
+	DialogBody,
+	DialogFooter,
+	DialogHeader,
 	Typography,
 } from '@material-tailwind/react';
 import TestRadio from './questionTypeTest/Radio';
 import TestInput from './questionTypeTest/Input';
 import TestCheck from './questionTypeTest/Check';
 import TestCompletion from './questionTypeTest/Completion';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import NewQuestionTest from './newQuestionTest';
+import toast from 'react-hot-toast';
 
 const QuestionTestList = () => {
 	// const navigate = useNavigate();
@@ -45,6 +52,8 @@ const QuestionTestList = () => {
 	}>();
 	const dispatch = useDispatch<AppDispatch>();
 	const [open, setOpen] = useState(false);
+	const [questionToDelete, setQuestionToDelete] = useState<question | null>(null);
+	const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 	useEffect(() => {
 		dispatch(fetchTest(test_id ? parseInt(test_id) : -1));
 		dispatch(
@@ -87,6 +96,33 @@ const QuestionTestList = () => {
 			href: `/dashboard/config/test/${course_id}`,
 		},
 	];
+	const handleDeleteQuestion = async () => {
+		if (!questionToDelete) return;
+		try {
+			await dispatch(deleteQuestionTest(questionToDelete.id)).unwrap();
+			toast.success('Pregunta eliminada correctamente');
+		} catch (error: any) {
+			toast.error(error || 'Error al eliminar la pregunta');
+		} finally {
+			setQuestionToDelete(null);
+		}
+	};
+
+	const handleDeleteAllQuestions = async () => {
+		const id = test_id ? parseInt(test_id) : -1;
+		if (id < 0) return;
+		try {
+			const result = await dispatch(deleteQuestionsByTest(id)).unwrap();
+			toast.success(
+				`${result.deleted_count} pregunta(s) y ${result.deleted_answers_count} respuesta(s) eliminada(s).`,
+			);
+		} catch (error: any) {
+			toast.error(error || 'Error al eliminar las preguntas');
+		} finally {
+			setConfirmDeleteAll(false);
+		}
+	};
+
 	if (test.status === 'loading') {
 		return (
 			<>
@@ -140,8 +176,8 @@ const QuestionTestList = () => {
 							para el examen ({questionForTest})
 						</Typography>
 					)}
-					{questionType.id != 4 && (
-						<div className="flex flex-col">
+					<div className="flex flex-row gap-2">
+						{questionType.id != 4 && (
 							<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 								size="sm"
 								title="Agregar pregunta"
@@ -153,8 +189,21 @@ const QuestionTestList = () => {
 							>
 								<Plus size={15} className="mx-auto text-lg" />
 							</Button>
-						</div>
-					)}
+						)}
+						<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+							size="sm"
+							title="Eliminar todas las preguntas del examen"
+							variant="filled"
+							color="red"
+							disabled={test.questionList.length === 0}
+							placeholder={undefined}
+							onClick={() => {
+								setConfirmDeleteAll(true);
+							}}
+						>
+							<Trash2 size={15} className="mx-auto text-lg" />
+						</Button>
+					</div>
 				</CardBody>
 			</Card>
 			<br />
@@ -172,6 +221,20 @@ const QuestionTestList = () => {
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
+								<div className="flex justify-end mb-2">
+									<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+										size="sm"
+										title="Eliminar pregunta"
+										variant="text"
+										color="red"
+										placeholder={undefined}
+										onClick={() => {
+											setQuestionToDelete(QL);
+										}}
+									>
+										<Trash2 size={16} />
+									</Button>
+								</div>
 								{QL.question_type?.id === 1 && (
 									<TestRadio
 										question={QL}
@@ -223,6 +286,108 @@ const QuestionTestList = () => {
 						setOpen={setOpen}
 					/>
 				)}
+			<Dialog
+				open={questionToDelete !== null}
+				handler={() => setQuestionToDelete(null)}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Confirmar eliminación
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se eliminará la pregunta{' '}
+					<strong className="break-all">
+						{questionToDelete?.header}
+					</strong>{' '}
+					y todas sus respuestas asociadas. Esta acción no se puede deshacer.
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						onClick={() => setQuestionToDelete(null)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						color="red"
+						onClick={handleDeleteQuestion}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						Eliminar
+					</Button>
+				</DialogFooter>
+			</Dialog>
+			<Dialog
+				open={confirmDeleteAll}
+				handler={() => setConfirmDeleteAll(false)}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Confirmar eliminación
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se eliminarán <strong>todas</strong> las preguntas del examen{' '}
+					<strong>{test.testSelected?.code}</strong> y sus respuestas
+					asociadas. Esta acción no se puede deshacer.
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						onClick={() => setConfirmDeleteAll(false)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						color="red"
+						onClick={handleDeleteAllQuestions}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						Eliminar
+					</Button>
+				</DialogFooter>
+			</Dialog>
 		</div>
 	);
 };

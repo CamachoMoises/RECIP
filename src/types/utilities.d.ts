@@ -174,6 +174,20 @@ export type testImportResult = {
     skippedRows: number;
 }
 
+// El endpoint DELETE /questions/:question_id responde 204 sin body, así que se
+// ecoa el id para poder limpiar el store.
+export type questionDeleteResult = {
+    question_id: number;
+}
+
+// Borrado masivo de todas las preguntas de un test.
+export type testQuestionsDeleteResult = {
+    test_id: number;
+    message?: string;
+    deleted_count: number;
+    deleted_answers_count: number;
+}
+
 export type instructor = {
     id: number | null;
     user_id: number;

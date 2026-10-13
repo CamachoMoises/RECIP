@@ -564,6 +564,25 @@ arranque usa `alter: false` y no las crea).
 - Body: `id`, `header`, `status`
 - `201` → Question con `answers` y `question_type`
 
+### DELETE /questions/:question_id
+- Auth: sí
+- Params: `question_id`
+- Elimina la pregunta y sus `answer` asociadas en una transacción.
+- `204` sin cuerpo
+- `400` JSON `{ error: 'Parámetro question_id inválido' }`
+- `404` JSON `{ error: 'Question not found' }`
+- `409` JSON `{ error: 'La pregunta ya fue usada en un intento de examen y no puede eliminarse' }`
+  (existe al menos un `course_student_test_question` con ese `question_id`)
+
+### DELETE /questions/by-test/:test_id
+- Auth: sí
+- Params: `test_id`
+- Elimina todas las preguntas del test y sus `answer` asociadas en una transacción.
+- `200` → `{ deleted_count, deleted_answers_count }`
+- `400` JSON `{ error: 'Parámetro test_id inválido' }`
+- `404` JSON `{ error: 'Test not found' }`
+- `409` JSON `{ error: 'Una o más preguntas ya fueron usadas en un intento de examen y no pueden eliminarse' }`
+
 ### POST /answerQuestionTest
 - Body: `course_id`, `test_id`, `question_type_id`, `question_id`, `value`
 - `201` → Question (getQuestionById del `question_id`)
@@ -1566,6 +1585,25 @@ arranque usa `alter: false` y no las crea).
 ### PUT /questionTest
 - Body: `id`, `header`, `status`
 - `201` → Question con `answers` y `question_type`
+
+### DELETE /questions/:question_id
+- Auth: sí
+- Params: `question_id`
+- Elimina la pregunta y sus `answer` asociadas en una transacción.
+- `204` sin cuerpo
+- `400` JSON `{ error: 'Parámetro question_id inválido' }`
+- `404` JSON `{ error: 'Question not found' }`
+- `409` JSON `{ error: 'La pregunta ya fue usada en un intento de examen y no puede eliminarse' }`
+  (existe al menos un `course_student_test_question` con ese `question_id`)
+
+### DELETE /questions/by-test/:test_id
+- Auth: sí
+- Params: `test_id`
+- Elimina todas las preguntas del test y sus `answer` asociadas en una transacción.
+- `200` → `{ deleted_count, deleted_answers_count }`
+- `400` JSON `{ error: 'Parámetro test_id inválido' }`
+- `404` JSON `{ error: 'Test not found' }`
+- `409` JSON `{ error: 'Una o más preguntas ya fueron usadas en un intento de examen y no pueden eliminarse' }`
 
 ### POST /answerQuestionTest
 - Body: `course_id`, `test_id`, `question_type_id`, `question_id`, `value`

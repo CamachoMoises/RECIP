@@ -1,6 +1,18 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { answer, courseStudentTest, question, questionType, test, testImportResult, testQuestionType, testState } from '../types/utilities';
-import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
+import { answer, courseStudentTest, question, questionDeleteResult, questionType, test, testImportResult, testQuestionsDeleteResult, testQuestionType, testState } from '../types/utilities';
+import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
+
+// axiosDeleteSlice lanza el AxiosError crudo: `error.message` solo dice
+// "Request failed with status code 4xx". El backend devuelve el motivo útil
+// en el body (p. ej. el 409 'La pregunta ya fue usada en un intento de examen').
+function deleteErrorMessage(error: any, fallback: string): string {
+    const data = error?.response?.data;
+    return (
+        (typeof data === 'string' ? data : data?.error || data?.message) ||
+        error?.message ||
+        fallback
+    );
+}
 
 const initialState: testState = {
     status: 'idle',
@@ -289,6 +301,33 @@ export const updateCourseStudentTestScore = createAsyncThunk<courseStudentTest, 
     }
 );
 
+// Acción para eliminar una pregunta (y sus respuestas) por su id.
+export const deleteQuestionTest = createAsyncThunk<questionDeleteResult, number>(
+    'questionTypes/deleteQuestionTest',
+    async (question_id, { rejectWithValue }) => {
+        try {
+            await axiosDeleteSlice(`api/test/questions/${question_id}`);
+            return { question_id };
+        } catch (error: any) {
+            return rejectWithValue(deleteErrorMessage(error, 'Error al eliminar la pregunta'));
+        }
+    }
+);
+
+// Acción para eliminar TODAS las preguntas de un test (y sus respuestas).
+// Borrado masivo e irreversible.
+export const deleteQuestionsByTest = createAsyncThunk<testQuestionsDeleteResult, number>(
+    'questionTypes/deleteQuestionsByTest',
+    async (test_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosDeleteSlice(`api/test/questions/by-test/${test_id}`);
+            return { test_id, ...response };
+        } catch (error: any) {
+            return rejectWithValue(deleteErrorMessage(error, 'Error al eliminar las preguntas'));
+        }
+    }
+);
+
 const testSlice = createSlice({
     name: 'subject',
     initialState,
@@ -480,6 +519,32 @@ const testSlice = createSlice({
                 }
             })
             .addCase(updateAnswerQuestionTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción deleteQuestionTest
+            .addCase(deleteQuestionTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteQuestionTest.fulfilled, (state, action: PayloadAction<questionDeleteResult>) => {
+                state.status = 'succeeded';
+                state.questionList = state.questionList.filter((q) => q.id !== action.payload.question_id);
+            })
+            .addCase(deleteQuestionTest.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción deleteQuestionsByTest
+            .addCase(deleteQuestionsByTest.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteQuestionsByTest.fulfilled, (state) => {
+                state.status = 'succeeded';
+                state.questionList = [];
+            })
+            .addCase(deleteQuestionsByTest.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })
