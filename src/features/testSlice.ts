@@ -465,7 +465,7 @@ const testSlice = createSlice({
             .addCase(createQuestionTest.fulfilled, (state, action: PayloadAction<question>) => {
                 const newQuestion = action.payload;
                 state.status = 'succeeded';
-                state.questionList.push(newQuestion);
+                state.questionList.unshift(newQuestion);
             })
             .addCase(createQuestionTest.rejected, (state, action) => {
                 state.status = 'failed';
