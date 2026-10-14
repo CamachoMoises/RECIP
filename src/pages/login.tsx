@@ -60,15 +60,16 @@ const Login = () => {
 	return (
 		<>
 			<SEO title="Iniciar Sesión" description="Accede al sistema R.E.C.I.P. para gestión de evaluación, capacitación e instrucción de pilotos." url="/login" />
-			<div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: '#09121d' }}>
+			<div className="flex min-h-dvh w-full flex-col lg:h-screen lg:flex-row lg:overflow-hidden" style={{ backgroundColor: '#09121d' }}>
 
-			<div className="relative w-2/3 h-full flex items-center justify-center" style={{ backgroundColor: '#09121d' }}>
+			<div className="relative hidden lg:flex lg:w-2/3 h-full items-center justify-center" style={{ backgroundColor: '#09121d' }}>
 				<video
 					className="max-w-full max-h-full object-contain rounded-2xl border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
 					loop
 					autoPlay
 					muted
 					playsInline
+					preload="metadata"
 				>
 					<source
 						src="https://res.cloudinary.com/moisesinc/video/upload/v1751816208/recip_resource/avion2_drrbld.mp4"
@@ -78,7 +79,7 @@ const Login = () => {
 				</video>
 			</div>
 
-			<div className="w-1/3 h-full flex items-center justify-center p-8" style={{ backgroundColor: '#09121d' }}>
+			<div className="w-full lg:w-1/3 flex-1 lg:h-full flex items-center justify-center p-4 sm:p-6 lg:p-8" style={{ backgroundColor: '#09121d' }}>
 				<div className="animate-fade-up w-full max-w-md" style={{ animationDelay: '0.2s' }}>
 				<Card
 					className="border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10"
@@ -93,7 +94,7 @@ const Login = () => {
 					onPointerLeaveCapture={undefined}
 				>
 					<CardBody
-						className="flex flex-col gap-6 p-8"
+						className="flex flex-col gap-6 p-6 sm:p-8"
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
