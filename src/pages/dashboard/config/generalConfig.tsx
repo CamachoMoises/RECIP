@@ -207,7 +207,7 @@ const GeneralConfig = () => {
 									Lista de Cursos
 								</Typography>
 							</div>
-							<div className="grid grid-cols-2 gap-2 sm:gap-4">
+							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
 								{course.courseList.map((course) => {
 									return (
 										<div key={course.id} className="min-w-0 h-full">
