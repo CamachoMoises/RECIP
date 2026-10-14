@@ -53,6 +53,30 @@ export type answer = {
 	answer_is_correct: boolean;
 };
 
+// Parsea `date` y `hour` por separado con formatos explícitos. WebKit (iOS
+// Safari/Chrome) es más estricto que Chrome desktop con formatos ambiguos, así
+// que no se concatenan strings: se parsea cada parte y se combinan con `.set()`.
+const parseScheduleMoment = (s: {
+	date?: string | null;
+	hour?: string | null;
+}): moment.Moment | null => {
+	if (!s.date) return null;
+	const day = moment(s.date, ['YYYY-MM-DD', moment.ISO_8601], true);
+	if (!day.isValid()) return null;
+	const result = day.clone();
+	if (s.hour) {
+		const time = moment(s.hour, ['HH:mm:ss', 'HH:mm', moment.ISO_8601], true);
+		if (time.isValid()) {
+			result.set({
+				hour: time.hour(),
+				minute: time.minute(),
+				second: time.second(),
+			});
+		}
+	}
+	return result;
+};
+
 const NewTest = () => {
 	const componentRef = useRef<HTMLDivElement>(null);
 	const dispatch = useDispatch<AppDispatch>();
@@ -204,6 +228,32 @@ const NewTest = () => {
 			endTimeTest();
 		}
 	}, [testActive, endTimeTest, ended]);
+
+	// Diagnóstico temporal (iPad): ver qué datos llegan al iniciar el examen.
+	/* eslint-disable react-hooks/exhaustive-deps */
+	useEffect(() => {
+		console.log('[NewTest] diagnóstico', {
+			status: test.status,
+			hasCourseStudentTest: !!test.courseStudentTestSelected,
+			questionsCount:
+				test.courseStudentTestSelected?.course_student_test_questions
+					?.length ?? 0,
+			firstQuestion:
+				test.courseStudentTestSelected
+					?.course_student_test_questions?.[0],
+			testDuration: test.testSelected?.duration,
+			schedules: course.courseStudent?.schedules,
+			dateTest: dateTest ? dateTest.format('YYYY-MM-DD HH:mm:ss') : null,
+			testActive,
+		});
+	}, [
+		test.status,
+		test.courseStudentTestSelected,
+		test.testSelected,
+		course.courseStudent,
+		testActive,
+	]);
+	/* eslint-enable react-hooks/exhaustive-deps */
 
 	if (test.status === 'loading') {
 		return (
@@ -490,9 +540,10 @@ const NewTest = () => {
 			// el examen se cerrara al terminar la sesión 1. Se toma el schedule más
 			// reciente que ya empezó y, si todos están por delante, el primero.
 			const scheduleMoments = (course.courseStudent.schedules ?? [])
-				.filter((s) => s.date)
-				.map((s) => moment(`${s.date}  ${s.hour}`))
-				.filter((m) => m.isValid())
+				.map((s) => parseScheduleMoment(s))
+				.filter(
+					(m): m is moment.Moment => m !== null && m.isValid(),
+				)
 				.sort((a, b) => a.diff(b));
 			const started = scheduleMoments.filter((m) =>
 				m.isSameOrBefore(moment()),
@@ -502,12 +553,20 @@ const NewTest = () => {
 				: (scheduleMoments[0] ?? null);
 		}
 
-		if (dateTest) {
+		// Fallback: si no se pudo resolver ningún horario válido, usar el momento
+		// actual para que el temporizador y el examen sigan visibles. La ventana
+		// de 2 horas solo se valida cuando sí se parseó un horario real.
+		const hasParsedSchedule = dateTest !== null;
+		if (!dateTest) {
+			dateTest = moment();
+		}
+
+		if (hasParsedSchedule && dateTest) {
 			const currentDate = moment();
 			horas = currentDate.diff(dateTest, 'hours', true);
-		}
-		if (!horas || horas < 0 || horas > 2) {
-			navigate('../test');
+			if (!horas || horas < 0 || horas > 2) {
+				navigate('../test');
+			}
 		}
 	}
 
