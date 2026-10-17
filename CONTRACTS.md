@@ -207,6 +207,19 @@ arranque usa `alter: false` y no las crea).
 - Params: `id`
 - `200` → Course con `course_type`, `course_level`
 
+### POST /clone/:course_id
+- Auth: sí
+- Params: `course_id` (numérico)
+- Body (Joi `cloneCourseSchema`, todos opcionales): `name`, `code`, `description`, `status`
+- Crea un curso nuevo (clon estructural) copiando `course`, `subject`, `subject_days`, `subject_lesson` y `subject_lesson_days`, re-apuntados al nuevo `course_id`. No clona students/grupos enrollados, schedules, asistencias, tests ni evaluaciones.
+- Defaults: `name` = `'<origen> (copia)'`, `code` = `'<origen>-COPIA'` (50 max, sufijo incremental si existe). Otros campos copiados; overrides reemplazan.
+- Transacción: si falla → rollback. Filas con padres faltantes se saltan.
+- `201` → Course con `course_type`, `course_level` (shape `GET /course/:id`) más: `subjects_cloned`, `subject_days_cloned`, `subject_lessons_cloned`, `subject_lesson_days_cloned` (conteos).
+- `400` JSON `{ error: 'Parámetro course_id inválido' }` | texto plano `Input Validation Error <msg>`
+- `404` texto plano `Curso no encontrado`
+- `500` texto plano `Internal Server Error <error>`
+
+
 ### GET /coursesStudents
 - Query: `course_type_id`, `status`, `course_group_id`, `course_id`, `student_id`, `instructor_id` (opcionales),
   `pageSize` (default 10), `currentPage` (default 1)
@@ -1228,6 +1241,18 @@ arranque usa `alter: false` y no las crea).
 ### GET /course/:id
 - Params: `id`
 - `200` → Course con `course_type`, `course_level`
+
+### POST /clone/:course_id
+- Auth: sí
+- Params: `course_id` (numérico)
+- Body (Joi `cloneCourseSchema`, todos opcionales): `name`, `code`, `description`, `status`
+- Crea un curso nuevo (clon estructural) copiando `course`, `subject`, `subject_days`, `subject_lesson` y `subject_lesson_days`, re-apuntados al nuevo `course_id`. No clona students/grupos enrollados, schedules, asistencias, tests ni evaluaciones.
+- Defaults: `name` = `'<origen> (copia)'`, `code` = `'<origen>-COPIA'` (50 max, sufijo incremental si existe). Otros campos copiados; overrides reemplazan.
+- Transacción: si falla → rollback. Filas con padres faltantes se saltan.
+- `201` → Course con `course_type`, `course_level` (shape `GET /course/:id`) más: `subjects_cloned`, `subject_days_cloned`, `subject_lessons_cloned`, `subject_lesson_days_cloned` (conteos).
+- `400` JSON `{ error: 'Parámetro course_id inválido' }` | texto plano `Input Validation Error <msg>`
+- `404` texto plano `Curso no encontrado`
+- `500` texto plano `Internal Server Error <error>`
 
 ### GET /coursesStudents
 - Query: `course_type_id`, `status`, `course_group_id`, `course_id`, `student_id`, `instructor_id` (opcionales),

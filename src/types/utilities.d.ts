@@ -225,6 +225,15 @@ export type course = {
     updatedAt?: string;
 }
 
+// Resultado de POST /api/courses/clone/:course_id: el curso clonado
+// (shape GET /course/:id) más los conteos de filas copiadas.
+export type courseCloneResult = course & {
+    subjects_cloned: number;
+    subject_days_cloned: number;
+    subject_lessons_cloned: number;
+    subject_lesson_days_cloned: number;
+}
+
 export type schedule = {
     id?: number;
     course_id?: number;

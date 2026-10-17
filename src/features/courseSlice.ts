@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course, courseStudent, courseStudentScheduleDeleteResult, schedule, scheduleDeleteResult } from '../types/utilities';
+import { CourseState, course, courseCloneResult, courseStudent, courseStudentScheduleDeleteResult, schedule, scheduleDeleteResult } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 
@@ -175,6 +175,28 @@ export const createCourse = createAsyncThunk<course, course>(
             return response;
         } catch (error: any) {
             return rejectWithValue(error.message);
+        }
+    }
+);
+// Acción para clonar un curso (clon estructural: subjects, subject_days,
+// subject_lessons y subject_lesson_days re-apuntados al nuevo curso).
+// No copia alumnos, schedules, asistencias, tests ni evaluaciones.
+// Body vacío: el backend aplica los defaults ('<nombre> (copia)', '<code>-COPIA').
+export const cloneCourse = createAsyncThunk<courseCloneResult, number>(
+    'course/cloneCourse',
+    async (course_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostSlice(`api/courses/clone/${course_id}`);
+            return response;
+        } catch (error: any) {
+            // axiosPostSlice lanza el AxiosError crudo: el backend devuelve el
+            // motivo en el body (string plano o { error }).
+            const data = error?.response?.data;
+            const message =
+                (typeof data === 'string' ? data : data?.error || data?.message) ||
+                error?.message ||
+                'Error al clonar el curso';
+            return rejectWithValue(message);
         }
     }
 );
@@ -451,6 +473,21 @@ const courseSlice = createSlice({
                 state.courseList.push(newCourse);
             })
             .addCase(createCourse.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acción cloneCourse
+            .addCase(cloneCourse.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(cloneCourse.fulfilled, (state, action: PayloadAction<courseCloneResult>) => {
+                // courseCloneResult extiende course: los conteos *_cloned van de
+                // y extra en el store, ningún componente los lee.
+                state.status = 'succeeded';
+                state.courseList.push(action.payload);
+            })
+            .addCase(cloneCourse.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             })

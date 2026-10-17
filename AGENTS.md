@@ -96,6 +96,7 @@ src/
 - All suggestions functionality was moved from `generalCourses.tsx` to `reports/Reports.tsx` (expandable card, admin only)
 - Redux slices use `createAsyncThunk` with automatic 403 handling
 - Database IDs are numbers, route params are strings
+- **Course cloning**: `POST /api/courses/clone/:course_id` (clon estructural: copia course + subject + subject_days + subject_lesson + subject_lesson_days; NO copia alumnos, schedules, asistencias, tests ni evaluaciones). Acción `cloneCourse` en `courseSlice.ts`, botón Copy en `generalConfig.tsx` con diálogo de confirmación. Ver `CONTRACTS.md` → `POST /clone/:course_id`
 
 ## Course Group Signatures
 

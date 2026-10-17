@@ -82,6 +82,7 @@ src/
 - **Breadcrumbs**: `<PageTitle>` component with breadcrumb array, used in most dashboard pages
 - **PDF**: Some pages use `@react-pdf/renderer` (`PDFCourseScheduleDocument.tsx`), others use `react-to-print`
 - **Course Groups**: Groups organize pilots by course (one course per group). Created via `modalFormCourseGroup` (course required, immutable after creation). Students assigned via `modalAssignStudents` (filtered by course, validated backend). API: `POST /api/course_groups`, `PUT /api/courses/:course_id/students` (assign student to group)
+- **Course Cloning**: `POST /api/courses/clone/:course_id` creates a structural copy of a course (subjects, subject_days, subject_lessons, subject_lesson_days re-pointed to the new course; no students, schedules, attendance, tests or assessments copied). Thunk `cloneCourse` in `courseSlice.ts`; triggered from a Copy button + confirm dialog in `generalConfig.tsx` (config). See `CONTRACTS.md`.
 
 ## Role System
 

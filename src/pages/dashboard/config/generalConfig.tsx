@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
 	fetchCourses,
+	cloneCourse,
 	setLastCreatedId,
 } from '../../../features/courseSlice';
 import { axiosGetDefault } from '../../../services/axios';
@@ -23,9 +24,19 @@ import {
 	ButtonGroup,
 	Card,
 	CardBody,
+	Dialog,
+	DialogBody,
+	DialogFooter,
+	DialogHeader,
 	Typography,
 } from '@material-tailwind/react';
-import { BookCheck, PaperclipIcon, Pencil, Plus } from 'lucide-react';
+import {
+	BookCheck,
+	Copy,
+	PaperclipIcon,
+	Pencil,
+	Plus,
+} from 'lucide-react';
 import ModalFormCourse from './modalFormCourse';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
@@ -56,6 +67,10 @@ const GeneralConfig = () => {
 		courseLevel[] | null
 	>(null);
 	const [open, setOpen] = useState(1);
+	const [courseToClone, setCourseToClone] = useState<course | null>(
+		null,
+	);
+	const [cloning, setCloning] = useState(false);
 
 	const { course, test } = useSelector((state: RootState) => {
 		return { course: state.courses, test: state.tests };
@@ -88,6 +103,31 @@ const GeneralConfig = () => {
 			setOpenNewCourse(!openNewCourse);
 		} else {
 			toast.error('Ocurrio un error al consultar el servidor');
+		}
+	};
+
+	const handleCloneCourse = async () => {
+		if (!courseToClone?.id) return;
+		setCloning(true);
+		try {
+			const result = await dispatch(
+				cloneCourse(courseToClone.id),
+			).unwrap();
+			toast.success(
+				`Curso clonado: ${result.subjects_cloned} secciones, ` +
+					`${result.subject_days_cloned} días, ` +
+					`${result.subject_lessons_cloned} lecciones, ` +
+					`${result.subject_lesson_days_cloned} lecciones por día`,
+			);
+			setCourseToClone(null);
+		} catch (error) {
+			toast.error(
+				typeof error === 'string'
+					? error
+					: 'Error al clonar el curso',
+			);
+		} finally {
+			setCloning(false);
 		}
 	};
 	// const updateQuestionTypeFunc = async (
@@ -207,7 +247,7 @@ const GeneralConfig = () => {
 									Lista de Cursos
 								</Typography>
 							</div>
-							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+							<div className="grid grid-cols-2 gap-2 sm:gap-4">
 								{course.courseList.map((course) => {
 									return (
 										<div key={course.id} className="min-w-0 h-full">
@@ -295,6 +335,17 @@ const GeneralConfig = () => {
 															>
 																<PaperclipIcon size={20} />
 															</Button>
+															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																title="Clonar el Curso"
+																placeholder={undefined}
+																onClick={() =>
+																	setCourseToClone(
+																		course,
+																	)
+																}
+															>
+																<Copy size={20} />
+															</Button>
 														</ButtonGroup>
 													</div>
 												</CardBody>
@@ -340,6 +391,68 @@ const GeneralConfig = () => {
 					courseLevel={courseLevel}
 				/>
 			)}
+
+			<Dialog
+				open={courseToClone !== null}
+				handler={() => {
+					if (!cloning) setCourseToClone(null);
+				}}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Confirmar clonación
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se creará una copia del curso{' '}
+					<strong className="break-all">
+						{courseToClone?.name}
+					</strong>{' '}
+					(<span className="break-all">{courseToClone?.code}</span>)
+					con todas sus secciones, días y lecciones.
+					<br />
+					<span className="text-sm">
+						No se copiarán alumnos, horarios, asistencias, grupos,
+						tests ni evaluaciones del curso original.
+					</span>
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						disabled={cloning}
+						onClick={() => setCourseToClone(null)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						disabled={cloning}
+						onClick={handleCloneCourse}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						{cloning ? 'Clonando...' : 'Clonar'}
+					</Button>
+				</DialogFooter>
+			</Dialog>
 		</div>
 	);
 };
