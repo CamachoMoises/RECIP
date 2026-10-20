@@ -388,7 +388,17 @@ const NewCourseStudentSchedule = () => {
 					onPointerLeaveCapture={undefined}
 				>
 					{/* Header Section */}
-					<div className="bg-blue-100 rounded-md p-2 sm:p-4 mb-2 sm:mb-4">
+					<div className="relative overflow-hidden bg-blue-100 rounded-md p-2 sm:p-4 mb-2 sm:mb-4 pl-5 sm:pl-6">
+						<span
+							title="Color del curso"
+							aria-label="Color del curso"
+							className="absolute inset-y-0 left-0 w-3 border-r border-black/10"
+							style={{
+								backgroundColor:
+									course.courseSelected?.color ||
+									'#ffffff',
+							}}
+						/>
 						<Typography
 							variant="h6"
 							className="text-sm sm:text-base"
