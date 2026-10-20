@@ -452,8 +452,18 @@ const CourseGroupsSection = ({
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
-										className={`border border-gray-200 ${isDeleting ? 'opacity-50' : ''} ${isInactive ? 'bg-gray-50' : ''}`}
+										className={`relative overflow-hidden border border-gray-200 ${isDeleting ? 'opacity-50' : ''} ${isInactive ? 'bg-gray-50' : ''}`}
 									>
+										<span
+											title="Color del curso"
+											aria-label="Color del curso"
+											className="absolute inset-y-0 left-0 w-1.5 z-10 border-r border-black/10"
+											style={{
+												backgroundColor:
+													group.course?.color ||
+													'#ffffff',
+											}}
+										/>
 										<Accordion
 											open={isOpen}
 											placeholder={undefined}
@@ -468,7 +478,7 @@ const CourseGroupsSection = ({
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
-												className="border-none py-3 px-4 cursor-pointer hover:bg-gray-50 transition-colors"
+												className="border-none py-3 pl-5 pr-4 cursor-pointer hover:bg-gray-50 transition-colors"
 											>
 												<div className="flex items-center justify-between w-full">
 													<div className="flex items-center gap-3 min-w-0">

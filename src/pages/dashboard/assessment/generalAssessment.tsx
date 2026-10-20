@@ -191,7 +191,18 @@ const GeneralAssessment = () => {
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
+										className="relative overflow-hidden pl-5 sm:pl-6"
 									>
+										<span
+											title="Color del curso"
+											aria-label="Color del curso"
+											className="absolute inset-y-0 left-0 w-1.5 border-r border-black/10"
+											style={{
+												backgroundColor:
+													CS.course?.color ||
+													'#ffffff',
+											}}
+										/>
 										<ListItemPrefix
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}

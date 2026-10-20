@@ -17,6 +17,7 @@ import {
 } from '../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useState } from 'react';
+import ColorPicker from '../../../components/ColorPicker';
 import {
 	createCourse,
 	updateCourse,
@@ -32,9 +33,12 @@ type Inputs = {
 	uses_sessions: boolean;
 	hours: number;
 	plane_model: string;
+	color: string;
 	course_type: string;
 	course_level: string;
 };
+
+const DEFAULT_COLOR = '#9d1013';
 
 const MAX_DAYS = 15;
 const MAX_SESSIONS = 30;
@@ -85,6 +89,7 @@ const ModalFormCourse = ({
 			code: courseSelected?.code,
 			hours: courseSelected?.hours,
 			plane_model: courseSelected?.plane_model,
+			color: courseSelected?.color || DEFAULT_COLOR,
 			course_type: courseSelected?.course_type.id
 				? `${courseSelected.course_type.id}`
 				: '',
@@ -121,6 +126,7 @@ const ModalFormCourse = ({
 				type: parseInt(data.course_type),
 				level: parseInt(data.course_level),
 				plane_model: data.plane_model,
+				color: data.color || null,
 				status: isActive,
 				course_type: newCourseType,
 				course_level: newCourseLevel,
@@ -141,7 +147,7 @@ const ModalFormCourse = ({
 			onPointerLeaveCapture={undefined}
 			open={openNewCourse}
 			handler={handleOpen}
-			className="overflow-y-scroll lg:overflow-hidden max-h-[90vh]"
+			className="max-h-[90vh] overflow-y-auto"
 			size="xl"
 		>
 			<form onSubmit={handleSubmit(onSubmit)}>
@@ -149,6 +155,7 @@ const ModalFormCourse = ({
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
+					className="sticky top-0 z-10 bg-white"
 				>
 					{courseSelected
 						? `Editar ${courseSelected.name} ${courseSelected.course_level.name}`
@@ -399,6 +406,19 @@ const ModalFormCourse = ({
 									</span>
 								)}
 							</div>
+							<div className="col-span-4 lg:col-span-1">
+								<Controller
+									name="color"
+									control={control}
+									render={({ field }) => (
+										<ColorPicker
+											label="Color"
+											value={field.value}
+											onChange={field.onChange}
+										/>
+									)}
+								/>
+							</div>
 							<div className="flex flex-col col-span-4">
 								<Textarea
 									onPointerEnterCapture={undefined}
@@ -453,6 +473,7 @@ const ModalFormCourse = ({
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
 					onPointerLeaveCapture={undefined}
+					className="sticky bottom-0 z-10 bg-white"
 				>
 					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 						variant="text"

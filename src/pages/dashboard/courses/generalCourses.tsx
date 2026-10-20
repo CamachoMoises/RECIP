@@ -279,17 +279,27 @@ const GeneralCourses = () => {
 									{/* <code>{JSON.stringify(courseList, null, 4)}</code> */}
 									{courseList.map((course) => {
 										return (
-											<div key={course.id}>
+											<div key={course.id} className="min-w-0 h-full">
 												<Card
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
+													className="relative h-full overflow-hidden"
 												>
+													<span
+														title="Color del curso"
+														aria-label="Color del curso"
+														className="absolute inset-y-0 left-0 w-3 border-r border-black/10"
+														style={{
+															backgroundColor:
+																course.color || '#ffffff',
+														}}
+													/>
 													<CardBody
 														placeholder={undefined}
 														onPointerEnterCapture={undefined}
 														onPointerLeaveCapture={undefined}
-														className="flex flex-col justify-center"
+														className="flex flex-col justify-center h-full pl-5 sm:pl-6"
 													>
 														<Typography
 															placeholder={undefined}

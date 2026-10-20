@@ -22,7 +22,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { breadCrumbsItems, user } from '../../../types/utilities';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import { updateCourseStudent } from '../../../features/courseSlice';
+import {
+	updateCourseStudent,
+	updateCourseStudentMaxAttempts,
+} from '../../../features/courseSlice';
 import PageTitle from '../../../components/PageTitle';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
@@ -86,6 +89,11 @@ const NewCourseStudentSchedule = () => {
 	);
 	const [mailsended, setMailsended] = useState(false);
 	const [sendModalOpen, setSendModalOpen] = useState(false);
+	const [maxAttempts, setMaxAttempts] = useState<string>(
+		course.courseStudent?.max_attempts != null
+			? String(course.courseStudent.max_attempts)
+			: '',
+	);
 	const regulationRef = useRef<number>(
 		course.courseStudent?.regulation || 1,
 	);
@@ -251,6 +259,39 @@ const NewCourseStudentSchedule = () => {
 		handleChange();
 	};
 
+	const handleMaxAttemptsChange = async () => {
+		const courseStudentId = course.courseStudent?.id;
+		if (!courseStudentId) return;
+
+		const value =
+			maxAttempts.trim() === '' ? null : Number(maxAttempts);
+		if (value === null || !Number.isInteger(value) || value < 0) {
+			toast.error(
+				'El máximo de intentos debe ser un entero mayor o igual a 0',
+			);
+			setMaxAttempts(
+				course.courseStudent?.max_attempts != null
+					? String(course.courseStudent.max_attempts)
+					: '',
+			);
+			return;
+		}
+
+		try {
+			await dispatch(
+				updateCourseStudentMaxAttempts({
+					course_student_id: courseStudentId,
+					max_attempts: value,
+				}),
+			).unwrap();
+			toast.success('Máximo de intentos actualizado');
+		} catch (error: any) {
+			toast.error(
+				error || 'Error al actualizar el máximo de intentos',
+			);
+		}
+	};
+
 	// Effects
 	useEffect(() => {
 		const setStudentFunc = (value: number) => {
@@ -273,6 +314,11 @@ const NewCourseStudentSchedule = () => {
 			instructorCodeRef.current =
 				course.courseStudent.instructor_code || '';
 			clientRef.current = course.courseStudent.client || '';
+			setMaxAttempts(
+				course.courseStudent.max_attempts != null
+					? String(course.courseStudent.max_attempts)
+					: '',
+			);
 		}
 	}, [course.courseStudent, user.studentList]);
 
@@ -290,7 +336,9 @@ const NewCourseStudentSchedule = () => {
 	 */
 	const sessionDateFallback = useMemo(() => {
 		if (!usesSessions(course.courseSelected)) return null;
-		const scheduled = course.scheduleList.filter((s) => s.subject_day?.day);
+		const scheduled = course.scheduleList.filter(
+			(s) => s.subject_day?.day,
+		);
 		if (scheduled.length === 0) {
 			return course.courseStudent?.date
 				? moment(course.courseStudent.date, 'YYYY-MM-DD').format(
@@ -310,8 +358,11 @@ const NewCourseStudentSchedule = () => {
 		return latest
 			? moment(latest, 'YYYY-MM-DD').format('YYYY-MM-DD')
 			: null;
-	}, [course.courseSelected, course.scheduleList, course.courseStudent]);
-
+	}, [
+		course.courseSelected,
+		course.scheduleList,
+		course.courseStudent,
+	]);
 
 	// Loading and error states
 	if (course.status === 'loading') return <LoadingPage />;
@@ -493,6 +544,24 @@ const NewCourseStudentSchedule = () => {
 										clientRef.current = e.target.value;
 									}}
 									onBlur={() => handleChange()}
+									crossOrigin={undefined}
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								/>
+							</div>
+
+							<div className="mt-4">
+								<Input
+									type="number"
+									inputMode="numeric"
+									label="Máximo de intentos de examen"
+									min={0}
+									disabled={!canViewContent}
+									value={maxAttempts}
+									onChange={(e) => setMaxAttempts(e.target.value)}
+									onBlur={() => handleMaxAttemptsChange()}
+									className="[&::-webkit-inner-spin-button]:appearance-none"
 									crossOrigin={undefined}
 									placeholder={undefined}
 									onPointerEnterCapture={undefined}
@@ -752,26 +821,29 @@ const NewCourseStudentSchedule = () => {
 							</div>
 						</div>
 
-{/* Action Buttons */}
-					<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 col-span-full justify-end">
-						{canViewContent && (course.scheduleList?.length ?? 0) > 0 && (
-							<Button
-								size="sm"
-								variant="gradient"
-								color="red"
-								className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
-								disabled={course.courseStudent?.approve}
-								onClick={() => setConfirmBulkDelete(true)}
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-								title="Eliminar todos los horarios del alumno"
-							>
-								<Trash2 size={14} />{' '}
-								<span className="hidden sm:inline">Eliminar horarios</span>
-							</Button>
-						)}
-						{canViewContent && (
+						{/* Action Buttons */}
+						<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 col-span-full justify-end">
+							{canViewContent &&
+								(course.scheduleList?.length ?? 0) > 0 && (
+									<Button
+										size="sm"
+										variant="gradient"
+										color="red"
+										className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+										disabled={course.courseStudent?.approve}
+										onClick={() => setConfirmBulkDelete(true)}
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										title="Eliminar todos los horarios del alumno"
+									>
+										<Trash2 size={14} />{' '}
+										<span className="hidden sm:inline">
+											Eliminar horarios
+										</span>
+									</Button>
+								)}
+							{canViewContent && (
 								<Button
 									size="sm"
 									className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
@@ -823,7 +895,10 @@ const NewCourseStudentSchedule = () => {
 						</AccordionHeader>
 						<AccordionBody>
 							<Tabs
-								value={ordinalLabel(course.courseSelected, course.day)}
+								value={ordinalLabel(
+									course.courseSelected,
+									course.day,
+								)}
 								orientation="vertical"
 							>
 								<TabsHeader
@@ -893,9 +968,7 @@ const NewCourseStudentSchedule = () => {
 																			?.id || -1
 																	}
 																	canViewContent={canViewContent}
-																	dateFallback={
-																		sessionDateFallback
-																	}
+																	dateFallback={sessionDateFallback}
 																	ordinalName={day.name}
 																/>
 															</div>
@@ -984,9 +1057,7 @@ const NewCourseStudentSchedule = () => {
 														? sessionDateFallback
 														: moment(course.courseStudent.date)
 																.add(
-																	programSize(
-																		course.courseSelected,
-																	),
+																	programSize(course.courseSelected),
 																	'days',
 																)
 																.format('YYYY-MM-DD')
@@ -1052,14 +1123,22 @@ const NewCourseStudentSchedule = () => {
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 												>
-													Total de {ordinalNounPlural(course.courseSelected).toLowerCase()} de clase:
+													Total de{' '}
+													{ordinalNounPlural(
+														course.courseSelected,
+													).toLowerCase()}{' '}
+													de clase:
 												</Typography>
 												<Input
 													type="number"
 													inputMode="numeric"
-													label={ordinalNounPlural(course.courseSelected)}
+													label={ordinalNounPlural(
+														course.courseSelected,
+													)}
 													className="[&::-webkit-inner-spin-button]:appearance-none"
-													value={programSize(course.courseSelected) || -1}
+													value={
+														programSize(course.courseSelected) || -1
+													}
 													crossOrigin={undefined}
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
@@ -1116,18 +1195,19 @@ const NewCourseStudentSchedule = () => {
 					onPointerLeaveCapture={undefined}
 				>
 					Se eliminarán los{' '}
-					<strong>{course.scheduleList?.length ?? 0}</strong>{' '}
-					horarios de{' '}
+					<strong>{course.scheduleList?.length ?? 0}</strong> horarios
+					de{' '}
 					<strong>
 						{studentSelect
 							? `${studentSelect.name} ${studentSelect.last_name}`
 							: 'este alumno'}
 					</strong>{' '}
-					(course {course.courseStudent?.code}). También se eliminará la
-					asistencia de las sesiones programadas y sus firmas, si existen.
-					La asistencia de días que nunca estuvieron programados se conserva.
-					El alumno dejará de aparecer en los filtros por instructor y en
-					los reportes de asistencia. Esta acción no se puede deshacer.
+					(course {course.courseStudent?.code}). También se eliminará
+					la asistencia de las sesiones programadas y sus firmas, si
+					existen. La asistencia de días que nunca estuvieron
+					programados se conserva. El alumno dejará de aparecer en los
+					filtros por instructor y en los reportes de asistencia. Esta
+					acción no se puede deshacer.
 				</DialogBody>
 				<DialogFooter
 					placeholder={undefined}

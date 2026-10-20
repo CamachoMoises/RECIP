@@ -235,7 +235,7 @@ export const updateCourseStudentMaxAttempts = createAsyncThunk<courseStudent, { 
             });
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error?.response?.data?.error || error.message);
         }
     }
 );
@@ -532,26 +532,24 @@ const courseSlice = createSlice({
             })
 
             // Reducers para la acción updateCourseStudentMaxAttempts
-            .addCase(updateCourseStudentMaxAttempts.pending, (state) => {
-                state.status = 'loading';
-            })
+            // No toca `status`: es un guardado de campo en línea y no debe
+            // sustituir la página por LoadingPage/ErrorPage. La respuesta viene
+            // sin includes, por eso se hace merge en lugar de reemplazo.
             .addCase(updateCourseStudentMaxAttempts.fulfilled, (state, action: PayloadAction<courseStudent>) => {
-                state.status = 'succeeded';
                 const updatedCourseStudent = action.payload;
 
                 if (state.courseStudentList) {
                     const index = state.courseStudentList.findIndex((courseStudent) => courseStudent.id === updatedCourseStudent.id);
                     if (index !== -1) {
-                        state.courseStudentList[index] = updatedCourseStudent;
+                        state.courseStudentList[index] = { ...state.courseStudentList[index], ...updatedCourseStudent };
                     }
                 }
 
                 if (state.courseStudent?.id === updatedCourseStudent.id) {
-                    state.courseStudent = updatedCourseStudent;
+                    state.courseStudent = { ...state.courseStudent, ...updatedCourseStudent };
                 }
             })
             .addCase(updateCourseStudentMaxAttempts.rejected, (state, action) => {
-                state.status = 'failed';
                 state.error = action.payload as string;
             })
 

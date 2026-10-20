@@ -34,7 +34,7 @@ repositorios que afecte una petición/respuesta DEBE actualizar este archivo en 
 | Student | `id, user_id, status` |
 | Instructor | `id, user_id, status` |
 | UserDocType | `id, name, symbol` |
-| Course | `id, name, description, code, hours, plane_model, days, uses_sessions, sessions, status, course_type_id, course_level_id` |
+| Course | `id, name, description, code, hours, plane_model, color, days, uses_sessions, sessions, status, course_type_id, course_level_id` |
 | CourseType | `id, name` |
 | CourseLevel | `id, name` |
 | CourseStudent | `id, course_id, date, score, approve, student_id, code, type_trip, license, regulation, status, max_attempts, instructor_code, client` |
@@ -184,14 +184,15 @@ arranque usa `alter: false` y no las crea).
 
 ### GET /
 - Query: `name`, `description`, `course_type_id`, `course_level_id` (todos opcionales)
-- `200` → array de Course con alias `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
+- `200` → array de Course con alias `course_type`, `course_level` (incluye `color`, `uses_sessions` y `sessions`)
 
 ### POST /
 - Body (Joi; `type`→`course_type_id`, `level`→`course_level_id`): `name`, `description`, `code`,
-  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status` (opcionales)
+  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `color` (string ≤ 50, acepta
+  `null`/`''`), `status` (opcionales)
 - `uses_sessions` (bool, default `false`) y `sessions` (int ≥ 1) son opcionales — ver
   [Días vs. Sesiones](#días-vs-sesiones). Si `sessions` no viene, se persiste `sessions = days`.
-- `201` → Course con `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
+- `201` → Course con `course_type`, `course_level` (incluye `color`, `uses_sessions` y `sessions`)
 
 ### PUT /
 - Body (Joi, mismo que POST + `id` requerido; se ignora `hours`)
@@ -212,7 +213,7 @@ arranque usa `alter: false` y no las crea).
 - Params: `course_id` (numérico)
 - Body (Joi `cloneCourseSchema`, todos opcionales): `name`, `code`, `description`, `status`
 - Crea un curso nuevo (clon estructural) copiando `course`, `subject`, `subject_days`, `subject_lesson` y `subject_lesson_days`, re-apuntados al nuevo `course_id`. No clona students/grupos enrollados, schedules, asistencias, tests ni evaluaciones.
-- Defaults: `name` = `'<origen> (copia)'`, `code` = `'<origen>-COPIA'` (50 max, sufijo incremental si existe). Otros campos copiados; overrides reemplazan.
+- Defaults: `name` = `'<origen> (copia)'`, `code` = `'<origen>-COPIA'` (50 max, sufijo incremental si existe). Otros campos copiados (incluido `color`); overrides reemplazan.
 - Transacción: si falla → rollback. Filas con padres faltantes se saltan.
 - `201` → Course con `course_type`, `course_level` (shape `GET /course/:id`) más: `subjects_cloned`, `subject_days_cloned`, `subject_lessons_cloned`, `subject_lesson_days_cloned` (conteos).
 - `400` JSON `{ error: 'Parámetro course_id inválido' }` | texto plano `Input Validation Error <msg>`
@@ -1069,7 +1070,7 @@ ido/expirado → `403` con el error JWT serializado.
 | Student | `id, user_id, status` |
 | Instructor | `id, user_id, status` |
 | UserDocType | `id, name, symbol` |
-| Course | `id, name, description, code, hours, plane_model, days, uses_sessions, sessions, status, course_type_id, course_level_id` |
+| Course | `id, name, description, code, hours, plane_model, color, days, uses_sessions, sessions, status, course_type_id, course_level_id` |
 | CourseType | `id, name` |
 | CourseLevel | `id, name` |
 | CourseStudent | `id, course_id, date, score, approve, student_id, code, type_trip, license, regulation, status, max_attempts, instructor_code, client` |
@@ -1219,14 +1220,15 @@ arranque usa `alter: false` y no las crea).
 
 ### GET /
 - Query: `name`, `description`, `course_type_id`, `course_level_id` (todos opcionales)
-- `200` → array de Course con alias `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
+- `200` → array de Course con alias `course_type`, `course_level` (incluye `color`, `uses_sessions` y `sessions`)
 
 ### POST /
 - Body (Joi; `type`→`course_type_id`, `level`→`course_level_id`): `name`, `description`, `code`,
-  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `status` (opcionales)
+  `days` (requeridos); `type`, `level` (requeridos); `plane_model`, `color` (string ≤ 50, acepta
+  `null`/`''`), `status` (opcionales)
 - `uses_sessions` (bool, default `false`) y `sessions` (int ≥ 1) son opcionales — ver
   [Días vs. Sesiones](#días-vs-sesiones). Si `sessions` no viene, se persiste `sessions = days`.
-- `201` → Course con `course_type`, `course_level` (incluye `uses_sessions` y `sessions`)
+- `201` → Course con `course_type`, `course_level` (incluye `color`, `uses_sessions` y `sessions`)
 
 ### PUT /
 - Body (Joi, mismo que POST + `id` requerido; se ignora `hours`)
@@ -1241,18 +1243,6 @@ arranque usa `alter: false` y no las crea).
 ### GET /course/:id
 - Params: `id`
 - `200` → Course con `course_type`, `course_level`
-
-### POST /clone/:course_id
-- Auth: sí
-- Params: `course_id` (numérico)
-- Body (Joi `cloneCourseSchema`, todos opcionales): `name`, `code`, `description`, `status`
-- Crea un curso nuevo (clon estructural) copiando `course`, `subject`, `subject_days`, `subject_lesson` y `subject_lesson_days`, re-apuntados al nuevo `course_id`. No clona students/grupos enrollados, schedules, asistencias, tests ni evaluaciones.
-- Defaults: `name` = `'<origen> (copia)'`, `code` = `'<origen>-COPIA'` (50 max, sufijo incremental si existe). Otros campos copiados; overrides reemplazan.
-- Transacción: si falla → rollback. Filas con padres faltantes se saltan.
-- `201` → Course con `course_type`, `course_level` (shape `GET /course/:id`) más: `subjects_cloned`, `subject_days_cloned`, `subject_lessons_cloned`, `subject_lesson_days_cloned` (conteos).
-- `400` JSON `{ error: 'Parámetro course_id inválido' }` | texto plano `Input Validation Error <msg>`
-- `404` texto plano `Curso no encontrado`
-- `500` texto plano `Internal Server Error <error>`
 
 ### GET /coursesStudents
 - Query: `course_type_id`, `status`, `course_group_id`, `course_id`, `student_id`, `instructor_id` (opcionales),

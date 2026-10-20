@@ -219,6 +219,7 @@ export type course = {
     level?: number;
     status: boolean;
     plane_model?: string;
+    color?: string | null;
     course_type: courseType;
     course_level: courseLevel;
     createdAt?: string;
@@ -784,6 +785,7 @@ export type courseGroupReportCourse = {
     uses_sessions?: boolean;
     sessions?: number;
     plane_model?: string | null;
+    color?: string | null;
     status: boolean;
     course_type: courseType;
     course_level: courseLevel;

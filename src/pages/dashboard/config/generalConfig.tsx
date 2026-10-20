@@ -255,13 +255,22 @@ const GeneralConfig = () => {
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
-												className="h-full"
+												className="relative h-full overflow-hidden"
 											>
+												<span
+													title="Color del curso"
+													aria-label="Color del curso"
+													className="absolute inset-y-0 left-0 w-3 border-r border-black/10"
+													style={{
+														backgroundColor:
+															course.color || '#ffffff',
+													}}
+												/>
 												<CardBody
 													placeholder={undefined}
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
-													className="flex flex-col justify-center h-full p-2 sm:p-4"
+													className="flex flex-col justify-center h-full p-2 pl-5 sm:p-4 sm:pl-6"
 												>
 													<div className="text-center sm:text-left">
 														<Typography

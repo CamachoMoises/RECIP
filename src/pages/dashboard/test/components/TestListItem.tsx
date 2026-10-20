@@ -107,11 +107,19 @@ const TestListItem = ({
 	return (
 		<ListItem
 			key={`${CL.id}.courseList`}
-			className="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-4 sm:py-3"
+			className="relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center gap-3 py-4 pl-5 sm:py-3 sm:pl-6"
 			placeholder={undefined}
 			onPointerEnterCapture={undefined}
 			onPointerLeaveCapture={undefined}
 		>
+			<span
+				title="Color del curso"
+				aria-label="Color del curso"
+				className="absolute inset-y-0 left-0 w-1.5 border-r border-black/10"
+				style={{
+					backgroundColor: CL.course?.color || '#ffffff',
+				}}
+			/>
 			<div className="flex flex-col sm:flex-row w-full gap-3">
 				<div className="flex flex-col w-full">
 					<div className="mt-2">

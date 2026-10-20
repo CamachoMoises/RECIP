@@ -223,9 +223,18 @@ const CourseStudentsSection = ({
 									onPointerEnterCapture={undefined}
 									onPointerLeaveCapture={undefined}
 									onClick={() => handleOpenDialog(CL)}
-									className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 ${CL.status === false ? 'opacity-50' : ''}`}
+									className={`relative overflow-hidden flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 ${CL.status === false ? 'opacity-50' : ''}`}
 								>
-									<div className="min-w-0">
+									<span
+										title="Color del curso"
+										aria-label="Color del curso"
+										className="absolute inset-y-0 left-0 w-1.5 border-r border-black/10"
+										style={{
+											backgroundColor:
+												CL.course?.color || '#ffffff',
+										}}
+									/>
+									<div className="min-w-0 pl-4 sm:pl-5">
 										{CL.student?.user?.rank && (
 											<Typography
 												variant="small"
@@ -404,17 +413,30 @@ const CourseStudentsSection = ({
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<div className="flex justify-between items-center w-full">
-									<Typography
-										variant="h5"
-										placeholder={undefined}
-										onPointerEnterCapture={undefined}
-										onPointerLeaveCapture={undefined}
-									>
-										{selectedStudent?.student?.user?.name
-											? `${selectedStudent.student.user.name} ${selectedStudent.student.user.last_name}`
-											: 'Detalle del Piloto'}
-									</Typography>
+								<div className="flex justify-between items-center w-full gap-3">
+									<div className="flex items-center gap-3 min-w-0">
+										<span
+											title="Color del curso"
+											aria-label="Color del curso"
+											className="w-4 h-10 rounded-md border border-black/10 shrink-0"
+											style={{
+												backgroundColor:
+													selectedStudent?.course?.color ||
+													'#ffffff',
+											}}
+										/>
+										<Typography
+											variant="h5"
+											className="truncate"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{selectedStudent?.student?.user?.name
+												? `${selectedStudent.student.user.name} ${selectedStudent.student.user.last_name}`
+												: 'Detalle del Piloto'}
+										</Typography>
+									</div>
 									<IconButton
 										variant="text"
 										color="red"
