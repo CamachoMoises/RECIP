@@ -266,6 +266,19 @@ export const updateCourse = createAsyncThunk<course, course>(
         }
     }
 );
+
+// Actualizaci√≥n silenciosa de las horas totales del curso (sin overlay global)
+export const updateCourseHours = createAsyncThunk<course, course>(
+    'course/updateCourseHours',
+    async (courseData, { rejectWithValue }) => {
+        try {
+            const response = await axiosPutSlice(`api/courses`, courseData);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 // Acci√≥n para actualizar un curso por estudiante
 export const updateCourseStudent = createAsyncThunk<courseStudent, { course_id: number, course_student_id: number, date: string | undefined, student_id: number | null | undefined, typeTrip: number, license: number, regulation: number, instructorCode?: string, client?: string }>(
     'course/updateCourseStudent',
@@ -567,7 +580,7 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Reducers para la acci√≥n updateCourse
+                        // Reducers para la acciÛn updateCourse
             .addCase(updateCourse.pending, (state) => {
                 state.status = 'loading';
             })
@@ -582,6 +595,21 @@ const courseSlice = createSlice({
             })
             .addCase(updateCourse.rejected, (state, action) => {
                 state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reducers para la acciÛn updateCourseHours (sin overlay)
+            .addCase(updateCourseHours.fulfilled, (state, action: PayloadAction<course>) => {
+                const editedCourse = action.payload;
+                const index = state.courseList.findIndex((course) => course.id === editedCourse.id);
+                if (index !== -1) {
+                    state.courseList[index] = editedCourse;
+                }
+                if (state.courseSelected?.id === editedCourse.id) {
+                    state.courseSelected = { ...state.courseSelected, hours: editedCourse.hours };
+                }
+            })
+            .addCase(updateCourseHours.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
 

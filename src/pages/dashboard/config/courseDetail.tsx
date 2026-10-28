@@ -13,7 +13,7 @@ import PageTitle from '../../../components/PageTitle';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
 	fetchSubject,
 	fetchSubjects,
@@ -24,7 +24,10 @@ import ModalFormSubject from './modalFormSubject';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import { axiosPostDefault } from '../../../services/axios';
-import { fetchCourse } from '../../../features/courseSlice';
+import {
+	fetchCourse,
+	updateCourseHours,
+} from '../../../features/courseSlice';
 import {
 	ordinalLabel,
 	ordinalNoun,
@@ -49,6 +52,7 @@ const CourseDetail = () => {
 		number | null
 	>(null);
 	const [openNewSubject, setOpenNewSubject] = useState(false);
+	const lastSavedHoursRef = useRef<number | null>(null);
 	const { course, subject } = useSelector((state: RootState) => {
 		return { course: state.courses, subject: state.subjects };
 	});
@@ -85,6 +89,38 @@ const CourseDetail = () => {
 		}
 	}, [dispatch, subjectSelectedId]);
 
+	useEffect(() => {
+		const sc = course.courseSelected;
+		if (!sc || !sc.id) return;
+		let total = 0;
+		if (sc.course_type?.id === 2) {
+			const count = sc.uses_sessions ? sc.sessions : sc.days;
+			total = 8 * (count || 0);
+		} else if (sc.course_type?.id === 1) {
+			if (!subject.subjectList) return;
+			total = subject.subjectList.reduce((sum, sub) => {
+				const activeDays =
+					sub.subject_days?.filter((sd) => sd.status)
+						?.length || 0;
+				return sum + (sub.hours || 0) * activeDays;
+			}, 0);
+		} else {
+			return;
+		}
+		if (lastSavedHoursRef.current === total) return;
+		if (sc.hours === total) {
+			lastSavedHoursRef.current = total;
+			return;
+		}
+		lastSavedHoursRef.current = total;
+		dispatch(
+			updateCourseHours({ ...sc, hours: total }),
+		);
+	}, [
+		course.courseSelected,
+		subject.subjectList,
+		dispatch,
+	]);
 	if (!id || Number.isNaN(courseIdNum)) {
 		return <LoadingPage />;
 	}

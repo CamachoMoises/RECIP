@@ -16,7 +16,7 @@ import {
 	courseType,
 } from '../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ColorPicker from '../../../components/ColorPicker';
 import {
 	createCourse,
@@ -81,6 +81,7 @@ const ModalFormCourse = ({
 		handleSubmit,
 		control,
 		watch,
+		setValue,
 		formState: { errors },
 	} = useForm<Inputs>({
 		defaultValues: {
@@ -105,6 +106,24 @@ const ModalFormCourse = ({
 	});
 
 	const usesSessions = watch('uses_sessions');
+	const watchedCourseType = watch('course_type');
+	const watchedDays = watch('days');
+	const watchedSessions = watch('sessions');
+
+	const computedHours = (() => {
+		const typeId = parseInt(watchedCourseType || '0', 10);
+		if (typeId === 2) {
+			const count = usesSessions
+				? parseInt(watchedSessions || '0', 10)
+				: parseInt(watchedDays || '0', 10);
+			return 8 * (isNaN(count) ? 0 : count);
+		}
+		return courseSelected?.hours ?? 0;
+	})();
+
+	useEffect(() => {
+		setValue('hours', computedHours);
+	}, [computedHours, setValue]);
 
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		const newCourseType: courseType | undefined = courseTypes.find(
@@ -119,7 +138,7 @@ const ModalFormCourse = ({
 				name: data.name,
 				description: data.description,
 				code: data.code,
-				hours: data.hours,
+				hours: computedHours,
 				days: parseInt(data.days),
 				uses_sessions: data.uses_sessions,
 				sessions: parseInt(data.sessions),
