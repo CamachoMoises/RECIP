@@ -264,7 +264,7 @@ const ResultsTestPdf = ({
 					return (
 						<div
 							key={question.id}
-							className="flex flex-col gap-2 border-2 p-2 border-blue-gray-800"
+							className="question-block flex flex-col gap-2 border-2 p-2 border-blue-gray-800"
 						>
 							<div className="text-left">
 								Pregunta #{index + 1} (

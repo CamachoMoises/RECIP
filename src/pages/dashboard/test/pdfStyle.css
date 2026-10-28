@@ -7,6 +7,10 @@
 	.printable {
 		margin: 1mm; /* Márgenes personalizados */
 		padding: 3mm;
-		page-break-after: always; /* Controla saltos de página */
+	}
+
+	.question-block {
+		page-break-inside: avoid;
+		break-inside: avoid;
 	}
 }
