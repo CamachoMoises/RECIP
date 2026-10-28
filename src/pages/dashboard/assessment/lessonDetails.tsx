@@ -69,7 +69,7 @@ const LessonDetails = ({
 				undefined,
 		};
 
-		await dispatch(changeCourseStudentAssessmentLessonDay(req));
+		await dispatch(changeCourseStudentAssessmentLessonDay(req)).unwrap();
 	};
 	// console.log(assessment.subjectList);
 

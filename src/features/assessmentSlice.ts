@@ -198,10 +198,8 @@ export const assessmentSlice = createSlice({
                 state.error = action.payload as string;
             })
             // Reducers para la acción updateCourseStudentAssessmentDay
-            .addCase(updateCourseStudentAssessmentDay.pending, (state) => {
-                console.log('Cargando');
-
-                state.status = 'loading';
+            .addCase(updateCourseStudentAssessmentDay.pending, () => {
+                // No global loading: evita recargar toda la vista
             })
             .addCase(updateCourseStudentAssessmentDay.fulfilled, (state, action: PayloadAction<courseStudentAssessmentDay>) => {
                 state.status = 'succeeded';
@@ -209,7 +207,6 @@ export const assessmentSlice = createSlice({
                 state.courseStudentAssessmentDaySelected = action.payload;
             })
             .addCase(updateCourseStudentAssessmentDay.rejected, (state, action) => {
-                state.status = 'failed';
                 state.error = action.payload as string;
             })
             // Reducers para la acción fetchSubjectAssessment
@@ -228,8 +225,8 @@ export const assessmentSlice = createSlice({
                 state.error = action.payload as string;
             })
             // Reducers para la acción updateCourse
-            .addCase(changeCourseStudentAssessmentLessonDay.pending, (state) => {
-                state.status = 'loading';
+            .addCase(changeCourseStudentAssessmentLessonDay.pending, () => {
+                // No global loading: evita recargar toda la vista
             })
             .addCase(changeCourseStudentAssessmentLessonDay.fulfilled, (state, action: PayloadAction<subject>) => {
                 const editedSubject = action.payload;
@@ -242,7 +239,6 @@ export const assessmentSlice = createSlice({
                 }
             })
             .addCase(changeCourseStudentAssessmentLessonDay.rejected, (state, action) => {
-                state.status = 'failed';
                 state.error = action.payload as string;
             })
             .addCase(saveSignatures.pending, (state) => {

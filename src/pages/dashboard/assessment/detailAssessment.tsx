@@ -276,33 +276,7 @@ const DetailAssessment = () => {
 					]),
 				),
 			);
-		// console.log(
-		// 	'[debug firmas] días:',
-		// 	Object.keys(signatures ?? {}),
-		// 	signatures,
-		// );
 
-		// const panel = document.createElement('div');
-		// panel.style.cssText =
-		// 	'position:fixed;top:0;left:0;right:0;max-height:50vh;overflow:auto;z-index:2147483647;background:#fff;border-bottom:3px solid red;padding:6px;font:12px sans-serif';
-		// panel.innerHTML =
-		// 	'<b>DEBUG firmas</b> (clic aquí para cerrar)<br/>';
-		// panel.onclick = () => panel.remove();
-
-		// Object.entries(signatures ?? {}).forEach(([day, sigs]) => {
-		// 	Object.entries(sigs).forEach(([role, src]) => {
-		// 		if (!src) return;
-		// 		const item = document.createElement('div');
-		// 		item.textContent = `día ${day} - ${role}: `;
-		// 		const img = document.createElement('img');
-		// 		img.src = src as string;
-		// 		img.style.cssText = 'height:60px;border:1px solid #ccc';
-		// 		item.appendChild(img);
-		// 		panel.appendChild(item);
-		// 	});
-		// });
-
-		// document.body.appendChild(panel);
 		const pdfBlob = await pdf(
 			<CSAssessmentPDFDocument
 				assessment={freshAssessment}

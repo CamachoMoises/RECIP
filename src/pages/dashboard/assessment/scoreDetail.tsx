@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { subjectLesson } from '../../../types/utilities';
 import {
 	ListItemSuffix,
@@ -75,10 +76,64 @@ const ScoreDetail = ({
 		CSALD_id =
 			SLE.subject_lesson_days[0]
 				.course_student_assessment_lesson_days[0].id;
-	}
+ 	}
 
-	return (
-		<>
+ 	const changeMain = (value: number) => {
+ 		const prev = score;
+ 		setScore(value);
+ 		handleChangeRadio(
+ 			CSALD_id,
+ 			value,
+ 			SLE.subject_id,
+ 			SLE.id ? SLE.id : -1,
+ 			SLD_id,
+ 			SLED_id ? SLED_id : -1,
+ 			score_2,
+ 			score_3,
+ 		).catch(() => {
+ 			setScore(prev);
+ 			toast.error('Error al guardar');
+ 		});
+ 	};
+
+ 	const changeSecond = (value: number) => {
+ 		const prev = score_2;
+ 		setScore_2(value);
+ 		handleChangeRadio(
+ 			CSALD_id,
+ 			score!,
+ 			SLE.subject_id,
+ 			SLE.id ? SLE.id : -1,
+ 			SLD_id,
+ 			SLED_id ? SLED_id : -1,
+ 			value,
+ 			score_3,
+ 		).catch(() => {
+ 			setScore_2(prev);
+ 			toast.error('Error al guardar');
+ 		});
+ 	};
+
+ 	const changeThird = (value: number) => {
+ 		const prev = score_3;
+ 		setScore_3(value);
+ 		handleChangeRadio(
+ 			CSALD_id,
+ 			score!,
+ 			SLE.subject_id,
+ 			SLE.id ? SLE.id : -1,
+ 			SLD_id,
+ 			SLED_id ? SLED_id : -1,
+ 			score_2,
+ 			value,
+ 		).catch(() => {
+ 			setScore_3(prev);
+ 			toast.error('Error al guardar');
+ 		});
+ 	};
+
+ 	return (
+ 		<>
 			<Typography
 				variant="paragraph"
 				placeholder={undefined}
@@ -103,19 +158,7 @@ const ScoreDetail = ({
 							name={`SLE-Radio-${SLE.id}`}
 							label="1"
 							value={1}
-							onChange={() => {
-								handleChangeRadio(
-									CSALD_id,
-									1,
-									SLE.subject_id,
-									SLE.id ? SLE.id : -1,
-									SLD_id,
-									SLED_id ? SLED_id : -1,
-									score_2,
-									score_3,
-								);
-								setScore(1);
-							}}
+							onChange={() => changeMain(1)}
 							defaultChecked={score === 1}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -126,19 +169,7 @@ const ScoreDetail = ({
 							name={`SLE-Radio-${SLE.id}`}
 							label="2"
 							value={2}
-							onChange={() => {
-								handleChangeRadio(
-									CSALD_id,
-									2,
-									SLE.subject_id,
-									SLE.id ? SLE.id : -1,
-									SLD_id,
-									SLED_id ? SLED_id : -1,
-									score_2,
-									score_3,
-								);
-								setScore(2);
-							}}
+							onChange={() => changeMain(2)}
 							defaultChecked={score === 2}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -149,19 +180,7 @@ const ScoreDetail = ({
 							name={`SLE-Radio-${SLE.id}`}
 							label="3"
 							value={3}
-							onChange={() => {
-								handleChangeRadio(
-									CSALD_id,
-									3,
-									SLE.subject_id,
-									SLE.id ? SLE.id : -1,
-									SLD_id,
-									SLED_id ? SLED_id : -1,
-									score_2,
-									score_3,
-								);
-								setScore(3);
-							}}
+							onChange={() => changeMain(3)}
 							defaultChecked={score === 3}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -172,19 +191,7 @@ const ScoreDetail = ({
 							name={`SLE-Radio-${SLE.id}`}
 							label="4"
 							value={4}
-							onChange={() => {
-								handleChangeRadio(
-									CSALD_id,
-									4,
-									SLE.subject_id,
-									SLE.id ? SLE.id : -1,
-									SLD_id,
-									SLED_id ? SLED_id : -1,
-									score_2,
-									score_3,
-								);
-								setScore(4);
-							}}
+							onChange={() => changeMain(4)}
 							defaultChecked={score === 4}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
@@ -198,19 +205,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="1"
 								value={1}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										1,
-										score_3,
-									);
-									setScore_2(1);
-								}}
+							onChange={() => changeSecond(1)}
 								defaultChecked={score_2 === 1}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -221,19 +216,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="2"
 								value={2}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										2,
-										score_3,
-									);
-									setScore_2(2);
-								}}
+							onChange={() => changeSecond(2)}
 								defaultChecked={score_2 === 2}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -244,19 +227,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="3"
 								value={3}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										3,
-										score_3,
-									);
-									setScore_2(3);
-								}}
+							onChange={() => changeSecond(3)}
 								defaultChecked={score_2 === 3}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -267,19 +238,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-2-${SLE.id}`}
 								label="4"
 								value={4}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										4,
-										score_3,
-									);
-									setScore_2(4);
-								}}
+							onChange={() => changeSecond(4)}
 								defaultChecked={score_2 === 4}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -295,19 +254,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="1"
 								value={1}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										score_2,
-										1,
-									);
-									setScore_3(1);
-								}}
+							onChange={() => changeThird(1)}
 								defaultChecked={score_3 === 1}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -318,19 +265,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="2"
 								value={2}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										score_2,
-										2,
-									);
-									setScore_3(2);
-								}}
+							onChange={() => changeThird(2)}
 								defaultChecked={score_3 === 2}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -341,19 +276,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="3"
 								value={3}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										score_2,
-										3,
-									);
-									setScore_3(3);
-								}}
+							onChange={() => changeThird(3)}
 								defaultChecked={score_3 === 3}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -364,19 +287,7 @@ const ScoreDetail = ({
 								name={`SLE-Radio-3-${SLE.id}`}
 								label="4"
 								value={4}
-								onChange={() => {
-									handleChangeRadio(
-										CSALD_id,
-										score,
-										SLE.subject_id,
-										SLE.id ? SLE.id : -1,
-										SLD_id,
-										SLED_id ? SLED_id : -1,
-										score_2,
-										4,
-									);
-									setScore_3(4);
-								}}
+							onChange={() => changeThird(4)}
 								defaultChecked={score_3 === 4}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}

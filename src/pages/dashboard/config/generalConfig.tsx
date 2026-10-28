@@ -22,6 +22,7 @@ import {
 	AccordionHeader,
 	Button,
 	ButtonGroup,
+	Input,
 	Card,
 	CardBody,
 	Dialog,
@@ -36,6 +37,7 @@ import {
 	PaperclipIcon,
 	Pencil,
 	Plus,
+	Search,
 } from 'lucide-react';
 import ModalFormCourse from './modalFormCourse';
 import LoadingPage from '../../../components/LoadingPage';
@@ -71,9 +73,19 @@ const GeneralConfig = () => {
 		null,
 	);
 	const [cloning, setCloning] = useState(false);
+	const [searchTerm, setSearchTerm] = useState('');
 
 	const { course, test } = useSelector((state: RootState) => {
 		return { course: state.courses, test: state.tests };
+	});
+
+	const filteredCourses = course.courseList.filter((c) => {
+		const term = searchTerm.toLowerCase().trim();
+		if (!term) return true;
+		return (
+			(c.name || '').toLowerCase().includes(term) ||
+			(c.code || '').toLowerCase().includes(term)
+		);
 	});
 
 	useEffect(() => {
@@ -214,29 +226,7 @@ const GeneralConfig = () => {
 							Cursos
 						</AccordionHeader>
 						<AccordionBody>
-							<div className="flex flex-col w-full">
-								<Typography
-									variant="h5"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-									className="text-lg sm:text-xl"
-								>
-									Crear Curso
-								</Typography>
-								<div className="flex flex-col">
-									<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-										placeholder={undefined}
-										className="flex flex-col text-center justify-center w-max mx-auto"
-										onClick={() => {
-											handleOpenEdit();
-										}}
-									>
-										<Plus size={15} className="mx-auto text-lg" />
-									</Button>
-								</div>
-							</div>
-							<div className="flex flex-col w-full">
+							<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 								<Typography
 									variant="h5"
 									placeholder={undefined}
@@ -245,10 +235,62 @@ const GeneralConfig = () => {
 									className="text-lg sm:text-xl"
 								>
 									Lista de Cursos
+									{filteredCourses.length > 0 && (
+										<span className="ml-2 text-sm font-normal text-gray-500">
+											({filteredCourses.length})
+										</span>
+									)}
 								</Typography>
+								<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+									<div className="relative flex w-full sm:w-72">
+										<Input
+											type="text"
+											placeholder="Buscar curso..."
+											className="pr-8"
+											value={searchTerm}
+											onChange={(e) =>
+												setSearchTerm(e.target.value)
+											}
+											containerProps={{
+												className: 'min-w-[100px]',
+											}}
+											labelProps={{ className: 'hidden' }}
+											crossOrigin={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										/>
+										<Search className="absolute right-3 top-2.5 h-5 w-5 text-blue-gray-300" />
+									</div>
+									<Button
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+										placeholder={undefined}
+										title="Crear Curso"
+										className="flex items-center justify-center gap-2"
+										onClick={() => {
+											handleOpenEdit();
+										}}
+									>
+										<Plus size={18} />
+										<span className="hidden sm:inline">
+											Nuevo
+										</span>
+									</Button>
+								</div>
 							</div>
+							{filteredCourses.length === 0 && (
+								<Typography
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									variant="small"
+									className="text-center text-gray-500 py-4"
+								>
+									No se encontraron cursos
+								</Typography>
+							)}
 							<div className="grid grid-cols-2 gap-2 sm:gap-4">
-								{course.courseList.map((course) => {
+								{filteredCourses.map((course) => {
 									return (
 										<div key={course.id} className="min-w-0 h-full">
 											<Card

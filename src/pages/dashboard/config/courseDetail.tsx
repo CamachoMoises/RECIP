@@ -54,29 +54,58 @@ const CourseDetail = () => {
 	});
 
 	const { id } = useParams<{ id: string }>();
+	const courseIdNum = id ? parseInt(id) : NaN;
+
 	useEffect(() => {
+		if (!id || Number.isNaN(courseIdNum)) {
+			navigate('/dashboard/config');
+			return;
+		}
+		let cancelled = false;
 		dispatch(
 			fetchSubjects({
-				course_id: parseInt(id ? id : '-1'),
+				course_id: courseIdNum,
 				status: false,
 				is_schedulable: false,
 			}),
 		);
-		dispatch(fetchCourse(parseInt(id ? id : '-1')));
-	}, [dispatch, id]);
+		dispatch(fetchCourse(courseIdNum))
+			.unwrap()
+			.catch(() => {
+				if (!cancelled) navigate('/dashboard/config');
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [dispatch, id, courseIdNum, navigate]);
 
 	useEffect(() => {
 		if (subjectSelectedId) {
 			dispatch(fetchSubject(subjectSelectedId)); // Llamada al thunk para obtener las secciones
 		}
 	}, [dispatch, subjectSelectedId]);
-	if (!id || !course.courseSelected) {
-		navigate('/dashboard/config');
-	} else {
-		const selectedCourse = course.courseSelected;
+
+	if (!id || Number.isNaN(courseIdNum)) {
+		return <LoadingPage />;
+	}
+	if (course.status === 'loading' && !course.courseSelected) {
+		return <LoadingPage />;
+	}
+	if (subject.status === 'loading') {
+		return <LoadingPage />;
+	}
+	if (subject.status === 'failed') {
+		return <ErrorPage error={subject.error ? subject.error : 'Indefinido'} />;
+	}
+	if (course.status === 'failed') {
+		return <LoadingPage />;
+	}
+	if (!course.courseSelected || course.courseSelected.id !== courseIdNum) {
+		return <LoadingPage />;
+	}
+
+	const selectedCourse = course.courseSelected;
 		const subjectList = subject.subjectList;
-		const error = subject.error;
-		const status = subject.status;
 		const maxOrderSubject = subject.maxOrderSubject;
 		const maxOrderLessonSelected = subject.maxOrderLesson;
 		const handleOpenEdit = async (
@@ -166,20 +195,6 @@ const CourseDetail = () => {
 				}
 			}
 		};
-		if (status === 'loading') {
-			return (
-				<>
-					<LoadingPage />
-				</>
-			);
-		}
-		if (status === 'failed') {
-			return (
-				<>
-					<ErrorPage error={error ? error : 'Indefinido'} />
-				</>
-			);
-		}
 
 		if (selectedCourse) {
 			const ordinals = programOrdinals(selectedCourse);
@@ -558,7 +573,6 @@ const CourseDetail = () => {
 		} else {
 			navigate('/dashboard/courses');
 		}
-	}
 };
 
 export default CourseDetail;
