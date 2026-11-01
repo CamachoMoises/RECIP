@@ -346,6 +346,23 @@ export const restoreCourse = createAsyncThunk<course, number>(
         }
     }
 );
+// Reordena los cursos. `ids` es la lista COMPLETA en el orden final.
+// El backend responde el listado completo (incluye eliminados) ya ordenado.
+export const reorderCourses = createAsyncThunk<course[], number[]>(
+    'course/reorderCourses',
+    async (ids, { rejectWithValue }) => {
+        try {
+            return await axiosPutSlice('api/courses/order', { ids });
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(
+                    error,
+                    'Error al guardar el orden de los cursos',
+                ),
+            );
+        }
+    }
+);
 // Acción para actualizar un curso por estudiante
 export const updateCourseStudent = createAsyncThunk<courseStudent, { course_id: number, course_student_id: number, date: string | undefined, student_id: number | null | undefined, typeTrip: number, license: number, regulation: number, instructorCode?: string, client?: string }>(
     'course/updateCourseStudent',
@@ -703,6 +720,26 @@ const courseSlice = createSlice({
                 if (state.courseSelected?.id === updated.id) state.courseSelected = updated;
             })
             .addCase(restoreCourse.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+
+            // Reordenamiento manual (`PUT /api/courses/order`). La respuesta ya
+            // trae el listado completo (con eliminados) en el orden final, así
+            // que se reemplaza entero: no hace falta otro `fetchCourses()`.
+            // Sin `lastCreatedId` (reabriría el modal) ni `status='failed'` en
+            // rejected (un 400/404 debe verse como toast, no como ErrorPage).
+            .addCase(reorderCourses.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(reorderCourses.fulfilled, (state, action: PayloadAction<course[]>) => {
+                state.status = 'succeeded';
+                state.courseList = action.payload;
+            })
+            .addCase(reorderCourses.rejected, (state, action) => {
+                // Se vuelve a `succeeded`: `status === 'loading'` es el flag de
+                // pantalla completa de otras vistas (generalTest, assessment…),
+                // y dejarlo colgado tras un 400/404 las dejaría en LoadingPage.
+                state.status = 'succeeded';
                 state.error = action.payload as string;
             })
 

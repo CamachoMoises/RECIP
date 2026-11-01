@@ -13,6 +13,7 @@ import {
 	fetchCourses,
 	cloneCourse,
 	deleteCourse,
+	reorderCourses,
 	restoreCourse,
 	setLastCreatedId,
 } from '../../../features/courseSlice';
@@ -35,6 +36,8 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import {
+	ArrowDown,
+	ArrowUp,
 	BookCheck,
 	Copy,
 	PaperclipIcon,
@@ -79,11 +82,12 @@ const GeneralConfig = () => {
 	);
 	const [cloning, setCloning] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
-	// `active` (por defecto) deja solo los cursos vigentes; `all` incluye los
-	// eliminados para poder reactivarlos.
+	// `all` (por defecto) incluye los cursos inactivos: así el orden manual
+	// funciona desde el inicio y el recién inactivado sigue visible para poder
+	// reactivarlo. `active` los oculta y deshabilita las flechas.
 	const [courseStateFilter, setCourseStateFilter] = useState<
 		'all' | 'active'
-	>('active');
+	>('all');
 	const [courseToDelete, setCourseToDelete] = useState<course | null>(
 		null,
 	);
@@ -105,6 +109,13 @@ const GeneralConfig = () => {
 			(c.code || '').toLowerCase().includes(term)
 		);
 	});
+
+	// Orden manual (`course.row_order`). Las flechas envían la lista COMPLETA,
+	// nunca `filteredCourses`. Con búsqueda o filtro activo los vecinos
+	// visibles no son los reales, así que se deshabilitan: mover un curso ahí
+	// lo reordenaría "salteando" los ocultos.
+	const fullCourseList = course.courseList;
+	const canReorder = !searchTerm.trim() && courseStateFilter === 'all';
 
 	useEffect(() => {
 		// Configuración debe ver también los cursos eliminados para poder
@@ -169,7 +180,7 @@ const GeneralConfig = () => {
 		try {
 			await dispatch(deleteCourse(courseToDelete.id)).unwrap();
 			toast.success(
-				'Curso inactivado. Su historial se conserva; cámbialo a "Todos los cursos" para reactivarlo.',
+				'Curso inactivado. Su historial se conserva y puedes reactivarlo.',
 			);
 			setCourseToDelete(null);
 		} catch (error) {
@@ -198,6 +209,31 @@ const GeneralConfig = () => {
 			);
 		} finally {
 			setWorking(false);
+		}
+	};
+
+	// Sube/baja un curso una posición y persiste con `PUT /api/courses/order`.
+	// El backend responde la lista completa ya ordenada, así que el reducer
+	// reemplaza `courseList` sin un segundo `fetchCourses()`.
+	const handleMoveCourse = async (
+		courseId: number,
+		direction: -1 | 1,
+	) => {
+		const ids = fullCourseList.map((c) => c.id as number);
+		const from = ids.indexOf(courseId);
+		const to = from + direction;
+		if (from === -1 || to < 0 || to >= ids.length) return;
+
+		[ids[from], ids[to]] = [ids[to], ids[from]];
+
+		try {
+			await dispatch(reorderCourses(ids)).unwrap();
+		} catch (error) {
+			toast.error(
+				typeof error === 'string'
+					? error
+					: 'Error al guardar el orden',
+			);
 		}
 	};
 	// const updateQuestionTypeFunc = async (
@@ -336,10 +372,10 @@ const GeneralConfig = () => {
 										title="Estado de los cursos a mostrar"
 										className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white w-full sm:w-44"
 									>
+										<option value="all">Todos los cursos</option>
 										<option value="active">
 											Solo activos
 										</option>
-										<option value="all">Todos los cursos</option>
 									</select>
 									<Button
 										onPointerEnterCapture={undefined}
@@ -358,6 +394,19 @@ const GeneralConfig = () => {
 									</Button>
 								</div>
 							</div>
+							{!canReorder && (
+								<Typography
+									variant="small"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+									className="mb-3 text-xs text-gray-500"
+								>
+									{searchTerm.trim()
+										? 'Quita la búsqueda para reordenar los cursos.'
+										: 'Cambia el filtro a «Todos los cursos» para reordenar.'}
+								</Typography>
+							)}
 							{filteredCourses.length === 0 && (
 								<Typography
 									placeholder={undefined}
@@ -371,6 +420,12 @@ const GeneralConfig = () => {
 							)}
 							<div className="grid grid-cols-2 gap-2 sm:gap-4">
 								{filteredCourses.map((course) => {
+									// Índice en la lista COMPLETA (`courseList`), no en
+									// `filteredCourses`: las flechas mueven posiciones
+									// reales de `row_order`.
+									const fullIndex = fullCourseList.findIndex(
+										(c) => c.id === course.id,
+									);
 									return (
 										<div key={course.id} className="min-w-0 h-full">
 											<Card
@@ -437,7 +492,7 @@ const GeneralConfig = () => {
 													>
 														{course.course_type.name}
 													</Typography>
-													<div className="flex flex-row justify-center flex-wrap gap-1 sm:gap-0">
+													<div className="flex flex-col items-center justify-center gap-1">
 														{isCourseDeleted(course) ? (
 															<ButtonGroup
 																size="sm"
@@ -470,67 +525,110 @@ const GeneralConfig = () => {
 																</Button>
 															</ButtonGroup>
 														) : (
-															<ButtonGroup
-																size="sm"
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
-															>
-																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																	title="Editar el Curso"
+															<>
+																<ButtonGroup
+																	size="sm"
 																	placeholder={undefined}
-																	onClick={() => handleOpenEdit(course)}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	className="flex-wrap justify-center"
 																>
-																	<Pencil size={20} />
-																</Button>
-																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																	title="Secciones del Curso"
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																		title="Editar el Curso"
+																		placeholder={undefined}
+																		onClick={() => handleOpenEdit(course)}
+																	>
+																		<Pencil size={20} />
+																	</Button>
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																		title="Secciones del Curso"
+																		placeholder={undefined}
+																		onClick={() =>
+																			navigate(
+																				`../config/course/${course.id}`,
+																			)
+																		}
+																	>
+																		<BookCheck size={20} />
+																	</Button>
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																		title="Editar examenes del curso"
+																		placeholder={undefined}
+																		disabled={course.course_type.id !== 1}
+																		onClick={() =>
+																			navigate(
+																				`../config/test/${course.id}`,
+																			)
+																		}
+																	>
+																		<PaperclipIcon size={20} />
+																	</Button>
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																		title="Clonar el Curso"
+																		placeholder={undefined}
+																		onClick={() =>
+																			setCourseToClone(
+																				course,
+																			)
+																		}
+																	>
+																		<Copy size={20} />
+																	</Button>
+																</ButtonGroup>
+																<ButtonGroup
+																	size="sm"
 																	placeholder={undefined}
-																	onClick={() =>
-																		navigate(
-																			`../config/course/${course.id}`,
-																		)
-																	}
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
 																>
-																	<BookCheck size={20} />
-																</Button>
-
-																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																	title="Editar examenes del curso"
-																	placeholder={undefined}
-																	disabled={course.course_type.id !== 1}
-																	onClick={() =>
-																		navigate(
-																			`../config/test/${course.id}`,
-																		)
-																	}
-																>
-																	<PaperclipIcon size={20} />
-																</Button>
-																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																	title="Clonar el Curso"
-																	placeholder={undefined}
-																	onClick={() =>
-																		setCourseToClone(
-																			course,
-																		)
-																	}
-																>
-																	<Copy size={20} />
-																</Button>
-																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																	title="Inactivar el Curso"
-																	placeholder={undefined}
-																	color="red"
-																	onClick={() =>
-																		setCourseToDelete(
-																			course,
-																		)
-																	}
-																>
-																	<Trash2 size={20} />
-																</Button>
-															</ButtonGroup>
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																		title="Subir"
+																		placeholder={undefined}
+																		disabled={
+																			!canReorder ||
+																			fullIndex <= 0
+																		}
+																		onClick={() =>
+																			handleMoveCourse(
+																				course.id as number,
+																				-1,
+																			)
+																		}
+																	>
+																		<ArrowUp size={16} />
+																	</Button>
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																		title="Bajar"
+																		placeholder={undefined}
+																		disabled={
+																			!canReorder ||
+																			fullIndex >=
+																				fullCourseList.length -
+																					1
+																		}
+																		onClick={() =>
+																			handleMoveCourse(
+																				course.id as number,
+																				1,
+																			)
+																		}
+																	>
+																		<ArrowDown size={16} />
+																	</Button>
+																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																		title="Inactivar el Curso"
+																		placeholder={undefined}
+																		color="red"
+																		onClick={() =>
+																			setCourseToDelete(
+																				course,
+																			)
+																		}
+																	>
+																		<Trash2 size={20} />
+																	</Button>
+																</ButtonGroup>
+															</>
 														)}
 													</div>
 												</CardBody>

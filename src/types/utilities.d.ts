@@ -218,6 +218,11 @@ export type course = {
     type?: number;
     level?: number;
     status: boolean;
+    // Orden manual global (1..N). El backend siempre lo devuelve y ordena el
+    // listado por él (`row_order ASC, id ASC`). Opcional para no romper
+    // objetos `course` construidos en el front (create/update lo ignoran).
+    // No confundir con `subject.order` (orden de secciones).
+    row_order?: number;
     plane_model?: string;
     color?: string | null;
     // Auditoría del soft delete. Eliminado ⇔ `status === false` (o 0).
