@@ -11,9 +11,12 @@ const QuestionTest = ({
 	QT,
 	TQT,
 	updateTestQuestion,
+	disabled = false,
 }: {
 	QT: questionType;
 	TQT: testQuestionType;
+	// Curso eliminado: la cantidad/valor son POST/PUT /api/test (409).
+	disabled?: boolean;
 	updateTestQuestion: (
 		testQuestion: testQuestionType,
 		amount: number,
@@ -85,6 +88,7 @@ const QuestionTest = ({
 					className="text-xs"
 					title={edit ? 'Cancelar' : 'Cambiar cantidad preguntas'}
 					variant={edit ? 'outlined' : 'filled'}
+					disabled={disabled}
 					placeholder={undefined}
 					onClick={() => {
 						setEdit(!edit);

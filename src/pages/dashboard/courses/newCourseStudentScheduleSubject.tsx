@@ -64,6 +64,7 @@ const NewCourseSubject = ({
 	const [scheduleToDelete, setScheduleToDelete] = useState<schedule | null>(
 		null,
 	);
+	const [saving, setSaving] = useState(false);
 
 	// Calculate initial date
 	let initialDate = schedule?.date || course_student?.date;
@@ -102,6 +103,11 @@ const NewCourseSubject = ({
 	});
 
 	const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+		// El form tiene además un submit oculto, así que el estado `saving` se
+		// valida aquí y no solo en el botón: un doble submit ya no genera el 409
+		// de "esta actividad ya está agendada".
+		if (saving) return;
+
 		dispatch(setDay(SD?.day || 1));
 
 		const req: schedule = {
@@ -117,10 +123,26 @@ const NewCourseSubject = ({
 			classTime: parseFloat(data.classTime || '0'),
 		};
 
-		if (schedule) {
-			await dispatch(updateSchedule(req));
-		} else {
-			await dispatch(createSchedule(req));
+		const isUpdate = Boolean(schedule);
+		setSaving(true);
+		try {
+			await dispatch(
+				isUpdate ? updateSchedule(req) : createSchedule(req),
+			).unwrap();
+			toast.success(isUpdate ? 'Horario actualizado' : 'Horario guardado');
+		} catch (error: any) {
+			// `rejectWithValue` entrega el mensaje del backend como string plano
+			// (p. ej. el 409 de "ya está agendada"); Axios entrega un Error.
+			toast.error(
+				typeof error === 'string'
+					? error
+					: error?.message ||
+							(isUpdate
+								? 'Error al actualizar el horario'
+								: 'Error al guardar el horario'),
+			);
+		} finally {
+			setSaving(false);
 		}
 	};
 
@@ -338,7 +360,7 @@ const NewCourseSubject = ({
 							variant="gradient"
 							color="green"
 							type="submit"
-							disabled={approve || !canViewContent}
+							disabled={approve || !canViewContent || saving}
 							placeholder={undefined}
 						>
 							<Save size={18} />
@@ -350,7 +372,7 @@ const NewCourseSubject = ({
 								variant="gradient"
 								color="red"
 								type="button"
-								disabled={approve || !canViewContent}
+								disabled={approve || !canViewContent || saving}
 								placeholder={undefined}
 								title="Eliminar horario"
 								onClick={() => setScheduleToDelete(schedule)}

@@ -30,6 +30,7 @@ import TestParams from './testParams';
 import { Plus, Upload } from 'lucide-react';
 import NewTestModal from './newTestModal';
 import ExcelUploadComponent from './excelUploadComponent';
+import { isCourseDeleted } from '../../../utils/courseStatus';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
 		name: 'Inicio',
@@ -110,6 +111,12 @@ const TestList = () => {
 		);
 	}
 
+	// Un curso eliminado sigue mostrando su historial de exámenes, pero no
+	// admite crear exámenes ni modificar parámetros (`POST/PUT /api/test` → 409).
+	const courseDeleted = course.courseSelected
+		? isCourseDeleted(course.courseSelected)
+		: false;
+
 	return (
 		<>
 			<PageTitle
@@ -117,6 +124,14 @@ const TestList = () => {
 				breadCrumbs={breadCrumbs}
 			/>
 			<div className="flex flex-col gap-3 p-2 sm:p-4">
+				{courseDeleted && (
+					<div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+						<strong>Curso inactivo.</strong> Los exámenes y sus
+						preguntas se conservan, pero no se pueden crear exámenes
+						ni cambiar sus parámetros hasta reactivar el curso desde
+						Configuración.
+					</div>
+				)}
 				<Card
 					placeholder={undefined}
 					onPointerEnterCapture={undefined}
@@ -138,28 +153,32 @@ const TestList = () => {
 								Cantidad de examenes {test.testList.length}
 							</Typography>
 							<div className="flex flex-wrap gap-2">
-								<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-									size="sm"
-									title="Agregar examen"
-									variant="filled"
-									onClick={() => {
-										setOpen(!open);
-									}}
-									placeholder={undefined}
-								>
-									<Plus size={15} className="mx-auto text-lg" />
-								</Button>
-								<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-									size="sm"
-									title="Subir preguntas desde Excel"
-									variant="outlined"
-									onClick={() => {
-										setOpenExcelUpload(!openExcelUpload);
-									}}
-									placeholder={undefined}
-								>
-									<Upload size={15} className="mx-auto text-lg" />
-								</Button>
+								{!courseDeleted && (
+									<>
+										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+											size="sm"
+											title="Agregar examen"
+											variant="filled"
+											onClick={() => {
+												setOpen(!open);
+											}}
+											placeholder={undefined}
+										>
+											<Plus size={15} className="mx-auto text-lg" />
+										</Button>
+										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+											size="sm"
+											title="Subir preguntas desde Excel"
+											variant="outlined"
+											onClick={() => {
+												setOpenExcelUpload(!openExcelUpload);
+											}}
+											placeholder={undefined}
+										>
+											<Upload size={15} className="mx-auto text-lg" />
+										</Button>
+									</>
+								)}
 							</div>
 						</div>
 					</CardBody>
@@ -250,6 +269,7 @@ const TestList = () => {
 																	<QuestionTest
 																		QT={QT}
 																		TQT={TQT ? TQT : TQT_2}
+																		disabled={courseDeleted}
 																		updateTestQuestion={
 																			updateTestQuestion
 																		}
@@ -272,6 +292,7 @@ const TestList = () => {
 
 													<TestParams
 														test={TL}
+														disabled={courseDeleted}
 														updateTestFunc={updateTestFunc}
 													/>
 												</div>

@@ -17,8 +17,11 @@ type Inputs = {
 const TestParams = ({
 	test,
 	updateTestFunc,
+	disabled = false,
 }: {
 	test: test;
+	// Curso eliminado: duración/nota/estatus son POST/PUT /api/test (409).
+	disabled?: boolean;
 	updateTestFunc: (
 		test: test,
 		data: {
@@ -98,7 +101,9 @@ const TestParams = ({
 					) : (
 						<>
 							<Typography
-								onClick={() => setEdit(!edit)}
+								onClick={() => {
+									if (!disabled) setEdit(!edit);
+								}}
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -151,7 +156,9 @@ const TestParams = ({
 					) : (
 						<>
 							<Typography
-								onClick={() => setEdit(!edit)}
+								onClick={() => {
+									if (!disabled) setEdit(!edit);
+								}}
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
@@ -209,6 +216,7 @@ const TestParams = ({
 						size="sm"
 						title={edit ? 'Cancelar' : 'Cambiar Encabezado'}
 						variant={edit ? 'outlined' : 'filled'}
+						disabled={disabled}
 						placeholder={undefined}
 						onClick={() => {
 							setEdit(!edit);

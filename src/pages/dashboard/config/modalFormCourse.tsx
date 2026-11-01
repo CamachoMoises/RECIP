@@ -13,10 +13,11 @@ import {
 import {
 	course,
 	courseLevel,
+	coursePayload,
 	courseType,
 } from '../../../types/utilities';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import ColorPicker from '../../../components/ColorPicker';
 import {
 	createCourse,
@@ -70,10 +71,6 @@ const ModalFormCourse = ({
 	courseLevel: courseLevel[];
 }) => {
 	// Implementación del modal para el formulario de nuevo curso o edición de un curso
-	const [isActive, setIsActive] = useState(
-		courseSelected ? courseSelected?.status : true,
-	);
-
 	const dispatch = useDispatch<AppDispatch>();
 
 	const {
@@ -133,7 +130,10 @@ const ModalFormCourse = ({
 			(level) => level.id === parseInt(data.course_level),
 		);
 		if (newCourseType && newCourseLevel) {
-			const req: course = {
+			// Sin `status`: POST lo ignora (el curso siempre nace activo) y PUT lo
+			// omite, conservando la auditoría del soft delete. Enviarlo aquí
+			// reactivaría un curso eliminado sin que el usuario lo pida.
+			const req: coursePayload = {
 				id: courseSelected?.id ? courseSelected.id : null,
 				name: data.name,
 				description: data.description,
@@ -146,7 +146,6 @@ const ModalFormCourse = ({
 				level: parseInt(data.course_level),
 				plane_model: data.plane_model,
 				color: data.color || null,
-				status: isActive,
 				course_type: newCourseType,
 				course_level: newCourseLevel,
 			};
@@ -458,32 +457,6 @@ const ModalFormCourse = ({
 										El campo de descripción es requerido
 									</span>
 								)}
-							</div>
-						</div>
-						<div className="flex flex-row gap-3 py-3">
-							<div className="basis-1/2">
-								<div className="flex flex-row gap-5">
-									<div>
-										<label
-											htmlFor="Nombre"
-											className="text-sx text-black"
-										>
-											Estatus
-										</label>
-										<br />
-										<Switch
-											defaultChecked={
-												courseSelected ? isActive : true
-											}
-											onChange={() => {
-												setIsActive(!isActive);
-											}}
-											crossOrigin={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										/>
-									</div>
-								</div>
 							</div>
 						</div>
 					</div>

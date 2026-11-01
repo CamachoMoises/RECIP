@@ -112,6 +112,21 @@ src/
 - Bulk: `deleteAllCourseStudentSchedules(courseStudentId)` → `DELETE /api/courses/schedule/course-student/:course_student_id`
 - Both cascade to `attendance` + `attendance_signature` of each `(date, day)` pair that had a schedule; the response carries `deleted_count`, `deleted_attendance_count`, `deleted_signature_count`
 - UI: per-session `Trash2` in `newCourseStudentScheduleSubject.tsx`; bulk "Eliminar horarios" in `newCourseStudentSchedule.tsx` (next to Imprimir), both behind a confirm dialog
+- Errors: `backendErrorMessage(error, fallback)` in `courseSlice.ts` unwraps the body (`{message}` on POST, `{error}` on the DELETE 400, plain text on 404/500) so the toast shows the real reason; the schedule thunks only handle `fulfilled`, so a failed save/delete no longer collapses the page into `ErrorPage`
+- Hidden schedules: the grid only renders the first schedule of each active `(subject, subject_day)` pair inside the program, so schedules on an inactive day/subject, outside the program or duplicated are unreachable. `newCourseStudentSchedule.tsx` lists them in the amber "Horarios fuera de la grilla" section with a `Trash2` + confirm dialog (state `hiddenScheduleToDelete`); they must be deleted there, otherwise the backend answers 409 when re-scheduling that activity
+
+## Course Soft Delete (`course.status`)
+
+- Eliminar un curso es **reversible**: `DELETE /api/courses/:id` marca `status = false` + `deleted_at`/`deleted_by` (auditoría) y no borra matrículas, horarios, asistencias, exámenes, evaluaciones ni grupos
+- Predicado: **Eliminado ⇔ `Number(course.status) === 0`** (`isCourseDeleted` en `src/utils/courseStatus.ts`). `deleted_at` solo informa cuándo; no lo uses como condición
+- Vocabulario: la UI dice **Inactivar / Inactivo / Reactivar**; el código y la API conservan `delete` / soft delete (`deleteCourse`, `restoreCourse`, `isCourseDeleted`, `deleted_at`). No renombres esos identificadores: los `PATCH/POST` del backend y los audit fields hablan de delete
+- `fetchCourses({ include_inactive: true })` solo en `generalConfig.tsx` (`GET /api/courses?include_inactive=true`). El resto de pantallas llaman `fetchCourses()` y el backend oculta los eliminados
+- Thunks `deleteCourse(id)` (`DELETE`) y `restoreCourse(id)` (`POST /:id/restore`) **actualizan** el curso en `courseList`, no lo quitan: en Configuración debe seguir visible para poder reactivarlo. Sus reducers `rejected` no tocan `status` (toast, no `ErrorPage`) ni `lastCreatedId` (no reabrir el modal)
+- `generalConfig.tsx`: tarjeta atenuada + badge "Inactivo", sin Editar/Secciones/Exámenes (responden `409`), con Clonar (el clon nace activo) y Reactivar/Inactivar. Diálogos de confirmación independientes (`courseToDelete`/`courseToRestore`). El filtro `courseStateFilter` (`all` | `active`, **por defecto `active`**) alterna "Solo activos" / "Todos los cursos" en cliente, junto al buscador por nombre/código; no toca el backend porque la lista ya llega con `include_inactive`. Ojo: como el default es `active`, un curso recién eliminado desaparece de la vista (el toast indica cambiar a "Todos los cursos")
+- `modalFormCourse.tsx` **no envía `status`**: `POST` lo ignora (nace activo) y `PUT` lo omite, así que conserva la auditoría; mandarlo al editar reactivaría un curso eliminado. Tipo `coursePayload` (`Omit<course,'status'> & {status?: boolean}`) documenta esa intención
+- `courseDetail.tsx` y `testList.tsx` muestran un banner ámbar y deshabilitan la creación/edición cuando el curso está eliminado (`POST/PUT` de subjects y tests responden `409`): en secciones se bloquean `+`, switches de día, lápiz y orden; en exámenes se ocultan "Agregar examen"/"Subir Excel" y `TestParams`/`QuestionTest` reciben `disabled`. El historial sigue visible
+- Un curso eliminado **bloquea creaciones nuevas** (`409` JSON `{ message }`) pero permite ver/cerrar lo existente: no filtres pantallas de historial, reportes ni asistencias por `course.status`
+- Errores: todos los thunks de curso usan `backendErrorMessage`, así el `409`/`404` llega legible al toast
 
 ## Instructor Dashboard (`my-instructor-courses`)
 

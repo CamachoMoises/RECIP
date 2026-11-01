@@ -1,7 +1,21 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CourseState, course, courseCloneResult, courseStudent, courseStudentScheduleDeleteResult, schedule, scheduleDeleteResult } from '../types/utilities';
+import { CourseState, course, courseCloneResult, coursePayload, courseStudent, courseStudentScheduleDeleteResult, schedule, scheduleDeleteResult } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
+/**
+ * `error.message` de Axios solo dice "Request failed with status code 409".
+ * El motivo real viaja en el body y el backend no es consistente entre endpoints:
+ * `CreateSchedule` responde `{ message }`, `DeleteSchedule` responde `{ error }`
+ * y los 404/500 texto plano.
+ */
+const backendErrorMessage = (error: any, fallback: string): string => {
+    const data = error?.response?.data;
+    return (
+        (typeof data === 'string' ? data : data?.error || data?.message) ||
+        error?.message ||
+        fallback
+    );
+};
 
 const initialState: CourseState = {
     status: 'idle',
@@ -21,14 +35,25 @@ const initialState: CourseState = {
     emailStatus: 'idle',
     emailError: null,
 };
-export const fetchCourses = createAsyncThunk<course[]>(
+export const fetchCourses = createAsyncThunk<
+    course[],
+    { include_inactive?: boolean } | undefined
+>(
     'course/fetchCourses',
-    async (_, { rejectWithValue }) => {
+    async (args, { rejectWithValue }) => {
         try {
-            const response = await axiosGetSlice('api/courses');
+            // `include_inactive` solo lo usa Configuración. Las pantallas
+            // operativas (matrícula, horarios, exámenes) deben seguir sin él
+            // para no mostrar cursos eliminados.
+            const response = await axiosGetSlice(
+                'api/courses',
+                args?.include_inactive ? { include_inactive: 'true' } : {},
+            );
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al cargar los cursos'),
+            );
         }
     }
 );
@@ -122,7 +147,9 @@ export const fetchCourse = createAsyncThunk<course, number>(
             const response = await axiosGetSlice(`api/courses/course/${id}`);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al cargar el curso'),
+            );
         }
     }
 );
@@ -166,15 +193,17 @@ export const sendCourseScheduleEmail = createAsyncThunk<
         }
     }
 );
-// Acción para crear un curso
-export const createCourse = createAsyncThunk<course, course>(
+// Acción para crear un curso (nace activo: el backend ignora `status`)
+export const createCourse = createAsyncThunk<course, coursePayload>(
     'course/createCourse',
     async (courseData, { rejectWithValue }) => {
         try {
             const response = await axiosPostSlice('api/courses', courseData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al crear el curso'),
+            );
         }
     }
 );
@@ -200,7 +229,8 @@ export const cloneCourse = createAsyncThunk<courseCloneResult, number>(
         }
     }
 );
-// Acción para crear un curso por piloto
+// Acción para crear un curso por piloto (matrícula).
+// Un curso eliminado responde 409 `{ message }`: se propaga tal cual.
 export const createCourseStudent = createAsyncThunk<courseStudent, number>(
     'course/createCourseStudent',
     async (course_id, { rejectWithValue }) => {
@@ -208,7 +238,9 @@ export const createCourseStudent = createAsyncThunk<courseStudent, number>(
             const response = await axiosPostSlice(`api/courses/courseStudent/${course_id}`);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al matricular en el curso'),
+            );
         }
     }
 );
@@ -247,35 +279,70 @@ export const createSchedule = createAsyncThunk<schedule, schedule>(
             const response = await axiosPostSlice('api/courses/schedule', scheduleData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al guardar el horario'),
+            );
         }
     }
 );
 
 
 
-// Acción para actualizar un curso
-export const updateCourse = createAsyncThunk<course, course>(
+// Acción para actualizar un curso (PUT; omitir `status` conserva la auditoría)
+export const updateCourse = createAsyncThunk<course, coursePayload>(
     'course/updateCourse',
     async (courseData, { rejectWithValue }) => {
         try {
             const response = await axiosPutSlice(`api/courses`, courseData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al actualizar el curso'),
+            );
         }
     }
 );
 
 // Actualización silenciosa de las horas totales del curso (sin overlay global)
-export const updateCourseHours = createAsyncThunk<course, course>(
+export const updateCourseHours = createAsyncThunk<course, coursePayload>(
     'course/updateCourseHours',
     async (courseData, { rejectWithValue }) => {
         try {
             const response = await axiosPutSlice(`api/courses`, courseData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al actualizar las horas'),
+            );
+        }
+    }
+);
+
+// Soft delete reversible: marca `status = false` (y `deleted_at`/`deleted_by`)
+// pero NO borra matrículas, horarios, asistencias, exámenes ni evaluaciones.
+export const deleteCourse = createAsyncThunk<course, number>(
+    'course/deleteCourse',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await axiosDeleteSlice(`api/courses/${id}`);
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al eliminar el curso'),
+            );
+        }
+    }
+);
+
+// Reactiva el curso y limpia la auditoría (idempotente).
+export const restoreCourse = createAsyncThunk<course, number>(
+    'course/restoreCourse',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await axiosPostSlice(`api/courses/${id}/restore`, {});
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al reactivar el curso'),
+            );
         }
     }
 );
@@ -299,7 +366,11 @@ export const updateSchedule = createAsyncThunk<schedule, schedule>(
             const response = await axiosPutSlice(`api/courses/schedule`, scheduleData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            // Ojo: `UpdateSchedule` en el backend responde 500 texto plano en
+            // cualquier fallo, así que aquí normalmente no llega un 409/400.
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al actualizar el horario'),
+            );
         }
     }
 );
@@ -311,7 +382,9 @@ export const deleteSchedule = createAsyncThunk<scheduleDeleteResult, number>(
             const response = await axiosDeleteSlice(`api/courses/schedule/${id}`);
             return { id, ...response };
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al eliminar el horario'),
+            );
         }
     }
 );
@@ -566,21 +639,15 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Reducers para la acción createSchedule
-            .addCase(createSchedule.pending, (state) => {
-                state.status = 'loading';
-            })
+            // Horarios (create/update/delete): solo se maneja `fulfilled`. No se
+            // toca `status` a propósito: un 409/400 de validación debe verse
+            // como toast en la pantalla de horarios, no reemplazarla por el
+            // ErrorPage global. El mensaje del backend llega vía `.unwrap()`.
             .addCase(createSchedule.fulfilled, (state, action: PayloadAction<schedule>) => {
-                const newSchedule = action.payload;
-                state.status = 'succeeded';
-                state.scheduleList.push(newSchedule);
-            })
-            .addCase(createSchedule.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string;
+                state.scheduleList.push(action.payload);
             })
 
-                        // Reducers para la acci�n updateCourse
+                        // Reducers para la acci�n updateCourse
             .addCase(updateCourse.pending, (state) => {
                 state.status = 'loading';
             })
@@ -598,7 +665,7 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Reducers para la acci�n updateCourseHours (sin overlay)
+            // Reducers para la acci�n updateCourseHours (sin overlay)
             .addCase(updateCourseHours.fulfilled, (state, action: PayloadAction<course>) => {
                 const editedCourse = action.payload;
                 const index = state.courseList.findIndex((course) => course.id === editedCourse.id);
@@ -610,6 +677,32 @@ const courseSlice = createSlice({
                 }
             })
             .addCase(updateCourseHours.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+
+            // Soft delete / reactivación: se ACTUALIZA el curso en la lista, no
+            // se quita. En Configuración el eliminado debe seguir visible para
+            // poder reactivarlo. No se toca `lastCreatedId` (reabriría el modal
+            // de edición) ni `status` en `rejected` (un 409/404 debe verse como
+            // toast, no reemplazar la pantalla por ErrorPage).
+            .addCase(deleteCourse.fulfilled, (state, action: PayloadAction<course>) => {
+                const updated = action.payload;
+                state.status = 'succeeded';
+                const index = state.courseList.findIndex((c) => c.id === updated.id);
+                if (index !== -1) state.courseList[index] = updated;
+                if (state.courseSelected?.id === updated.id) state.courseSelected = updated;
+            })
+            .addCase(deleteCourse.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+            .addCase(restoreCourse.fulfilled, (state, action: PayloadAction<course>) => {
+                const updated = action.payload;
+                state.status = 'succeeded';
+                const index = state.courseList.findIndex((c) => c.id === updated.id);
+                if (index !== -1) state.courseList[index] = updated;
+                if (state.courseSelected?.id === updated.id) state.courseSelected = updated;
+            })
+            .addCase(restoreCourse.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
 
@@ -628,49 +721,25 @@ const courseSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Reducers para la acción updateSchedule
-            .addCase(updateSchedule.pending, (state) => {
-                state.status = 'loading';
-            })
+            // Reducers para la acción updateSchedule (solo `fulfilled`, ver nota arriba)
             .addCase(updateSchedule.fulfilled, (state, action: PayloadAction<schedule>) => {
                 const editedCourse = action.payload;
-                state.status = 'succeeded';
                 const index = state.scheduleList.findIndex((schedule) => schedule.id === editedCourse.id);
                 if (index !== -1) {
                     state.scheduleList[index] = editedCourse;
                 }
             })
-            .addCase(updateSchedule.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string;
-            })
 
             // Reducers para la acción deleteSchedule
-            .addCase(deleteSchedule.pending, (state) => {
-                state.status = 'loading';
-            })
             .addCase(deleteSchedule.fulfilled, (state, action: PayloadAction<scheduleDeleteResult>) => {
-                state.status = 'succeeded';
                 state.scheduleList = state.scheduleList.filter((schedule) => schedule.id !== action.payload.id);
-            })
-            .addCase(deleteSchedule.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string;
             })
 
             // Reducers para la acción deleteAllCourseStudentSchedules
-            .addCase(deleteAllCourseStudentSchedules.pending, (state) => {
-                state.status = 'loading';
-            })
             .addCase(deleteAllCourseStudentSchedules.fulfilled, (state, action: PayloadAction<courseStudentScheduleDeleteResult>) => {
-                state.status = 'succeeded';
                 state.scheduleList = state.scheduleList.filter(
                     (schedule) => schedule.course_student_id !== action.payload.course_student_id
                 );
-            })
-            .addCase(deleteAllCourseStudentSchedules.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string;
             })
 
             // Reducers para sendCourseScheduleEmail

@@ -12,8 +12,11 @@ import { useEffect, useState } from 'react';
 import {
 	fetchCourses,
 	cloneCourse,
+	deleteCourse,
+	restoreCourse,
 	setLastCreatedId,
 } from '../../../features/courseSlice';
+import { isCourseDeleted } from '../../../utils/courseStatus';
 import { axiosGetDefault } from '../../../services/axios';
 import toast from 'react-hot-toast';
 import {
@@ -37,7 +40,9 @@ import {
 	PaperclipIcon,
 	Pencil,
 	Plus,
+	RotateCcw,
 	Search,
+	Trash2,
 } from 'lucide-react';
 import ModalFormCourse from './modalFormCourse';
 import LoadingPage from '../../../components/LoadingPage';
@@ -74,12 +79,25 @@ const GeneralConfig = () => {
 	);
 	const [cloning, setCloning] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
+	// `active` (por defecto) deja solo los cursos vigentes; `all` incluye los
+	// eliminados para poder reactivarlos.
+	const [courseStateFilter, setCourseStateFilter] = useState<
+		'all' | 'active'
+	>('active');
+	const [courseToDelete, setCourseToDelete] = useState<course | null>(
+		null,
+	);
+	const [courseToRestore, setCourseToRestore] = useState<course | null>(
+		null,
+	);
+	const [working, setWorking] = useState(false);
 
 	const { course, test } = useSelector((state: RootState) => {
 		return { course: state.courses, test: state.tests };
 	});
 
 	const filteredCourses = course.courseList.filter((c) => {
+		if (courseStateFilter === 'active' && isCourseDeleted(c)) return false;
 		const term = searchTerm.toLowerCase().trim();
 		if (!term) return true;
 		return (
@@ -89,7 +107,9 @@ const GeneralConfig = () => {
 	});
 
 	useEffect(() => {
-		dispatch(fetchCourses());
+		// Configuración debe ver también los cursos eliminados para poder
+		// reactivarlos. Sin `include_inactive` quedarían inalcanzables en la UI.
+		dispatch(fetchCourses({ include_inactive: true }));
 		dispatch(fetchQuestionTypes());
 	}, [dispatch]);
 
@@ -142,6 +162,44 @@ const GeneralConfig = () => {
 			setCloning(false);
 		}
 	};
+
+	const handleDeleteCourse = async () => {
+		if (!courseToDelete?.id) return;
+		setWorking(true);
+		try {
+			await dispatch(deleteCourse(courseToDelete.id)).unwrap();
+			toast.success(
+				'Curso inactivado. Su historial se conserva; cámbialo a "Todos los cursos" para reactivarlo.',
+			);
+			setCourseToDelete(null);
+		} catch (error) {
+			toast.error(
+				typeof error === 'string'
+					? error
+					: 'Error al inactivar el curso',
+			);
+		} finally {
+			setWorking(false);
+		}
+	};
+
+	const handleRestoreCourse = async () => {
+		if (!courseToRestore?.id) return;
+		setWorking(true);
+		try {
+			await dispatch(restoreCourse(courseToRestore.id)).unwrap();
+			toast.success('Curso reactivado');
+			setCourseToRestore(null);
+		} catch (error) {
+			toast.error(
+				typeof error === 'string'
+					? error
+					: 'Error al reactivar el curso',
+			);
+		} finally {
+			setWorking(false);
+		}
+	};
 	// const updateQuestionTypeFunc = async (
 	// 	questionTypeId: number,
 	// 	value: number
@@ -192,6 +250,11 @@ const GeneralConfig = () => {
 				/>
 			</>
 		);
+	}
+	// Un fallo de los thunks de curso solo reemplaza la pantalla si no hay
+	// lista que mostrar: un 409/404 de eliminar/reactivar debe verse como toast.
+	if (course.status === 'failed' && !course.courseList.length) {
+		return <ErrorPage error={course.error ?? 'Indefinido'} />;
 	}
 
 	return (
@@ -261,6 +324,23 @@ const GeneralConfig = () => {
 										/>
 										<Search className="absolute right-3 top-2.5 h-5 w-5 text-blue-gray-300" />
 									</div>
+									<select
+										value={courseStateFilter}
+										onChange={(e) =>
+											setCourseStateFilter(
+												e.target.value as
+													| 'all'
+													| 'active',
+											)
+										}
+										title="Estado de los cursos a mostrar"
+										className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white w-full sm:w-44"
+									>
+										<option value="active">
+											Solo activos
+										</option>
+										<option value="all">Todos los cursos</option>
+									</select>
 									<Button
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
@@ -297,8 +377,17 @@ const GeneralConfig = () => {
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
-												className="relative h-full overflow-hidden"
+												className={`relative h-full overflow-hidden ${
+													isCourseDeleted(course)
+														? 'opacity-60'
+														: ''
+												}`}
 											>
+												{isCourseDeleted(course) && (
+													<span className="absolute right-2 top-2 z-10 rounded bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+														Inactivo
+													</span>
+												)}
 												<span
 													title="Color del curso"
 													aria-label="Color del curso"
@@ -349,55 +438,100 @@ const GeneralConfig = () => {
 														{course.course_type.name}
 													</Typography>
 													<div className="flex flex-row justify-center flex-wrap gap-1 sm:gap-0">
-														<ButtonGroup
-															size="sm"
-															placeholder={undefined}
-															onPointerEnterCapture={undefined}
-															onPointerLeaveCapture={undefined}
-														>
-															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																title="Editar el Curso"
+														{isCourseDeleted(course) ? (
+															<ButtonGroup
+																size="sm"
 																placeholder={undefined}
-																onClick={() => handleOpenEdit(course)}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
 															>
-																<Pencil size={20} />
-															</Button>
-															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																title="Secciones del Curso"
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																	title="Clonar el Curso"
+																	placeholder={undefined}
+																	onClick={() =>
+																		setCourseToClone(
+																			course,
+																		)
+																	}
+																>
+																	<Copy size={20} />
+																</Button>
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																	title="Reactivar el Curso"
+																	placeholder={undefined}
+																	color="green"
+																	onClick={() =>
+																		setCourseToRestore(
+																			course,
+																		)
+																	}
+																>
+																	<RotateCcw size={20} />
+																</Button>
+															</ButtonGroup>
+														) : (
+															<ButtonGroup
+																size="sm"
 																placeholder={undefined}
-																onClick={() =>
-																	navigate(
-																		`../config/course/${course.id}`,
-																	)
-																}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
 															>
-																<BookCheck size={20} />
-															</Button>
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																	title="Editar el Curso"
+																	placeholder={undefined}
+																	onClick={() => handleOpenEdit(course)}
+																>
+																	<Pencil size={20} />
+																</Button>
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																	title="Secciones del Curso"
+																	placeholder={undefined}
+																	onClick={() =>
+																		navigate(
+																			`../config/course/${course.id}`,
+																		)
+																	}
+																>
+																	<BookCheck size={20} />
+																</Button>
 
-															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																title="Editar examenes del curso"
-																placeholder={undefined}
-																disabled={course.course_type.id !== 1}
-																onClick={() =>
-																	navigate(
-																		`../config/test/${course.id}`,
-																	)
-																}
-															>
-																<PaperclipIcon size={20} />
-															</Button>
-															<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																title="Clonar el Curso"
-																placeholder={undefined}
-																onClick={() =>
-																	setCourseToClone(
-																		course,
-																	)
-																}
-															>
-																<Copy size={20} />
-															</Button>
-														</ButtonGroup>
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																	title="Editar examenes del curso"
+																	placeholder={undefined}
+																	disabled={course.course_type.id !== 1}
+																	onClick={() =>
+																		navigate(
+																			`../config/test/${course.id}`,
+																		)
+																	}
+																>
+																	<PaperclipIcon size={20} />
+																</Button>
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																	title="Clonar el Curso"
+																	placeholder={undefined}
+																	onClick={() =>
+																		setCourseToClone(
+																			course,
+																		)
+																	}
+																>
+																	<Copy size={20} />
+																</Button>
+																<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+																	title="Inactivar el Curso"
+																	placeholder={undefined}
+																	color="red"
+																	onClick={() =>
+																		setCourseToDelete(
+																			course,
+																		)
+																	}
+																>
+																	<Trash2 size={20} />
+																</Button>
+															</ButtonGroup>
+														)}
 													</div>
 												</CardBody>
 											</Card>
@@ -501,6 +635,131 @@ const GeneralConfig = () => {
 						onPointerLeaveCapture={undefined}
 					>
 						{cloning ? 'Clonando...' : 'Clonar'}
+					</Button>
+				</DialogFooter>
+			</Dialog>
+
+			{/* Confirmar eliminación (soft delete) */}
+			<Dialog
+				open={courseToDelete !== null}
+				handler={() => {
+					if (!working) setCourseToDelete(null);
+				}}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Inactivar curso
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se marcará{' '}
+					<strong className="break-all">
+						{courseToDelete?.name}
+					</strong>{' '}
+					(<span className="break-all">{courseToDelete?.code}</span>)
+					como inactivo. <br />
+					<span className="text-sm">
+						No se borra nada: alumnos, horarios, asistencias,
+						exámenes, evaluaciones y grupos se conservan. No se
+						podrán crear matrículas ni programar nuevas actividades
+						hasta reactivarlo. Puedes deshacerlo cuando quieras.
+					</span>
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						disabled={working}
+						onClick={() => setCourseToDelete(null)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						color="red"
+						disabled={working}
+						onClick={handleDeleteCourse}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						{working ? 'Inactivando...' : 'Inactivar'}
+					</Button>
+				</DialogFooter>
+			</Dialog>
+
+			{/* Confirmar reactivación */}
+			<Dialog
+				open={courseToRestore !== null}
+				handler={() => {
+					if (!working) setCourseToRestore(null);
+				}}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Reactivar curso
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se reactivará el curso{' '}
+					<strong className="break-all">
+						{courseToRestore?.name}
+					</strong>{' '}
+					(<span className="break-all">{courseToRestore?.code}</span>)
+					y volverá a admitir matrículas, actividades, exámenes y
+					evaluaciones.
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						disabled={working}
+						onClick={() => setCourseToRestore(null)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						color="green"
+						disabled={working}
+						onClick={handleRestoreCourse}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						{working ? 'Reactivando...' : 'Reactivar'}
 					</Button>
 				</DialogFooter>
 			</Dialog>

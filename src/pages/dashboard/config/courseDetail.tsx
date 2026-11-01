@@ -34,6 +34,7 @@ import {
 	ordinalNounPlural,
 	programOrdinals,
 } from '../../../utils/programSize';
+import { isCourseDeleted } from '../../../utils/courseStatus';
 import toast from 'react-hot-toast';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -141,6 +142,7 @@ const CourseDetail = () => {
 	}
 
 	const selectedCourse = course.courseSelected;
+	const courseDeleted = isCourseDeleted(selectedCourse);
 		const subjectList = subject.subjectList;
 		const maxOrderSubject = subject.maxOrderSubject;
 		const maxOrderLessonSelected = subject.maxOrderLesson;
@@ -200,35 +202,58 @@ const CourseDetail = () => {
 		 * El endpoint sigue llamándose `day` en ambos modos; el backend lo valida
 		 * contra `course.sessions` cuando el curso usa sesiones y responde 400 si
 		 * el ordinal excede el tope.
+		 *
+		 * El `Switch` no está controlado (`defaultChecked`), así que su estado
+		 * visual no se revierte solo si el POST falla. Por eso se recargan las
+		 * asignaciones siempre: el check, la etiqueta "Inactivo" y las horas
+		 * totales (efecto de arriba) tienen que reflejar lo que quedó guardado.
+		 * El precio es el `LoadingPage` de `fetchSubjects.pending`, porque el
+		 * slice comparte `status` para todas sus acciones.
 		 */
 		const handleChangeStatusDay = async (
 			event: React.ChangeEvent<HTMLInputElement>,
 			day: { id: number; name: string },
 			subject_id: number | null,
 		) => {
-			if (subject_id && selectedCourse?.id) {
-				const req = {
-					status: event.target.checked,
-					subject_id: subject_id,
-					day: day.id + 1,
-					course_id: selectedCourse.id,
-				};
+			if (!subject_id || !selectedCourse?.id) return;
 
-				try {
-					await axiosPostDefault('api/subjects/subjects_days', req);
-					toast.success(
-						`${ordinalLabel(selectedCourse, day.id + 1)} actualizado`,
-					);
-				} catch (error: any) {
-					toast.error(
-						error?.response?.data?.message ||
-							error?.message ||
-							`Error al actualizar ${ordinalLabel(
-								selectedCourse,
-								day.id + 1,
-							).toLowerCase()}`,
-					);
-				}
+			const courseId = selectedCourse.id;
+			const req = {
+				status: event.target.checked,
+				subject_id: subject_id,
+				day: day.id + 1,
+				course_id: courseId,
+			};
+			const reload = () =>
+				dispatch(
+					fetchSubjects({
+						course_id: courseId,
+						status: false,
+						is_schedulable: false,
+					}),
+				);
+
+			try {
+				await axiosPostDefault('api/subjects/subjects_days', req);
+				toast.success(
+					`${ordinalLabel(selectedCourse, day.id + 1)} actualizado`,
+				);
+			} catch (error: any) {
+				// Los 400 sin `status` llegan como texto plano
+				// ("Input Validation Error ..."), no como `{ message }`.
+				const data = error?.response?.data;
+				toast.error(
+					(typeof data === 'string'
+						? data
+						: data?.message || data?.error) ||
+						error?.message ||
+						`Error al actualizar ${ordinalLabel(
+							selectedCourse,
+							day.id + 1,
+						).toLowerCase()}`,
+				);
+			} finally {
+				await reload();
 			}
 		};
 
@@ -249,6 +274,14 @@ const CourseDetail = () => {
 						title={`Editar Asiganciones del curso ${selectedCourse.name}`}
 						breadCrumbs={breadCrumbs}
 					/>
+					{courseDeleted && (
+						<div className="mb-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+							<strong>Curso inactivo.</strong> No se pueden crear
+							ni modificar secciones, días ni lecciones hasta
+							reactivarlo desde Configuración. El historial del
+							curso sigue disponible.
+						</div>
+					)}
 					<div className="flex flex-col  gap-2">
 						<div className="flex flex-row w-full">
 							<Card
@@ -370,6 +403,12 @@ const CourseDetail = () => {
 										size="sm"
 										placeholder={undefined}
 										className="flex flex-row justify-center text-center"
+										disabled={courseDeleted}
+										title={
+											courseDeleted
+												? 'Reactiva el curso para crear secciones'
+												: 'Crear sección'
+										}
 										onClick={() => handleOpenEdit(-1)}
 									>
 										<Plus />
@@ -499,6 +538,7 @@ const CourseDetail = () => {
 																							}}
 																							defaultChecked={check}
 																							disabled={
+																								courseDeleted ||
 																								!subject.status
 																							}
 																							onChange={(event) => {
@@ -530,7 +570,7 @@ const CourseDetail = () => {
 																>
 																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																		placeholder={undefined}
-																		disabled={subject.order <= 1}
+																		disabled={courseDeleted || subject.order <= 1}
 																		onClick={() =>
 																			handleSwitchSubject(
 																				subject,
@@ -544,6 +584,7 @@ const CourseDetail = () => {
 
 																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																		placeholder={undefined}
+																		disabled={courseDeleted}
 																		onClick={() =>
 																			handleOpenEdit(subject.id)
 																		}
@@ -553,10 +594,11 @@ const CourseDetail = () => {
 																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 																		placeholder={undefined}
 																		disabled={
-																			maxOrderSubject
+																			courseDeleted ||
+																			(maxOrderSubject
 																				? maxOrderSubject <=
 																					subject.order
-																				: true
+																				: true)
 																		}
 																		onClick={() =>
 																			handleSwitchSubject(

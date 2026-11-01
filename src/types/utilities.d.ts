@@ -220,11 +220,21 @@ export type course = {
     status: boolean;
     plane_model?: string;
     color?: string | null;
+    // Auditoría del soft delete. Eliminado ⇔ `status === false` (o 0).
+    // `deleted_at` solo dice cuándo se eliminó: no lo uses como predicado.
+    deleted_at?: string | null;
+    deleted_by?: number | null;
     course_type: courseType;
     course_level: courseLevel;
     createdAt?: string;
     updatedAt?: string;
 }
+
+// Payload de alta/edición de curso. `status` es opcional y NO debe enviarse:
+// POST lo ignora (el curso siempre nace activo) y PUT omite el campo, así que
+// la auditoría del soft delete se conserva. Mandarlo reactivaría un curso
+// eliminado sin querer.
+export type coursePayload = Omit<course, 'status'> & { status?: boolean };
 
 // Resultado de POST /api/courses/clone/:course_id: el curso clonado
 // (shape GET /course/:id) más los conteos de filas copiadas.

@@ -19,7 +19,7 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { breadCrumbsItems, user } from '../../../types/utilities';
+import { breadCrumbsItems, schedule, user } from '../../../types/utilities';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import {
@@ -35,6 +35,7 @@ import NewCourseSubject from './newCourseStudentScheduleSubject';
 import { PermissionsValidate } from '../../../services/permissionsValidate';
 import {
 	deleteAllCourseStudentSchedules,
+	deleteSchedule,
 	sendCourseScheduleEmail,
 } from '../../../features/courseSlice';
 import { fetchAttendanceByCourseStudent } from '../../../features/attendanceSlice';
@@ -44,6 +45,7 @@ import toast from 'react-hot-toast';
 import { pdf } from '@react-pdf/renderer';
 import { getLogoBase64 } from '../../../utils/logoBase64';
 import {
+	isWithinProgram,
 	ordinalLabel,
 	ordinalNounPlural,
 	programOrdinals,
@@ -107,6 +109,9 @@ const NewCourseStudentSchedule = () => {
 	);
 	const [open, setOpen] = useState<number>(0);
 	const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+	// Horario huérfano (fuera de la grilla) que se va a eliminar.
+	const [hiddenScheduleToDelete, setHiddenScheduleToDelete] =
+		useState<schedule | null>(null);
 
 	// Handlers
 	const handleDeleteAllSchedules = async () => {
@@ -135,6 +140,31 @@ const NewCourseStudentSchedule = () => {
 			toast.error(error || 'Error al eliminar los horarios');
 		} finally {
 			setConfirmBulkDelete(false);
+		}
+	};
+
+	const handleDeleteHiddenSchedule = async () => {
+		const id = hiddenScheduleToDelete?.id;
+		if (!id) return;
+		try {
+			const result = await dispatch(deleteSchedule(id)).unwrap();
+			const attendanceDeleted = result.deleted_attendance_count > 0;
+			const signatureDeleted = result.deleted_signature_count > 0;
+			toast.success(
+				attendanceDeleted
+					? `Horario eliminado. También se eliminó la asistencia de esa sesión${
+							signatureDeleted ? ' y su firma' : ''
+						}.`
+					: 'Horario eliminado',
+			);
+		} catch (error: any) {
+			toast.error(
+				typeof error === 'string'
+					? error
+					: error?.message || 'Error al eliminar el horario',
+			);
+		} finally {
+			setHiddenScheduleToDelete(null);
 		}
 	};
 
@@ -324,6 +354,45 @@ const NewCourseStudentSchedule = () => {
 
 	// Derived data
 	const days = programOrdinals(course.courseSelected);
+
+	/**
+	 * La grilla solo muestra el primer horario de cada par (sección, día) activo
+	 * dentro del programa. Todo lo demás —días inactivos, secciones inactivas o
+	 * no programables, ordinales fuera del programa y duplicados del mismo par—
+	 * queda invisible y no se puede editar ni borrar desde el formulario. Se
+	 * listan aparte para poder eliminarlos.
+	 */
+	const renderedScheduleIds = new Set<number>();
+	days.forEach((day) => {
+		subject.subjectList.forEach((subjectItem) => {
+			const SD = subjectItem.subject_days?.find(
+				(sd) =>
+					sd.day === day.id + 1 && sd.status && subjectItem.status,
+			);
+			const rendered = course.scheduleList?.find(
+				(item) =>
+					item.subject_id === subjectItem.id &&
+					item.subject_days_id === SD?.id,
+			);
+			if (rendered?.id != null) renderedScheduleIds.add(rendered.id);
+		});
+	});
+	const hiddenSchedules = (course.scheduleList || []).filter(
+		(item) =>
+			item.id != null && !renderedScheduleIds.has(item.id as number),
+	);
+
+	const hiddenScheduleReason = (item: schedule): string => {
+		const subjectDay = item.subject_day;
+		if (item.subject && !item.subject.status) return 'Sección inactiva';
+		if (item.subject && !item.subject.is_schedulable)
+			return 'Sección no programable';
+		if (!subjectDay) return 'Día no encontrado';
+		if (!subjectDay.status) return 'Día inactivo';
+		if (!isWithinProgram(course.courseSelected, subjectDay.day))
+			return 'Fuera del programa del curso';
+		return 'Duplicado de otra sesión';
+	};
 
 	/**
 	 * En modo legacy cada sesión ocupa un día de calendario, así que la fecha por
@@ -993,6 +1062,85 @@ const NewCourseStudentSchedule = () => {
 						</AccordionBody>
 					</Accordion>
 
+					{/* Horarios fuera de la grilla (huérfanos / duplicados) */}
+					{canViewContent &&
+						!course.courseStudent?.approve &&
+						hiddenSchedules.length > 0 && (
+						<div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 sm:p-4">
+							<Typography
+								variant="h6"
+								className="text-amber-900"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Horarios fuera de la grilla (
+								{hiddenSchedules.length})
+							</Typography>
+							<Typography
+								variant="small"
+								className="mb-3 block text-amber-900/80"
+								placeholder={undefined}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							>
+								Estos horarios no se pueden editar porque su
+								día o su sección ya no forman parte del
+								programa activo, o porque repiten una sesión ya
+								agendada. Elimínalos para liberar la actividad.
+							</Typography>
+							<ul className="flex flex-col gap-2">
+								{hiddenSchedules.map((item) => (
+									<li
+										key={item.id}
+										className="flex flex-col gap-2 rounded-sm border border-amber-200 bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+									>
+										<div className="min-w-0">
+											<p className="text-sm font-semibold text-gray-800">
+												{item.subject?.name ||
+													`Sección #${item.subject_id}`}
+												{item.subject_day?.day
+													? ` · ${ordinalLabel(
+															course.courseSelected,
+															item.subject_day.day,
+														)}`
+													: ''}
+											</p>
+											<p className="text-xs text-gray-600">
+												{item.date
+													? moment(item.date).format(
+															'DD/MM/YYYY',
+														)
+													: 'Sin fecha'}
+												{item.hour
+													? ` · ${item.hour}`
+													: ''}
+												{' · '}
+												<span className="font-medium text-amber-800">
+													{hiddenScheduleReason(item)}
+												</span>
+											</p>
+										</div>
+										<Button
+											variant="text"
+											color="red"
+											onClick={() =>
+												setHiddenScheduleToDelete(item)
+											}
+											className="flex items-center gap-2 self-start px-3 py-2 sm:self-auto"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											<Trash2 className="h-4 w-4" />
+											Eliminar
+										</Button>
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
+
 					{/* Results Accordion */}
 					<Accordion
 						open={open === 2}
@@ -1238,6 +1386,73 @@ const NewCourseStudentSchedule = () => {
 					<Button
 						color="red"
 						onClick={handleDeleteAllSchedules}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						Eliminar
+					</Button>
+				</DialogFooter>
+			</Dialog>
+			<Dialog
+				open={hiddenScheduleToDelete != null}
+				handler={() => setHiddenScheduleToDelete(null)}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Eliminar horario
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se eliminará el horario de{' '}
+					<strong>
+						{hiddenScheduleToDelete?.subject?.name || 'la sección'}
+					</strong>
+					{hiddenScheduleToDelete?.subject_day?.day
+						? ` (${ordinalLabel(
+								course.courseSelected,
+								hiddenScheduleToDelete.subject_day.day,
+							)})`
+						: ''}{' '}
+					del{' '}
+					<strong>
+						{hiddenScheduleToDelete?.date
+							? moment(hiddenScheduleToDelete.date).format(
+									'DD/MM/YYYY',
+								)
+							: 'sin fecha'}
+					</strong>
+					. También se eliminará la asistencia de esa sesión y su
+					firma, si existen. Esta acción no se puede deshacer.
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						onClick={() => setHiddenScheduleToDelete(null)}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						color="red"
+						onClick={handleDeleteHiddenSchedule}
 						placeholder={undefined}
 						onPointerEnterCapture={undefined}
 						onPointerLeaveCapture={undefined}
