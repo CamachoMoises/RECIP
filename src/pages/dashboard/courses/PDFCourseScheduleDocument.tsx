@@ -220,7 +220,8 @@ const ScheduleTable = ({
 						{ backgroundColor: '#f3f4f6', fontWeight: 'bold' },
 					]}
 				>
-					Horas Totales ({courseHours ?? 48})
+					Horas Totales
+					{'\n'}({courseHours})
 				</Text>
 				<Text
 					style={[
@@ -302,7 +303,10 @@ const PDFCourseScheduleDocument = ({
 	let completionDate = '';
 	if (latestScheduleDate) {
 		completionDate = moment(latestScheduleDate).format('DD-MM-YYYY');
-	} else if (!usesSessions(course.courseSelected) && courseStartDate) {
+	} else if (
+		!usesSessions(course.courseSelected) &&
+		courseStartDate
+	) {
 		// Legacy sin schedules: cada ordinal es un día de calendario, así que sumar
 		// el tamaño del programa al inicio aproxima la fecha de completado.
 		completionDate = moment(courseStartDate)
@@ -439,7 +443,11 @@ const PDFCourseScheduleDocument = ({
 								<Text style={styles.resultsCell}>
 									Total de horas: {course.courseSelected?.hours}
 									{'\n'}
-									Total de {ordinalNounPlural(course.courseSelected).toLowerCase()}: {programSize(course.courseSelected)}
+									Total de{' '}
+									{ordinalNounPlural(
+										course.courseSelected,
+									).toLowerCase()}
+									: {programSize(course.courseSelected)}
 								</Text>
 							</View>
 							<View style={styles.resultsRow}>
