@@ -17,14 +17,12 @@ type Inputs = {
 const NewQuestionTest = ({
 	open,
 	testId,
-	courseId,
 	questionTypeId,
 	testQuestionTypeId,
 	setOpen,
 }: {
 	open: boolean;
 	testId: number;
-	courseId: number;
 	questionTypeId: number;
 	testQuestionTypeId: number;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -36,10 +34,12 @@ const NewQuestionTest = ({
 		formState: { errors },
 	} = useForm<Inputs>();
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
+		// El backend resuelve el curso dueño del examen (`test.course_id`) y
+		// guarda la pregunta con ese `course_id`, aunque se cree desde un curso
+		// vinculado. Por eso no se envía `course_id`.
 		const dataTest = {
 			...data,
 			test_id: testId,
-			course_id: courseId,
 			question_type_id: questionTypeId,
 			test_question_type_id: testQuestionTypeId,
 		};

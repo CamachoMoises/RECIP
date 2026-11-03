@@ -15,14 +15,12 @@ type Inputs = {
 };
 const NewAnswerQuestionTest = ({
 	open,
-	courseId,
 	testId,
 	questionTypeId,
 	questionId,
 	setOpen,
 }: {
 	open: boolean;
-	courseId: number;
 	testId: number;
 	questionTypeId: number;
 	questionId: number;
@@ -35,10 +33,10 @@ const NewAnswerQuestionTest = ({
 		formState: { errors },
 	} = useForm<Inputs>();
 	const onSubmit: SubmitHandler<Inputs> = async (data) => {
+		// Igual que la pregunta: el backend hereda el curso dueño del examen.
 		const dataTest = {
 			...data,
 			test_id: testId,
-			course_id: courseId,
 			question_type_id: questionTypeId,
 			question_id: questionId,
 		};

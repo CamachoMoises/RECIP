@@ -82,6 +82,11 @@ const QuestionTestList = () => {
 	const questionForTest = questionTypeTest?.amount
 		? questionTypeTest.amount
 		: 0;
+	// Examen compartido: editar/borrar preguntas afecta a todos los cursos
+	// vinculados (decisión de producto; el backend no añade un guard extra).
+	const sharedCourses = test.testSelected?.courses ?? [];
+	const isSharedTest =
+		test.testSelected?.is_shared ?? sharedCourses.length > 1;
 	const breadCrumbs: breadCrumbsItems[] = [
 		{
 			name: 'Inicio',
@@ -144,6 +149,17 @@ const QuestionTestList = () => {
 				title={`Lista de ${questionType.name} del ${test.testSelected?.code}`}
 				breadCrumbs={breadCrumbs}
 			/>
+			{isSharedTest && (
+				<div className="mb-3 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+					<strong>Examen compartido.</strong> Está vinculado a{' '}
+					{sharedCourses.length} cursos
+					{sharedCourses.length > 0
+						? ` (${sharedCourses.map((C) => C.name).join(', ')})`
+						: ''}
+					. Las preguntas y respuestas se comparten: cualquier cambio o
+					eliminación afecta a todos los cursos.
+				</div>
+			)}
 			<Card
 				placeholder={undefined}
 				onPointerEnterCapture={undefined}
@@ -280,7 +296,6 @@ const QuestionTestList = () => {
 					<NewQuestionTest
 						open={open}
 						testId={parseInt(test_id)}
-						courseId={parseInt(course_id)}
 						questionTypeId={parseInt(question_type_id)}
 						testQuestionTypeId={parseInt(test_question_type_id)}
 						setOpen={setOpen}
@@ -310,6 +325,12 @@ const QuestionTestList = () => {
 						{questionToDelete?.header}
 					</strong>{' '}
 					y todas sus respuestas asociadas. Esta acción no se puede deshacer.
+					{isSharedTest && (
+						<span className="mt-2 block font-medium text-red-700">
+							Este examen está compartido con {sharedCourses.length}{' '}
+							cursos: la pregunta desaparecerá de todos.
+						</span>
+					)}
 				</DialogBody>
 				<DialogFooter
 					placeholder={undefined}
@@ -360,6 +381,12 @@ const QuestionTestList = () => {
 					Se eliminarán <strong>todas</strong> las preguntas del examen{' '}
 					<strong>{test.testSelected?.code}</strong> y sus respuestas
 					asociadas. Esta acción no se puede deshacer.
+					{isSharedTest && (
+						<span className="mt-2 block font-medium text-red-700">
+							Este examen está compartido con {sharedCourses.length}{' '}
+							cursos: las preguntas desaparecerán de todos.
+						</span>
+					)}
 				</DialogBody>
 				<DialogFooter
 					placeholder={undefined}

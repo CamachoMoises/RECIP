@@ -140,9 +140,16 @@ const GeneralTest = () => {
 			await dispatch(fetchTest(CST.test_id));
 			toast.dismiss(loadingToast);
 			navigate(`../new_test/${CS.id}/${CS.course_id}/${CST.test_id}`);
-		} catch {
+		} catch (error: any) {
 			toast.dismiss(loadingToast);
-			toast.error('Error al generar el examen');
+			// El backend responde 404 "El curso no tiene un examen activo" o
+			// "Matrícula del alumno no encontrada", y 409 si el curso está
+			// eliminado. El thunk ya extrae ese mensaje del body.
+			toast.error(
+				typeof error === 'string' && error
+					? error
+					: 'Error al generar el examen',
+			);
 			setIsGeneratingTest(false);
 		}
 	};

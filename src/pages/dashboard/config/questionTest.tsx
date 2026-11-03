@@ -10,11 +10,15 @@ import { useNavigate } from 'react-router-dom';
 const QuestionTest = ({
 	QT,
 	TQT,
+	courseId,
 	updateTestQuestion,
 	disabled = false,
 }: {
 	QT: questionType;
 	TQT: testQuestionType;
+	// Curso desde el que se está viendo el examen. Puede no ser el dueño si el
+	// examen es compartido; se usa para volver al curso correcto.
+	courseId?: number | null;
 	// Curso eliminado: la cantidad/valor son POST/PUT /api/test (409).
 	disabled?: boolean;
 	updateTestQuestion: (
@@ -123,7 +127,7 @@ const QuestionTest = ({
 						onPointerLeaveCapture={undefined}
 						onClick={() => {
 							navigate(
-								`../config/testQuestion/${TQT.course_id}/${TQT.test_id}/${QT.id}/${TQT.id}`,
+								`../config/testQuestion/${courseId ?? TQT.course_id}/${TQT.test_id}/${QT.id}/${TQT.id}`,
 							);
 						}}
 					>

@@ -249,7 +249,33 @@ const TestReportsPanel = () => {
 											>
 												<td className="py-2 px-2">{t.code}</td>
 												<td className="py-2 px-2">
-													{t.course?.name ?? '—'}
+													<div className="flex flex-col">
+														<span>
+															{t.course?.name ?? '—'}
+														</span>
+														{t.is_shared && (
+															<span
+																title={
+																	t.courses
+																		?.map(
+																			(C) =>
+																				C.name,
+																		)
+																		.join(
+																			', ',
+																		) ??
+																	undefined
+																}
+																className="text-xs text-blue-700"
+															>
+																Compartido con{' '}
+																{t.courses
+																	?.length ??
+																	0}{' '}
+																cursos
+															</span>
+														)}
+													</div>
 												</td>
 												<td className="py-2 px-2 text-center">
 													{t.question_count}

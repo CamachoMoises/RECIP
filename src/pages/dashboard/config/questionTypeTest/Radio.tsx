@@ -109,7 +109,6 @@ const TestRadio = ({
 			{open && (
 				<NewAnswerQuestionTest
 					open={open}
-					courseId={question.course_id}
 					testId={question.test_id}
 					questionTypeId={question.question_type_id}
 					questionId={question.id}

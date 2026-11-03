@@ -1,11 +1,11 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { answer, courseStudentTest, question, questionDeleteResult, questionType, test, testImportResult, testQuestionsDeleteResult, testQuestionType, testState } from '../types/utilities';
+import { answer, courseStudentTest, question, questionDeleteResult, questionType, test, testCoursesResult, testImportResult, testLinkResult, testQuestionsDeleteResult, testQuestionType, testState, testUnlinkResult } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
-// axiosDeleteSlice lanza el AxiosError crudo: `error.message` solo dice
-// "Request failed with status code 4xx". El backend devuelve el motivo útil
-// en el body (p. ej. el 409 'La pregunta ya fue usada en un intento de examen').
-function deleteErrorMessage(error: any, fallback: string): string {
+// Los endpoints de examen responden el motivo real en el body (`{ message }`
+// o `{ error }`). `error.message` de Axios solo dice
+// "Request failed with status code 4xx", así que se prioriza el body.
+function backendErrorMessage(error: any, fallback: string): string {
     const data = error?.response?.data;
     return (
         (typeof data === 'string' ? data : data?.error || data?.message) ||
@@ -72,6 +72,84 @@ export const fetchTests = createAsyncThunk<test[], number>(
     }
 );
 
+// Catálogo completo de exámenes (`GET /api/test/`). Lo usa el modal de
+// "Vincular examen existente": el listado del curso solo trae los ya
+// vinculados, no los candidatos de otros cursos.
+export const fetchAllTests = createAsyncThunk<test[]>(
+    'user/fetchAllTests',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetSlice('api/test/');
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al cargar los exámenes'),
+            );
+        }
+    }
+);
+
+// Vincula exámenes existentes al curso sin duplicarlos (`course_test`).
+export const linkTestToCourse = createAsyncThunk<
+    testLinkResult,
+    { course_id: number; test_ids: number[] }
+>(
+    'test/linkTestToCourse',
+    async ({ course_id, test_ids }, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostSlice(
+                `api/test/tests/${course_id}/link`,
+                { test_ids },
+            );
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al vincular los exámenes'),
+            );
+        }
+    }
+);
+
+// Desvincula el examen del curso. Nunca borra el examen ni su contenido.
+export const unlinkTestFromCourse = createAsyncThunk<
+    testUnlinkResult,
+    { course_id: number; test_id: number }
+>(
+    'test/unlinkTestFromCourse',
+    async ({ course_id, test_id }, { rejectWithValue }) => {
+        try {
+            const response = await axiosDeleteSlice(
+                `api/test/tests/${course_id}/link/${test_id}`,
+            );
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al desvincular el examen'),
+            );
+        }
+    }
+);
+
+// Cursos vinculados a un examen (dueño incluido).
+export const fetchTestCourses = createAsyncThunk<testCoursesResult, number>(
+    'test/fetchTestCourses',
+    async (test_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosGetSlice(
+                `api/test/test/${test_id}/courses`,
+            );
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(
+                    error,
+                    'Error al cargar los cursos del examen',
+                ),
+            );
+        }
+    }
+);
+
 export const fetchQuestions = createAsyncThunk<question[], { test_id: number, question_type_id: number, test_question_type_id: number }>(
     'user/fetchQuestions',
     async ({ test_id, question_type_id, test_question_type_id }, { rejectWithValue }) => {
@@ -112,14 +190,16 @@ export const updateQuestionTypes = createAsyncThunk<questionType, questionType>(
     }
 );
 // Acción para Crear una Examen
-export const createTest = createAsyncThunk<test, { course_id: number, duration: number, min_score: number }>(
+export const createTest = createAsyncThunk<test, { course_id: number, duration: number, min_score: number, course_ids?: number[] }>(
     'questionTypes/createTest',
     async (testData, { rejectWithValue }) => {
         try {
             const response = await axiosPostSlice(`api/test/test`, testData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al crear el examen'),
+            );
         }
     }
 );
@@ -131,19 +211,23 @@ export const updateTest = createAsyncThunk<test, test>(
             const response = await axiosPutSlice(`api/test/test`, testData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al actualizar el examen'),
+            );
         }
     }
 );
 // Acción para Crear una pregunta
-export const createQuestionTest = createAsyncThunk<question, { course_id: number, test_id: number, question_type_id: number, test_question_type_id: number, header: string }>(
+export const createQuestionTest = createAsyncThunk<question, { course_id?: number, test_id: number, question_type_id: number, test_question_type_id: number, header: string }>(
     'questionTypes/createQuestionTest',
     async (questionTestData, { rejectWithValue }) => {
         try {
             const response = await axiosPostSlice(`api/test/questionTest`, questionTestData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al crear la pregunta'),
+            );
         }
     }
 );
@@ -163,14 +247,16 @@ export const updateQuestionTest = createAsyncThunk<question, question>(
 );
 
 // Acción para Crear una pregunta
-export const createAnswerQuestionTest = createAsyncThunk<question, { course_id: number, test_id: number, question_type_id: number, question_id: number, value: string }>(
+export const createAnswerQuestionTest = createAsyncThunk<question, { course_id?: number, test_id: number, question_type_id: number, question_id: number, value: string }>(
     'questionTypes/createAnswerQuestionTest',
     async (answerQuestionTestData, { rejectWithValue }) => {
         try {
             const response = await axiosPostSlice(`api/test/answerQuestionTest`, answerQuestionTestData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al crear la respuesta'),
+            );
         }
     }
 );
@@ -196,7 +282,12 @@ export const updateTestQuestionTypes = createAsyncThunk<test, testQuestionType>(
             const response = await axiosPutSlice(`api/test/testQuestionTypes`, testQuestionTypeData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(
+                    error,
+                    'Error al actualizar la cantidad de preguntas',
+                ),
+            );
         }
     }
 );
@@ -213,7 +304,14 @@ export const createCourseStudentTest = createAsyncThunk<courseStudentTest, { cou
             );
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            // El backend distingue 404 ("El curso no tiene un examen activo",
+            // "Matrícula del alumno no encontrada") y 409 (curso eliminado).
+            return rejectWithValue(
+                backendErrorMessage(
+                    error,
+                    'Error al generar el examen',
+                ),
+            );
         }
     }
 );
@@ -309,7 +407,7 @@ export const deleteQuestionTest = createAsyncThunk<questionDeleteResult, number>
             await axiosDeleteSlice(`api/test/questions/${question_id}`);
             return { question_id };
         } catch (error: any) {
-            return rejectWithValue(deleteErrorMessage(error, 'Error al eliminar la pregunta'));
+            return rejectWithValue(backendErrorMessage(error, 'Error al eliminar la pregunta'));
         }
     }
 );
@@ -323,7 +421,7 @@ export const deleteQuestionsByTest = createAsyncThunk<testQuestionsDeleteResult,
             const response = await axiosDeleteSlice(`api/test/questions/by-test/${test_id}`);
             return { test_id, ...response };
         } catch (error: any) {
-            return rejectWithValue(deleteErrorMessage(error, 'Error al eliminar las preguntas'));
+            return rejectWithValue(backendErrorMessage(error, 'Error al eliminar las preguntas'));
         }
     }
 );
@@ -437,7 +535,9 @@ const testSlice = createSlice({
                 state.testList.push(newTest);
             })
             .addCase(createTest.rejected, (state, action) => {
-                state.status = 'failed';
+                // Un 409 (curso eliminado, dueño no teórico, conflicto de
+                // examen activo) debe verse como toast, no como ErrorPage.
+                state.status = 'succeeded';
                 state.error = action.payload as string;
             })
 
@@ -454,7 +554,10 @@ const testSlice = createSlice({
                 }
             })
             .addCase(updateTest.rejected, (state, action) => {
-                state.status = 'failed';
+                // 409 (todos los cursos eliminados / conflicto de activo) y
+                // 404 se muestran como toast; dejar `status` en 'loading'
+                // dejaría la página atrapada en LoadingPage.
+                state.status = 'succeeded';
                 state.error = action.payload as string;
             })
 
@@ -564,7 +667,25 @@ const testSlice = createSlice({
                 }
             })
             .addCase(updateTestQuestionTypes.rejected, (state, action) => {
-                state.status = 'failed';
+                state.status = 'succeeded';
+                state.error = action.payload as string;
+            })
+
+            // Vinculación / desvinculación de exámenes (`course_test`).
+            // La respuesta trae el listado actualizado del curso, así que se
+            // reemplaza `testList` sin un segundo `fetchTests`.
+            .addCase(linkTestToCourse.fulfilled, (state, action: PayloadAction<testLinkResult>) => {
+                state.status = 'succeeded';
+                state.testList = action.payload.tests;
+            })
+            .addCase(linkTestToCourse.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+            .addCase(unlinkTestFromCourse.fulfilled, (state, action: PayloadAction<testUnlinkResult>) => {
+                state.status = 'succeeded';
+                state.testList = action.payload.tests;
+            })
+            .addCase(unlinkTestFromCourse.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
 

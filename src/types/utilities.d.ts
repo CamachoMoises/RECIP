@@ -44,6 +44,15 @@ export type courseLevel = {
     createdAt?: string;
     updatedAt?: string;
 }
+
+// Resumen de curso que devuelven los endpoints de exámenes compartidos
+// (`test.course`, `test.courses`): el backend solo envía estos atributos.
+export type courseSummary = {
+    id: number;
+    name: string;
+    code: string;
+    color?: string | null;
+}
 export type subject = {
     id: number | null;
     name: string;
@@ -106,7 +115,14 @@ export type test = {
     course_id: number;
     min_score: number;
     duration: number;
-    course?: course;
+    // Dueño del examen (autoría). No decide visibilidad: un examen puede
+    // estar vinculado a varios cursos vía `course_test`.
+    course?: courseSummary;
+    // Cursos vinculados. El backend los devuelve en `GET /tests/:course_id`
+    // y `GET /test/:test_id`.
+    courses?: courseSummary[];
+    // `courses.length > 1`: el examen se comparte con otros cursos.
+    is_shared?: boolean;
     code: string;
     status: boolean;
     test_question_types: testQuestionType[];
@@ -186,6 +202,41 @@ export type testQuestionsDeleteResult = {
     message?: string;
     deleted_count: number;
     deleted_answers_count: number;
+}
+
+// POST /api/test/tests/:course_id/link — vincula exámenes existentes al curso
+// sin duplicarlos. `tests` es el listado actualizado del curso.
+export type testLinkResult = {
+    course_id: number;
+    linked: number[];
+    skipped: number[];
+    tests: test[];
+}
+
+// DELETE /api/test/tests/:course_id/link/:test_id — desvincula sin borrar el
+// examen, sus preguntas, respuestas ni intentos.
+export type testUnlinkResult = {
+    course_id: number;
+    test_id: number;
+    removed: boolean;
+    tests: test[];
+}
+
+// GET /api/test/test/:test_id/courses — cursos vinculados a un examen.
+export type testLinkedCourse = {
+    id: number;
+    name: string;
+    code: string;
+    color?: string | null;
+    status: boolean;
+    course_type_id: number;
+    is_owner: boolean;
+}
+
+export type testCoursesResult = {
+    test_id: number;
+    owner_course_id: number;
+    courses: testLinkedCourse[];
 }
 
 export type instructor = {
@@ -1002,11 +1053,9 @@ export type testReportRow = {
     duration: number;
     min_score: number;
     status: boolean;
-    course?: {
-        id: number;
-        name: string;
-        code: string;
-    } | null;
+    course?: courseSummary | null;
+    courses?: courseSummary[];
+    is_shared?: boolean;
     question_count: number;
     attempt_count: number;
 }

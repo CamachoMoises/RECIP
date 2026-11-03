@@ -12,6 +12,7 @@ import { fetchCourse } from '../../../features/courseSlice';
 import {
 	fetchQuestionTypes,
 	fetchTests,
+	unlinkTestFromCourse,
 	updateTest,
 	updateTestQuestionTypes,
 } from '../../../features/testSlice';
@@ -19,6 +20,10 @@ import {
 	Button,
 	Card,
 	CardBody,
+	Dialog,
+	DialogBody,
+	DialogFooter,
+	DialogHeader,
 	List,
 	ListItem,
 	Typography,
@@ -27,9 +32,11 @@ import QuestionTest from './questionTest';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import TestParams from './testParams';
-import { Plus, Upload } from 'lucide-react';
+import { Link2, Plus, Unlink, Upload } from 'lucide-react';
 import NewTestModal from './newTestModal';
 import ExcelUploadComponent from './excelUploadComponent';
+import LinkTestModal from './linkTestModal';
+import toast from 'react-hot-toast';
 import { isCourseDeleted } from '../../../utils/courseStatus';
 const breadCrumbs: breadCrumbsItems[] = [
 	{
@@ -46,6 +53,9 @@ const TestList = () => {
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
 	const [openExcelUpload, setOpenExcelUpload] = useState(false);
+	const [openLink, setOpenLink] = useState(false);
+	const [testToUnlink, setTestToUnlink] = useState<test | null>(null);
+	const [unlinking, setUnlinking] = useState(false);
 	const { id } = useParams<{ id: string }>();
 	const { course, test } = useSelector((state: RootState) => {
 		return { course: state.courses, test: state.tests };
@@ -76,24 +86,74 @@ const TestList = () => {
 			value,
 		};
 
-		await dispatch(updateTestQuestionTypes(newTestQuestionType));
+		try {
+			await dispatch(updateTestQuestionTypes(newTestQuestionType)).unwrap();
+		} catch (error: any) {
+			toast.error(
+				typeof error === 'string'
+					? error
+					: 'Error al actualizar la cantidad de preguntas',
+			);
+		}
 	};
 
 	const updateTestFunc = async (
 		test: test,
 		data: { duration: number; min_score: number; status: boolean },
 	) => {
-		if (data.status && testActive) {
-			const oldTestActive: test = { ...testActive, status: false };
-			await dispatch(updateTest(oldTestActive));
+		try {
+			// Solo se desactiva el examen activo cuando es OTRO examen. Si es el
+			// mismo, el backend omite la revalidación de conflicto al ya estar
+			// activo y evita dos llamadas innecesarias.
+			if (data.status && testActive && testActive.id !== test.id) {
+				const oldTestActive: test = { ...testActive, status: false };
+				await dispatch(updateTest(oldTestActive)).unwrap();
+			}
+			const newTest: test = {
+				...test,
+				duration: data.duration,
+				min_score: data.min_score,
+				status: data.status,
+			};
+			await dispatch(updateTest(newTest)).unwrap();
+		} catch (error: any) {
+			// 409 (examen activo en otro curso vinculado, todos los cursos
+			// eliminados) y 404 llegan como toast, sin reemplazar la pantalla.
+			toast.error(
+				typeof error === 'string'
+					? error
+					: 'Error al actualizar el examen',
+			);
 		}
-		const newTest: test = {
-			...test,
-			duration: data.duration,
-			min_score: data.min_score,
-			status: data.status,
-		};
-		await dispatch(updateTest(newTest));
+	};
+
+	const handleUnlinkTest = async () => {
+		if (!testToUnlink || !course.courseSelected?.id) return;
+		setUnlinking(true);
+		try {
+			const result = await dispatch(
+				unlinkTestFromCourse({
+					course_id: course.courseSelected.id,
+					test_id: testToUnlink.id,
+				}),
+			).unwrap();
+			if (result.removed) {
+				toast.success(
+					'Examen desvinculado. El examen, sus preguntas e intentos se conservan.',
+				);
+			} else {
+				toast('El examen ya no estaba vinculado a este curso');
+			}
+			setTestToUnlink(null);
+		} catch (error: any) {
+			toast.error(
+				typeof error === 'string'
+					? error
+					: 'Error al desvincular el examen',
+			);
+		} finally {
+			setUnlinking(false);
+		}
 	};
 
 	if (test.status === 'loading') {
@@ -116,6 +176,9 @@ const TestList = () => {
 	const courseDeleted = course.courseSelected
 		? isCourseDeleted(course.courseSelected)
 		: false;
+	// Solo los cursos de teoría (course_type_id = 1) pueden compartir exámenes.
+	const isTheoryCourse =
+		course.courseSelected?.course_type?.id === 1;
 
 	return (
 		<>
@@ -155,6 +218,19 @@ const TestList = () => {
 							<div className="flex flex-wrap gap-2">
 								{!courseDeleted && (
 									<>
+										{isTheoryCourse && (
+											<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+												size="sm"
+												title="Vincular examen existente"
+												variant="outlined"
+												onClick={() => {
+													setOpenLink(true);
+												}}
+												placeholder={undefined}
+											>
+												<Link2 size={15} className="mx-auto text-lg" />
+											</Button>
+										)}
 										<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
 											size="sm"
 											title="Agregar examen"
@@ -185,6 +261,19 @@ const TestList = () => {
 				</Card>
 				<div className="flex flex-col gap-3">
 					{test.testList.map((TL, indexTL) => {
+						// `is_shared` lo calcula el backend con `courses.length > 1`;
+						// el fallback cubre respuestas antiguas cacheadas.
+						const linkedCourses = TL.courses ?? [];
+						const isShared =
+							TL.is_shared ?? linkedCourses.length > 1;
+						const ownerCourse = TL.course;
+						const ownerIsCurrent =
+							!ownerCourse ||
+							ownerCourse.id === course.courseSelected?.id;
+						const linkedNames = linkedCourses
+							.map((C) => C.name)
+							.join(', ');
+
 						return (
 							<div key={`test-${indexTL}`}>
 								<Card
@@ -207,15 +296,57 @@ const TestList = () => {
 											Evaluacion del {course.courseSelected?.name}
 										</Typography>
 
-										<Typography
-											variant="h6"
-											color={TL.status ? 'green' : 'red'}
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
-										>
-											{TL.status ? <>Activo</> : <>Inactivo</>}
-										</Typography>
+										<div className="flex flex-wrap items-center gap-2">
+											<Typography
+												variant="h6"
+												color={TL.status ? 'green' : 'red'}
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												{TL.status ? <>Activo</> : <>Inactivo</>}
+											</Typography>
+											{isShared && (
+												<span
+													title={
+														linkedNames
+															? `Cursos: ${linkedNames}`
+															: undefined
+													}
+													className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800"
+												>
+													<Link2 size={12} />
+													Compartido con{' '}
+													{linkedCourses.length} cursos
+												</span>
+											)}
+											{!ownerIsCurrent && ownerCourse && (
+												<span
+													title={`Curso dueño del examen: ${ownerCourse.name}`}
+													className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
+												>
+													Examen del curso{' '}
+													{ownerCourse.name}
+												</span>
+											)}
+											{isShared && !courseDeleted && (
+												<Button
+													onPointerEnterCapture={undefined}
+													onPointerLeaveCapture={undefined}
+													size="sm"
+													variant="text"
+													color="red"
+													title="Desvincular este examen del curso"
+													className="ml-auto"
+													placeholder={undefined}
+													onClick={() => {
+														setTestToUnlink(TL);
+													}}
+												>
+													<Unlink size={14} />
+												</Button>
+											)}
+										</div>
 
 										<Typography
 											variant="small"
@@ -269,6 +400,9 @@ const TestList = () => {
 																	<QuestionTest
 																		QT={QT}
 																		TQT={TQT ? TQT : TQT_2}
+																		courseId={
+																			course.courseSelected?.id
+																		}
 																		disabled={courseDeleted}
 																		updateTestQuestion={
 																			updateTestQuestion
@@ -322,6 +456,78 @@ const TestList = () => {
 					/>
 				</>
 			)}
+			{openLink && course.courseSelected && (
+				<LinkTestModal
+					open={openLink}
+					setOpen={setOpenLink}
+					courseId={course.courseSelected.id}
+					courseName={course.courseSelected.name}
+					linkedTestIds={test.testList.map((TL) => TL.id)}
+					hasActiveTest={!!testActive}
+				/>
+			)}
+			<Dialog
+				open={testToUnlink !== null}
+				handler={() => {
+					if (!unlinking) setTestToUnlink(null);
+				}}
+				placeholder={undefined}
+				onPointerEnterCapture={undefined}
+				onPointerLeaveCapture={undefined}
+			>
+				<DialogHeader
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Desvincular examen
+				</DialogHeader>
+				<DialogBody
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					Se desvinculará el examen{' '}
+					<strong>{testToUnlink?.code}</strong> del curso{' '}
+					<strong>{course.courseSelected?.name}</strong>.
+					{testToUnlink?.is_shared && (
+						<span className="mt-2 block text-sm text-gray-700">
+							Solo se quita el vínculo con este curso: el examen, sus
+							preguntas, respuestas e intentos se conservan y los
+							demás cursos vinculados no se ven afectados. La regla
+							de un examen activo por curso también se mantiene.
+						</span>
+					)}
+				</DialogBody>
+				<DialogFooter
+					placeholder={undefined}
+					onPointerEnterCapture={undefined}
+					onPointerLeaveCapture={undefined}
+				>
+					<Button
+						variant="text"
+						color="gray"
+						onClick={() => setTestToUnlink(null)}
+						disabled={unlinking}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+						className="mr-2"
+					>
+						Cancelar
+					</Button>
+					<Button
+						color="red"
+						onClick={handleUnlinkTest}
+						disabled={unlinking}
+						placeholder={undefined}
+						onPointerEnterCapture={undefined}
+						onPointerLeaveCapture={undefined}
+					>
+						{unlinking ? 'Desvinculando...' : 'Desvincular'}
+					</Button>
+				</DialogFooter>
+			</Dialog>
 		</>
 	);
 };
