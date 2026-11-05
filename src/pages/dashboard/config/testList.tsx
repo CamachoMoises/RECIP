@@ -32,10 +32,11 @@ import QuestionTest from './questionTest';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import TestParams from './testParams';
-import { Link2, Plus, Unlink, Upload } from 'lucide-react';
+import { Copy, Link2, Plus, Unlink, Upload } from 'lucide-react';
 import NewTestModal from './newTestModal';
 import ExcelUploadComponent from './excelUploadComponent';
 import LinkTestModal from './linkTestModal';
+import CloneTestModal from './cloneTestModal';
 import toast from 'react-hot-toast';
 import { isCourseDeleted } from '../../../utils/courseStatus';
 const breadCrumbs: breadCrumbsItems[] = [
@@ -55,6 +56,7 @@ const TestList = () => {
 	const [openExcelUpload, setOpenExcelUpload] = useState(false);
 	const [openLink, setOpenLink] = useState(false);
 	const [testToUnlink, setTestToUnlink] = useState<test | null>(null);
+	const [testToClone, setTestToClone] = useState<test | null>(null);
 	const [unlinking, setUnlinking] = useState(false);
 	const { id } = useParams<{ id: string }>();
 	const { course, test } = useSelector((state: RootState) => {
@@ -273,6 +275,12 @@ const TestList = () => {
 						const linkedNames = linkedCourses
 							.map((C) => C.name)
 							.join(', ');
+						// v1 no guarda linaje (`parent_test_id`): el código
+						// `${origen}-COPIA[-N]` es la única pista de que es una
+						// variante. Es solo informativo.
+						const variantRoot = /-COPIA(-\d+)?$/i.test(TL.code ?? '')
+							? (TL.code ?? '').replace(/-COPIA(-\d+)?$/i, '')
+							: null;
 
 						return (
 							<div key={`test-${indexTL}`}>
@@ -329,23 +337,58 @@ const TestList = () => {
 													{ownerCourse.name}
 												</span>
 											)}
-											{isShared && !courseDeleted && (
+											{variantRoot && (
+												<span
+													title={`Variante independiente${
+														variantRoot
+															? ` de ${variantRoot}`
+															: ''
+													}: editarla no afecta al examen original`}
+													className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800"
+												>
+													<Copy size={12} />
+													Variante
+													{variantRoot
+														? ` de ${variantRoot}`
+														: ''}
+												</span>
+											)}
+											<div className="ml-auto flex items-center gap-1">
 												<Button
 													onPointerEnterCapture={undefined}
 													onPointerLeaveCapture={undefined}
 													size="sm"
 													variant="text"
-													color="red"
-													title="Desvincular este examen del curso"
-													className="ml-auto"
+													color="blue"
+													title={
+														courseDeleted
+															? 'Clonar este examen en otro curso (rescatar contenido del curso inactivo)'
+															: 'Clonar este examen en otro curso (variante independiente)'
+													}
 													placeholder={undefined}
 													onClick={() => {
-														setTestToUnlink(TL);
+														setTestToClone(TL);
 													}}
 												>
-													<Unlink size={14} />
+													<Copy size={14} />
 												</Button>
-											)}
+												{isShared && !courseDeleted && (
+													<Button
+														onPointerEnterCapture={undefined}
+														onPointerLeaveCapture={undefined}
+														size="sm"
+														variant="text"
+														color="red"
+														title="Desvincular este examen del curso"
+														placeholder={undefined}
+														onClick={() => {
+															setTestToUnlink(TL);
+														}}
+													>
+														<Unlink size={14} />
+													</Button>
+												)}
+											</div>
 										</div>
 
 										<Typography
@@ -464,6 +507,16 @@ const TestList = () => {
 					courseName={course.courseSelected.name}
 					linkedTestIds={test.testList.map((TL) => TL.id)}
 					hasActiveTest={!!testActive}
+				/>
+			)}
+			{testToClone && course.courseSelected && (
+				<CloneTestModal
+					open={testToClone !== null}
+					setOpen={(value) => {
+						if (!value) setTestToClone(null);
+					}}
+					test={testToClone}
+					currentCourseId={course.courseSelected.id}
 				/>
 			)}
 			<Dialog

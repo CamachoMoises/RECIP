@@ -239,6 +239,16 @@ export type testCoursesResult = {
     courses: testLinkedCourse[];
 }
 
+// POST /api/test/clone/:test_id — variante independiente del examen en otro
+// curso. Devuelve el `test` clonado (shape de `GET /test/:test_id`) más el
+// origen y los conteos de lo copiado. El clon siempre nace inactivo.
+export type cloneTestResult = test & {
+    cloned_from_test_id: number;
+    test_question_types_cloned: number;
+    questions_cloned: number;
+    answers_cloned: number;
+}
+
 export type instructor = {
     id: number | null;
     user_id: number;

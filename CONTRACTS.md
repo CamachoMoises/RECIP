@@ -667,6 +667,10 @@ arranque usa `alter: false` y no las crea).
 > examen se resuelve con la tabla puente `course_test`. `question`, `answer` y `test_question_type`
 > guardan siempre el `course_id` del dueño, aunque el body envíe el curso desde el que se edita.
 > Los endpoints de importación ya no requieren `course_id`.
+>
+> **Compartir vs. clonar:** `POST /tests/:course_id/link` comparte el **mismo** examen entre cursos
+> (editar una pregunta impacta a todos). `POST /clone/:test_id` crea una **variante independiente**
+> (copia profunda) para casos con más/menos preguntas, otro puntaje o duración.
 
 ### GET /
 - `200` → array de Test (sin includes)
@@ -735,6 +739,32 @@ arranque usa `alter: false` y no las crea).
 - `400` JSON `{ message }` si algún parámetro no es válido.
 - `404` JSON `{ message: 'Test not found' }` si el examen no existe. Desvincular un vínculo
   inexistente no es error: `removed: false`.
+
+### POST /clone/:test_id
+- Auth: sí
+- Params: `test_id` = examen **origen**. Body: `course_id` (**destino**, obligatorio; debe existir,
+  estar activo y ser de teoría `course_type_id = 1`), `code` (opcional, ≤ 50), `duration`
+  (opcional, entero > 0), `min_score` (opcional, ≥ 0). Un `status` enviado se ignora.
+- Crea un examen **nuevo e independiente** en otro curso: copia `duration`/`min_score` (salvo
+  overrides), el blueprint `test_question_type`, **todas** las `question` (tipos 1..5, incluidas
+  inactivas) y **todas** las `answer` (incluida `is_correct`). Los IDs internos son nuevos y el
+  `course_id` de blueprint/preguntas/respuestas se normaliza al curso destino.
+- El clon **siempre nace inactivo** (`status: false`) y queda vinculado solo al curso destino
+  (`course_test`). No copia intentos (`course_student_test*`) ni los vínculos del origen.
+- `code`: si se omite se genera `${code_origen}-COPIA` (con sufijo `-2`, `-3`, … si ya existe;
+  clonar un clon no produce `-COPIA-COPIA`).
+- `201` → Test con el mismo shape de `GET /test/:test_id` (`test_question_types` con
+  `question_type`, `course`, `courses`, `is_shared`) **más** `cloned_from_test_id`,
+  `test_question_types_cloned`, `questions_cloned`, `answers_cloned`.
+- `400` JSON `{ message: 'Parámetro test_id inválido' }`
+- `400` JSON `{ message: 'Input Validation Error ...' }` si falta `course_id` o un override es inválido.
+- `404` JSON `{ message: 'Test not found' }` si el origen no existe.
+- `404` JSON `{ message: 'Course not found' }` si el destino no existe.
+- `409` JSON `{ message }` si el destino está eliminado, no es de teoría o es el mismo curso dueño
+  del origen; si el origen no pertenece a un curso de teoría; si el contenido del origen es
+  inconsistente; o si el `code` explícito ya existe.
+- El clon no valida conflicto de examen activo al crearse (nace inactivo). Al activarlo aplica el
+  `409` de `PUT /test`.
 
 ### GET /questions/by-test/:test_id
 - Params: `test_id`; Query: `question_type_id`, `test_question_type_id`, `status`
@@ -1881,6 +1911,10 @@ arranque usa `alter: false` y no las crea).
 > examen se resuelve con la tabla puente `course_test`. `question`, `answer` y `test_question_type`
 > guardan siempre el `course_id` del dueño, aunque el body envíe el curso desde el que se edita.
 > Los endpoints de importación ya no requieren `course_id`.
+>
+> **Compartir vs. clonar:** `POST /tests/:course_id/link` comparte el **mismo** examen entre cursos
+> (editar una pregunta impacta a todos). `POST /clone/:test_id` crea una **variante independiente**
+> (copia profunda) para casos con más/menos preguntas, otro puntaje o duración.
 
 ### GET /
 - `200` → array de Test (sin includes)
@@ -1949,6 +1983,32 @@ arranque usa `alter: false` y no las crea).
 - `400` JSON `{ message }` si algún parámetro no es válido.
 - `404` JSON `{ message: 'Test not found' }` si el examen no existe. Desvincular un vínculo
   inexistente no es error: `removed: false`.
+
+### POST /clone/:test_id
+- Auth: sí
+- Params: `test_id` = examen **origen**. Body: `course_id` (**destino**, obligatorio; debe existir,
+  estar activo y ser de teoría `course_type_id = 1`), `code` (opcional, ≤ 50), `duration`
+  (opcional, entero > 0), `min_score` (opcional, ≥ 0). Un `status` enviado se ignora.
+- Crea un examen **nuevo e independiente** en otro curso: copia `duration`/`min_score` (salvo
+  overrides), el blueprint `test_question_type`, **todas** las `question` (tipos 1..5, incluidas
+  inactivas) y **todas** las `answer` (incluida `is_correct`). Los IDs internos son nuevos y el
+  `course_id` de blueprint/preguntas/respuestas se normaliza al curso destino.
+- El clon **siempre nace inactivo** (`status: false`) y queda vinculado solo al curso destino
+  (`course_test`). No copia intentos (`course_student_test*`) ni los vínculos del origen.
+- `code`: si se omite se genera `${code_origen}-COPIA` (con sufijo `-2`, `-3`, … si ya existe;
+  clonar un clon no produce `-COPIA-COPIA`).
+- `201` → Test con el mismo shape de `GET /test/:test_id` (`test_question_types` con
+  `question_type`, `course`, `courses`, `is_shared`) **más** `cloned_from_test_id`,
+  `test_question_types_cloned`, `questions_cloned`, `answers_cloned`.
+- `400` JSON `{ message: 'Parámetro test_id inválido' }`
+- `400` JSON `{ message: 'Input Validation Error ...' }` si falta `course_id` o un override es inválido.
+- `404` JSON `{ message: 'Test not found' }` si el origen no existe.
+- `404` JSON `{ message: 'Course not found' }` si el destino no existe.
+- `409` JSON `{ message }` si el destino está eliminado, no es de teoría o es el mismo curso dueño
+  del origen; si el origen no pertenece a un curso de teoría; si el contenido del origen es
+  inconsistente; o si el `code` explícito ya existe.
+- El clon no valida conflicto de examen activo al crearse (nace inactivo). Al activarlo aplica el
+  `409` de `PUT /test`.
 
 ### GET /questions/by-test/:test_id
 - Params: `test_id`; Query: `question_type_id`, `test_question_type_id`, `status`

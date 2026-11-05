@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { answer, courseStudentTest, question, questionDeleteResult, questionType, test, testCoursesResult, testImportResult, testLinkResult, testQuestionsDeleteResult, testQuestionType, testState, testUnlinkResult } from '../types/utilities';
+import { answer, cloneTestResult, courseStudentTest, question, questionDeleteResult, questionType, test, testCoursesResult, testImportResult, testLinkResult, testQuestionsDeleteResult, testQuestionType, testState, testUnlinkResult } from '../types/utilities';
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
 // Los endpoints de examen responden el motivo real en el body (`{ message }`
@@ -145,6 +145,53 @@ export const fetchTestCourses = createAsyncThunk<testCoursesResult, number>(
                     error,
                     'Error al cargar los cursos del examen',
                 ),
+            );
+        }
+    }
+);
+
+// Clona un examen en otro curso: crea una variante independiente (copia del
+// blueprint, preguntas y respuestas) que nace inactiva y solo se vincula al
+// curso destino. No copia intentos ni vínculos del origen.
+// `view_course_id` no viaja al backend: indica qué curso está abierto en la
+// UI para insertar el clon en `testList` sin recargar la página.
+export const cloneTest = createAsyncThunk<
+    cloneTestResult,
+    {
+        test_id: number;
+        course_id: number;
+        view_course_id?: number;
+        code?: string;
+        duration?: number;
+        min_score?: number;
+    }
+>(
+    'test/cloneTest',
+    async ({ test_id, course_id, code, duration, min_score }, { rejectWithValue }) => {
+        try {
+            // Solo se envían los campos con valor: los overrides vacíos deben
+            // quedar fuera del body para que el backend copie los del origen.
+            const body: {
+                course_id: number;
+                code?: string;
+                duration?: number;
+                min_score?: number;
+            } = { course_id };
+
+            if (typeof code === 'string' && code.trim()) {
+                body.code = code.trim();
+            }
+            if (typeof duration === 'number') body.duration = duration;
+            if (typeof min_score === 'number') body.min_score = min_score;
+
+            const response = await axiosPostSlice(
+                `api/test/clone/${test_id}`,
+                body,
+            );
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al clonar el examen'),
             );
         }
     }
@@ -686,6 +733,24 @@ const testSlice = createSlice({
                 state.testList = action.payload.tests;
             })
             .addCase(unlinkTestFromCourse.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+
+            // Clonación de exámenes: variante independiente en otro curso.
+            // No se toca `status` (la página ya está cargada) para no mostrar
+            // `LoadingPage` ni `ErrorPage`; los errores se muestran como toast.
+            .addCase(cloneTest.fulfilled, (state, action) => {
+                const clone = action.payload;
+                // Solo se inserta si el curso destino es el que está abierto:
+                // clonar hacia otro curso no cambia este listado.
+                if (
+                    action.meta.arg.view_course_id === clone.course_id &&
+                    !state.testList.some((T) => T.id === clone.id)
+                ) {
+                    state.testList.push(clone);
+                }
+            })
+            .addCase(cloneTest.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
 
