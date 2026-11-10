@@ -19,8 +19,9 @@ import {
 	fetchSubjects,
 	updateSubject,
 } from '../../../features/subjectSlice';
-import { ArrowDown, ArrowUp, Pencil, Plus } from 'lucide-react';
+import { ArrowDown, ArrowUp, Eye, Pencil, Plus } from 'lucide-react';
 import ModalFormSubject from './modalFormSubject';
+import CourseAssessmentPreviewModal from './courseAssessmentPreviewModal';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
 import { axiosPostDefault } from '../../../services/axios';
@@ -53,6 +54,8 @@ const CourseDetail = () => {
 		number | null
 	>(null);
 	const [openNewSubject, setOpenNewSubject] = useState(false);
+	const [openAssessmentPreview, setOpenAssessmentPreview] =
+		useState(false);
 	const lastSavedHoursRef = useRef<number | null>(null);
 	const { course, subject } = useSelector((state: RootState) => {
 		return { course: state.courses, subject: state.subjects };
@@ -101,8 +104,7 @@ const CourseDetail = () => {
 			if (!subject.subjectList) return;
 			total = subject.subjectList.reduce((sum, sub) => {
 				const activeDays =
-					sub.subject_days?.filter((sd) => sd.status)
-						?.length || 0;
+					sub.subject_days?.filter((sd) => sd.status)?.length || 0;
 				return sum + (sub.hours || 0) * activeDays;
 			}, 0);
 		} else {
@@ -114,14 +116,8 @@ const CourseDetail = () => {
 			return;
 		}
 		lastSavedHoursRef.current = total;
-		dispatch(
-			updateCourseHours({ ...sc, hours: total }),
-		);
-	}, [
-		course.courseSelected,
-		subject.subjectList,
-		dispatch,
-	]);
+		dispatch(updateCourseHours({ ...sc, hours: total }));
+	}, [course.courseSelected, subject.subjectList, dispatch]);
 	if (!id || Number.isNaN(courseIdNum)) {
 		return <LoadingPage />;
 	}
@@ -132,264 +128,270 @@ const CourseDetail = () => {
 		return <LoadingPage />;
 	}
 	if (subject.status === 'failed') {
-		return <ErrorPage error={subject.error ? subject.error : 'Indefinido'} />;
+		return (
+			<ErrorPage
+				error={subject.error ? subject.error : 'Indefinido'}
+			/>
+		);
 	}
 	if (course.status === 'failed') {
 		return <LoadingPage />;
 	}
-	if (!course.courseSelected || course.courseSelected.id !== courseIdNum) {
+	if (
+		!course.courseSelected ||
+		course.courseSelected.id !== courseIdNum
+	) {
 		return <LoadingPage />;
 	}
 
 	const selectedCourse = course.courseSelected;
 	const courseDeleted = isCourseDeleted(selectedCourse);
-		const subjectList = subject.subjectList;
-		const maxOrderSubject = subject.maxOrderSubject;
-		const maxOrderLessonSelected = subject.maxOrderLesson;
-		const handleOpenEdit = async (
-			subjectId: number | null = null,
-		) => {
-			setSubjectSelectedId(subjectId);
-			if (openNewSubject) {
-				await dispatch(
-					fetchSubjects({
-						course_id: selectedCourse.id ? selectedCourse.id : -1,
-						status: false,
-						is_schedulable: false,
-					}),
-				);
-			}
-			setOpenNewSubject(!openNewSubject);
-		};
-		const handleSwitchSubject = async (
-			subjectEdit: subject,
-			index: number,
-			tpye: string,
-		) => {
-			let index_related = 0;
-			if (tpye === 'up') {
-				index_related = -1;
-			} else {
-				index_related = 1;
-			}
-			const reated_subject = subjectList[index + index_related];
-			const subject_a = {
-				...subjectEdit,
-				order: subjectEdit.order + index_related,
-			};
-			const subject_b = {
-				...reated_subject,
-				order: reated_subject.order - index_related,
-			};
-			delete subject_a.createdAt;
-			delete subject_a.updatedAt;
-			delete subject_b.createdAt;
-			delete subject_b.updatedAt;
-			delete subject_a.subject_days;
-			delete subject_b.subject_days;
-
-			await dispatch(updateSubject(subject_a));
-			await dispatch(updateSubject(subject_b));
+	const subjectList = subject.subjectList;
+	const maxOrderSubject = subject.maxOrderSubject;
+	const maxOrderLessonSelected = subject.maxOrderLesson;
+	const handleOpenEdit = async (subjectId: number | null = null) => {
+		setSubjectSelectedId(subjectId);
+		if (openNewSubject) {
 			await dispatch(
 				fetchSubjects({
-					course_id: parseInt(id),
+					course_id: selectedCourse.id ? selectedCourse.id : -1,
 					status: false,
 					is_schedulable: false,
 				}),
 			);
+		}
+		setOpenNewSubject(!openNewSubject);
+	};
+	const handleSwitchSubject = async (
+		subjectEdit: subject,
+		index: number,
+		tpye: string,
+	) => {
+		let index_related = 0;
+		if (tpye === 'up') {
+			index_related = -1;
+		} else {
+			index_related = 1;
+		}
+		const reated_subject = subjectList[index + index_related];
+		const subject_a = {
+			...subjectEdit,
+			order: subjectEdit.order + index_related,
 		};
-		/**
-		 * El endpoint sigue llamándose `day` en ambos modos; el backend lo valida
-		 * contra `course.sessions` cuando el curso usa sesiones y responde 400 si
-		 * el ordinal excede el tope.
-		 *
-		 * El `Switch` no está controlado (`defaultChecked`), así que su estado
-		 * visual no se revierte solo si el POST falla. Por eso se recargan las
-		 * asignaciones siempre: el check, la etiqueta "Inactivo" y las horas
-		 * totales (efecto de arriba) tienen que reflejar lo que quedó guardado.
-		 * El precio es el `LoadingPage` de `fetchSubjects.pending`, porque el
-		 * slice comparte `status` para todas sus acciones.
-		 */
-		const handleChangeStatusDay = async (
-			event: React.ChangeEvent<HTMLInputElement>,
-			day: { id: number; name: string },
-			subject_id: number | null,
-		) => {
-			if (!subject_id || !selectedCourse?.id) return;
-
-			const courseId = selectedCourse.id;
-			const req = {
-				status: event.target.checked,
-				subject_id: subject_id,
-				day: day.id + 1,
-				course_id: courseId,
-			};
-			const reload = () =>
-				dispatch(
-					fetchSubjects({
-						course_id: courseId,
-						status: false,
-						is_schedulable: false,
-					}),
-				);
-
-			try {
-				await axiosPostDefault('api/subjects/subjects_days', req);
-				toast.success(
-					`${ordinalLabel(selectedCourse, day.id + 1)} actualizado`,
-				);
-			} catch (error: any) {
-				// Los 400 sin `status` llegan como texto plano
-				// ("Input Validation Error ..."), no como `{ message }`.
-				const data = error?.response?.data;
-				toast.error(
-					(typeof data === 'string'
-						? data
-						: data?.message || data?.error) ||
-						error?.message ||
-						`Error al actualizar ${ordinalLabel(
-							selectedCourse,
-							day.id + 1,
-						).toLowerCase()}`,
-				);
-			} finally {
-				await reload();
-			}
+		const subject_b = {
+			...reated_subject,
+			order: reated_subject.order - index_related,
 		};
+		delete subject_a.createdAt;
+		delete subject_a.updatedAt;
+		delete subject_b.createdAt;
+		delete subject_b.updatedAt;
+		delete subject_a.subject_days;
+		delete subject_b.subject_days;
 
-		if (selectedCourse) {
-			const ordinals = programOrdinals(selectedCourse);
+		await dispatch(updateSubject(subject_a));
+		await dispatch(updateSubject(subject_b));
+		await dispatch(
+			fetchSubjects({
+				course_id: parseInt(id),
+				status: false,
+				is_schedulable: false,
+			}),
+		);
+	};
+	/**
+	 * El endpoint sigue llamándose `day` en ambos modos; el backend lo valida
+	 * contra `course.sessions` cuando el curso usa sesiones y responde 400 si
+	 * el ordinal excede el tope.
+	 *
+	 * El `Switch` no está controlado (`defaultChecked`), así que su estado
+	 * visual no se revierte solo si el POST falla. Por eso se recargan las
+	 * asignaciones siempre: el check, la etiqueta "Inactivo" y las horas
+	 * totales (efecto de arriba) tienen que reflejar lo que quedó guardado.
+	 * El precio es el `LoadingPage` de `fetchSubjects.pending`, porque el
+	 * slice comparte `status` para todas sus acciones.
+	 */
+	const handleChangeStatusDay = async (
+		event: React.ChangeEvent<HTMLInputElement>,
+		day: { id: number; name: string },
+		subject_id: number | null,
+	) => {
+		if (!subject_id || !selectedCourse?.id) return;
 
-			const hoursByOrdinals = subject.subjectList.flatMap((sub) => {
-				const daysActive =
-					sub.subject_days?.filter((SD) => SD.status) || [];
-				return daysActive.map((SD) => ({
-					day: SD.day,
-					hours: sub.hours,
-				}));
-			});
-			return (
-				<>
-					<PageTitle
-						title={`Editar Asiganciones del curso ${selectedCourse.name}`}
-						breadCrumbs={breadCrumbs}
-					/>
-					{courseDeleted && (
-						<div className="mb-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-							<strong>Curso inactivo.</strong> No se pueden crear
-							ni modificar secciones, días ni lecciones hasta
-							reactivarlo desde Configuración. El historial del
-							curso sigue disponible.
-						</div>
-					)}
-					<div className="flex flex-col  gap-2">
-						<div className="flex flex-row w-full">
-							<Card
-								className="flex flex-row w-full"
+		const courseId = selectedCourse.id;
+		const req = {
+			status: event.target.checked,
+			subject_id: subject_id,
+			day: day.id + 1,
+			course_id: courseId,
+		};
+		const reload = () =>
+			dispatch(
+				fetchSubjects({
+					course_id: courseId,
+					status: false,
+					is_schedulable: false,
+				}),
+			);
+
+		try {
+			await axiosPostDefault('api/subjects/subjects_days', req);
+			toast.success(
+				`${ordinalLabel(selectedCourse, day.id + 1)} actualizado`,
+			);
+		} catch (error: any) {
+			// Los 400 sin `status` llegan como texto plano
+			// ("Input Validation Error ..."), no como `{ message }`.
+			const data = error?.response?.data;
+			toast.error(
+				(typeof data === 'string'
+					? data
+					: data?.message || data?.error) ||
+					error?.message ||
+					`Error al actualizar ${ordinalLabel(
+						selectedCourse,
+						day.id + 1,
+					).toLowerCase()}`,
+			);
+		} finally {
+			await reload();
+		}
+	};
+
+	if (selectedCourse) {
+		const ordinals = programOrdinals(selectedCourse);
+
+		const hoursByOrdinals = subject.subjectList.flatMap((sub) => {
+			const daysActive =
+				sub.subject_days?.filter((SD) => SD.status) || [];
+			return daysActive.map((SD) => ({
+				day: SD.day,
+				hours: sub.hours,
+			}));
+		});
+		return (
+			<>
+				<PageTitle
+					title={`Editar Asiganciones del curso ${selectedCourse.name}`}
+					breadCrumbs={breadCrumbs}
+				/>
+				{courseDeleted && (
+					<div className="mb-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+						<strong>Curso inactivo.</strong> No se pueden crear ni
+						modificar secciones, días ni lecciones hasta reactivarlo
+						desde Configuración. El historial del curso sigue
+						disponible.
+					</div>
+				)}
+				<div className="flex flex-col  gap-2">
+					<div className="flex flex-row w-full">
+						<Card
+							className="flex flex-row w-full"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<CardBody
+								className="w-full"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<CardBody
-									className="w-full"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
-									<div className="flex flex-col w-full">
-										<div className="flex flex-row justify-between">
-											<Typography
-												variant="lead"
-												className="text-left"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Nombre: {selectedCourse.name}
-											</Typography>
-											<Typography
-												variant="lead"
-												className="text-left"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Curso {selectedCourse.course_level.name}
-											</Typography>
-										</div>
-										<div className="flex flex-row justify-between">
-											<Typography
-												variant="lead"
-												className="text-left"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Descripcion: {selectedCourse.description}
-											</Typography>
-											<Typography
-												variant="lead"
-												className="text-left"
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-											>
-												Tipo: {selectedCourse.course_type.name}
-											</Typography>
-										</div>
+								<div className="flex flex-col w-full">
+									<div className="flex flex-row justify-between">
 										<Typography
-											variant="small"
+											variant="lead"
 											className="text-left"
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
 										>
-											{ordinals.map((ordinal, index) => {
-												let hours = 0;
-												const hoursForOrdinal =
-													hoursByOrdinals.filter(
-														(HbD) => HbD.day === ordinal.id + 1,
-													);
-
-												hours = hoursForOrdinal.reduce(
-													(sum, SD) => sum + SD.hours,
-													0,
-												);
-
-												return (
-													<div
-														key={`ordinal-${index}`}
-														className="flex flex-col gap-2"
-													>
-														<span
-															key={`ordinalDetails-${index}`}
-															className={
-																hours > 8 ? 'text-red-700' : ''
-															}
-														>
-															{ordinal.name}: {hours} horas de instruccion
-														</span>
-													</div>
-												);
-											})}
+											Nombre: {selectedCourse.name}
+										</Typography>
+										<Typography
+											variant="lead"
+											className="text-left"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Curso {selectedCourse.course_level.name}
 										</Typography>
 									</div>
-								</CardBody>
-							</Card>
-						</div>
-						<div className="flex flex-row w-full">
-							<Card
-								className="flex flex-row w-full overflow-x-auto whitespace-nowrap"
+									<div className="flex flex-row justify-between">
+										<Typography
+											variant="lead"
+											className="text-left"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Descripcion: {selectedCourse.description}
+										</Typography>
+										<Typography
+											variant="lead"
+											className="text-left"
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											Tipo: {selectedCourse.course_type.name}
+										</Typography>
+									</div>
+									<Typography
+										variant="small"
+										className="text-left"
+										placeholder={undefined}
+										onPointerEnterCapture={undefined}
+										onPointerLeaveCapture={undefined}
+									>
+										{ordinals.map((ordinal, index) => {
+											let hours = 0;
+											const hoursForOrdinal = hoursByOrdinals.filter(
+												(HbD) => HbD.day === ordinal.id + 1,
+											);
+
+											hours = hoursForOrdinal.reduce(
+												(sum, SD) => sum + SD.hours,
+												0,
+											);
+
+											return (
+												<div
+													key={`ordinal-${index}`}
+													className="flex flex-col gap-2"
+												>
+													<span
+														key={`ordinalDetails-${index}`}
+														className={
+															hours > 8 ? 'text-red-700' : ''
+														}
+													>
+														{ordinal.name}: {hours} horas de
+														instruccion
+													</span>
+												</div>
+											);
+										})}
+									</Typography>
+								</div>
+							</CardBody>
+						</Card>
+					</div>
+					<div className="flex flex-row w-full">
+						<Card
+							className="flex flex-row w-full overflow-x-auto whitespace-nowrap"
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<CardBody
+								className="flex flex-col w-full"
 								placeholder={undefined}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<CardBody
-									className="flex flex-col w-full"
-									placeholder={undefined}
-									onPointerEnterCapture={undefined}
-									onPointerLeaveCapture={undefined}
-								>
+								<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 									<Typography
 										placeholder={undefined}
 										onPointerEnterCapture={undefined}
@@ -398,111 +400,122 @@ const CourseDetail = () => {
 									>
 										Secciones/ Modulos
 									</Typography>
-									<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-										fullWidth
-										size="sm"
-										placeholder={undefined}
-										className="flex flex-row justify-center text-center"
-										disabled={courseDeleted}
-										title={
-											courseDeleted
-												? 'Reactiva el curso para crear secciones'
-												: 'Crear sección'
-										}
-										onClick={() => handleOpenEdit(-1)}
-									>
-										<Plus />
-									</Button>
+									<div className="flex flex-wrap gap-2">
+										<Button
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											size="sm"
+											variant="outlined"
+											placeholder={undefined}
+											className="flex flex-row items-center gap-2"
+											disabled={subjectList.length === 0}
+											title={
+												subjectList.length === 0
+													? 'Crea secciones y temas para ver la vista previa'
+													: 'Ver cómo se arma la evaluación'
+											}
+											onClick={() => setOpenAssessmentPreview(true)}
+										>
+											<Eye size={16} />
+											Vista previa
+										</Button>
+										<Button
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											size="sm"
+											variant="filled"
+											placeholder={undefined}
+											className="flex flex-row items-center gap-2"
+											disabled={courseDeleted}
+											title={
+												courseDeleted
+													? 'Reactiva el curso para crear secciones'
+													: 'Crear sección'
+											}
+											onClick={() => handleOpenEdit(-1)}
+										>
+											<Plus size={16} />
+											Crear sección
+										</Button>
+									</div>
+								</div>
 
-									<hr />
-									{subjectList.length > 0 ? (
-										<>
-											<br />
-											<Typography
+								{subjectList.length > 0 ? (
+									<>
+										<br />
+										<Typography
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+										>
+											{ordinalNounPlural(selectedCourse)} impartidos
+										</Typography>
+										<div className="flex w-dvh lg:w-full">
+											<List
+												className="w-full overflow-x-auto whitespace-nowrap"
 												placeholder={undefined}
 												onPointerEnterCapture={undefined}
 												onPointerLeaveCapture={undefined}
 											>
-												{ordinalNounPlural(selectedCourse)} impartidos
-											</Typography>
-											<div className="flex w-dvh lg:w-full">
-												<List
-													className="w-full overflow-x-auto whitespace-nowrap"
-													placeholder={undefined}
-													onPointerEnterCapture={undefined}
-													onPointerLeaveCapture={undefined}
-												>
-													{subjectList.map((subject, index) => {
-														const subjectDays = subject.subject_days
-															? subject.subject_days
-															: [];
-														return (
-															<ListItem
-																className={`flex justify-between ${
-																	subject.status ? '' : 'bg-gray-400'
-																}`}
-																key={subject.id ?? `subject-${index}`}
-																placeholder={undefined}
-																onPointerEnterCapture={undefined}
-																onPointerLeaveCapture={undefined}
-															>
-																<div className="flex flex-row justify-between w-80">
-																	<div className="relative flex w-40 group">
-																		<Typography
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																			className="truncate cursor-pointer"
-																		>
-																			{subject.name.length > 15
-																				? subject.name.substring(
-																						0,
-																						15,
-																					) + '...'
-																				: subject.name}
-																		</Typography>
-																		{subject.name.length > 15 && (
-																			<div className="absolute z-50 hidden group-hover:block bg-gray-800 text-white text-sm px-3 py-2 rounded-md shadow-lg -top-8 left-0 w-max max-w-xs whitespace-normal">
-																				{subject.name}
-																			</div>
-																		)}
-																	</div>
-																	{course.courseSelected?.course_type
-																		.id != 2 && (
-																		<Typography
-																			placeholder={undefined}
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			horas: ({subject.hours})
-																		</Typography>
-																	)}
-
-																	{!subject.status && (
-																		<Typography
-																			placeholder={undefined}
-																			color="red"
-																			onPointerEnterCapture={
-																				undefined
-																			}
-																			onPointerLeaveCapture={
-																				undefined
-																			}
-																		>
-																			Inactivo
-																		</Typography>
+												{subjectList.map((subject, index) => {
+													const subjectDays = subject.subject_days
+														? subject.subject_days
+														: [];
+													return (
+														<ListItem
+															className={`flex justify-between ${
+																subject.status ? '' : 'bg-gray-400'
+															}`}
+															key={subject.id ?? `subject-${index}`}
+															placeholder={undefined}
+															onPointerEnterCapture={undefined}
+															onPointerLeaveCapture={undefined}
+														>
+															<div className="flex flex-row justify-between w-80">
+																<div className="relative flex w-40 group">
+																	<Typography
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																		className="truncate cursor-pointer"
+																	>
+																		{subject.name.length > 15
+																			? subject.name.substring(
+																					0,
+																					15,
+																				) + '...'
+																			: subject.name}
+																	</Typography>
+																	{subject.name.length > 15 && (
+																		<div className="absolute z-50 hidden group-hover:block bg-gray-800 text-white text-sm px-3 py-2 rounded-md shadow-lg -top-8 left-0 w-max max-w-xs whitespace-normal">
+																			{subject.name}
+																		</div>
 																	)}
 																</div>
+																{course.courseSelected?.course_type
+																	.id != 2 && (
+																	<Typography
+																		placeholder={undefined}
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																	>
+																		horas: ({subject.hours})
+																	</Typography>
+																)}
 
-																<div className="flex w-max gap-3">
+																{!subject.status && (
+																	<Typography
+																		placeholder={undefined}
+																		color="red"
+																		onPointerEnterCapture={undefined}
+																		onPointerLeaveCapture={undefined}
+																	>
+																		Inactivo
+																	</Typography>
+																)}
+															</div>
+
+															<div className="flex w-max gap-3">
 																{ordinals.map((ordinal) => {
 																	let check = false;
 																	check = subjectDays.some(
@@ -511,9 +524,8 @@ const CourseDetail = () => {
 																			sd.status,
 																	);
 																	const labelView =
-																		course.courseSelected
-																			?.course_type.id != 2 ||
-																		check;
+																		course.courseSelected?.course_type
+																			.id != 2 || check;
 																	return (
 																		<div
 																			className="flex flex-col gap-1"
@@ -523,134 +535,147 @@ const CourseDetail = () => {
 																				<label>{ordinal.name}</label>
 																			)}
 
-
-																				{course.courseSelected
-																					?.course_type.id != 2 && (
-																					<>
-																						<Switch
-																							className="h-full w-full checked:bg-[#134475]"
-																							containerProps={{
-																								className: 'w-11 h-6',
-																							}}
-																							circleProps={{
-																								className:
-																									'before:hidden left-0.5 border-none',
-																							}}
-																							defaultChecked={check}
-																							disabled={
-																								courseDeleted ||
-																								!subject.status
-																							}
-																							onChange={(event) => {
-																								handleChangeStatusDay(
-																									event,
-																									ordinal,
-																									subject.id,
-																								);
-																							}}
-																							crossOrigin={undefined}
-																							onPointerEnterCapture={
-																								undefined
-																							}
-																							onPointerLeaveCapture={
-																								undefined
-																							}
-																						/>
-																					</>
-																				)}
-																			</div>
-																		);
-																	})}
-																</div>
-																<ButtonGroup
-																	size="sm"
-																	placeholder={undefined}
+																			{course.courseSelected
+																				?.course_type.id != 2 && (
+																				<>
+																					<Switch
+																						className="h-full w-full checked:bg-[#134475]"
+																						containerProps={{
+																							className: 'w-11 h-6',
+																						}}
+																						circleProps={{
+																							className:
+																								'before:hidden left-0.5 border-none',
+																						}}
+																						defaultChecked={check}
+																						disabled={
+																							courseDeleted ||
+																							!subject.status
+																						}
+																						onChange={(event) => {
+																							handleChangeStatusDay(
+																								event,
+																								ordinal,
+																								subject.id,
+																							);
+																						}}
+																						crossOrigin={undefined}
+																						onPointerEnterCapture={
+																							undefined
+																						}
+																						onPointerLeaveCapture={
+																							undefined
+																						}
+																					/>
+																				</>
+																			)}
+																		</div>
+																	);
+																})}
+															</div>
+															<ButtonGroup
+																size="sm"
+																placeholder={undefined}
+																onPointerEnterCapture={undefined}
+																onPointerLeaveCapture={undefined}
+															>
+																<Button
 																	onPointerEnterCapture={undefined}
 																	onPointerLeaveCapture={undefined}
+																	placeholder={undefined}
+																	disabled={
+																		courseDeleted ||
+																		subject.order <= 1
+																	}
+																	onClick={() =>
+																		handleSwitchSubject(
+																			subject,
+																			index,
+																			'up',
+																		)
+																	}
 																>
-																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																		placeholder={undefined}
-																		disabled={courseDeleted || subject.order <= 1}
-																		onClick={() =>
-																			handleSwitchSubject(
-																				subject,
-																				index,
-																				'up',
-																			)
-																		}
-																	>
-																		<ArrowUp size={12} />
-																	</Button>
+																	<ArrowUp size={12} />
+																</Button>
 
-																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																		placeholder={undefined}
-																		disabled={courseDeleted}
-																		onClick={() =>
-																			handleOpenEdit(subject.id)
-																		}
-																	>
-																		<Pencil size={12} />
-																	</Button>
-																	<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-																		placeholder={undefined}
-																		disabled={
-																			courseDeleted ||
-																			(maxOrderSubject
-																				? maxOrderSubject <=
-																					subject.order
-																				: true)
-																		}
-																		onClick={() =>
-																			handleSwitchSubject(
-																				subject,
-																				index,
-																				'down',
-																			)
-																		}
-																	>
-																		<ArrowDown size={12} />
-																	</Button>
-																</ButtonGroup>
-															</ListItem>
-														);
-													})}
-												</List>
-											</div>
-										</>
-									) : (
-										<div className="pt-5">
-											<Typography
-												placeholder={undefined}
-												onPointerEnterCapture={undefined}
-												onPointerLeaveCapture={undefined}
-												variant="h6"
-												className="text-center"
-											>
-												Sin secciones creadas
-											</Typography>
+																<Button
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	placeholder={undefined}
+																	disabled={courseDeleted}
+																	onClick={() =>
+																		handleOpenEdit(subject.id)
+																	}
+																>
+																	<Pencil size={12} />
+																</Button>
+																<Button
+																	onPointerEnterCapture={undefined}
+																	onPointerLeaveCapture={undefined}
+																	placeholder={undefined}
+																	disabled={
+																		courseDeleted ||
+																		(maxOrderSubject
+																			? maxOrderSubject <=
+																				subject.order
+																			: true)
+																	}
+																	onClick={() =>
+																		handleSwitchSubject(
+																			subject,
+																			index,
+																			'down',
+																		)
+																	}
+																>
+																	<ArrowDown size={12} />
+																</Button>
+															</ButtonGroup>
+														</ListItem>
+													);
+												})}
+											</List>
 										</div>
-									)}
-								</CardBody>
-							</Card>
-						</div>
+									</>
+								) : (
+									<div className="pt-5">
+										<Typography
+											placeholder={undefined}
+											onPointerEnterCapture={undefined}
+											onPointerLeaveCapture={undefined}
+											variant="h6"
+											className="text-center"
+										>
+											Sin secciones creadas
+										</Typography>
+									</div>
+								)}
+							</CardBody>
+						</Card>
 					</div>
-					{openNewSubject && (
-						<ModalFormSubject
-							subjectSelected={subject.subjectSelected}
-							openNewSubject={openNewSubject}
-							handleOpen={handleOpenEdit}
-							maxOrderSubject={maxOrderSubject}
-							maxOrderLessonSelected={maxOrderLessonSelected}
-							courseType={course.courseSelected.course_type.id}
-							ordinals={ordinals}
+				</div>
+				{openNewSubject && (
+					<ModalFormSubject
+						subjectSelected={subject.subjectSelected}
+						openNewSubject={openNewSubject}
+						handleOpen={handleOpenEdit}
+						maxOrderSubject={maxOrderSubject}
+						maxOrderLessonSelected={maxOrderLessonSelected}
+						courseType={course.courseSelected.course_type.id}
+						ordinals={ordinals}
 						ordinalNoun={ordinalNoun(selectedCourse)}
-						/>
-					)}
-				</>
-			);
-		} else {
-			navigate('/dashboard/courses');
-		}
+					/>
+				)}
+				<CourseAssessmentPreviewModal
+					open={openAssessmentPreview}
+					onClose={() => setOpenAssessmentPreview(false)}
+					course={selectedCourse}
+				/>
+			</>
+		);
+	} else {
+		navigate('/dashboard/courses');
+	}
 };
 
 export default CourseDetail;
