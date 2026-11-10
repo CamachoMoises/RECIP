@@ -389,6 +389,27 @@ export const fetchTestStudent = createAsyncThunk<courseStudentTest[], { student_
         }
     }
 );
+// Reabre un intento ya presentado y evaluado (solo administrador) para que el
+// alumno siga respondiendo las mismas preguntas desde `/dashboard/test`.
+// El backend limpia `score`/`approve` del intento y conserva respuestas y la
+// mejor nota histórica de la matrícula.
+export const reactivateCourseStudentTest = createAsyncThunk<courseStudentTest, number>(
+    'test/reactivateCourseStudentTest',
+    async (course_student_test_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosPostSlice(
+                `api/test/courseStudentTest/${course_student_test_id}/reactivate`,
+                {},
+            );
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al reabrir el examen'),
+            );
+        }
+    }
+);
+
 // Importación masiva de preguntas desde Excel
 export const importExcelQuestions = createAsyncThunk<testImportResult, { test_id: number, file: File, course_id: number, test_question_type_id: number, question_type_id?: number }>(
     'questionTypes/importExcelQuestions',
@@ -780,6 +801,27 @@ const testSlice = createSlice({
             })
             .addCase(updateCourseStudentTestScore.rejected, (state, action) => {
                 state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reapertura de un intento: se actualiza en sitio (conservando
+            // `test` y `course_student` del listado) para que el badge pase a
+            // "En progreso" y el botón "Reabrir" desaparezca sin recargar.
+            .addCase(reactivateCourseStudentTest.fulfilled, (state, action: PayloadAction<courseStudentTest>) => {
+                state.status = 'succeeded';
+                const index = state.studentTestList.findIndex(
+                    (CST) => CST.id === action.payload.id,
+                );
+                if (index !== -1) {
+                    state.studentTestList[index] = {
+                        ...state.studentTestList[index],
+                        finished: false,
+                        score: null as unknown as number,
+                        approve: undefined,
+                    };
+                }
+            })
+            .addCase(reactivateCourseStudentTest.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
 

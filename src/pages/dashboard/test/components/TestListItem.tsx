@@ -28,6 +28,10 @@ interface TestListItemProps {
 		courseStudentId: number,
 		userId: number,
 	) => void;
+	onContinueCourseStudentTest: (
+		CS: courseStudent,
+		cst: courseStudentTest,
+	) => void;
 	onNavigateReviewTest: (
 		CST_id: number,
 		test_id: number,
@@ -47,6 +51,7 @@ const TestListItem = ({
 	onNavigateCourseStudentTest,
 	onSeeResults,
 	onOpenExamsList,
+	onContinueCourseStudentTest,
 	onNavigateReviewTest,
 }: TestListItemProps) => {
 	const maxTries = CL.max_attempts || 5;
@@ -57,6 +62,14 @@ const TestListItem = ({
 	let dateTest = null;
 	let horas = null;
 	const exams_submitted = CL.course_student_tests?.length || 0;
+
+	// Un intento reabierto por el administrador queda con `finished = false`.
+	// Es la única entrada válida cuando ya pasó la ventana de 2 h o se agotaron
+	// los intentos: no crea un intento nuevo, retoma el mismo con sus
+	// respuestas guardadas.
+	const openTest = (CL.course_student_tests ?? [])
+		.filter((t) => t.finished === false)
+		.slice(-1)[0];
 
 	if (exams_submitted > 0) {
 		active = byPassMaxTries ? true : exams_submitted < maxTries;
@@ -85,6 +98,8 @@ const TestListItem = ({
 
 	const selfUser = authUserId === CL.student?.user?.id;
 	let selfInstructor = false;
+	// Continuar un intento reabierto no consume intento ni exige ventana de 2 h.
+	const canContinue = selfUser && !!openTest;
 
 	if (!selfUser) {
 		active = false;
@@ -241,7 +256,10 @@ const TestListItem = ({
 					exams_submitted={exams_submitted}
 					selfInstructor={selfInstructor}
 					isSuperuser={isSuperuser}
+					canContinue={canContinue}
+					openTest={openTest}
 					onNavigateCourseStudentTest={onNavigateCourseStudentTest}
+					onContinueCourseStudentTest={onContinueCourseStudentTest}
 					onSeeResults={onSeeResults}
 					onOpenExamsList={onOpenExamsList}
 					onNavigateReviewTest={onNavigateReviewTest}

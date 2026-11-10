@@ -19,7 +19,7 @@ import {
 	ListItem,
 } from '@material-tailwind/react';
 import moment from 'moment';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import QuestionTypeRadio from './questionTypeRadio';
 import QuestionTypeCheck from './questionTypeCheck';
 import { CheckCircle, SaveAll, XCircle } from 'lucide-react';
@@ -81,6 +81,13 @@ const NewTest = () => {
 	const componentRef = useRef<HTMLDivElement>(null);
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
+	const location = useLocation();
+	// `TestListItem` navega aquí con `{ resume: true }` cuando el alumno retoma
+	// un intento reabierto por el administrador: ese intento ya está fuera de la
+	// ventana de 2 h del horario, así que no se le expulsa.
+	const isResume = Boolean(
+		(location.state as { resume?: boolean } | null)?.resume,
+	);
 	const [open, setOpen] = useState(false);
 	const [seePDF, setSeePDF] = useState(false);
 	const [score, setScore] = useState(0);
@@ -561,7 +568,7 @@ const NewTest = () => {
 			dateTest = moment();
 		}
 
-		if (hasParsedSchedule && dateTest) {
+		if (hasParsedSchedule && dateTest && !isResume) {
 			const currentDate = moment();
 			horas = currentDate.diff(dateTest, 'hours', true);
 			if (!horas || horas < 0 || horas > 2) {

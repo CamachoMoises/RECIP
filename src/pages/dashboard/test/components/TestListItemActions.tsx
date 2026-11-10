@@ -12,6 +12,7 @@ import {
 	FileText,
 	NotebookText,
 	MoreVertical,
+	PlayCircle,
 } from 'lucide-react';
 import {
 	courseStudent,
@@ -30,9 +31,15 @@ interface TestListItemActionsProps {
 	exams_submitted: number;
 	selfInstructor: boolean;
 	isSuperuser: boolean;
+	canContinue: boolean;
+	openTest?: courseStudentTest;
 	onNavigateCourseStudentTest: (
 		CS: courseStudent,
 		date: string,
+	) => void;
+	onContinueCourseStudentTest: (
+		CS: courseStudent,
+		cst: courseStudentTest,
 	) => void;
 	onSeeResults: (
 		CST_id: number,
@@ -64,28 +71,42 @@ const TestListItemActions = ({
 	exams_submitted,
 	selfInstructor,
 	isSuperuser,
+	canContinue,
+	openTest,
 	onNavigateCourseStudentTest,
+	onContinueCourseStudentTest,
 	onSeeResults,
 	onOpenExamsList,
 	onNavigateReviewTest,
 }: TestListItemActionsProps) => {
+	// Si hay un intento reabierto se retoma ese mismo; iniciar de nuevo crearía
+	// otro intento con preguntas distintas y perdería lo ya respondido.
+	const canResume = canContinue && !!openTest && !isGeneratingTest;
+	const canStart = active && !isGeneratingTest;
+
+	const startOrResumeTest = () => {
+		if (canResume && openTest) {
+			onContinueCourseStudentTest(CL, openTest);
+			return;
+		}
+		onNavigateCourseStudentTest(
+			CL,
+			dateTest ? dateTest.format('YYYY-MM-DD') : '-1',
+		);
+	};
+
 	return (
 		<div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
 			<div className="hidden sm:flex">
 				<div className="flex flex-row items-center gap-2">
 					<Button onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
-						title="Iniciar examen"
+						title={canResume ? 'Continuar examen' : 'Iniciar examen'}
 						className="flex items-center gap-1 px-2 sm:px-3"
 						placeholder={undefined}
-						disabled={!active || isGeneratingTest}
-						onClick={() => {
-							onNavigateCourseStudentTest(
-								CL,
-								dateTest ? dateTest.format('YYYY-MM-DD') : '-1',
-							);
-						}}
+						disabled={(!canStart && !canResume) || isGeneratingTest}
+						onClick={startOrResumeTest}
 					>
-						<Pencil size={15} />
+						{canResume ? <PlayCircle size={15} /> : <Pencil size={15} />}
 					</Button>
 
 					{CL.score && lastTest && CL.student?.user?.id && (
@@ -168,19 +189,20 @@ const TestListItemActions = ({
 					>
 						<MenuItem
 							className="flex items-center gap-2"
-							disabled={!active || isGeneratingTest}
-							onClick={() => {
-								onNavigateCourseStudentTest(
-									CL,
-									dateTest ? dateTest.format('YYYY-MM-DD') : '-1',
-								);
-							}}
+							disabled={(!canStart && !canResume) || isGeneratingTest}
+							onClick={startOrResumeTest}
 							placeholder={undefined}
 							onPointerEnterCapture={undefined}
 							onPointerLeaveCapture={undefined}
 						>
-							<Pencil size={15} />
-							<span>Iniciar examen</span>
+							{canResume ? (
+								<PlayCircle size={15} />
+							) : (
+								<Pencil size={15} />
+							)}
+							<span>
+								{canResume ? 'Continuar examen' : 'Iniciar examen'}
+							</span>
 						</MenuItem>
 
 						{CL.score && lastTest && CL.student?.user?.id && (

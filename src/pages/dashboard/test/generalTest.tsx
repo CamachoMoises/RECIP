@@ -12,6 +12,7 @@ import {
 import {
 	breadCrumbsItems,
 	courseStudent,
+	courseStudentTest,
 } from '../../../types/utilities';
 import LoadingPage from '../../../components/LoadingPage';
 import ErrorPage from '../../../components/ErrorPage';
@@ -27,6 +28,7 @@ import {
 	fetchCourseStudentTest,
 	fetchTest,
 	fetchTestStudent,
+	reactivateCourseStudentTest,
 } from '../../../features/testSlice';
 
 import { fetchUser } from '../../../features/userSlice';
@@ -151,6 +153,64 @@ const GeneralTest = () => {
 					: 'Error al generar el examen',
 			);
 			setIsGeneratingTest(false);
+		}
+	};
+
+	// Retoma un intento reabierto por el administrador. No usa
+	// `createCourseStudentTest`: ese endpoint exige examen activo y, si la
+	// ventana de 2 h expiró, crearía un intento nuevo (preguntas distintas y
+	// respuestas en blanco). Aquí se carga el intento tal cual quedó guardado.
+	const continueCourseStudentTest = async (
+		CS: courseStudent,
+		cst: courseStudentTest,
+	) => {
+		setIsGeneratingTest(true);
+		const loadingToast = toast.loading('Cargando examen');
+		try {
+			await dispatch(
+				fetchSubjects({
+					course_id: CS.course_id ? CS.course_id : -1,
+					status: true,
+					is_schedulable: true,
+				}),
+			);
+			await dispatch(fetchCourse(CS.course_id ? CS.course_id : -1));
+			await dispatch(fetchCourseStudent(CS.id ? CS.id : -1));
+			await dispatch(fetchCourseStudentTest(cst.id)).unwrap();
+			await dispatch(fetchTest(cst.test_id)).unwrap();
+			toast.dismiss(loadingToast);
+			navigate(
+				`../new_test/${CS.id}/${CS.course_id}/${cst.test_id}`,
+				{ state: { resume: true } },
+			);
+		} catch (error: any) {
+			toast.dismiss(loadingToast);
+			toast.error(
+				typeof error === 'string' && error
+					? error
+					: 'Error al abrir el examen',
+			);
+			setIsGeneratingTest(false);
+		}
+	};
+
+	// Reabre un intento ya presentado y evaluado (solo administrador) para que
+	// el alumno lo continúe desde su propio `/dashboard/test`.
+	const handleReactivateTest = async (cst: courseStudentTest) => {
+		const loadingToast = toast.loading('Reabriendo examen');
+		try {
+			await dispatch(reactivateCourseStudentTest(cst.id)).unwrap();
+			toast.dismiss(loadingToast);
+			toast.success(
+				'Examen reabierto: el alumno ya puede continuarlo',
+			);
+		} catch (error: any) {
+			toast.dismiss(loadingToast);
+			toast.error(
+				typeof error === 'string' && error
+					? error
+					: 'Error al reabrir el examen',
+			);
 		}
 	};
 
@@ -319,6 +379,9 @@ const GeneralTest = () => {
 										}
 										onSeeResults={seeReults}
 										onOpenExamsList={openExamsList}
+										onContinueCourseStudentTest={
+											continueCourseStudentTest
+										}
 										onNavigateReviewTest={navigateReviewTest}
 									/>
 								))}
@@ -348,6 +411,7 @@ const GeneralTest = () => {
 				onNavigateReviewTest={navigateReviewTest}
 				onHandleEndTest={handleEndTest}
 				onPrintResults={seeReults}
+				onReactivate={handleReactivateTest}
 			/>
 
 			<ResultsPdfContainer
