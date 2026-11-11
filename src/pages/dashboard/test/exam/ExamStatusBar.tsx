@@ -3,7 +3,6 @@ import moment from 'moment';
 import {
 	AlertCircle,
 	CheckCircle2,
-	ChevronDown,
 	Loader2,
 	RefreshCw,
 	SaveAll,
@@ -37,10 +36,11 @@ const isDesktop = () =>
  * preguntas y el botón de finalizar.
  *
  * Responsive:
- *  - móvil/tablet (`< lg`): barra horizontal `sticky` sobre las preguntas, con
- *    el navegador plegable (abierto solo en pantallas grandes).
+ *  - móvil/tablet (`< lg`): barra horizontal `sticky` sobre las preguntas, solo
+ *    con tiempo, progreso, estado de guardado y Finalizar. La numeración de
+ *    preguntas se oculta porque en pantallas estrechas no queda espacio.
  *  - desktop (`>= lg`): **columna vertical** fija a la derecha, junto a las
- *    preguntas, con todo visible a la vez.
+ *    preguntas, con la numeración siempre visible.
  *
  * Publica su alto real en `--exam-bar-offset` para que las tarjetas de
  * pregunta usen ese valor como `scroll-margin-top`. En desktop la barra está
@@ -73,9 +73,6 @@ const ExamStatusBar = ({
 	answers: AnswerMap;
 	className?: string;
 }) => {
-	// En móvil el navegador arranca cerrado: con la barra abierta se comería
-	// ~150px de una pantalla de 640px. En desktop siempre está visible.
-	const [showNavigator, setShowNavigator] = useState(() => isDesktop());
 	const [scrolled, setScrolled] = useState(
 		() => typeof window !== 'undefined' && window.scrollY >= NAVBAR_SCROLL_THRESHOLD,
 	);
@@ -105,7 +102,7 @@ const ExamStatusBar = ({
 
 	useEffect(() => {
 		publishOffset();
-	}, [publishOffset, showNavigator, top]);
+	}, [publishOffset, top]);
 
 	useEffect(() => {
 		const node = rootRef.current;
@@ -213,9 +210,14 @@ const ExamStatusBar = ({
 						setActive={setActive}
 					/>
 					<div className="hidden h-10 w-px bg-slate-200 sm:block lg:hidden" />
-					<div className="hidden min-w-[150px] flex-col gap-1 sm:flex lg:w-full lg:min-w-0">
+					<div className="flex min-w-[88px] flex-col gap-1 sm:min-w-[150px] lg:w-full lg:min-w-0">
 						<span className="text-[11px] text-slate-500 lg:text-center">
-							{answered} de {total} respondidas
+							<span className="hidden sm:inline">
+								{answered} de {total} respondidas
+							</span>
+							<span className="sm:hidden">
+								{answered}/{total} respondidas
+							</span>
 						</span>
 						<div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
 							<div
@@ -256,29 +258,14 @@ const ExamStatusBar = ({
 				</div>
 			</div>
 
-			<div className="px-3 py-1.5 lg:mt-2 lg:px-1 lg:pb-0 lg:pt-0">
-				<button
-					onClick={() => setShowNavigator((value) => !value)}
-					className="flex w-full items-center justify-between gap-2 text-[11px] font-medium text-slate-500 transition hover:text-slate-700 lg:hidden"
-				>
-					<span className="truncate text-left">
-						Navegación rápida · {answered}/{total} respondidas
-					</span>
-					<ChevronDown
-						size={14}
-						className={`shrink-0 transition-transform ${showNavigator ? 'rotate-180' : ''}`}
-					/>
-				</button>
-
-				<p className="mb-1.5 hidden text-[10px] font-semibold uppercase tracking-wide text-slate-400 lg:block">
+			{/* Numeración de preguntas: solo en desktop, dentro del panel
+			    vertical. En móvil se oculta para dejar espacio al examen. */}
+			<div className="hidden px-3 py-1.5 lg:mt-2 lg:block lg:px-1 lg:pb-0 lg:pt-0">
+				<p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
 					Preguntas
 				</p>
 
-				<div
-					className={`mt-1.5 flex max-h-24 flex-wrap gap-1.5 overflow-y-auto pb-1 lg:mt-0 lg:max-h-[45vh] ${
-						showNavigator ? '' : 'hidden lg:flex'
-					}`}
-				>
+				<div className="flex max-h-[45vh] flex-wrap gap-1.5 overflow-y-auto pb-1">
 					{questions.map((questionTest, index) => {
 						const isAnswered = isQuestionAnswered(
 							questionTypeId(questionTest),
