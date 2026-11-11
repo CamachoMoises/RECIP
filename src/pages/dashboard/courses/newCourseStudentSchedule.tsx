@@ -19,7 +19,11 @@ import {
 	Typography,
 } from '@material-tailwind/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { breadCrumbsItems, schedule, user } from '../../../types/utilities';
+import {
+	breadCrumbsItems,
+	schedule,
+	user,
+} from '../../../types/utilities';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import {
@@ -384,7 +388,8 @@ const NewCourseStudentSchedule = () => {
 
 	const hiddenScheduleReason = (item: schedule): string => {
 		const subjectDay = item.subject_day;
-		if (item.subject && !item.subject.status) return 'Sección inactiva';
+		if (item.subject && !item.subject.status)
+			return 'Sección inactiva';
 		if (item.subject && !item.subject.is_schedulable)
 			return 'Sección no programable';
 		if (!subjectDay) return 'Día no encontrado';
@@ -464,8 +469,7 @@ const NewCourseStudentSchedule = () => {
 							className="absolute inset-y-0 left-0 w-3 border-r border-black/10"
 							style={{
 								backgroundColor:
-									course.courseSelected?.color ||
-									'#ffffff',
+									course.courseSelected?.color || '#ffffff',
 							}}
 						/>
 						<Typography
@@ -593,7 +597,7 @@ const NewCourseStudentSchedule = () => {
 							<div className="mt-4">
 								<Input
 									label="Código"
-									maxLength={15}
+									maxLength={20}
 									disabled={
 										course.courseStudent?.approve || !canViewContent
 									}
@@ -1066,80 +1070,76 @@ const NewCourseStudentSchedule = () => {
 					{canViewContent &&
 						!course.courseStudent?.approve &&
 						hiddenSchedules.length > 0 && (
-						<div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 sm:p-4">
-							<Typography
-								variant="h6"
-								className="text-amber-900"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Horarios fuera de la grilla (
-								{hiddenSchedules.length})
-							</Typography>
-							<Typography
-								variant="small"
-								className="mb-3 block text-amber-900/80"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								Estos horarios no se pueden editar porque su
-								día o su sección ya no forman parte del
-								programa activo, o porque repiten una sesión ya
-								agendada. Elimínalos para liberar la actividad.
-							</Typography>
-							<ul className="flex flex-col gap-2">
-								{hiddenSchedules.map((item) => (
-									<li
-										key={item.id}
-										className="flex flex-col gap-2 rounded-sm border border-amber-200 bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
-									>
-										<div className="min-w-0">
-											<p className="text-sm font-semibold text-gray-800">
-												{item.subject?.name ||
-													`Sección #${item.subject_id}`}
-												{item.subject_day?.day
-													? ` · ${ordinalLabel(
-															course.courseSelected,
-															item.subject_day.day,
-														)}`
-													: ''}
-											</p>
-											<p className="text-xs text-gray-600">
-												{item.date
-													? moment(item.date).format(
-															'DD/MM/YYYY',
-														)
-													: 'Sin fecha'}
-												{item.hour
-													? ` · ${item.hour}`
-													: ''}
-												{' · '}
-												<span className="font-medium text-amber-800">
-													{hiddenScheduleReason(item)}
-												</span>
-											</p>
-										</div>
-										<Button
-											variant="text"
-											color="red"
-											onClick={() =>
-												setHiddenScheduleToDelete(item)
-											}
-											className="flex items-center gap-2 self-start px-3 py-2 sm:self-auto"
-											placeholder={undefined}
-											onPointerEnterCapture={undefined}
-											onPointerLeaveCapture={undefined}
+							<div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 sm:p-4">
+								<Typography
+									variant="h6"
+									className="text-amber-900"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Horarios fuera de la grilla (
+									{hiddenSchedules.length})
+								</Typography>
+								<Typography
+									variant="small"
+									className="mb-3 block text-amber-900/80"
+									placeholder={undefined}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								>
+									Estos horarios no se pueden editar porque su día o
+									su sección ya no forman parte del programa activo, o
+									porque repiten una sesión ya agendada. Elimínalos
+									para liberar la actividad.
+								</Typography>
+								<ul className="flex flex-col gap-2">
+									{hiddenSchedules.map((item) => (
+										<li
+											key={item.id}
+											className="flex flex-col gap-2 rounded-sm border border-amber-200 bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
 										>
-											<Trash2 className="h-4 w-4" />
-											Eliminar
-										</Button>
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
+											<div className="min-w-0">
+												<p className="text-sm font-semibold text-gray-800">
+													{item.subject?.name ||
+														`Sección #${item.subject_id}`}
+													{item.subject_day?.day
+														? ` · ${ordinalLabel(
+																course.courseSelected,
+																item.subject_day.day,
+															)}`
+														: ''}
+												</p>
+												<p className="text-xs text-gray-600">
+													{item.date
+														? moment(item.date).format('DD/MM/YYYY')
+														: 'Sin fecha'}
+													{item.hour ? ` · ${item.hour}` : ''}
+													{' · '}
+													<span className="font-medium text-amber-800">
+														{hiddenScheduleReason(item)}
+													</span>
+												</p>
+											</div>
+											<Button
+												variant="text"
+												color="red"
+												onClick={() =>
+													setHiddenScheduleToDelete(item)
+												}
+												className="flex items-center gap-2 self-start px-3 py-2 sm:self-auto"
+												placeholder={undefined}
+												onPointerEnterCapture={undefined}
+												onPointerLeaveCapture={undefined}
+											>
+												<Trash2 className="h-4 w-4" />
+												Eliminar
+											</Button>
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
 
 					{/* Results Accordion */}
 					<Accordion
