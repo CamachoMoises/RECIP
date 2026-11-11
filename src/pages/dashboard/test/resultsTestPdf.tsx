@@ -3,6 +3,7 @@ import {
 	CourseState,
 	UserState,
 	answer,
+	courseStudentTestQuestion,
 	testState,
 } from '../../../types/utilities';
 import './pdfStyle.css';
@@ -23,6 +24,31 @@ const ResultsTestPdf = ({
 	const regulation = ['', 'INAC', 'No-INAC'];
 	const questions =
 		test.courseStudentTestSelected?.course_student_test_questions;
+
+	/**
+	 * Valor de cada pregunta según **el examen**, no según el tipo global.
+	 *
+	 * El backend califica con `test_question_type.value` (el valor configurado
+	 * para ese tipo dentro del test), que puede ser distinto de
+	 * `question_type.value` (el valor por defecto del tipo). Si aquí se usa el
+	 * global, un acierto de 2 puntos se imprime como "2/1".
+	 *
+	 * `GET /test/courseStudentTest/:id` no incluye `test_question_type` en la
+	 * pregunta, así que se resuelve por `question_type_id` con los
+	 * `test_question_types` del examen (`testSelected`).
+	 */
+	const typeValues = new Map<number, number>(
+		(test.testSelected?.test_question_types ?? []).map((tqt) => [
+			tqt.question_type_id,
+			tqt.value,
+		]),
+	);
+
+	const maxScoreOf = (question: courseStudentTestQuestion) =>
+		question.question?.test_question_type?.value ??
+		typeValues.get(question.question?.question_type_id ?? -1) ??
+		question.question?.question_type?.value ??
+		0;
 
 	return (
 		<div className="printable">
@@ -172,6 +198,9 @@ const ResultsTestPdf = ({
 						(QA) => QA.is_correct,
 					);
 					const type = question.question?.question_type_id;
+					const questionScore =
+						question.course_student_test_answer?.score ?? 0;
+					const questionMax = maxScoreOf(question);
 
 					switch (type) {
 						case 1:
@@ -296,7 +325,7 @@ const ResultsTestPdf = ({
 									<Typography
 										variant="h5"
 										className={
-											question.course_student_test_answer?.score
+											questionScore > 0
 												? 'text-light-green-500'
 												: 'text-red-700'
 										}
@@ -304,11 +333,7 @@ const ResultsTestPdf = ({
 										onPointerEnterCapture={undefined}
 										onPointerLeaveCapture={undefined}
 									>
-										Puntaje :
-										{question.course_student_test_answer?.score
-											? question.course_student_test_answer.score
-											: 0}
-										/{question.question?.question_type?.value}
+										Puntaje :{questionScore}/{questionMax}
 									</Typography>
 								</div>
 							</div>

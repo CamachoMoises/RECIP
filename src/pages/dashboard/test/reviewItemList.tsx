@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
 	answer,
 	courseStudentTestQuestion,
+	testQuestionType,
 } from '../../../types/utilities';
 import { Input } from '@material-tailwind/react';
 import { Save, X, CheckCircle, User, Minus } from 'lucide-react';
@@ -16,11 +17,19 @@ const ReviewItemList = ({
 	index,
 	editing,
 	setEditing,
+	testTypes = [],
 }: {
 	question: courseStudentTestQuestion;
 	index: number;
 	editing: boolean;
 	setEditing: React.Dispatch<React.SetStateAction<boolean>>;
+	/**
+	 * `test_question_types` del examen. El valor de una pregunta lo define el
+	 * test (`test_question_type.value`), no el valor por defecto del tipo
+	 * (`question_type.value`): el backend califica con el primero, así que el
+	 * máximo que se muestra aquí debe salir de la misma fuente.
+	 */
+	testTypes?: testQuestionType[];
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
 
@@ -85,7 +94,11 @@ const ReviewItemList = ({
 		}
 	}
 
-	const maxScore = question.question?.question_type?.value ?? 0;
+	const maxScore =
+		testTypes.find((tqt) => tqt.question_type_id === type)?.value ??
+		question.question?.test_question_type?.value ??
+		question.question?.question_type?.value ??
+		0;
 	const initialScore = `${question.course_student_test_answer?.score ?? 0}`;
 	const [localEditing, setLocalEditing] = useState(false);
 	const [score, setScore] = useState(initialScore);

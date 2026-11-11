@@ -197,6 +197,7 @@ const ReviewTest = () => {
 									editing={editing}
 									setEditing={setEditing}
 									question={question}
+									testTypes={test.testSelected?.test_question_types}
 								/>
 							))}
 						</div>

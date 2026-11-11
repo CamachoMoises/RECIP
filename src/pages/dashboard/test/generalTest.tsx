@@ -238,6 +238,11 @@ const GeneralTest = () => {
 		const testData = await dispatch(
 			fetchCourseStudentTest(CST_id),
 		).unwrap();
+		// El PDF necesita `test_question_types` para imprimir el valor real de
+		// cada pregunta (el backend califica con `test_question_type.value`).
+		if (testData?.test_id) {
+			await dispatch(fetchTest(testData.test_id));
+		}
 		if (coursedata && userdata && testData) {
 			seeResults();
 		}
