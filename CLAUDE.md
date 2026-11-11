@@ -35,7 +35,7 @@ src/
       instructors/  # Instructor management (tableInstructors)
       config/       # Course config, subjects, lessons, test questions management (generalConfig, courseDetail, questionType*, testList, etc.)
       assessment/   # FSTD/ATD flight evaluations (generalAssessment, scoreDetail, CSAD_form, CSA_PDF, lessonDetails)
-      test/         # Exams/tests (generalTest, newTest, reviewTest, questionType*, resultsTestPdf)
+      test/         # Exams/tests (generalTest, newTest shell, reviewTest, questionType*, exam/ layer, resultsTestPdf)
       reports/      # Reports & suggestions list
       suggestions/  # SuggestionDialog, SuggestionListDialog
   services/
@@ -83,6 +83,7 @@ src/
 - **PDF**: Some pages use `@react-pdf/renderer` (`PDFCourseScheduleDocument.tsx`), others use `react-to-print`
 - **Course Groups**: Groups organize pilots by course (one course per group). Created via `modalFormCourseGroup` (course required, immutable after creation). Students assigned via `modalAssignStudents` (filtered by course, validated backend). API: `POST /api/course_groups`, `PUT /api/courses/:course_id/students` (assign student to group)
 - **Course Cloning**: `POST /api/courses/clone/:course_id` creates a structural copy of a course (subjects, subject_days, subject_lessons, subject_lesson_days re-pointed to the new course; no students, schedules, attendance, tests or assessments copied). Thunk `cloneCourse` in `courseSlice.ts`; triggered from a Copy button + confirm dialog in `generalConfig.tsx` (config). See `CONTRACTS.md`.
+- **Taking an exam** (`new_test/:id/:course_id/:test_id`): `newTest.tsx` is only a route shell (context + guards + empty-questions card) and renders `<ExamRunner key={cst.id}>`. The attempt lifecycle lives in `src/pages/dashboard/test/exam/`: `ExamRunner.tsx` (answers, timer, finish/end dialogs, result), `useExamAnswers.ts` (single-flight save queue with 500 ms debounce, exponential-backoff retry, `flush()` before finishing, sync XHR flush on `unload`), `answerUtils.ts` (per-type `resp` format, defensive JSON parsing, `localStorage` drafts `recip:exam-draft:v1:<cst_id>`, `finishedAttempts` back-button guard), `ExamStatusBar.tsx`, `ExamQuestionCard.tsx`, `FstdTable.tsx` (44-cell FSTD), `TextAnswerFields.tsx`. `questionType*.tsx` are controlled components (`{ questionTest, resp, onChange, disabled }`) with no fetching or timers of their own — `ExamRunner` is the single source of truth. See `AGENTS.md` → *Tomar un examen*.
 
 ## Role System
 

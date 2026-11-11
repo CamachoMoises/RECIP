@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../store';
 import { updateCourseStudentTestScore } from '../../../features/testSlice';
 import { TYPE_BADGE_COLORS, TYPE_LABELS } from './components/questionTypeMeta';
+import { safeParseJson } from './exam/answerUtils';
 
 const ReviewItemList = ({
 	question,
@@ -48,32 +49,40 @@ const ReviewItemList = ({
 			}
 			break;
 
-		case 2:
-			findAnswer = JSON.parse(
-				question.course_student_test_answer?.resp ?? '[]',
+		case 2: {
+			const parsed = safeParseJson<unknown>(
+				question.course_student_test_answer?.resp,
+				[],
 			);
-			for (const ans of findAnswer) {
-				if (ans.check) {
-					findAnswerMulti = question.question?.answers?.find(
-						(a) => a.id === ans.id,
-					);
-					if (findAnswerMulti) multiResp++;
-					respData.push(findAnswerMulti?.value ?? '');
-				}
+			for (const ans of Array.isArray(parsed) ? parsed : []) {
+				if (!ans || typeof ans !== 'object') continue;
+				const check = ans as { id?: unknown; check?: unknown };
+				if (!check.check) continue;
+				findAnswerMulti = question.question?.answers?.find(
+					(a) => a.id === Number(check.id),
+				);
+				if (findAnswerMulti) multiResp++;
+				respData.push(findAnswerMulti?.value ?? '');
 			}
 			answered = multiResp > 0;
 			break;
+		}
 
 		case 4:
-		case 5:
-			findAnswer = JSON.parse(
-				question.course_student_test_answer?.resp ?? '[]',
+		case 5: {
+			const parsed = safeParseJson<unknown[]>(
+				question.course_student_test_answer?.resp,
+				[],
 			);
-			if (findAnswer.length > 0) {
-				respData = findAnswer;
+			const values = Array.isArray(parsed) ? parsed : [];
+			if (values.length > 0) {
+				respData = values.map((value) =>
+					typeof value === 'string' ? value : String(value ?? ''),
+				);
 				answered = true;
 			}
 			break;
+		}
 	}
 
 	const maxScore = question.question?.question_type?.value ?? 0;

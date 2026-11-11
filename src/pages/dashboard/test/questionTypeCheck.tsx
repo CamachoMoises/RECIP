@@ -1,135 +1,57 @@
-import { Checkbox, Typography } from '@material-tailwind/react';
-import {
-	courseStudentTestAnswer,
-	courseStudentTestQuestion,
-} from '../../../types/utilities';
-import { useEffect, useState } from 'react';
-import { axiosPostDefault } from '../../../services/axios';
-type checkData = {
-	id: number;
-	check: boolean;
-};
+import { courseStudentTestQuestion } from '../../../types/utilities';
+import { readCheckAnswers, writeCheckAnswers } from './exam/answerUtils';
+
+/**
+ * Selección múltiple. Controlado: los checks se derivan de `resp` y cada
+ * cambio reescribe el arreglo `[{ id, check }]` completo.
+ */
 const QuestionTypeCheck = ({
 	questionTest,
-	countKey,
+	resp,
+	onChange,
+	disabled,
 }: {
 	questionTest: courseStudentTestQuestion;
-	countKey: number;
-	type: number;
+	resp?: string;
+	onChange: (resp: string) => void;
+	disabled?: boolean;
 }) => {
-	const enptyCheck: checkData = {
-		id: -1,
-		check: false,
-	};
-	const answerLength = questionTest.question?.answers
-		? questionTest.question.answers.length
-		: 0;
-	const loadAnswers: checkData[] = questionTest
-		.course_student_test_answer?.resp
-		? JSON.parse(questionTest.course_student_test_answer.resp)
-		: Array(answerLength).fill(enptyCheck);
+	const answers = questionTest.question?.answers ?? [];
+	const answerIds = answers.map((answer) => answer.id);
+	const checked = readCheckAnswers(resp, answerIds);
 
-	const [checkboxes, setCheckboxes] =
-		useState<checkData[]>(loadAnswers);
-	const [hasChange, setHasChange] = useState(false);
-
-	const handleCheckboxChange = (
-		answer_id: number,
-		check: boolean,
-		index: number,
-	) => {
-		const newCheckboxes = [...checkboxes];
-		newCheckboxes[index] = {
-			id: answer_id,
-			check: check,
-		};
-		setCheckboxes(newCheckboxes);
-		setHasChange(true);
-	};
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const saveAnswers = async (resp: checkData[]) => {
-		const CSTA: courseStudentTestAnswer = {
-			course_student_test_id: questionTest.course_student_test_id,
-			course_student_test_question_id: questionTest.id,
-			course_student_id: questionTest.course_student_id,
-			student_id: questionTest.student_id,
-			question_id: questionTest.question_id,
-			resp: JSON.stringify(resp),
-			test_id: questionTest.test_id,
-			course_id: questionTest.course_id,
-		};
-		await axiosPostDefault(`api/test/courseStudentTestAnswer`, {
-			courseStudentTestAnswer: CSTA,
-		});
-		console.log('Se guardaron las respuestas');
-	};
-
-	useEffect(() => {
-		if (hasChange) {
-			saveAnswers(checkboxes);
-		}
-	}, [checkboxes, hasChange, saveAnswers]);
 	return (
-		<div
-			className={`${
-				questionTest.Answered ? 'bg-light-green-200' : ''
-			}`}
-		>
-			<Typography
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-				variant="h5"
-			>
-				Pregunta Nº{countKey + 1} Seleccion Multiple
-			</Typography>
-			<Typography
-				placeholder={undefined}
-				onPointerEnterCapture={undefined}
-				onPointerLeaveCapture={undefined}
-				variant="h6"
-			>
-				{questionTest.question?.header}
-			</Typography>
-
-			{/* <code>{JSON.stringify(checkboxes, null, 4)}</code> */}
-			<div className="flex flex-row justify-center">
-				{questionTest.question?.answers?.map((answer, index) => (
-					<div key={answer.id} className="basis-1/4 justify-center">
-						<Checkbox
-							color="red"
-							id={`check-${answer.id}`}
+		<div className="mt-3 flex flex-wrap gap-2 sm:gap-3">
+			{answers.map((answer) => {
+				const isChecked = checked[answer.id] ?? false;
+				return (
+					<label
+						key={answer.id}
+						className={`flex min-w-[140px] flex-1 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition ${
+							isChecked
+								? 'bg-sky-100 text-slate-900'
+								: 'bg-slate-100 text-slate-700 hover:bg-slate-200/70'
+						} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+					>
+						<input
+							type="checkbox"
 							value={answer.id}
-							defaultChecked={checkboxes[index].check}
-							name={`check-${questionTest.question?.id}`}
-							onPointerEnterCapture={undefined}
-							onChange={(e) =>
-								handleCheckboxChange(
-									answer.id,
-									e.target.checked,
-									index,
+							checked={isChecked}
+							disabled={disabled}
+							onChange={(event) =>
+								onChange(
+									writeCheckAnswers(answerIds, {
+										...checked,
+										[answer.id]: event.target.checked,
+									}),
 								)
 							}
-							onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
+							className="h-4 w-4 shrink-0 accent-sky-600"
 						/>
-						<br />
-						<div className="flex flex-row justify-center">
-							<Typography
-								variant="small"
-								className="max-w-40 text-center"
-								placeholder={undefined}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							>
-								{answer.value}
-							</Typography>
-						</div>
-					</div>
-				))}
-			</div>
-			<hr />
+						<span className="leading-snug">{answer.value}</span>
+					</label>
+				);
+			})}
 		</div>
 	);
 };

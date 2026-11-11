@@ -63,14 +63,12 @@ const Countdown = ({
 				gap: 6,
 			}}
 		>
-			<span
-				style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}
-			>
+			<span style={{ fontSize: 11, color: '#64748B' }}>
 				Tiempo restante
 			</span>
 			<span
 				style={{
-					fontSize: 30,
+					fontSize: 'clamp(22px, 6vw, 30px)',
 					fontWeight: 500,
 					fontVariantNumeric: 'tabular-nums',
 					color: isWarning ? '#A32D2D' : '#0C447C',
@@ -81,9 +79,9 @@ const Countdown = ({
 			</span>
 			<div
 				style={{
-					width: 130,
+					width: 'clamp(92px, 26vw, 130px)',
 					height: 4,
-					background: 'var(--color-background-secondary)',
+					background: '#E2E8F0',
 					borderRadius: 999,
 					overflow: 'hidden',
 				}}
