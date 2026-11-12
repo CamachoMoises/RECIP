@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { subjectLesson } from '../../../types/utilities';
 import {
+	Button,
 	ListItemSuffix,
 	Radio,
 	Typography,
 } from '@material-tailwind/react';
+import { Trash2 } from 'lucide-react';
 
 const ScoreDetail = ({
 	SLE,
 	SLD_id,
 	disabled,
 	handleChangeRadio,
+	onRequestDeleteDetail,
 }: {
 	SLE: subjectLesson;
 	SLD_id: number;
@@ -26,57 +29,31 @@ const ScoreDetail = ({
 		value_2: number | undefined,
 		value_3: number | undefined,
 	) => Promise<void>;
+	onRequestDeleteDetail: (detail: { id: number; name: string }) => void;
 }) => {
-	const [score, setScore] = useState<number | undefined>(
-		SLE.subject_lesson_days &&
-			SLE.subject_lesson_days[0] &&
-			SLE.subject_lesson_days[0]
-				.course_student_assessment_lesson_days &&
-			SLE.subject_lesson_days[0]
-				.course_student_assessment_lesson_days[0]
-			? SLE.subject_lesson_days[0]
-					.course_student_assessment_lesson_days[0].score
-			: undefined,
-	);
+	const lessonDay = SLE.subject_lesson_days?.[0];
+	const detail =
+		lessonDay?.course_student_assessment_lesson_days?.[0];
+	const CSALD_id = detail?.id;
+	const SLED_id = lessonDay?.id;
+
+	const [score, setScore] = useState<number | undefined>(detail?.score);
 	const [score_2, setScore_2] = useState<number | undefined>(
-		SLE.subject_lesson_days &&
-			SLE.subject_lesson_days[0] &&
-			SLE.subject_lesson_days[0]
-				.course_student_assessment_lesson_days &&
-			SLE.subject_lesson_days[0]
-				.course_student_assessment_lesson_days[0]
-			? SLE.subject_lesson_days[0]
-					.course_student_assessment_lesson_days[0].score_2
-			: undefined,
+		detail?.score_2,
 	);
 	const [score_3, setScore_3] = useState<number | undefined>(
-		SLE.subject_lesson_days &&
-			SLE.subject_lesson_days[0] &&
-			SLE.subject_lesson_days[0]
-				.course_student_assessment_lesson_days &&
-			SLE.subject_lesson_days[0]
-				.course_student_assessment_lesson_days[0]
-			? SLE.subject_lesson_days[0]
-					.course_student_assessment_lesson_days[0].score_3
-			: undefined,
+		detail?.score_3,
 	);
-	let SLED_id: number | undefined = undefined;
-	let CSALD_id: number | undefined = undefined;
-	if (SLE.subject_lesson_days && SLE.subject_lesson_days[0]) {
-		SLED_id = SLE.subject_lesson_days[0].id;
-	}
-	if (
-		SLE.subject_lesson_days &&
-		SLE.subject_lesson_days[0] &&
-		SLE.subject_lesson_days[0]
-			.course_student_assessment_lesson_days &&
-		SLE.subject_lesson_days[0]
-			.course_student_assessment_lesson_days[0]
-	) {
-		CSALD_id =
-			SLE.subject_lesson_days[0]
-				.course_student_assessment_lesson_days[0].id;
- 	}
+
+	// Al borrar la calificación el detalle desaparece de `subjectList` y hay
+	// que limpiar los radios. Solo se depende del id: así dos clics seguidos
+	// no se pisan con la respuesta del servidor.
+	useEffect(() => {
+		setScore(detail?.score);
+		setScore_2(detail?.score_2);
+		setScore_3(detail?.score_3);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [CSALD_id]);
 
  	const changeMain = (value: number) => {
  		const prev = score;
@@ -148,153 +125,174 @@ const ScoreDetail = ({
 				onPointerEnterCapture={undefined}
 				onPointerLeaveCapture={undefined}
 			>
-				<div className="flex flex-col gap-2 px-3">
-					<div
-						className={`flex flex-row gap-2 px-3 ${
-							!score ? 'bg-blue-100 rounded-sm' : ''
-						}`}
-					>
-						<Radio
-							name={`SLE-Radio-${SLE.id}`}
-							label="1"
-							value={1}
-							onChange={() => changeMain(1)}
-							defaultChecked={score === 1}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						crossOrigin={undefined}
-						disabled={disabled}
-					/>
-						<Radio
-							name={`SLE-Radio-${SLE.id}`}
-							label="2"
-							value={2}
-							onChange={() => changeMain(2)}
-							defaultChecked={score === 2}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						crossOrigin={undefined}
-						disabled={disabled}
-					/>
-						<Radio
-							name={`SLE-Radio-${SLE.id}`}
-							label="3"
-							value={3}
-							onChange={() => changeMain(3)}
-							defaultChecked={score === 3}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						crossOrigin={undefined}
-						disabled={disabled}
-					/>
-						<Radio
-							name={`SLE-Radio-${SLE.id}`}
-							label="4"
-							value={4}
-							onChange={() => changeMain(4)}
-							defaultChecked={score === 4}
-							onPointerEnterCapture={undefined}
-							onPointerLeaveCapture={undefined}
-						crossOrigin={undefined}
-						disabled={disabled}
-					/>
+				<div className="flex items-center gap-2">
+					<div className="flex flex-col gap-2 px-3">
+						<div
+							className={`flex flex-row gap-2 px-3 ${
+								!score ? 'bg-blue-100 rounded-sm' : ''
+							}`}
+						>
+							<Radio
+								name={`SLE-Radio-${SLE.id}`}
+								label="1"
+								value={1}
+								onChange={() => changeMain(1)}
+								checked={score === 1}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
+							<Radio
+								name={`SLE-Radio-${SLE.id}`}
+								label="2"
+								value={2}
+								onChange={() => changeMain(2)}
+								checked={score === 2}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
+							<Radio
+								name={`SLE-Radio-${SLE.id}`}
+								label="3"
+								value={3}
+								onChange={() => changeMain(3)}
+								checked={score === 3}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
+							<Radio
+								name={`SLE-Radio-${SLE.id}`}
+								label="4"
+								value={4}
+								onChange={() => changeMain(4)}
+								checked={score === 4}
+								onPointerEnterCapture={undefined}
+								onPointerLeaveCapture={undefined}
+							crossOrigin={undefined}
+							disabled={disabled}
+						/>
+						</div>
+						{score && score <= 2 && (
+							<div className="flex flex-row gap-2 px-3 bg-red-100 rounded-sm">
+								<Radio
+									name={`SLE-Radio-2-${SLE.id}`}
+									label="1"
+									value={1}
+								onChange={() => changeSecond(1)}
+									checked={score_2 === 1}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+								<Radio
+									name={`SLE-Radio-2-${SLE.id}`}
+									label="2"
+									value={2}
+								onChange={() => changeSecond(2)}
+									checked={score_2 === 2}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+								<Radio
+									name={`SLE-Radio-2-${SLE.id}`}
+									label="3"
+									value={3}
+								onChange={() => changeSecond(3)}
+									checked={score_2 === 3}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+								<Radio
+									name={`SLE-Radio-2-${SLE.id}`}
+									label="4"
+									value={4}
+								onChange={() => changeSecond(4)}
+									checked={score_2 === 4}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+							</div>
+						)}
+	
+						{score && score_2 && score_2 <= 2 && (
+							<div className="flex flex-row gap-2 px-3 bg-red-100 rounded-sm">
+								<Radio
+									name={`SLE-Radio-3-${SLE.id}`}
+									label="1"
+									value={1}
+								onChange={() => changeThird(1)}
+									checked={score_3 === 1}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+								<Radio
+									name={`SLE-Radio-3-${SLE.id}`}
+									label="2"
+									value={2}
+								onChange={() => changeThird(2)}
+									checked={score_3 === 2}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+								<Radio
+									name={`SLE-Radio-3-${SLE.id}`}
+									label="3"
+									value={3}
+								onChange={() => changeThird(3)}
+									checked={score_3 === 3}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+								<Radio
+									name={`SLE-Radio-3-${SLE.id}`}
+									label="4"
+									value={4}
+								onChange={() => changeThird(4)}
+									checked={score_3 === 4}
+									onPointerEnterCapture={undefined}
+									onPointerLeaveCapture={undefined}
+								crossOrigin={undefined}
+								disabled={disabled}
+							/>
+							</div>
+						)}
 					</div>
-					{score && score <= 2 && (
-						<div className="flex flex-row gap-2 px-3 bg-red-100 rounded-sm">
-							<Radio
-								name={`SLE-Radio-2-${SLE.id}`}
-								label="1"
-								value={1}
-							onChange={() => changeSecond(1)}
-								defaultChecked={score_2 === 1}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-							<Radio
-								name={`SLE-Radio-2-${SLE.id}`}
-								label="2"
-								value={2}
-							onChange={() => changeSecond(2)}
-								defaultChecked={score_2 === 2}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-							<Radio
-								name={`SLE-Radio-2-${SLE.id}`}
-								label="3"
-								value={3}
-							onChange={() => changeSecond(3)}
-								defaultChecked={score_2 === 3}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-							<Radio
-								name={`SLE-Radio-2-${SLE.id}`}
-								label="4"
-								value={4}
-							onChange={() => changeSecond(4)}
-								defaultChecked={score_2 === 4}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-						</div>
-					)}
-
-					{score && score_2 && score_2 <= 2 && (
-						<div className="flex flex-row gap-2 px-3 bg-red-100 rounded-sm">
-							<Radio
-								name={`SLE-Radio-3-${SLE.id}`}
-								label="1"
-								value={1}
-							onChange={() => changeThird(1)}
-								defaultChecked={score_3 === 1}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-							<Radio
-								name={`SLE-Radio-3-${SLE.id}`}
-								label="2"
-								value={2}
-							onChange={() => changeThird(2)}
-								defaultChecked={score_3 === 2}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-							<Radio
-								name={`SLE-Radio-3-${SLE.id}`}
-								label="3"
-								value={3}
-							onChange={() => changeThird(3)}
-								defaultChecked={score_3 === 3}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-							<Radio
-								name={`SLE-Radio-3-${SLE.id}`}
-								label="4"
-								value={4}
-							onChange={() => changeThird(4)}
-								defaultChecked={score_3 === 4}
-								onPointerEnterCapture={undefined}
-								onPointerLeaveCapture={undefined}
-							crossOrigin={undefined}
-							disabled={disabled}
-						/>
-						</div>
+					{CSALD_id !== undefined && !disabled && (
+						<Button
+							variant="text"
+							color="red"
+							className="p-2 min-w-0"
+							title="Eliminar calificación"
+							onClick={() =>
+								onRequestDeleteDetail({
+									id: CSALD_id,
+									name: SLE.name,
+								})
+							}
+							placeholder={undefined}
+							onPointerEnterCapture={undefined}
+							onPointerLeaveCapture={undefined}
+						>
+							<Trash2 size={16} />
+						</Button>
 					)}
 				</div>
 			</ListItemSuffix>

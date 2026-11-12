@@ -82,12 +82,12 @@ const GeneralConfig = () => {
 	);
 	const [cloning, setCloning] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
-	// `all` (por defecto) incluye los cursos inactivos: así el orden manual
-	// funciona desde el inicio y el recién inactivado sigue visible para poder
-	// reactivarlo. `active` los oculta y deshabilita las flechas.
+	// `active` (por defecto) oculta los cursos inactivos y deshabilita las
+	// flechas de orden. `all` los incluye: hace falta para reordenar y para
+	// encontrar un curso inactivo y poder reactivarlo.
 	const [courseStateFilter, setCourseStateFilter] = useState<
 		'all' | 'active'
-	>('all');
+	>('active');
 	const [courseToDelete, setCourseToDelete] = useState<course | null>(
 		null,
 	);

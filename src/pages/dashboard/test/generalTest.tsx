@@ -67,22 +67,25 @@ const GeneralTest = () => {
 	);
 
 	const isSuperAdmin = auth.user?.is_superuser;
-	const currentPage = course.currentPage;
-	const pageSize = course.pageSize;
 	const totalPages = course.totalPages;
 	const totalItems = course.totalItems;
-	const [active, setActive] = useState(currentPage);
+	// Paginación propia de la pantalla: `state.courses.currentPage` lo
+	// comparten cursos, my-courses, evaluaciones y exámenes (todos usan el
+	// mismo listado de matrículas). Heredarlo hacía que al entrar aquí desde
+	// la página 3 de cursos se pidiera la página 3 de exámenes.
+	const fixedPageSize = 10;
+	const [active, setActive] = useState(1);
 
 	useEffect(() => {
 		dispatch(
 			fetchCoursesStudentsTests({
-				pageSize: course.pageSize,
-				currentPage: course.currentPage,
+				pageSize: fixedPageSize,
+				currentPage: 1,
 				course_type_id: 1,
 				status: true,
 			}),
 		);
-	}, [dispatch, course.currentPage, course.pageSize]);
+	}, [dispatch, fixedPageSize]);
 
 	useEffect(() => {
 		toast(
@@ -255,7 +258,7 @@ const GeneralTest = () => {
 			onClick: async () => {
 				await dispatch(
 					fetchCoursesStudentsTests({
-						pageSize,
+						pageSize: fixedPageSize,
 						currentPage: index,
 						course_type_id: 1,
 						status: true,
@@ -271,7 +274,7 @@ const GeneralTest = () => {
 		setActive(active + 1);
 		await dispatch(
 			fetchCoursesStudentsTests({
-				pageSize,
+				pageSize: fixedPageSize,
 				currentPage: active + 1,
 				course_type_id: 1,
 				status: true,
@@ -284,7 +287,7 @@ const GeneralTest = () => {
 		setActive(active - 1);
 		await dispatch(
 			fetchCoursesStudentsTests({
-				pageSize,
+				pageSize: fixedPageSize,
 				currentPage: active - 1,
 				course_type_id: 1,
 				status: true,

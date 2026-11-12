@@ -239,7 +239,9 @@ arranque usa `alter: false` y no las crea).
 - `row_order` **se ignora**: el curso nuevo se agrega al final (`MAX(row_order) + 1`). Si el body lo
   envía, se descarta antes de Joi (no devuelve 400 por clave desconocida).
 - `hours` es **derivado** y se ignora del body. Se recalcula al guardar: tipo 2
-  (`Entrenamiento`) = `8 × días/sesiones del programa`; resto = `Σ(subject.hours × días activos)`.
+  (`Entrenamiento`) = `8 × días/sesiones del programa`, **salvo** nivel 4 (`Experiencia
+  Reciente`) que usa `Σ(subject.hours × días activos)`; resto =
+  `Σ(subject.hours × días activos)`.
 - `201` → Course con `course_type`, `course_level` (incluye `color`, `uses_sessions`, `sessions` y
   `row_order`)
 
@@ -590,7 +592,9 @@ arranque usa `alter: false` y no las crea).
     - `course_score_average`: promedio global del CSA (o `null`)
   - `CASD` = array de Subject (status=true, is_schedulable=false) con `subject_days` y
     `subject_lessons` → `subject_lesson_days` → `course_student_assessment_lesson_days`
-    (los lesson details filtrados por `course_student_assessment_id = CSA_id`)
+    (los lesson details filtrados por `course_student_assessment_id = CSA_id`). Sin filter por
+    `day` (el PDF cubre todos los días del programa), pero `subject_days`, `subject_lesson` y
+    `subject_lesson_days` filtran `status=true`: los días/temas desactivados no aparecen.
 
 ### GET /courseStudentAssessment/:id
 - Params: `id` (CSA id)
@@ -638,9 +642,12 @@ arranque usa `alter: false` y no las crea).
 
 ### GET /fetchSubjectAssessment
 - Query: `day`, `course_id`, `course_student_assessment_day_id`
-- `200` → array de Subject (status=true, is_schedulable=false) con `subject_days` (filter por `day`)
-  y `subject_lessons` → `subject_lesson_days` (filter por `day`) →
-  `course_student_assessment_lesson_days` (filter por `course_student_assessment_day_id`)
+- `200` → array de Subject (status=true, is_schedulable=false) con `subject_days` (filter por
+  `day` y `status=true`) y `subject_lessons` (filter por `status=true`) → `subject_lesson_days`
+  (filter por `day` y `status=true`) → `course_student_assessment_lesson_days` (filter por
+  `course_student_assessment_day_id`)
+- Solo temas activos: un tema con `subject_lesson_days.status = 0` (switch apagado en ese día) no
+  aparece, y un subject sin ningún tema activo en ese día desaparece de la respuesta.
 
 ### PUT /changeCourseStudentAssessmentLessonDay
 - Body: `id` (opcional; si llega actualiza, si no crea), `course_id`, `student_id`,
@@ -658,6 +665,16 @@ arranque usa `alter: false` y no las crea).
 - Query: `CSAD_id` (requerido), `type` (1|2|3, requerido)
 - `200` → `{ success: true, message: 'Firma eliminada correctamente.' }`
 - `400` JSON `{ success: false, error: 'CSAD_id y type son requeridos.' | 'type debe ser 1, 2 o 3.' }`
+
+### DELETE /courseStudentAssessmentLessonDay
+- Query: `id` o `course_student_assessment_day_id` (al menos uno; enteros positivos)
+  - `id` → borra ese `course_student_assessment_lesson_day` puntual.
+  - `course_student_assessment_day_id` → borra **todos** los detalles de ese día de evaluación.
+  - Si llegan ambos, se combinan (el detalle debe cumplir ambos filtros).
+- `200` → `{ success: true, deleted: N, ids: [..] }`
+- `400` JSON `{ success: false, error: 'id o course_student_assessment_day_id es requerido.' | 'id y course_student_assessment_day_id deben ser enteros positivos.' }`
+- `404` JSON `{ success: false, error: 'No se encontraron registros de course_student_assessment_lesson_day para eliminar.' }`
+- Borrado **físico**: la tabla no tiene columna `status` (no hay soft delete).
 
 ---
 
@@ -862,6 +879,29 @@ arranque usa `alter: false` y no las crea).
 - `200` → `{ answers: [...], score }` (cada answer con `question` —con `answers` restringidas a
   `is_correct=true`, `question_type`, `test_question_type`—)
 - `400` texto plano `Error <msg>`
+
+### POST /courseStudentTest/:course_student_test_id/reactivate
+- Auth: sí, **solo `user.is_superuser`** (administrador). Sin token `401`; con token sin rol
+  `403` JSON `{ message: 'Se requiere rol de administrador' }`.
+- Params: `course_student_test_id` (id del **intento**, no de la matrícula). Body: ninguno.
+- **Reabre un intento ya presentado y evaluado** (`finished = true`) para que el alumno siga
+  respondiendo las preguntas del mismo examen: `finished = false`, `score = null`,
+  `approve = null`.
+- Conserva preguntas, respuestas y el puntaje histórico de la matrícula: `course_student.score`
+  y `course_student.approve` **no** se tocan. Al volver a cerrar el intento con
+  `POST /courseStudentTestEnd` se recalculan todos los puntajes.
+- Idempotente: si el intento ya estaba abierto responde `200` sin cambios.
+- El alumno retoma el intento por **id del intento** con `GET /courseStudentTest/:id`: el
+  frontend carga ese intento y entra directo a `new_test`, sin pasar por
+  `POST /courseStudentTest/:course_student_id`. Ese endpoint exige un examen activo y, fuera de la
+  ventana de 2 horas del horario, **crearía un intento nuevo** (preguntas distintas y respuestas en
+  blanco), pisando el intento reabierto.
+- Un intento reabierto se puede continuar **aunque el examen esté inactivo** (`test.status = 0`),
+  porque las preguntas ya están en `course_student_test_question`; lo que no se puede es iniciar
+  uno nuevo mientras siga inactivo. La reactivación **no** toca `test.status`.
+- `200` → CourseStudentTest (shape de `GET /courseStudentTest/:id`)
+- `400` JSON `{ message: 'Parámetro course_student_test_id inválido' }`
+- `404` JSON `{ message: 'Intento de examen no encontrado' }`
 
 ### PUT /updateCourseStudentTestScore
 - Body: `course_student_test_id`, `course_student_test_answer_id`, `score`
@@ -1499,7 +1539,9 @@ arranque usa `alter: false` y no las crea).
 - `row_order` **se ignora**: el curso nuevo se agrega al final (`MAX(row_order) + 1`). Si el body lo
   envía, se descarta antes de Joi (no devuelve 400 por clave desconocida).
 - `hours` es **derivado** y se ignora del body. Se recalcula al guardar: tipo 2
-  (`Entrenamiento`) = `8 × días/sesiones del programa`; resto = `Σ(subject.hours × días activos)`.
+  (`Entrenamiento`) = `8 × días/sesiones del programa`, **salvo** nivel 4 (`Experiencia
+  Reciente`) que usa `Σ(subject.hours × días activos)`; resto =
+  `Σ(subject.hours × días activos)`.
 - `201` → Course con `course_type`, `course_level` (incluye `color`, `uses_sessions`, `sessions` y
   `row_order`)
 
@@ -1834,7 +1876,9 @@ arranque usa `alter: false` y no las crea).
     - `course_score_average`: promedio global del CSA (o `null`)
   - `CASD` = array de Subject (status=true, is_schedulable=false) con `subject_days` y
     `subject_lessons` → `subject_lesson_days` → `course_student_assessment_lesson_days`
-    (los lesson details filtrados por `course_student_assessment_id = CSA_id`)
+    (los lesson details filtrados por `course_student_assessment_id = CSA_id`). Sin filter por
+    `day` (el PDF cubre todos los días del programa), pero `subject_days`, `subject_lesson` y
+    `subject_lesson_days` filtran `status=true`: los días/temas desactivados no aparecen.
 
 ### GET /courseStudentAssessment/:id
 - Params: `id` (CSA id)
@@ -1882,9 +1926,12 @@ arranque usa `alter: false` y no las crea).
 
 ### GET /fetchSubjectAssessment
 - Query: `day`, `course_id`, `course_student_assessment_day_id`
-- `200` → array de Subject (status=true, is_schedulable=false) con `subject_days` (filter por `day`)
-  y `subject_lessons` → `subject_lesson_days` (filter por `day`) →
-  `course_student_assessment_lesson_days` (filter por `course_student_assessment_day_id`)
+- `200` → array de Subject (status=true, is_schedulable=false) con `subject_days` (filter por
+  `day` y `status=true`) y `subject_lessons` (filter por `status=true`) → `subject_lesson_days`
+  (filter por `day` y `status=true`) → `course_student_assessment_lesson_days` (filter por
+  `course_student_assessment_day_id`)
+- Solo temas activos: un tema con `subject_lesson_days.status = 0` (switch apagado en ese día) no
+  aparece, y un subject sin ningún tema activo en ese día desaparece de la respuesta.
 
 ### PUT /changeCourseStudentAssessmentLessonDay
 - Body: `id` (opcional; si llega actualiza, si no crea), `course_id`, `student_id`,
@@ -1902,6 +1949,16 @@ arranque usa `alter: false` y no las crea).
 - Query: `CSAD_id` (requerido), `type` (1|2|3, requerido)
 - `200` → `{ success: true, message: 'Firma eliminada correctamente.' }`
 - `400` JSON `{ success: false, error: 'CSAD_id y type son requeridos.' | 'type debe ser 1, 2 o 3.' }`
+
+### DELETE /courseStudentAssessmentLessonDay
+- Query: `id` o `course_student_assessment_day_id` (al menos uno; enteros positivos)
+  - `id` → borra ese `course_student_assessment_lesson_day` puntual.
+  - `course_student_assessment_day_id` → borra **todos** los detalles de ese día de evaluación.
+  - Si llegan ambos, se combinan (el detalle debe cumplir ambos filtros).
+- `200` → `{ success: true, deleted: N, ids: [..] }`
+- `400` JSON `{ success: false, error: 'id o course_student_assessment_day_id es requerido.' | 'id y course_student_assessment_day_id deben ser enteros positivos.' }`
+- `404` JSON `{ success: false, error: 'No se encontraron registros de course_student_assessment_lesson_day para eliminar.' }`
+- Borrado **físico**: la tabla no tiene columna `status` (no hay soft delete).
 
 ---
 
@@ -2106,6 +2163,29 @@ arranque usa `alter: false` y no las crea).
 - `200` → `{ answers: [...], score }` (cada answer con `question` —con `answers` restringidas a
   `is_correct=true`, `question_type`, `test_question_type`—)
 - `400` texto plano `Error <msg>`
+
+### POST /courseStudentTest/:course_student_test_id/reactivate
+- Auth: sí, **solo `user.is_superuser`** (administrador). Sin token `401`; con token sin rol
+  `403` JSON `{ message: 'Se requiere rol de administrador' }`.
+- Params: `course_student_test_id` (id del **intento**, no de la matrícula). Body: ninguno.
+- **Reabre un intento ya presentado y evaluado** (`finished = true`) para que el alumno siga
+  respondiendo las preguntas del mismo examen: `finished = false`, `score = null`,
+  `approve = null`.
+- Conserva preguntas, respuestas y el puntaje histórico de la matrícula: `course_student.score`
+  y `course_student.approve` **no** se tocan. Al volver a cerrar el intento con
+  `POST /courseStudentTestEnd` se recalculan todos los puntajes.
+- Idempotente: si el intento ya estaba abierto responde `200` sin cambios.
+- El alumno retoma el intento por **id del intento** con `GET /courseStudentTest/:id`: el
+  frontend carga ese intento y entra directo a `new_test`, sin pasar por
+  `POST /courseStudentTest/:course_student_id`. Ese endpoint exige un examen activo y, fuera de la
+  ventana de 2 horas del horario, **crearía un intento nuevo** (preguntas distintas y respuestas en
+  blanco), pisando el intento reabierto.
+- Un intento reabierto se puede continuar **aunque el examen esté inactivo** (`test.status = 0`),
+  porque las preguntas ya están en `course_student_test_question`; lo que no se puede es iniciar
+  uno nuevo mientras siga inactivo. La reactivación **no** toca `test.status`.
+- `200` → CourseStudentTest (shape de `GET /courseStudentTest/:id`)
+- `400` JSON `{ message: 'Parámetro course_student_test_id inválido' }`
+- `404` JSON `{ message: 'Intento de examen no encontrado' }`
 
 ### PUT /updateCourseStudentTestScore
 - Body: `course_student_test_id`, `course_student_test_answer_id`, `score`

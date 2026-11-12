@@ -23,13 +23,29 @@ const TestReportResultsPdf = ({
 
 	return (
 		<div className="printable flex flex-col gap-3">
-			<div style={{ textAlign: 'center' }}>
-				<h2 style={{ margin: 0, fontSize: 18 }}>
-					Reporte preliminar de examen
-				</h2>
-				<p style={{ margin: '4px 0 0', fontSize: 12 }}>
-					{test.course?.name ?? ''} {test.code}
-				</p>
+			{/* Header: mismo esquema que CSAssessmentPDFDocument (logo + títulos) */}
+			<div
+				style={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					gap: 8,
+					marginBottom: 4,
+				}}
+			>
+				<img
+					src="/images/logo.png"
+					alt="CEA 360 ATC"
+					style={{ width: 70, height: 'auto' }}
+				/>
+				<div style={{ textAlign: 'center' }}>
+					<h2 style={{ margin: 0, fontSize: 18 }}>
+						Reporte preliminar de examen
+					</h2>
+					<p style={{ margin: '4px 0 0', fontSize: 12 }}>
+						{test.course?.name ?? ''} {test.code}
+					</p>
+				</div>
 			</div>
 
 			<table style={{ width: '100%', borderCollapse: 'collapse' }}>

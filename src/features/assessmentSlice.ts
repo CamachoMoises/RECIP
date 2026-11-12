@@ -1,6 +1,20 @@
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
-import { assessmentState, courseStudentAssessment, courseStudentAssessmentDay, courseStudentAssessmentLessonDay, subject } from '../types/utilities';
+import { assessmentState, courseStudentAssessment, courseStudentAssessmentDay, courseStudentAssessmentLessonDay, courseStudentAssessmentLessonDayDeleteParams, courseStudentAssessmentLessonDayDeleteResult, subject } from '../types/utilities';
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+
+/**
+ * `error.message` de Axios solo dice "Request failed with status code 404".
+ * El motivo real viaja en el body y el backend de assessment usa `{ error }`
+ * en el DELETE (y `{ message }` en los POST/PUT).
+ */
+const backendErrorMessage = (error: any, fallback: string): string => {
+    const data = error?.response?.data;
+    return (
+        (typeof data === 'string' ? data : data?.error || data?.message) ||
+        error?.message ||
+        fallback
+    );
+};
 
 const initialState: assessmentState = {
     status: 'idle',
@@ -101,6 +115,43 @@ export const changeCourseStudentAssessmentLessonDay = createAsyncThunk<subject, 
         }
     }
 )
+
+/**
+ * Borra registros de `course_student_assessment_lesson_day` (borrado físico).
+ * Con `id` elimina una calificación puntual; con
+ * `course_student_assessment_day_id` todas las del día de evaluación.
+ */
+export const deleteCourseStudentAssessmentLessonDay = createAsyncThunk<
+    courseStudentAssessmentLessonDayDeleteResult,
+    courseStudentAssessmentLessonDayDeleteParams
+>(
+    'assessment/deleteCourseStudentAssessmentLessonDay',
+    async (params, { rejectWithValue }) => {
+        try {
+            const query = new URLSearchParams();
+            if (params.id !== undefined) {
+                query.set('id', String(params.id));
+            }
+            if (params.course_student_assessment_day_id !== undefined) {
+                query.set(
+                    'course_student_assessment_day_id',
+                    String(params.course_student_assessment_day_id),
+                );
+            }
+            const response = await axiosDeleteSlice(
+                `api/assessment/courseStudentAssessmentLessonDay?${query.toString()}`,
+            );
+            return { ...params, ...response };
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(
+                    error,
+                    'Error al eliminar las calificaciones',
+                ),
+            );
+        }
+    }
+);
 
 export const fetchSubjectAssessment = createAsyncThunk<subject[], { day: number, course_id: number, student_id: number, course_student_id: number, course_student_assessment_id: number, course_student_assessment_day_id: number }>(
     'assessment/fetchSubjectAssessment',
@@ -239,6 +290,40 @@ export const assessmentSlice = createSlice({
                 }
             })
             .addCase(changeCourseStudentAssessmentLessonDay.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+            // Reducers para la acción deleteCourseStudentAssessmentLessonDay
+            .addCase(deleteCourseStudentAssessmentLessonDay.pending, () => {
+                // No global loading: el borrado se refleja al volver la respuesta
+            })
+            .addCase(deleteCourseStudentAssessmentLessonDay.fulfilled, (state, action: PayloadAction<courseStudentAssessmentLessonDayDeleteResult>) => {
+                state.status = 'succeeded';
+                state.error = null;
+                const deletedIds = new Set(action.payload.ids ?? []);
+                if (!state.subjectList || deletedIds.size === 0) return;
+
+                // Los detalles viven anidados en subjectList
+                // (subject → subject_lessons → subject_lesson_days →
+                // course_student_assessment_lesson_days): los quitamos en sitio
+                // para que la grilla muestre la calificación vacía sin refetch.
+                state.subjectList = state.subjectList.map((subjectItem) => ({
+                    ...subjectItem,
+                    subject_lessons: subjectItem.subject_lessons?.map((lesson) => ({
+                        ...lesson,
+                        subject_lesson_days: lesson.subject_lesson_days?.map((lessonDay) => ({
+                            ...lessonDay,
+                            course_student_assessment_lesson_days:
+                                lessonDay.course_student_assessment_lesson_days?.filter(
+                                    (detail) =>
+                                        detail.id === undefined ||
+                                        !deletedIds.has(detail.id),
+                                ),
+                        })),
+                    })),
+                }));
+            })
+            .addCase(deleteCourseStudentAssessmentLessonDay.rejected, (state, action) => {
+                // Solo toast: no marcar status 'failed' (montaría ErrorPage)
                 state.error = action.payload as string;
             })
             .addCase(saveSignatures.pending, (state) => {

@@ -669,6 +669,22 @@ export type courseStudentAssessmentLessonDay = {
     updatedAt?: string;
 }
 
+// Filtros de `DELETE /assessment/courseStudentAssessmentLessonDay`: al menos
+// uno es obligatorio. `id` borra un detalle puntual y
+// `course_student_assessment_day_id` todos los del día (si llegan ambos, se
+// combinan).
+export type courseStudentAssessmentLessonDayDeleteParams = {
+    id?: number;
+    course_student_assessment_day_id?: number;
+}
+
+// El endpoint responde `{ success, deleted, ids }` (borrado físico).
+export type courseStudentAssessmentLessonDayDeleteResult =
+    courseStudentAssessmentLessonDayDeleteParams & {
+        deleted: number;
+        ids: number[];
+    }
+
 export interface credentials {
     email: string;
     password?: string;

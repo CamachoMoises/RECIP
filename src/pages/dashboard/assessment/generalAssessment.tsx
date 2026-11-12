@@ -44,11 +44,14 @@ const GeneralAssessment = () => {
 	const { course, assessment } = useSelector((state: RootState) => {
 		return { course: state.courses, assessment: state.assessment };
 	});
-	const currentPage = course.currentPage;
-	const pageSize = course.pageSize;
 	const totalPages = course.totalPages;
 	const totalItems = course.totalItems;
-	const [active, setActive] = useState(currentPage);
+	// Paginación propia de la pantalla: `state.courses.currentPage` lo
+	// comparten cursos, my-courses, evaluaciones y exámenes (todos usan el
+	// mismo listado de matrículas). Si se heredara, entrar aquí después de
+	// paginar cursos buscaría esa misma página (p. ej. la 3).
+	const fixedPageSize = 10;
+	const [active, setActive] = useState(1);
 	// console.log(course.courseStudentList);
 	const getItemProps = (index: number) =>
 		({
@@ -57,7 +60,7 @@ const GeneralAssessment = () => {
 			onClick: async () => {
 				await dispatch(
 					fetchCoursesStudentsTests({
-						pageSize,
+						pageSize: fixedPageSize,
 						currentPage: index,
 						course_type_id: 1,
 						status: true,
@@ -73,7 +76,7 @@ const GeneralAssessment = () => {
 		setActive(active + 1);
 		await dispatch(
 			fetchCoursesStudentsTests({
-				pageSize,
+				pageSize: fixedPageSize,
 				currentPage: active + 1,
 				course_type_id: 1,
 				status: true,
@@ -86,7 +89,7 @@ const GeneralAssessment = () => {
 		setActive(active - 1);
 		await dispatch(
 			fetchCoursesStudentsTests({
-				pageSize,
+				pageSize: fixedPageSize,
 				currentPage: active - 1,
 				course_type_id: 1,
 				status: true,
@@ -96,13 +99,13 @@ const GeneralAssessment = () => {
 	useEffect(() => {
 		dispatch(
 			fetchCoursesStudentsTests({
-				pageSize: course.pageSize,
-				currentPage: course.currentPage,
+				pageSize: fixedPageSize,
+				currentPage: 1,
 				course_type_id: 2,
 				status: true,
 			}),
 		);
-	}, [dispatch, course.pageSize, course.currentPage]);
+	}, [dispatch, fixedPageSize]);
 	const navigateCourseStudentAssessment = async (
 		CS: courseStudent,
 	) => {
@@ -122,8 +125,8 @@ const GeneralAssessment = () => {
 
 		await dispatch(
 			fetchCoursesStudentsTests({
-				pageSize: course.pageSize,
-				currentPage: course.currentPage,
+				pageSize: fixedPageSize,
+				currentPage: active,
 				course_type_id: 2,
 				status: true,
 			}),
