@@ -1,6 +1,7 @@
 import { axiosDeleteSlice, axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 import { assessmentState, courseStudentAssessment, courseStudentAssessmentDay, courseStudentAssessmentLessonDay, courseStudentAssessmentLessonDayDeleteParams, courseStudentAssessmentLessonDayDeleteResult, subject } from '../types/utilities';
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { sortAssessmentSubjects, sortSubjectLessons } from "../utils/subjectOrder";
 
 /**
  * `error.message` de Axios solo dice "Request failed with status code 404".
@@ -34,20 +35,6 @@ const initialState: assessmentState = {
     signatureStatus: 'idle',
 }
 
-export const fetchCourseStudentAssessment = createAsyncThunk<courseStudentAssessment, number>(
-    'assessment/fetchCourseStudentAssessment',
-    async (course_student_assessment_id, { rejectWithValue }) => {
-        try {
-            const response = await axiosGetSlice(`api/assessment/courseStudentAssessment/${course_student_assessment_id}`
-            );
-            return response;
-        } catch (error: any) {
-            return rejectWithValue(error.message);
-        }
-    }
-);
-
-
 export const fetchAssessmentData = createAsyncThunk<{ CSA: courseStudentAssessment, CASD: subject[] }, number>(
     'assessment/fetchAssessmentData',
     async (course_student_assessment_id, { rejectWithValue }) => {
@@ -55,7 +42,10 @@ export const fetchAssessmentData = createAsyncThunk<{ CSA: courseStudentAssessme
             const response = await axiosGetSlice(`api/assessment/fetchAssessmentData`,
                 { CSA_id: course_student_assessment_id }
             );
-            return response;
+            // El backend no ordena secciones ni temas: el orden manual
+            // (`order` 1..N) se aplica aquí para que el PDF y la grilla
+            // coincidan con `config/course/:id`.
+            return { ...response, CASD: sortAssessmentSubjects(response.CASD) };
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -158,7 +148,7 @@ export const fetchSubjectAssessment = createAsyncThunk<subject[], { day: number,
     async (data, { rejectWithValue }) => {
         try {
             const response = await axiosGetSlice(`api/assessment/fetchSubjectAssessment/`, data);
-            return response;
+            return sortAssessmentSubjects(response);
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -177,17 +167,6 @@ export const saveSignatures = createAsyncThunk<void, { CSAD_id: number; signatur
         }
     );
 
-export const deleteAssessmentSignature = createAsyncThunk<void, { CSAD_id: number; type: number }>(
-    'assessment/deleteAssessmentSignature',
-    async ({ CSAD_id, type }, { rejectWithValue }) => {
-        try {
-            await axiosDeleteSlice(`api/assessment/signature?CSAD_id=${CSAD_id}&type=${type}`);
-        } catch (error: any) {
-            return rejectWithValue(error.message);
-        }
-    }
-);
-
 export const assessmentSlice = createSlice({
     name: 'assessment',
     initialState,
@@ -196,18 +175,6 @@ export const assessmentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Reducers para la acción fetchCourseStudentAssessment
-            .addCase(fetchCourseStudentAssessment.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchCourseStudentAssessment.fulfilled, (state, action: PayloadAction<courseStudentAssessment>) => {
-                state.status = 'succeeded';
-                state.courseStudentAssessmentSelected = action.payload;
-            })
-            .addCase(fetchCourseStudentAssessment.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string;
-            })
             // Reducers para la acción fetchAssessmentData
             .addCase(fetchAssessmentData.pending, (state) => {
                 state.status = 'loading';
@@ -280,7 +247,12 @@ export const assessmentSlice = createSlice({
                 // No global loading: evita recargar toda la vista
             })
             .addCase(changeCourseStudentAssessmentLessonDay.fulfilled, (state, action: PayloadAction<subject>) => {
-                const editedSubject = action.payload;
+                // El PUT responde la sección completa sin ordenar: si se
+                // guardara tal cual, los temas saltarían de fila al calificar.
+                const editedSubject: subject = {
+                    ...action.payload,
+                    subject_lessons: sortSubjectLessons(action.payload.subject_lessons),
+                };
                 state.status = 'succeeded';
                 if (state.subjectList) {
                     const index = state.subjectList.findIndex((subject) => subject.id === editedSubject.id);
@@ -333,17 +305,6 @@ export const assessmentSlice = createSlice({
                 state.status = 'succeeded';
             })
             .addCase(saveSignatures.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string;
-            })
-
-            .addCase(deleteAssessmentSignature.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(deleteAssessmentSignature.fulfilled, (state) => {
-                state.status = 'succeeded';
-            })
-            .addCase(deleteAssessmentSignature.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });

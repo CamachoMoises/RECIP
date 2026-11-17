@@ -2,6 +2,22 @@ import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { subject, subjectLesson, subjectState } from '../types/utilities';
 import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from "../services/axios";
 
+/**
+ * `error.message` de Axios solo dice "Request failed with status code 400".
+ * `PUT /api/subjects/lesson/order` responde `{ message }` en los 400/404
+ * (`Parámetro ids inválido`, `La lista de ids tiene duplicados`,
+ * `Lección no encontrada: <ids>`), así que hay que leer el body para que el
+ * toast muestre el motivo real.
+ */
+const backendErrorMessage = (error: any, fallback: string): string => {
+    const data = error?.response?.data;
+    return (
+        (typeof data === 'string' ? data : data?.error || data?.message) ||
+        error?.message ||
+        fallback
+    );
+};
+
 const initialState: subjectState = {
     status: 'idle',
     subjectList: [],
@@ -33,19 +49,6 @@ export const fetchSubjects = createAsyncThunk<subject[], { course_id: number, st
     }
 );
 
-export const fetchSubjectsLesson = createAsyncThunk<subject[], number>(
-    'user/fetchSubjectsLesson',
-    async (id, { rejectWithValue }) => {
-        try {
-            const response = await axiosGetSlice(`api/subjects/lesson/course/${id}`);
-            return response;
-
-        } catch (error: any) {
-            return rejectWithValue(error.message);
-        }
-    }
-);
-
 export const fetchSubject = createAsyncThunk<subject, number>(
     'user/fetchSubject',
     async (id, { rejectWithValue }) => {
@@ -66,7 +69,9 @@ export const createSubject = createAsyncThunk<subject, subject>(
             const response = await axiosPostSlice('api/subjects', subjectData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al crear la sección'),
+            );
         }
     }
 );
@@ -79,7 +84,9 @@ export const createSubjectLesson = createAsyncThunk<subject, subjectLesson>(
             const response = await axiosPostSlice('api/subjects/lesson', subjectLessonData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al crear el tema'),
+            );
         }
     }
 );
@@ -92,7 +99,9 @@ export const updateSubject = createAsyncThunk<subject, subject>(
             const response = await axiosPutSlice(`api/subjects`, subjectData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al actualizar la sección'),
+            );
         }
     }
 );
@@ -106,7 +115,28 @@ export const updateSubjectLesson = createAsyncThunk<subject, subjectLesson>(
             const response = await axiosPutSlice(`api/subjects/lesson`, subjectLessonData);
             return response;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(
+                backendErrorMessage(error, 'Error al actualizar el tema'),
+            );
+        }
+    }
+);
+
+// Reordena los temas de una sección. `ids` es la lista COMPLETA de lecciones
+// de esa sección en el orden final; el backend reasigna `order = 1..N` y
+// devuelve las lecciones ya ordenadas (`order ASC, id ASC`).
+export const reorderSubjectLessons = createAsyncThunk<subjectLesson[], { subject_id: number; ids: number[] }>(
+    'subject/reorderSubjectLessons',
+    async ({ subject_id, ids }, { rejectWithValue }) => {
+        try {
+            return await axiosPutSlice('api/subjects/lesson/order', { subject_id, ids });
+        } catch (error: any) {
+            return rejectWithValue(
+                backendErrorMessage(
+                    error,
+                    'Error al guardar el orden de los temas',
+                ),
+            );
         }
     }
 );
@@ -141,21 +171,6 @@ const subjectSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Reducers para la acción fetchSubjectsLesson
-
-            .addCase(fetchSubjectsLesson.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchSubjectsLesson.fulfilled, (state, action: PayloadAction<subject[]>) => {
-                state.status = 'succeeded';
-                state.subjectList = action.payload;
-
-            })
-            .addCase(fetchSubjectsLesson.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string;
-            })
-
             // Reducers para la acción fetchSubject
             .addCase(fetchSubject.pending, (state) => {
                 state.status = 'loading';
@@ -174,9 +189,10 @@ const subjectSlice = createSlice({
 
 
             // Reducers para la acción createSubjectLesson
-            .addCase(createSubjectLesson.pending, (state) => {
-                state.status = 'loading';
-            })
+            // No se toca `status`: `courseDetail.tsx` monta `LoadingPage` cuando
+            // `subject.status === 'loading'` y `ErrorPage` cuando es `failed`,
+            // lo que desmontaría el modal de la sección al crear/editar un tema.
+            // Los errores los muestra el toast del modal (`unwrap()`).
             .addCase(createSubjectLesson.fulfilled, (state, action: PayloadAction<subject>) => {
                 state.status = 'succeeded';
                 state.subjectSelected = action.payload;
@@ -185,14 +201,11 @@ const subjectSlice = createSlice({
 
             })
             .addCase(createSubjectLesson.rejected, (state, action) => {
-                state.status = 'failed';
                 state.error = action.payload as string;
             })
 
-            // Reducers para la acción updateSubjectLesson
-            .addCase(updateSubjectLesson.pending, (state) => {
-                state.status = 'loading';
-            })
+            // Reducers para la acción updateSubjectLesson (misma regla que
+            // createSubjectLesson: sin `loading`/`failed` para no cerrar el modal).
             .addCase(updateSubjectLesson.fulfilled, (state, action: PayloadAction<subject>) => {
                 state.status = 'succeeded';
                 state.subjectSelected = action.payload;
@@ -201,7 +214,21 @@ const subjectSlice = createSlice({
 
             })
             .addCase(updateSubjectLesson.rejected, (state, action) => {
-                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+
+            // Reordenamiento de temas. No se toca `status` en `pending`:
+            // `courseDetail.tsx` monta `LoadingPage` cuando
+            // `subject.status === 'loading'`, lo que desmontaría el modal de la
+            // sección en cada clic. `rejected` solo guarda el error para el
+            // toast (un 400/404 no debe dejar la pantalla en error).
+            .addCase(reorderSubjectLessons.fulfilled, (state, action: PayloadAction<subjectLesson[]>) => {
+                state.status = 'succeeded';
+                if (state.subjectSelected) {
+                    state.subjectSelected.subject_lessons = action.payload;
+                }
+            })
+            .addCase(reorderSubjectLessons.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
 

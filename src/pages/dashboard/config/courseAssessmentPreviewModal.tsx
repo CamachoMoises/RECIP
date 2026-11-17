@@ -20,6 +20,7 @@ import {
 	ordinalNoun,
 	programOrdinals,
 } from '../../../utils/programSize';
+import { sortAssessmentSubjects } from '../../../utils/subjectOrder';
 
 type PreviewLesson = {
 	lesson: subjectLesson;
@@ -88,7 +89,11 @@ const CourseAssessmentPreviewModal = ({
 			const data = await axiosGetSlice(
 				`api/subjects/lesson/course/${courseId}`,
 			);
-			setSubjects(Array.isArray(data) ? data : []);
+			// `GET /api/subjects/lesson/course/:id` no ordena las lecciones:
+			// se replica aquí el orden manual que aplica la evaluación real.
+			setSubjects(
+				sortAssessmentSubjects(Array.isArray(data) ? data : []),
+			);
 		} catch (e: any) {
 			setError(
 				e?.response?.data?.message ||

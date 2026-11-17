@@ -34,7 +34,7 @@ src/
       students/     # Pilot/participant management (tableStudents)
       instructors/  # Instructor management (tableInstructors)
       config/       # Course config, subjects, lessons, test questions management (generalConfig, courseDetail, questionType*, testList, etc.)
-      assessment/   # FSTD/ATD flight evaluations (generalAssessment, scoreDetail, CSAD_form, CSA_PDF, lessonDetails)
+      assessment/   # FSTD/ATD flight evaluations (generalAssessment, scoreDetail, CSAD_form, lessonDetails)
       test/         # Exams/tests (generalTest, newTest shell, reviewTest, questionType*, exam/ layer, resultsTestPdf)
       reports/      # Reports & suggestions list
       suggestions/  # SuggestionDialog, SuggestionListDialog

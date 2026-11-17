@@ -199,7 +199,7 @@ const LessonDetails = ({
 						SLD_id = SL.subject_days[0].id;
 					}
 					return (
-						<div key={`SL-list${index}`}>
+						<div key={SL.id ?? `SL-list${index}`}>
 							<Typography
 								variant="h6"
 								className="text-left"
@@ -217,7 +217,7 @@ const LessonDetails = ({
 								{SL.subject_lessons?.map((SLE, index2) => {
 									return (
 										<ListItem
-											key={`SLE-list${index2}`}
+											key={SLE.id ?? `SLE-list${index2}`}
 											placeholder={undefined}
 											onPointerEnterCapture={undefined}
 											onPointerLeaveCapture={undefined}
