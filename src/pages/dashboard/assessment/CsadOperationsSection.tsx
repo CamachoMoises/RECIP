@@ -9,7 +9,11 @@ import {
 	Controller,
 	UseFormRegister,
 } from 'react-hook-form';
-import { CsadFieldConfig, CsadInputs, course } from '../../../types/utilities';
+import {
+	CsadFieldConfig,
+	CsadInputs,
+	course,
+} from '../../../types/utilities';
 import { ordinalNounArticle } from '../../../utils/programSize';
 import { proficiencyLabel } from '../../../lib/utils';
 
@@ -26,7 +30,9 @@ const COUNT_LABELS: Record<
 	landing: { total: 'Total', day: 'Diurnos', night: 'Nocturnos' },
 };
 
-const countFields = (prefix: 'takeoff' | 'landing'): CsadFieldConfig[] => {
+const countFields = (
+	prefix: 'takeoff' | 'landing',
+): CsadFieldConfig[] => {
 	const labels = COUNT_LABELS[prefix];
 	return [
 		{ name: prefix, label: labels.total },
@@ -69,7 +75,12 @@ const LANDING_TYPE_FIELDS: CsadFieldConfig[] = [
 		valueAsNumber: true,
 		min: 0,
 	},
-	{ name: 'landing_visual', label: 'Visual', valueAsNumber: true, min: 0 },
+	{
+		name: 'landing_visual',
+		label: 'Visual',
+		valueAsNumber: true,
+		min: 0,
+	},
 ];
 
 const TIME_FIELDS: CsadFieldConfig[] = [
@@ -189,9 +200,7 @@ const CsadOperationsSection = ({
 								labelProps={{ className: lockedLabelClass }}
 								{...register(
 									field.name,
-									field.valueAsNumber
-										? { valueAsNumber: true }
-										: {},
+									field.valueAsNumber ? { valueAsNumber: true } : {},
 								)}
 							/>
 						))}
@@ -215,15 +224,13 @@ const CsadOperationsSection = ({
 								labelProps={{ className: lockedLabelClass }}
 								{...register(
 									field.name,
-									field.valueAsNumber
-										? { valueAsNumber: true }
-										: {},
+									field.valueAsNumber ? { valueAsNumber: true } : {},
 								)}
 							/>
 						))}
 					</div>
 				</CardSection>
-				<CardSection title="Aterrizajes por tipo">
+				<CardSection title="Tipo de aproximación">
 					<div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
 						{LANDING_TYPE_FIELDS.map((field) => (
 							<Input
@@ -241,9 +248,7 @@ const CsadOperationsSection = ({
 								labelProps={{ className: lockedLabelClass }}
 								{...register(
 									field.name,
-									field.valueAsNumber
-										? { valueAsNumber: true }
-										: {},
+									field.valueAsNumber ? { valueAsNumber: true } : {},
 								)}
 							/>
 						))}
@@ -255,18 +260,14 @@ const CsadOperationsSection = ({
 						control={control}
 						render={({ field }) => (
 							<Select
-								label={
-									isFormDisabled ? undefined : 'Tipo'
-								}
+								label={isFormDisabled ? undefined : 'Tipo'}
 								placeholder="Tipo"
 								value={field.value ?? ''}
 								onChange={(value) => field.onChange(value)}
 								onPointerEnterCapture={undefined}
 								onPointerLeaveCapture={undefined}
 							>
-								<Option value="entrenamiento">
-									Entrenamiento
-								</Option>
+								<Option value="entrenamiento">Entrenamiento</Option>
 								<Option value="reentrenamiento">
 									Reentrenamiento
 								</Option>
