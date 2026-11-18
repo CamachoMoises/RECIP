@@ -74,6 +74,7 @@ src/
 
 - **All MT components** (including `Button`) need `placeholder={undefined}` and `onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}` — with @types/react 18.3 these props are **required** by the MT Button type; `undefined` value causes no React DOM warnings
 - **API**: Use `axiosGetSlice`, `axiosPostSlice`, `axiosPutSlice` from `services/axios.ts`
+- **`PUT /api/users`**: usa `updateUser({ user, newPassword? })`. El thunk arma el payload con `buildUserUpdatePayload` (`src/utils/userPayload.ts`): no reenvía el hash de `password` que devuelve el GET ni los includes (`user_doc_type`, `student`, `instructor`), y solo manda `password` si `newPassword` trae una contraseña nueva. El backend ya usa `stripUnknown`, pero el front no depende de eso
 - **Auth**: Token auto-injected; 403 triggers logout via Redux dispatch
 - **Permissions**: `PermissionsValidate(['staff', 'instructor'])` returns boolean
 - **Breadcrumbs**: `<PageTitle title="..." breadCrumbs={[{name, href}]} />` component

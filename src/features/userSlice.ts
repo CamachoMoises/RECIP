@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosGetSlice, axiosPostSlice, axiosPutSlice } from '../services/axios';
 import { StatusParam, UserState, user, suggestion, searchedStudentItem } from '../types/utilities';
+import { buildUserUpdatePayload } from '../utils/userPayload';
 
 
 
@@ -113,12 +114,20 @@ export const createUser = createAsyncThunk<user, user>(
 	}
 );
 
-// 
-export const updateUser = createAsyncThunk<user, user>(
+// `PUT /api/users`: el payload se arma con `buildUserUpdatePayload` para no
+// reenviar el hash del GET ni los includes anidados. `newPassword` solo se
+// incluye cuando el formulario trae una contraseña nueva.
+export const updateUser = createAsyncThunk<
+	user,
+	{ user: user; newPassword?: string }
+>(
 	'user/updateUser',
-	async (userData, { rejectWithValue }) => {
+	async ({ user: userData, newPassword }, { rejectWithValue }) => {
 		try {
-			const response = await axiosPutSlice(`api/users`, userData);
+			const response = await axiosPutSlice(
+				`api/users`,
+				buildUserUpdatePayload(userData, newPassword),
+			);
 			return response;
 		} catch (error: any) {
 			return rejectWithValue(error.message);

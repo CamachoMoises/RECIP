@@ -91,7 +91,7 @@ const UserTable = () => {
 
 	const switchUser = async (user: user) => {
 		const req: user = { ...user, is_active: !user.is_active };
-		dispatch(updateUser(req));
+		dispatch(updateUser({ user: req }));
 	};
 
 	useEffect(() => {

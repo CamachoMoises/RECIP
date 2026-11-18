@@ -159,7 +159,9 @@ const ModalFormUser = ({
 			};
 
 			if (userSelect) {
-				await dispatch(updateUser(req));
+				await dispatch(
+					updateUser({ user: req, newPassword: data.password }),
+				);
 				if (onSuccess) onSuccess();
 			} else {
 				const user = await dispatch(createUser(req)).unwrap();
