@@ -151,6 +151,16 @@ src/
 - Un curso eliminado **bloquea creaciones nuevas** (`409` JSON `{ message }`) pero permite ver/cerrar lo existente: no filtres pantallas de historial, reportes ni asistencias por `course.status`
 - Errores: todos los thunks de curso usan `backendErrorMessage`, así el `409`/`404` llega legible al toast
 
+## Horas totales del curso (`course.hours`)
+
+- `hours` es **derivado**, no se edita a mano: el backend lo calcula en `calculateCourseTotalHours` al crear/editar el curso, al clonarlo, al crear/editar secciones y al activar/desactivar un día (`POST /api/subjects/subjects_days`). `POST`/`PUT /api/courses` **descartan** el `hours` que mande el cliente y responden el valor recalculado
+- Regla única para **Escuela en Tierra (1)** y **Entrenamiento (2)**: `Σ(subject.hours × días activos de la sección)`. No hay `8 × días/sesiones` ni excepción por `course_level`; `days`/`sessions` solo definen el tamaño del programa, no la carga horaria. Cambiar las horas de una sección o activar/desactivar un día sí mueve el total
+- `courseDetail.tsx` replica la regla con `sumCourseHours` solo para reflejar el total sin esperar al `PUT`. No calcula hasta que `fetchSubjects` termina **para ese curso** (`subjectsCourseId`), porque `subjectList` arranca vacío y puede contener las secciones del curso anterior; si el total difiere del guardado dispara `updateCourseHours` (`PUT /api/courses`, sin overlay). El aviso ámbar de 0 h también espera a `subjectsReady`
+- `modalFormCourse.tsx` solo muestra el valor persistido (input `disabled`); un curso nuevo arranca en 0 hasta que tenga secciones
+- Cursos sin secciones o con `subject.hours = 0` quedan en **0 h** (es el resultado correcto de la regla). No hay fallback a `8 × días`
+- `hoursByOrdinals` (en `courseDetail.tsx`) suma por día y marca en rojo los días con más de 8 h
+- Los PDFs y listados (`PDFCourseScheduleDocument`, `AttendanceListPDF`, `viewCourseStudentSchedule`, `newCourseStudentSchedule`, `myInstructorCourseDetail`) solo leen `course.hours`; no recalculan
+
 ## Instructor Dashboard (`my-instructor-courses`)
 
 Single general page for the instructor. There is **no** per-course detail route anymore: the tabs live inside `myInstructorCourses.tsx` and every request is oriented to the logged-in instructor, not to a `course_id`:

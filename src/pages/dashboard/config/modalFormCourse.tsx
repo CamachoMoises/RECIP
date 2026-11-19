@@ -103,20 +103,12 @@ const ModalFormCourse = ({
 	});
 
 	const usesSessions = watch('uses_sessions');
-	const watchedCourseType = watch('course_type');
-	const watchedDays = watch('days');
-	const watchedSessions = watch('sessions');
 
-	const computedHours = (() => {
-		const typeId = parseInt(watchedCourseType || '0', 10);
-		if (typeId === 2) {
-			const count = usesSessions
-				? parseInt(watchedSessions || '0', 10)
-				: parseInt(watchedDays || '0', 10);
-			return 8 * (isNaN(count) ? 0 : count);
-		}
-		return courseSelected?.hours ?? 0;
-	})();
+	// `hours` es derivado: el backend lo calcula sumando las secciones
+	// (`Σ subject.hours × días activos`) al crear/editar el curso y en cada
+	// cambio de sección o día. Un curso nuevo todavía no tiene secciones, así
+	// que arranca en 0.
+	const computedHours = courseSelected?.hours ?? 0;
 
 	useEffect(() => {
 		setValue('hours', computedHours);
@@ -248,6 +240,10 @@ const ModalFormCourse = ({
 									{...register('hours', {})}
 									aria-invalid={errors.name ? 'true' : 'false'}
 								/>
+								<span className="block text-xs text-slate-600">
+									Se calcula sumando las horas de cada sección
+									por sus días activos.
+								</span>
 							</div>
 
 							<div className="">

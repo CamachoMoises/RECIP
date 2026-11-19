@@ -47,6 +47,20 @@ const breadCrumbs: breadCrumbsItems[] = [
 		href: '/dashboard/config',
 	},
 ];
+/**
+ * Horas totales del curso = Σ(`subject.hours` × días activos de la sección).
+ *
+ * Es la misma regla que aplica el backend en `calculateCourseTotalHours`
+ * (Escuela en Tierra y Entrenamiento). `days`/`sessions` solo definen el
+ * tamaño del programa, no la carga horaria; el total depende únicamente de
+ * las secciones y de sus días activos.
+ */
+const sumCourseHours = (subjects: subject[]) =>
+	subjects.reduce((sum, sub) => {
+		const activeDays =
+			sub.subject_days?.filter((sd) => sd.status).length || 0;
+		return sum + (sub.hours || 0) * activeDays;
+	}, 0);
 const CourseDetail = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
@@ -56,6 +70,11 @@ const CourseDetail = () => {
 	const [openNewSubject, setOpenNewSubject] = useState(false);
 	const [openAssessmentPreview, setOpenAssessmentPreview] =
 		useState(false);
+	// Curso para el que `fetchSubjects` ya terminó. Evita calcular las horas
+	// con la lista vacía inicial o con las secciones del curso anterior.
+	const [subjectsCourseId, setSubjectsCourseId] = useState<number | null>(
+		null,
+	);
 	const lastSavedHoursRef = useRef<number | null>(null);
 	const { course, subject } = useSelector((state: RootState) => {
 		return { course: state.courses, subject: state.subjects };
@@ -76,7 +95,17 @@ const CourseDetail = () => {
 				status: false,
 				is_schedulable: false,
 			}),
-		);
+		)
+			// Las horas se calculan con `subjectList`: marcar para qué curso
+			// llegó permite no sumar secciones de otro curso ni una lista vacía.
+			.unwrap()
+			.then(() => {
+				if (!cancelled) setSubjectsCourseId(courseIdNum);
+			})
+			.catch(() => {
+				// El reducer ya deja `subject.status = 'failed'` (ErrorPage);
+				// aquí solo se evita un unhandled rejection.
+			});
 		dispatch(fetchCourse(courseIdNum))
 			.unwrap()
 			.catch(() => {
@@ -96,20 +125,12 @@ const CourseDetail = () => {
 	useEffect(() => {
 		const sc = course.courseSelected;
 		if (!sc || !sc.id) return;
-		let total = 0;
-		if (sc.course_type?.id === 2) {
-			const count = sc.uses_sessions ? sc.sessions : sc.days;
-			total = 8 * (count || 0);
-		} else if (sc.course_type?.id === 1) {
-			if (!subject.subjectList) return;
-			total = subject.subjectList.reduce((sum, sub) => {
-				const activeDays =
-					sub.subject_days?.filter((sd) => sd.status)?.length || 0;
-				return sum + (sub.hours || 0) * activeDays;
-			}, 0);
-		} else {
-			return;
-		}
+		// Escuela en Tierra (1) y Entrenamiento (2) comparten la regla: el
+		// total es la suma de las secciones, no `8 × días/sesiones`.
+		if (sc.course_type?.id !== 1 && sc.course_type?.id !== 2) return;
+		// Espera a que `fetchSubjects` termine para ESTE curso.
+		if (subjectsCourseId !== sc.id) return;
+		const total = sumCourseHours(subject.subjectList);
 		if (lastSavedHoursRef.current === total) return;
 		if (sc.hours === total) {
 			lastSavedHoursRef.current = total;
@@ -117,7 +138,12 @@ const CourseDetail = () => {
 		}
 		lastSavedHoursRef.current = total;
 		dispatch(updateCourseHours({ ...sc, hours: total }));
-	}, [course.courseSelected, subject.subjectList, dispatch]);
+	}, [
+		course.courseSelected,
+		subject.subjectList,
+		subjectsCourseId,
+		dispatch,
+	]);
 	if (!id || Number.isNaN(courseIdNum)) {
 		return <LoadingPage />;
 	}
@@ -147,6 +173,10 @@ const CourseDetail = () => {
 	const selectedCourse = course.courseSelected;
 	const courseDeleted = isCourseDeleted(selectedCourse);
 	const subjectList = subject.subjectList;
+	// Mientras `fetchSubjects` no termine para este curso, la lista puede ser
+	// la del curso anterior: el aviso de 0 h espera a tener las secciones.
+	const subjectsReady = subjectsCourseId === selectedCourse.id;
+	const courseHoursTotal = sumCourseHours(subjectList);
 	const maxOrderSubject = subject.maxOrderSubject;
 	const maxOrderLessonSelected = subject.maxOrderLesson;
 	const handleOpenEdit = async (subjectId: number | null = null) => {
@@ -281,6 +311,14 @@ const CourseDetail = () => {
 						modificar secciones, días ni lecciones hasta reactivarlo
 						desde Configuración. El historial del curso sigue
 						disponible.
+					</div>
+				)}
+				{!courseDeleted && subjectsReady && courseHoursTotal === 0 && (
+					<div className="mb-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+						<strong>El curso suma 0 horas.</strong> El total se
+						calcula sumando las horas de cada sección por sus días
+						activos. Revisa que las secciones tengan horas y al menos
+						un día activo.
 					</div>
 				)}
 				<div className="flex flex-col  gap-2">
