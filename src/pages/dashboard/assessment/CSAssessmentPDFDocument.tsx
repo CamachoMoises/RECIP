@@ -92,6 +92,12 @@ const styles = StyleSheet.create({
 		backgroundColor: '#e0e0e0',
 		fontWeight: 'bold',
 	},
+	// Observaciones del CSAD: hasta 2000 caracteres en una celda estrecha.
+	// Interlineado algo más ajustado que el default para que la fila (que no
+	// se parte, `wrap={false}`) quepa en una página.
+	commentsCell: {
+		lineHeight: 1.2,
+	},
 	cellGreen: {
 		backgroundColor: '#d6e3bc',
 	},
@@ -1164,7 +1170,13 @@ const CSAssessmentPDFDocument = ({
 													? dayCSAD.score_average
 													: ''}
 											</Text>
-											<Text style={[styles.cell, { flex: 3 }]}>
+											<Text
+												style={[
+													styles.cell,
+													styles.commentsCell,
+													{ flex: 3 },
+												]}
+											>
 												{dayCSAD?.comments ? dayCSAD.comments : ''}
 											</Text>
 										</View>
