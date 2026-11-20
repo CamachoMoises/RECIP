@@ -1,4 +1,7 @@
-import { testReportAttemptAnswers, testReportRow } from '../../../types/utilities';
+import {
+	testReportAttemptAnswers,
+	testReportRow,
+} from '../../../types/utilities';
 import { typeLabel } from '../test/components/questionTypeMeta';
 import '../test/pdfStyle.css';
 
@@ -28,7 +31,9 @@ const TestReportResultsPdf = ({
 				style={{
 					display: 'flex',
 					alignItems: 'center',
-					justifyContent: 'center',
+					// Logo al inicio (izquierda); los títulos siguen centrados
+					// en el espacio restante.
+					justifyContent: 'flex-start',
 					gap: 8,
 					marginBottom: 4,
 				}}
@@ -38,9 +43,9 @@ const TestReportResultsPdf = ({
 					alt="CEA 360 ATC"
 					style={{ width: 70, height: 'auto' }}
 				/>
-				<div style={{ textAlign: 'center' }}>
+				<div style={{ flex: 1, textAlign: 'center' }}>
 					<h2 style={{ margin: 0, fontSize: 18 }}>
-						Reporte preliminar de examen
+						Reporte Preliminar de Examen Teorico
 					</h2>
 					<p style={{ margin: '4px 0 0', fontSize: 12 }}>
 						{test.course?.name ?? ''} {test.code}
@@ -117,7 +122,9 @@ const TestReportResultsPdf = ({
 
 					<p style={{ margin: 0, fontSize: 12 }}>{question.header}</p>
 
-					<table style={{ width: '100%', borderCollapse: 'collapse' }}>
+					<table
+						style={{ width: '100%', borderCollapse: 'collapse' }}
+					>
 						<tbody>
 							<tr>
 								<td style={{ ...cell, width: '50%' }}>
@@ -135,7 +142,8 @@ const TestReportResultsPdf = ({
 			))}
 
 			<p style={{ margin: 0, fontSize: 10, textAlign: 'center' }}>
-				Documento generado automáticamente. No recalcula ni modifica puntajes.
+				Documento generado automáticamente. No recalcula ni modifica
+				puntajes.
 			</p>
 		</div>
 	);

@@ -166,16 +166,13 @@ const EmailHistoryPanel = () => {
 												Fecha
 											</th>
 											<th className="text-center py-2 px-2 font-medium">
-												Tipo
+												Nombre
 											</th>
 											<th className="text-center py-2 px-2 font-medium">
 												Titulo
 											</th>
 											<th className="text-center py-2 px-2 font-medium">
 												Descripción
-											</th>
-											<th className="text-center py-2 px-2 font-medium">
-												Usuario
 											</th>
 											<th className="text-center py-2 px-2 font-medium">
 												Acción
@@ -196,18 +193,17 @@ const EmailHistoryPanel = () => {
 															).toLocaleDateString()
 														: '-'}
 												</td>
-												<td className="py-2 px-2">Corporativo</td>
+												<td className="py-2 px-2">
+													{email.user
+														? `${email.user.name} ${email.user.last_name}`
+														: '-'}
+												</td>
 												<td className="py-2 px-2">{email.modulo}</td>
 												<td
 													className="py-2 px-2 max-w-xs truncate"
 													title={email.descripcion}
 												>
 													{email.descripcion}
-												</td>
-												<td className="py-2 px-2">
-													{email.user
-														? `${email.user.name} ${email.user.last_name}`
-														: '-'}
 												</td>
 												<td className="py-2 px-2 text-center">
 													<Button
